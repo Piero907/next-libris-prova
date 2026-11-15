@@ -102,6 +102,9 @@ COME SI USA
   se hai donato!"; se si e' rimasti su PayPal almeno 20 secondi le
   richieste tacciono 3 mesi, altrimenti 10 giorni. L'app non puo' sapere
   se il pagamento c'e' stato davvero (non ha un server).
+- Dopo un aggiornamento compare una volta "Aggiornato in questa versione"
+  con l'elenco delle novita', dalle piu' importanti ai ritocchi;
+  "Tutte le novita'" apre il registro completo.
 - Novita': in Opzioni > App, "Novita' delle versioni" apre dentro l'app
   il registro delle modifiche, versione per versione, dalla piu' recente
   (quella in uso e' evidenziata). Il testo e' REGISTRO_MODIFICHE.md: l'app

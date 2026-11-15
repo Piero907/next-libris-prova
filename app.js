@@ -275,6 +275,8 @@ function loadAll() {
     settings.sumLoan = s.sumLoan !== false;                                         // riepilogo: «N in prestito» (si tocca per vederli)
     settings.sumGone = s.sumGone === true;                                          // riepilogo: «N non più in libreria» (spento di predefinito)
     settings.showSync = s.showSync !== false;                                       // «Salvato su questo telefono» (gli errori si vedono sempre)
+    settings.seenV = Number(s.seenV) || 0;                                         // ultima versione di cui si sono viste le novita'
+    settings.seenB = L.str(s.seenB).slice(0, 12);                                   // nella copia di prova: ultima prova vista («94.17»)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
     settings.suggLang = s.suggLang === 'all' ? 'all' : 'it';                        // «Da scoprire»: solo italiano o tutte le lingue
     settings.nxSeen = L.str(s.nxSeen).slice(0, 40);                                 // riquadro «Cosa leggere dopo» chiuso per questo libro finito
@@ -2501,6 +2503,53 @@ function closeLog(fromPop) {
   if (logPushed && !fromPop) { logPushed = false; try { history.back(); } catch (e) {} }
   else logPushed = false;
 }
+/* ---- Dopo un aggiornamento: «Aggiornato in questa versione», con le novita' dalla piu' importante (quelle in grassetto) alle altre ---- */
+function provaNum(t) { var m = /^(\d+)\.(\d+)$/.exec(t || ''); return m ? +m[1] * 10000 + +m[2] : 0; }
+function newsSince(md, test) {                    // le righe puntate delle sezioni «## …» che passano il test
+  var on = false, out = [];
+  md.replace(/\r/g, '').split('\n').forEach(function (line) {
+    var m = line.match(/^##\s+(.*)$/);
+    if (m) { on = test(m[1]); return; }
+    if (on && (m = line.match(/^\s*[-*]\s+(.*)$/))) out.push(m[1].trim());
+  });
+  return out;
+}
+function rankNews(items) {                        // prima le novita' (cominciano in grassetto), poi le correzioni e i ritocchi
+  var big = items.filter(function (x) { return /^\*\*/.test(x); }), small = items.filter(function (x) { return !/^\*\*/.test(x); });
+  return big.concat(small);
+}
+async function checkWhatsNew() {
+  var curB = PROVA ? BUILD.n : '';
+  if (!settings.seenV) { settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings(); return; }   // prima apertura: niente da raccontare
+  var newV = APP_VERSION.v > settings.seenV, newB = PROVA && curB && provaNum(curB) > provaNum(settings.seenB);
+  if (!newV && !newB) return;
+  var fromV = settings.seenV, fromB = settings.seenB;
+  settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings();
+  var items = [], title = '';
+  try {
+    if (PROVA && curB) {
+      var rp = await fetch('REGISTRO_PROVA.md', { cache: 'no-cache' }).catch(function () { return null; });
+      var pm = rp && rp.ok ? await rp.text() : '';
+      items = newsSince(pm, function (h) { var m = /^Prova\s+([\d.]+)/.exec(h); return !!m && provaNum(m[1]) > provaNum(fromB) && provaNum(m[1]) <= provaNum(curB); });
+      title = 'Prova ' + curB;
+    }
+    if (!items.length) {
+      var r = await fetch('REGISTRO_MODIFICHE.md', { cache: 'no-cache' }).catch(function () { return null; });
+      if (!r || !r.ok) r = await fetch('REGISTRO_MODIFICHE.md').catch(function () { return null; });
+      var md = r && r.ok ? await r.text() : '';
+      items = newsSince(md, function (h) { var m = /^Versione\s+(\d+)/.exec(h); return !!m && +m[1] > fromV && +m[1] <= APP_VERSION.v; });
+      title = 'Versione ' + APP_VERSION.v;
+    }
+  } catch (e) {}
+  if (!items.length) return;
+  $('#wnSub').textContent = title + ' · ' + (items.length === 1 ? '1 novità' : items.length + ' novità');
+  $('#wnList').innerHTML = rankNews(items).map(function (x) { return '<li>' + logInline(x) + '</li>'; }).join('');
+  $('#wnSheet').hidden = false;
+}
+function closeWhatsNew() { $('#wnSheet').hidden = true; }
+$('#wnClose').addEventListener('click', closeWhatsNew);
+$('#wnAll').addEventListener('click', function () { closeWhatsNew(); openLog(); });
+$('#wnSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeWhatsNew(); });
 $('#verLog').addEventListener('click', openLog);
 $('#logClose').addEventListener('click', function () { closeLog(); });
 $('#logSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeLog(); });
@@ -4668,7 +4717,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 23:06", "n": "94.17", "note": "Libri pubblicati con Amazon (ISBN 979-8)"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 23:09", "n": "94.18", "note": "«Aggiornato in questa versione»"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -4701,7 +4750,12 @@ async function updateNow() {
   try {
     var reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
     if (reg) await reg.update().catch(function () {});
-    await Promise.all(['./', 'index.html', 'app.js', 'lib.js', 'style.css', 'sw.js', 'manifest.json'].map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); }));
+    var files = ['./', 'index.html', 'app.js', 'lib.js', 'style.css', 'sw.js', 'manifest.json', 'REGISTRO_MODIFICHE.md'];
+    Array.prototype.forEach.call(document.querySelectorAll('script[src], link[rel="stylesheet"][href]'), function (el) {   // anche i moduli (wrap.js, layout.css…)
+      var u = el.getAttribute('src') || el.getAttribute('href');
+      if (u && !/^(https?:)?\/\//.test(u) && files.indexOf(u) < 0) files.push(u);
+    });
+    await Promise.all(files.map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); }));
   } catch (e) {}
   location.reload();
 }
@@ -5797,6 +5851,7 @@ document.addEventListener('keydown', function (e) {
   if (!$('#allqSheet').hidden) { closeAllQuotes(); return; }
   if (!$('#newsSheet').hidden) { $('#newsSheet').hidden = true; return; }
   if (!$('#suggSheet').hidden) { closeSugg(); return; }
+  if (!$('#wnSheet').hidden) { closeWhatsNew(); return; }
   if (!$('#priceAsk').hidden) closePriceAsk();
   if (!$('#bkFailSheet').hidden) { $('#bkFailSheet').hidden = true; return; }
   ['#statsSheet', '#exportSheet', '#pubSheet', '#dupSheet', '#photoSheet'].forEach(function (k) { $(k).hidden = true; });
@@ -5809,7 +5864,7 @@ function closeSheetEl(sh) {
   function hide() { sh.hidden = true; }
   var map = {
     covSheet: closeCovAsk, svcSheet: closeSvcShare, svcInSheet: closeSvcImport, shareSheet: closeShare, importSheet: closeImport,
-    quoteSheet: closeQuote, suggSheet: closeSugg, logSheet: function () { closeLog(); }, auSheet: closeAuthor, donSheet: function () { closeDon(); }, manSheet: closeManual,
+    quoteSheet: closeQuote, suggSheet: closeSugg, wnSheet: closeWhatsNew, logSheet: function () { closeLog(); }, auSheet: closeAuthor, donSheet: function () { closeDon(); }, manSheet: closeManual,
     recSheet: flowLater, allqSheet: closeAllQuotes, priceAsk: closePriceAsk, loanSheet: closeLoan, instSheet: closeInstallHelp,
     confirmSheet: function () { hide(); confirmFn = null; },
     pickSheet: function () { $('#pickClose').click(); }, isbnSheet: function () { $('#isbnCancel').click(); }, copySheet: function () { $('#copyClose').click(); }
@@ -6330,6 +6385,7 @@ try { if (navigator.storage && navigator.storage.persisted) navigator.storage.pe
 updateSummary();
 persist();
 checkIncoming();
+setTimeout(checkWhatsNew, 900);
 loadNews(); loadSugg(); setTimeout(autoNews, 12000); setTimeout(autoSugg, 20000); setTimeout(runDescQueue, 6000);
 /* schermata d'apertura (solo app installata): resta almeno ~0,7 s dall'avvio, poi sfuma */
 (function () {

@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.18 · 15/11/2026 23:09
+- **«Aggiornato in questa versione»**: dopo un aggiornamento compare una volta la pagina con l'elenco delle novità, dalle più importanti ai ritocchi; «Tutte le novità» apre il registro completo.
+- «Aggiorna adesso» scarica di nuovo anche i file dei moduli (trimestre, disposizione) e il registro, non solo quelli principali.
+
 ## Prova 94.17 · 15/11/2026 23:06
 - **Libri pubblicati con Amazon (ISBN 979-8)**: se le banche dati non li conoscono, nella scheda compare il riquadro «Libro pubblicato in proprio tramite Amazon» con «Fotografa la copertina» e «Cerca sul web».
 - La foto della copertina riconosce titolo e autore e il libro tiene il suo codice.
