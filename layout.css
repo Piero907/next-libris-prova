@@ -49,3 +49,5 @@ html[data-layout="a"] body.selecting .lay-nav,html[data-layout="a"] body.scannin
 /* avvisi da scorrere col dito */
 [data-lay-swipe]{touch-action:pan-y;will-change:transform}
 html[data-layout="a"] main{overflow-x:clip}   /* l'avviso che scivola via non deve allargare la pagina */
+html[data-layout="a"] .stick.stuck #btnView svg{display:inline}   /* nella A il pulsante ha solo l'icona: in alto, bloccato, non deve restare vuoto */
+html[data-layout="a"] .stick.stuck #btnView{min-height:46px;padding:0 11px}

@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.16 · 15/11/2026 22:57
+- Disposizione A: scorrendo la pagina, nella barra che resta in alto il pulsante **Copertine/Elenco** mostra la sua icona (prima restava vuoto).
+
 ## Prova 94.15 · 15/11/2026 22:52
 - **Copertina di un libro «Non trovato»**: toccandola si apre solo la sua scheda, non più tutte quelle dei libri senza titolo; chiudendola (anche dopo «Cerca sul web» e Indietro) si torna alle copertine, allo stesso punto.
 - **Triangolino ⚠** allineato alla scritta del riepilogo, della stessa altezza del testo.
