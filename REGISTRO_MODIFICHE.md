@@ -1,0 +1,262 @@
+# Registro delle modifiche di Next Libris
+
+Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in Opzioni › App.
+L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
+
+## Versione 93 · 15/11/2026
+- **Pronta la copia di prova:** nasce una seconda copia dell'app, per provare le novità prima di portarle qui. Sta a un indirizzo suo, ha l'etichetta PROVA e **dati tutti suoi**: libri, foto, impostazioni e copia offline non si mescolano mai con quelli di questa versione. In questa versione non cambia nulla di visibile.
+
+## Versione 92 · 15/11/2026
+- **«Prova la luce»** (Opzioni › App › Fotocamera e luce): alcuni telefoni, come il Galaxy A32, dicono a Chrome di avere la luce e di averla accesa, ma resta spenta, e l'app non può accorgersene. La prova la accende per qualche secondo e chiede se l'hai vista: con «No, è rimasta spenta» i pulsanti della luce spariscono dalle fotocamere dell'app (per il flash resta «Usa la fotocamera del telefono»).
+- La luce ora si accende anche nel secondo modo previsto da Chrome, che su alcuni telefoni è l'unico che funziona.
+- **Sostieni Next Libris** anche in Opzioni › App è in evidenza: verde chiaro della palette, con il boccale.
+
+## Versione 91 · 15/11/2026
+- **Obiettivo con il flash:** i telefoni hanno più obiettivi posteriori e il flash è collegato a uno solo, mentre Chrome a volte apre un altro obiettivo. La prima volta che apri la fotocamera dell'app, l'app li prova uno per uno, usa quello con la luce e se lo ricorda («Cerco l'obiettivo con il flash (solo la prima volta)…»).
+- **Niente pulsanti della luce se la luce non c'è:** se nessun obiettivo ha la luce, o se toccando la luce non si accende davvero, i pulsanti 🔦 e ⚡ spariscono (nelle foto e nella scansione) e l'app consiglia la fotocamera del telefono per il flash.
+- **Opzioni › App › Fotocamera e luce:** dice se è stato trovato un obiettivo con la luce; «Prova gli obiettivi» li riprova e li elenca (anteriore o posteriore, luce sì o no, quale è in uso).
+
+## Versione 90 · 15/11/2026
+- **Fotocamera del telefono, con il suo flash:** su alcuni telefoni Chrome non lascia accendere la luce dalla fotocamera dell'app. Ora:
+  - nella fotocamera dell'app (Foto, copertina, citazioni) c'è «📷 Usa la fotocamera del telefono (con il flash)»: apre quella del telefono per la stessa foto, che poi torna nell'app;
+  - nella scansione c'è lo stesso pulsante: chiude la scansione, scatti con la fotocamera del telefono e l'app legge dalla foto il codice a barre, l'ISBN o la copertina (non in «Ce l'ho già?»);
+  - in Opzioni › Schede e prezzo: «Per le foto usa la fotocamera del telefono», per usarla sempre (la scansione del codice dal vivo resta nell'app).
+- **Le due fotocamere hanno lo stesso aspetto:** quella delle foto ora è come quella della scansione: inquadratura a tutto schermo, in alto «× Chiudi», il titolo al centro e la luce 🔦 a destra; in basso lo scatto, la fotocamera del telefono e il messaggio.
+
+## Versione 89 · 15/11/2026
+- **Sostieni Next Libris:** al posto della tazzina c'è un boccale di birra disegnato a tratto, come le altre icone dell'app, in un cerchio che non viene più schiacciato. Il testo ora dice «Se ti piace, offrimi una birra!».
+
+## Versione 88 · 14/11/2026
+- **Backup che non partiva:** se il telefono non apre la condivisione, l'app non scarica più il file in silenzio. Compare «Il backup non è partito», con «Riprova a inviarlo» (di solito al secondo tocco parte) e «Salvalo nei Download».
+- **Nome del file di backup:** «Libreria di Piero - Next Libris - 2026-11-14» (senza nome: «La mia libreria - …»).
+- **Luce nella fotocamera della scansione:** ora usa sempre la fotocamera posteriore principale, quella con la luce. In alto a destra ci sono due pulsanti: 🔦 **torcia**, che resta accesa, e ⚡ **flash**, solo inquadrando la copertina, che accende la luce un attimo quando scatti (come «Luce» nella fotocamera delle foto). Accesi diventano bianchi.
+
+## Versione 87 · 14/11/2026
+- **Suoni accesi o spenti:** in Opzioni › Aspetto c'è «Suoni» (acceso di predefinito), e nella fotocamera, in alto a destra, il pulsante 🔊/🔇 li accende e spegne al volo. Spenti, niente bip della scansione né «fatto» del prezzo; la vibrazione resta. La scelta resta anche alle aperture successive.
+
+## Versione 86 · 14/11/2026
+- **Backup più chiaro:** i pulsanti ora dicono cosa fanno: «Fai il backup e mandalo su Drive, email…» e «Fai il backup sul telefono (Download)». Sotto, una riga spiega che il primo è il più sicuro (resta anche se perdi il telefono).
+
+## Versione 85 · 14/11/2026
+- **Finestre dal basso:** si chiudono anche trascinandole verso il basso (Statistiche, Citazioni, Novità, Sostieni, prezzo, prestito…). La finestra segue il dito: un tratto lungo o un gesto veloce la chiude, uno corto la rimette a posto. Se il contenuto è scorso, il gesto prima lo riporta in cima; partendo da un campo di testo non si chiude. In cima a ogni finestra c'è una piccola maniglia grigia.
+
+## Versione 84 · 14/11/2026
+- **Menu laterale rifatto:** più largo (due terzi dello schermo) e, aprendolo dal bordo o dalla linguetta, mostra il **menu** e non più direttamente i filtri.
+  - In cima: «Filtri e ordine» (con il riassunto, es. «1 filtro attivo, dai più recenti», e il numero dei filtri attivi), «Tutte le citazioni», «Statistiche».
+  - Sotto, «Impostazioni»: Aspetto, Ricerca dei libri, Schede e prezzo, Sistema l'elenco, Backup, Condivisione, App.
+  - «Filtri e ordine» si apre come pagina a parte, con ‹ e Indietro per tornare al menu. Il pulsante «Filtri» della schermata principale la apre direttamente.
+- **Filtri riorganizzati:** pillole raggruppate per tema (Libri, Lettura, Scaffale, Genere, Ricevuti da); gli elenchi lunghi mostrano i primi 8 e «Altri…»; «Da verificare» e «Copie e doppioni» stanno a parte in fondo, in «Da sistemare». In basso resta «Mostra N libri».
+- **Sostieni Next Libris** è in mezzo alle impostazioni, in un riquadro con lo sfondo verde chiaro della palette e una tazzina: «Niente pubblicità, niente abbonamenti. Se ti piace, offrimi un caffè!».
+- **«Prestato»** sulle copertine: la scritta è centrata nel riquadro celeste.
+- **Vista all'apertura:** in Opzioni › Aspetto si sceglie se l'app si apre con le **Copertine** (ora la predefinita) o con l'**Elenco**. Il pulsante sopra i libri cambia la vista solo fino alla prossima apertura.
+
+## Versione 83 · 14/11/2026
+- **Foto di un libro, una finestra sola:** dopo lo scatto non compare più «Libro aggiunto» con il solo prezzo. Si apre «Riconosco il libro» con la foto, la barra e la percentuale dell'avanzamento; poi si passa da soli al passo giusto:
+  - libro riconosciuto (o codice a barre letto) → «Libro aggiunto» con titolo, autore e prezzo facoltativo;
+  - più edizioni possibili → la scelta, poi il prezzo;
+  - non trovato o testo illeggibile → «Scrivi titolo e autore», ora anche con il prezzo (facoltativo), tutto in una volta.
+  - «Scrivi a mano» c'è da subito e ferma la ricerca; «Continua dopo» chiude la finestra e lascia il libro in lavorazione nell'elenco.
+- **Fotocamera con poca luce:** l'app misura la luce dell'inquadratura e avvisa («Poca luce: accendi «Luce»…» o «avvicinati a una lampada»), evidenziando il pulsante «Luce» se il telefono ce l'ha. Toccando il libro sullo schermo si mette a fuoco lì (cerchio giallo), dove il telefono lo permette.
+- **Statistiche:** nel riquadro delle pagine c'è anche quanti libri non hanno le pagine («su 49 libri · senza pagine: 6»).
+
+## Versione 82 · 14/11/2026
+- Nella scheda aperta la tastiera mostra «Fatto» (non più «Succ.») su Costo e su tutti gli altri campi: Invio chiude la tastiera, come già faceva. Lo stesso nei campi singoli delle finestre (prestito, numerazione, pagina della citazione, nome, obiettivo di lettura).
+
+## Versione 81 · 14/11/2026
+- **Volume nella vista compatta:** se il campo «Volume» della serie è compilato, accanto al titolo compare il numero, separato da una virgola (es. «Il trono di spade, 3»).
+- **Suono di «fatto» per il prezzo:** quando salvi il prezzo (dopo la scansione o nel riquadro «Libro aggiunto») suonano due note che salgono, non più lo stesso bip della scansione.
+- **Foto della copertina rivista:** se il libro non si trova online, o il testo della copertina non si legge, si apre subito «Scrivi titolo e autore», già riempita con il testo letto; salvando, la foto diventa la copertina. Se in quel momento è aperta la domanda del prezzo, la finestra arriva subito dopo.
+  - Nella riga del libro: «Scrivi titolo e autore» e «Usa il testo letto» (prima il testo letto veniva usato da solo).
+  - Tra le edizioni proposte c'è «Nessuno: scrivo io titolo e autore».
+  - Mentre l'app legge la foto o cerca il libro c'è già «Scrivi a mano»: scrivendolo tu, la ricerca si ferma.
+
+## Versione 80 · 14/11/2026
+- La riga «Next Libris è gratis…» non compare più dal primo avvio: si vede dopo 5 accessi all'app (tornare nell'app dopo almeno 30 minuti conta come un accesso). Il riquadro ogni 50 libri e la voce nel menu restano come prima.
+
+## Versione 79 · 14/11/2026
+- La riga «Next Libris è gratis…» ora sta in cima all'elenco, non più in fondo.
+
+## Versione 78 · 14/11/2026
+- **Sostieni Next Libris:** l'app resta gratis; chi vuole può fare una donazione con PayPal (2, 3, 5 € o l'importo che preferisci) dalla voce «Sostieni Next Libris» nel menu (scheda Opzioni) o in Opzioni › App.
+- Una riga discreta (dalla versione 79 in cima all'elenco) ricorda che l'app è gratis: con la × sparisce per 10 giorni.
+- Ogni 50 libri catalogati (50, 100, 150…) un riquadro in cima all'elenco: «Più tardi» lo rimanda di 10 giorni, «Non chiedere più» lo spegne. Chi aveva già dei libri lo vede dal prossimo multiplo di 50.
+- Tornando da PayPal compare «Grazie se hai donato!»: se si è rimasti su PayPal almeno 20 secondi le richieste tacciono per 3 mesi, altrimenti per 10 giorni.
+- Indietro dal registro delle novità o dalla finestra «Sostieni» aperti dal menu ora lascia aperto il menu.
+
+## Versione 77 · 14/11/2026
+- «Novità delle versioni» (Opzioni › App) si apre dentro l'app, in una finestra con lo stesso stile: versione per versione, dalla più recente, con quella in uso evidenziata.
+- Il registro è salvato anche sul telefono: si legge pure senza rete.
+- Indietro o «Chiudi» tornano alle Opzioni.
+
+## Versione 76 · 14/11/2026
+- Editor delle foto: adesivi, emoticon e scritte si selezionano con un tocco e hanno le maniglie per grandezza (verde), rotazione (blu, con aggancio quando è dritto) e per toglierli (rossa).
+- Ogni gesto (spostare, ingrandire, ruotare) si annulla con «↶».
+- **Punto di salvataggio:** questa versione è conservata nel ramo `versione-76` del repository (https://github.com/Piero907/next-libris/tree/versione-76).
+
+## Versione 75 · 14/11/2026
+- Scheda aperta: il nome dell'autore si tocca e mostra chi è (breve profilo da Wikipedia), con «I suoi libri nella tua libreria», «Cerca sul web» e «Apri su Wikipedia».
+- Per modificare l'autore c'è la matita accanto al nome.
+- Con una scheda aperta, Indietro chiude prima la finestra in primo piano.
+
+## Versione 74 · 14/11/2026
+- Editor delle foto delle citazioni: gomma (cancella i segni dove passi, non la foto; toglie gli adesivi con un tocco).
+- Emoticon e adesivi con la scritta («Importante», «Da rileggere», «Bellissima», «Da ricordare», «Non sono d'accordo»): si mettono con un tocco, si spostano trascinandoli, si ingrandiscono o rimpiccioliscono.
+- «↶» annulla anche spostamenti e rimozioni, una alla volta.
+
+## Versione 73 · 14/11/2026
+- «Elimina» su un singolo libro chiede conferma (come per più libri insieme); subito dopo resta «Annulla».
+- I messaggi con «Annulla» restano 4 secondi.
+
+## Versione 72 · 14/11/2026
+- Messaggi in basso più brevi: senza tasti restano da 2,5 a 5 secondi secondo la lunghezza; con «Annulla» 6 secondi (prima sempre 6,5).
+
+## Versione 71 · 14/11/2026
+- Selezione di più libri, numerazione dei volumi: la prima scelta ora dice «Nell'ordine in cui li hai selezionati».
+- Nuovo questo registro delle modifiche nel repository, raggiungibile anche da Opzioni › App › «Novità delle versioni».
+
+## Versione 70 · 14/11/2026
+- La descrizione arriva nella stessa richiesta a Google Libri che trova il libro (per ISBN e per titolo): nessuna richiesta in più.
+- La ricerca a parte resta solo se Google non ha la descrizione o il libro l'ha trovato un'altra banca dati.
+
+## Versione 69 · 14/11/2026
+- Numerazione dei volumi «Personalizzato»: maniglia per trascinare, frecce su/giù, numero scrivibile a mano.
+- Avviso (e nessuna modifica) se due libri hanno lo stesso numero.
+
+## Versione 68 · 14/11/2026
+- Il tasto «Presta» diventa «Presta, vendi o regala», con la spiegazione di ogni scelta nella finestra.
+- Tolto «Smarrito» (resta solo per i libri già segnati così); filtro «Venduti e regalati».
+
+## Versione 67 · 14/11/2026
+- La descrizione si cerca da sola appena un libro è riconosciuto, in sottofondo.
+- Senza rete, con connessione debole o con Google al limite resta in sospeso e riparte da sola.
+
+## Versione 66 · 14/11/2026
+- Editor delle foto delle citazioni: due dita per ingrandire (fino a 5×) e spostare, «Adatta» per tornare alla vista intera.
+
+## Versione 65 · 14/11/2026
+- Dopo ogni foto di una citazione si apre «Evidenzia o scrivi»: evidenziatore (giallo, verde, rosa) e penna (rossa, blu, nera).
+- Matita sulle miniature per aggiungere segni dopo; la lettura del testo usa la foto senza segni.
+
+## Versione 64 · 14/11/2026
+- Fino a 10 foto per citazione, ognuna con la sua X; visore con frecce.
+- «Leggi il testo» parte solo quando lo tocchi; opzione per leggerlo subito.
+- Corretto: obiettivo di lettura e controllo delle novità ora restano dopo la chiusura dell'app.
+
+## Versione 63 · 14/11/2026
+- Selezione di più libri: numero d'ordine sui libri selezionati; numerazione dei volumi per ordine di selezione, anno o elenco, con primo numero automatico e anteprima.
+
+## Versione 62 · 14/11/2026
+- Dopo ogni libro aggiunto: riquadro con titolo, autore e «Prezzo (facoltativo)»; tolta la lettura del prezzo con la fotocamera.
+- Foto di libri, copertine e citazioni scattate dentro l'app, sempre con la fotocamera posteriore (Galleria, Luce).
+- X rossa per eliminare le citazioni; rotellina durante la lettura del testo.
+
+## Versione 61 · 14/11/2026
+- Selezione di più libri con la pressione lunga: Tutti, Elimina (con conferma) e Modifica in gruppo (serie, scaffale, genere, lettura, preferiti, sposta, verificati, condividi).
+
+## Versione 60 · 14/11/2026
+- Mentre scrivi in una scheda la barra in basso sparisce e il campo resta sopra la tastiera.
+- «Cerca sul web» tra i tasti in alto; tolti «Prezzo dal web» e «Prezzo da foto» in fondo alla scheda.
+- «Condividi» su ogni citazione.
+
+## Versione 59 · 14/11/2026
+- Condividere una citazione dalla sua finestra e «Condividi tutte» quelle di un libro; firma «Inviato con Next Libris» con il link.
+
+## Versione 58 · 14/11/2026
+- Foto della pagina nelle citazioni (anche solo foto), salvate nel backup.
+- Una scheda aperta alla volta: Indietro o la freccetta tornano all'elenco.
+- Per uscire dall'app servono due Indietro.
+
+## Versione 57 · 14/11/2026
+- Menu laterale: «Leggi tutte le citazioni» (con ricerca e Condividi) e filtro «Con citazioni».
+
+## Versione 56 · 14/11/2026
+- La ricerca trova anche descrizioni e citazioni; «Scarica tutte le descrizioni».
+- Obiettivo di lettura dell'anno; serie e collane con i volumi mancanti; novità dei tuoi autori; citazioni e appunti.
+
+## Versione 55 · 14/11/2026
+- Descrizione: «Non è questo libro: rimuovila».
+
+## Versione 54 · 14/11/2026
+- Riquadro «Descrizione» nella scheda aperta (Google Libri, poi Open Library), salvata per l'uso offline.
+
+## Versione 53 · 14/11/2026
+- Apertura immediata dalla copia sul telefono; gli aggiornamenti si scaricano in sottofondo, senza mai mescolare versioni.
+
+## Versione 52 · 14/11/2026
+- La schermata d'apertura verde copre tutto lo schermo.
+
+## Versione 51 · 13/11/2026
+- Apertura tutta verde, niente schermo bianco.
+
+## Versione 50 · 13/11/2026
+- App pronta per il nuovo indirizzo next-libris.
+
+## Versione 49 · 13/11/2026
+- Condividere chiave Google e worker SBN con un link, con avviso sui rischi.
+
+## Versione 48 · 13/11/2026
+- «Libreria di <nome>» in testata.
+
+## Versione 47 · 13/11/2026
+- Schermata d'apertura con la scritta Next Libris.
+
+## Versione 46 · 13/11/2026
+- Le condivisioni portano prezzo, copertina, genere e pagine; segnalibro giallo sui preferiti nelle Copertine.
+
+## Versione 45 · 13/11/2026
+- Con i filtri l'elenco torna compatto; uscita più chiara dalla fotocamera; copertina cercata a ogni tocco.
+
+## Versione 44 · 13/11/2026
+- Preferiti; condivisione di un libro o di una lista con il nome di chi la manda.
+
+## Versione 43 · 13/11/2026
+- «Elimina» con la scritta, lontano dalla freccetta.
+
+## Versione 42 · 13/11/2026
+- Prezzo dalla fotocamera più preciso e veloce; «Scrivi» apre subito la tastiera.
+
+## Versione 41 · 13/11/2026
+- Copertina mancante cercata online; pulsanti della scheda con icona e scritta.
+
+## Versione 40 · 13/11/2026
+- Tema chiaro predefinito, nuovo benvenuto; chiave e worker nel backup.
+
+## Versione 39 · 13/11/2026
+- Chiave Google e worker SBN visibili, contatori delle richieste, Cancella e valori salvati.
+
+## Versione 38 · 13/11/2026
+- Pulsante Installa in evidenza; «Condividi l'app» con link e QR code.
+
+## Versione 37 · 13/11/2026
+- Digita cerca anche per titolo e propone i risultati.
+
+## Versione 36 · 13/11/2026
+- Icona verde nei colori Bosco.
+
+## Versione 35 · 13/11/2026
+- Il verde (Bosco) è la palette principale.
+
+## Versione 34 · 13/11/2026
+- Nuovo nome Next Libris e nuova icona.
+
+## Versione 33 · 13/11/2026
+- «Sposta nei Desideri / in Libreria» in alto nella scheda aperta, con icone.
+
+## Versione 32 · 13/11/2026
+- Aspetto senza lo stile Classico.
+
+## Versione 31 · 13/11/2026
+- Barra in alto ferma durante lo scorrimento dell'elenco compatto.
+
+## Versione 30 · 13/11/2026
+- Numero di versione nel menu e controllo degli aggiornamenti.
+
+## Prima della versione 30 (12–13/11/2026)
+- Copertine grandi ufficiali e foto tue delle copertine.
+- Lettura e voto, ricerche offline, catalogo SBN, Desideri da condividere.
+- Copie dello stesso libro; venduto, regalato, smarrito; limite giornaliero di Google.
+- Pannello laterale con filtri e ordine; Opzioni nel menu laterale.
+- Fotocamera: ISBN scritto e Copertina oltre al codice a barre; prezzo scritto a mano.
+- Foto da galleria (anche più foto insieme).
+- Scheda aperta: «Vedi tutti i libri di» autore, casa editrice, genere, scaffale.
+- Nuovo aspetto grafico, tema chiaro/scuro, palette e caratteri a scelta.
