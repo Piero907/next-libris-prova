@@ -1439,6 +1439,7 @@ function toggleRow(id, fromPop) {
     try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) {}
   } else if (!open && cardPushed && !fromPop) { cardPushed = null; try { history.back(); } catch (e) {} }
   openState[id] = open;
+  if (!open && gridRet && !anyOpen() && backToGrid()) { updateStick(); return; }   // aperta dalle copertine: si torna li'
   refreshRow(id);
   updateStick();
   var el = rowEl(id);
@@ -1471,6 +1472,7 @@ var exitArmed = 0;
     var openIds = settings.openAll ? [] : Object.keys(openState).filter(function (k) { var x = get(k); return openState[k] && x && x.t; });
     if (openIds.length) {                                                                    // schede aperte senza cronologia: Indietro le chiude
       openIds.forEach(function (k) { openState[k] = false; refreshRow(k); });
+      if (gridRet) backToGrid();
       try { push({ guard: 1 }, ''); } catch (x) {}
       return;
     }
@@ -4617,7 +4619,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 21:48", "n": "94.11", "note": "Suggerimento di prova tra gli avvisi finti"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 21:58", "n": "94.12", "note": "Dalle copertine alla scheda e ritorno"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5347,6 +5349,7 @@ function moveToWish(id) {
   toast('Spostato nei Desideri: ' + (b.t || b.i), { label: 'Annulla', fn: function () { var x = get(id); if (x) { Object.assign(x, before); openState[id] = oldOpen; touch(); renderList(); updateSummary(); } } });
 }
 function setTab(t) {
+  gridRet = null;
   if (selOn) endSel(false);
   tab = t === 'wish' ? 'wish' : 'lib';
   flt = ''; shFlt = ''; genFlt = ''; autFlt = ''; autName = ''; edFlt = ''; frFlt = '';
@@ -5363,13 +5366,31 @@ function setView(v) {
   b.innerHTML = settings.view === 'grid' ? icon('list') + 'Elenco' : icon('grid') + 'Copertine';
   b.setAttribute('aria-label', settings.view === 'grid' ? 'Mostra come elenco' : 'Mostra le copertine');
 }
+/* Dalle copertine: la scheda si apre nell'elenco; chiudendola (freccetta o Indietro) si torna alle copertine, allo stesso punto */
+var gridRet = null;
 function openFromGrid(id) {
+  if (!settings.openAll) Object.keys(openState).forEach(function (k) { if (k !== id) openState[k] = false; });
+  gridRet = { id: id, y: window.scrollY };
   openState[id] = true;
   setView('list');
   renderList();
+  try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) {}   // Indietro chiude la scheda
   var el = rowEl(id);
   if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 1600); }
 }
+function backToGrid() {                          // chiamata quando l'ultima scheda aperta si chiude
+  var r = gridRet; gridRet = null;
+  if (!r || settings.view === 'grid') return false;
+  setView('grid'); renderList();
+  window.scrollTo(0, r.y);
+  requestAnimationFrame(function () {
+    window.scrollTo(0, r.y);
+    var c = document.querySelector('#list .cover[data-id="' + r.id + '"]');
+    if (c) { c.classList.add('flash'); setTimeout(function () { c.classList.remove('flash'); }, 1200); try { c.focus({ preventScroll: true }); } catch (e) {} }
+  });
+  return true;
+}
+function anyOpen() { return !settings.openAll && Object.keys(openState).some(function (k) { var x = get(k); return openState[k] && x && x.t; }); }
 /* ---------- statistiche ---------- */
 function barsHTML(title, items, filterable) {
   if (!items.length) return '';
@@ -5800,7 +5821,7 @@ function allLoansText() {
 $('#optOpenAll').addEventListener('change', function (e) { settings.openAll = e.target.checked; openState = {}; saveSettings(); renderList(); });
 $('#tabLib').addEventListener('click', function () { setTab('lib'); });
 $('#tabWish').addEventListener('click', function () { setTab('wish'); });
-$('#btnView').addEventListener('click', function () { setView(settings.view === 'grid' ? 'list' : 'grid'); renderList(); });
+$('#btnView').addEventListener('click', function () { gridRet = null; setView(settings.view === 'grid' ? 'list' : 'grid'); renderList(); });
 $('#btnCheck').addEventListener('click', function () { startScan('check'); });
 $('#btnStats').addEventListener('click', openStats);
 $('#statsClose').addEventListener('click', function () { $('#statsSheet').hidden = true; });

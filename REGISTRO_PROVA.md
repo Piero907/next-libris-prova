@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.12 · 15/11/2026 21:58
+- **Dalle copertine alla scheda e ritorno**: se apri un libro toccando la copertina, chiudendo la scheda (freccetta o Indietro) torni alle copertine, allo stesso punto dello scorrimento; la copertina del libro si illumina un attimo.
+
 ## Prova 94.11 · 15/11/2026 21:48
 - **Suggerimento di prova** tra gli avvisi finti: «Hai finito «Libro di prova». E adesso?» con uno dei tuoi libri da leggere (temporaneo).
 
