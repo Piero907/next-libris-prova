@@ -1,4 +1,4 @@
-/* Next Libris · modulo TEMPORANEO «avvisi di prova»: solo nella copia di prova, 4 avvisi finti per provare lo scorrimento
+/* Next Libris · modulo TEMPORANEO «avvisi di prova»: solo nella copia di prova, 4 avvisi finti e un suggerimento finto per provare lo scorrimento
    degli avvisi nella disposizione A. Si toglie con: python3 togli_modulo.py avvisi-prova (nessun dato salvato). */
 (function () {
 'use strict';
@@ -16,5 +16,18 @@ for (var i = 1; i <= 4; i++) {
   s.querySelector('button').addEventListener('click', function (e) { e.currentTarget.closest('section').hidden = true; });
   ref.parentNode.insertBefore(s, ref);
 }
+/* un suggerimento finto come «Hai finito… E adesso?» (piu' alto degli altri avvisi), con un libro vero «da leggere» */
+var bk = NL.books().filter(function (b) { return !b.w && b.rs === 'da' && !b.xs && b.t; })[0];
+var sg = document.createElement('section');
+sg.className = 'nx-box lay-note demo-note'; sg.id = 'demoSugg';
+var img = bk ? NL.bigImg(bk) : '';
+sg.innerHTML = '<button type="button" class="ico nx-x" aria-label="Chiudi">×</button><h3>Hai finito «Libro di prova». E adesso?</h3>' +
+  '<div class="nx-card">' + (img ? '<img src="' + NL.esc(img) + '" alt="" referrerpolicy="no-referrer">' : '<span class="nimg ph" style="--h:' + NL.hue(bk ? bk.t : 'prova') + '" aria-hidden="true"></span>') +
+  '<div class="nt"><b>' + NL.esc(bk ? bk.t : 'Un libro da leggere') + '</b><span>' + NL.esc(bk ? bk.a || '' : '') + '</span><ul class="nx-why"><li>Suggerimento di prova: è uno dei tuoi libri da leggere.</li></ul></div></div>' +
+  '<div class="nx-acts"><button class="btn primary" type="button">Inizio questo</button><button class="btn" type="button">Un altro</button><button class="link" type="button">Tutti i suggerimenti</button></div>';
+sg.querySelector('.nx-x').addEventListener('click', function () { sg.hidden = true; });
+Array.prototype.forEach.call(sg.querySelectorAll('.nx-acts button'), function (b) { b.addEventListener('click', function () { NL.toast('È solo un suggerimento di prova.'); }); });
+var first = document.getElementById('demoNote2');
+first.parentNode.insertBefore(sg, first);
 NL.refresh();
 })();
