@@ -315,7 +315,7 @@ function notice(msg, label, fn, onClose, kind) {
   b.hidden = !label;
   b.textContent = label || '';
   b.onclick = function () { $('#notice').hidden = true; noticeKind = ''; if (fn) fn(); };
-  $('#noticeX').onclick = function () { $('#notice').hidden = true; noticeKind = ''; if (onClose) onClose(); };
+  $('#noticeX').onclick = function () { $('#notice').hidden = true; noticeKind = ''; if (onClose) onClose(); updateSummary(); };
   noticeKind = kind || '';
   $('#notice').hidden = false;
 }
@@ -3254,7 +3254,7 @@ function nxBoxPaint() {
 $('#nxBoxGo').addEventListener('click', function (e) { startReading(e.currentTarget.dataset.id); });
 $('#nxBoxNext').addEventListener('click', function () { nxBoxIdx++; nxBoxPaint(); });
 $('#nxBoxAll').addEventListener('click', function () { nxIdx = nxBoxIdx; openSugg('next'); });
-$('#nxBoxX').addEventListener('click', function () { var l = nxJustRead(); settings.nxSeen = l ? l.id : ''; saveSettings(); nxBoxPaint(); });
+$('#nxBoxX').addEventListener('click', function () { var l = nxJustRead(); settings.nxSeen = l ? l.id : ''; saveSettings(); nxBoxPaint(); updateSummary(); });
 $('#btnNews').addEventListener('click', openNews);
 $('#newsClose').addEventListener('click', function () { $('#newsSheet').hidden = true; });
 $('#newsAgain').addEventListener('click', runNews);
@@ -3641,7 +3641,7 @@ function updateSummary() {
     : (n ? '<b>' + n + '</b> ' + (n === 1 ? 'libro' : 'libri') + (settings.sumEur ? ' · <b>' + esc(eur(total)) + '</b>' : '') + (g ? ' · ' + g + ' da verificare' : '') +
         (loans && settings.sumLoan ? ' · <button type="button" class="sum-link" data-sum="loan" aria-pressed="' + (flt === 'loan' ? 'true' : 'false') + '">' + loans + ' in prestito</button>' : '') +
         (gone && settings.sumGone ? ' · ' + gone + ' non più in libreria' : '')
-      : (gone ? gone + ' non più in libreria' : 'Ancora nessun libro'));
+      : (gone ? gone + ' non più in libreria' : 'Ancora nessun libro')) + alertBtn();
   var nl = state.books.filter(function (b) { return !b.w && !b.xs && hasData(b); }).length, nw = state.books.filter(function (b) { return b.w && hasData(b); }).length;
   $('#cntLib').textContent = nl; $('#cntWish').textContent = nw;
   $('#tabLib').setAttribute('aria-selected', tab === 'lib' ? 'true' : 'false');
@@ -4646,7 +4646,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 22:39", "n": "94.13", "note": "Suono «non trovato»"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 22:47", "n": "94.14", "note": "Triangolino ⚠ nel riepilogo"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -6243,6 +6243,32 @@ $('#lightYes').addEventListener('click', function () { lightAnswer(true); });
 $('#lightNo').addEventListener('click', function () { lightAnswer(false); });
 $('#optCamNative').addEventListener('change', function (e) { settings.camNative = e.target.checked; saveSettings(); toast(settings.camNative ? 'Foto con la fotocamera del telefono.' : 'Foto con la fotocamera dell\'app.'); });
 $('#optSound').addEventListener('change', function (e) { setSound(e.target.checked, true); });
+/* Avvisi chiusi ma ancora validi (prestiti lunghi, backup, «Hai finito…», e quelli dei moduli): un triangolino nel riepilogo li riapre */
+function closedNotices() {
+  var out = [], DAY = 864e5, now = Date.now();
+  var showing = $('#notice').hidden ? '' : noticeKind;
+  var longLoans = state.books.some(function (b) { return !b.w && b.p && b.pd && now - Date.parse(b.pd) > 30 * DAY; });
+  if (longLoans && showing !== 'loan' && now - settings.loanSnooze < 7 * DAY) out.push({ k: 'loan', reopen: function () { settings.loanSnooze = 0; saveSettings(); if (!$('#notice').hidden && noticeKind !== 'loan') $('#notice').hidden = true; noticeKind = ''; checkLoanNag(); } });
+  var n = storable().length;
+  if (n >= 10 && state.updated > settings.lastBackup && now - settings.lastBackup > 14 * DAY && now - settings.snooze <= 14 * DAY && showing !== 'backup')
+    out.push({ k: 'backup', reopen: function () { settings.snooze = 0; saveSettings(); if ($('#notice').hidden) checkBackupNag(); } });
+  var last = nxJustRead();
+  if (last && settings.nxSeen === last.id && !state.books.some(function (b) { return !b.w && b.rs === 'in'; }) && nextList().length)
+    out.push({ k: 'next', reopen: function () { settings.nxSeen = ''; saveSettings(); nxBoxPaint(); } });
+  emit('closed', out);                            // i moduli aggiungono i loro
+  return out;
+}
+function alertBtn() {
+  if (tab !== 'lib') return '';
+  var n = closedNotices().length;
+  return n ? ' <button type="button" class="sum-alert" data-sum="alert" aria-label="' + (n === 1 ? 'Riapri l\'avviso chiuso' : 'Riapri i ' + n + ' avvisi chiusi') + '" title="Riapri gli avvisi">' +
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5M12 17.2v.01"/></svg></button>' : '';
+}
+function reopenNotices() {
+  closedNotices().forEach(function (x) { try { x.reopen(); } catch (e) {} });
+  emit('reopen');
+  updateSummary(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 /* riepilogo in alto: cosa mostrare (valore e «non più in libreria» spenti di predefinito) */
 function paintSumOpts() {
   [['#optSumEur', 'sumEur'], ['#optSumLoan', 'sumLoan'], ['#optSumGone', 'sumGone'], ['#optShowSync', 'showSync']].forEach(function (x) { var e = $(x[0]); if (e) e.checked = settings[x[1]] !== false && (x[1] === 'sumLoan' || x[1] === 'showSync' || settings[x[1]] === true); });
@@ -6251,7 +6277,7 @@ function paintSumOpts() {
   var e = $(x[0]); if (!e) return;
   e.addEventListener('change', function () { settings[x[1]] = e.checked; saveSettings(); updateSummary(); persist(); emit('list'); });
 });
-$('#summary').addEventListener('click', function (e) { if (e.target.closest('[data-sum="loan"]')) $('#fltLoan').click(); });
+$('#summary').addEventListener('click', function (e) { if (e.target.closest('[data-sum="loan"]')) $('#fltLoan').click(); else if (e.target.closest('[data-sum="alert"]')) reopenNotices(); });
 $('#scanSound').addEventListener('click', function () { setSound(settings.sound === false, true); });
 $('#optExtra').checked = settings.extra;
 $('#optOpenAll').checked = settings.openAll;
@@ -6306,7 +6332,7 @@ window.NL = {
   closeDrawer: function () { closeDrawer(); }, refresh: function () { renderList(); updateSummary(); },
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
-  updateStick: function () { updateStick(); }
+  updateStick: function () { updateStick(); }, summary: function () { updateSummary(); }
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
 window.__app = { sugg: function () { return sugg; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,

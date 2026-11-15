@@ -640,6 +640,11 @@ copia di prova si parte dalla A.
 
 RIEPILOGO IN ALTO
 -----------------
+Se chiudi con la X un avviso che vale ancora (prestiti da piu' di un
+mese, backup da fare, "Hai finito... E adesso?", il trimestre in libri),
+accanto al riepilogo compare un triangolino arancione: toccandolo gli
+avvisi chiusi tornano in cima.
+
 Opzioni > Aspetto > "Riepilogo in alto": sotto il nome c'e' sempre il
 numero dei libri. Si possono aggiungere il valore in euro (spento di
 predefinito), "N in prestito" (acceso; toccandolo mostra solo i libri

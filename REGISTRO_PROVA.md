@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.14 · 15/11/2026 22:47
+- **Triangolino ⚠ nel riepilogo**: accanto a «N in prestito» compare quando hai chiuso con la × un avviso che vale ancora (prestiti lunghi, backup, «Hai finito… E adesso?», trimestre, avvisi di prova); toccandolo gli avvisi chiusi tornano in cima, dal primo.
+
 ## Prova 94.13 · 15/11/2026 22:39
 - **Suono «non trovato»**: se il codice viene letto ma titolo e autore non si trovano (o la foto della copertina non porta a nessun libro), dopo il bip suonano due note basse che scendono, con una vibrazione doppia.
 - Il «non trovato» suona solo per i libri appena scansionati, scritti a mano o fotografati, non per quelli cercati in sottofondo; con i suoni spenti tace.

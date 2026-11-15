@@ -1529,3 +1529,6 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .sync.quiet-ok{display:none}
 .log-part{margin:6px 0 4px;font:600 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0}
 .cover.flash .art{box-shadow:0 0 0 3px var(--accent)}
+/* triangolino nel riepilogo: riapre gli avvisi chiusi */
+.sum-alert{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin:-8px 0 -8px 2px;padding:0;border:0;border-radius:50%;background:none;color:var(--warn-line);vertical-align:middle;cursor:pointer}
+.sum-alert:hover,.sum-alert:focus-visible{background:var(--warn-bg)}

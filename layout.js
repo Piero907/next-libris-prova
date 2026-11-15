@@ -216,6 +216,7 @@ function place() {
 }
 NL.on('list', function () { paintNav(); notes(); setTimeout(loans0, 0); });
 NL.on('options', paintOption);
+NL.on('reopen', function () { noteIdx = 0; notes(); });   // avvisi riaperti dal triangolino: si riparte dal primo
 apply();
 window.NLLayout = { get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: LAYOUTS };
 })();

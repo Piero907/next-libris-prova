@@ -235,10 +235,10 @@ function share() {
 }
 
 /* ---------- invito in cima all'elenco, voce nel menu, opzione ---------- */
-function askData() {
+function askData(evenSeen) {
   if (!cfg.on || NL.tab() !== 'lib') return null;
   var now = Date.now(), cur = quarterOf(now), last = prevQ(cur);
-  if (now - cur.s > ASK_DAYS * DAY || cfg.seen === last.key) return null;
+  if (now - cur.s > ASK_DAYS * DAY || (!evenSeen && cfg.seen === last.key)) return null;
   var d = wrapData(NL.books(), NL.quotes(), last, now);
   return d.empty || (!d.n && d.added < 3) ? null : d;
 }
@@ -252,7 +252,7 @@ function paintAsk() {
       '<button type="button" class="ico" id="wrapAskX" aria-label="Non ora">×</button>';
     anchor.parentNode.insertBefore(box, anchor);
     box.querySelector('#wrapAskGo').addEventListener('click', function () { open(); });
-    box.querySelector('#wrapAskX').addEventListener('click', function () { cfg.seen = prevQ(quarterOf(Date.now())).key; save(); paintAsk(); });
+    box.querySelector('#wrapAskX').addEventListener('click', function () { cfg.seen = prevQ(quarterOf(Date.now())).key; save(); paintAsk(); NL.summary && NL.summary(); });
   }
   var d = askData();
   box.hidden = !d;
@@ -291,6 +291,10 @@ function paintOption(sec) {
   box.checked = cfg.on;
 }
 NL.on('list', paintAsk);
+NL.on('closed', function (list) {            // invito chiuso con la × ma ancora nel suo mese: il triangolino del riepilogo lo riapre
+  var d = askData(true);
+  if (d && cfg.seen === d.Q.key) list.push({ k: 'wrap', reopen: function () { cfg.seen = ''; save(); paintAsk(); } });
+});
 NL.on('menu', paintMenu);
 NL.on('options', paintOption);
 paintAsk();
