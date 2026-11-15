@@ -1,6 +1,6 @@
-/* Next Libris · modulo «Disposizione dello schermo»: Classico, A (barra in basso), B (leggera), C (pulsante tondo), D (tutto in basso).
+/* Next Libris · modulo «Disposizione dello schermo»: Classico oppure A (barra in basso). (B, C e D provate e tolte il 15/11/2026.)
    Modulo a parte: usa solo window.NL. Toglierlo (togli_modulo.py layout) riporta l'app alla disposizione classica.
-   La scelta sta in 'catalogo-libri-layout'. In tutte le disposizioni tranne la classica gli avvisi in cima si vedono uno alla volta. */
+   La scelta sta in 'catalogo-libri-layout'. Nella A gli avvisi stanno sopra la ricerca e (di predefinito) si vedono uno alla volta. */
 (function () {
 'use strict';
 var NL = window.NL;
@@ -8,14 +8,11 @@ if (!NL) return;
 var $ = NL.$, esc = NL.esc;
 var LS = 'catalogo-libri-layout', DEF = NL.PROVA ? 'a' : 'classico';   // nella copia di prova si parte dalla A
 var LAYOUTS = [
-  { k: 'classico', t: 'Classico', d: 'Come prima: tasti grandi in alto, Scansiona, Foto e Digita in basso.' },
-  { k: 'a', t: 'A · Barra in basso', d: 'Libreria, Desideri, + per aggiungere, Per te e Menu sempre sotto il pollice.' },
-  { k: 'b', t: 'B · Leggera', d: 'Come la classica, ma con meno pulsanti: Statistiche ed Esporta nel menu.' },
-  { k: 'c', t: 'C · Pulsante tondo', d: 'Un + tondo in basso a destra; in alto le scorciatoie da scorrere.' },
-  { k: 'd', t: 'D · Tutto in basso', d: 'Ricerca, elenchi e tasti in basso, per usarla con una mano.' }
+  { k: 'classico', t: 'Classico', d: 'Tasti grandi in alto, Scansiona, Foto e Digita in basso.' },
+  { k: 'a', t: 'A · Barra in basso', d: 'Libreria, Desideri, + per aggiungere, Per te e Menu sempre sotto il pollice.' }
 ];
-var cur = DEF;
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) {}
+var cur = DEF, one = true;
+try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; else if (/^[bcd]$/.test(c0.v)) cur = 'a'; one = c0.one !== false; } catch (e) {}
 var root = document.documentElement;
 function svg(p, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
 var I = {
@@ -30,7 +27,7 @@ var I = {
   cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   next: '<path d="M5 6h14M5 12h9M5 18h6"/><path d="M17 15l3 3-3 3"/>'
 };
-function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
+function save() { NL.ls.set(LS, JSON.stringify({ v: cur, one: one })); }
 
 /* ---------- barra in basso (A), pulsante tondo (C), tasto menu nella barra di D ---------- */
 var built = false;
@@ -43,13 +40,6 @@ function build() {
     '<button type="button" class="lay-plus" data-l="add" aria-label="Aggiungi un libro">' + svg(I.plus, 28) + '</button>' +
     '<button type="button" data-l="you">' + svg(I.spark) + '<span>Per te</span></button>' +
     '<button type="button" data-l="menu">' + svg(I.menu) + '<span>Menu</span></button></nav>'));
-  document.body.appendChild(el('<div class="lay-fab" id="layFab"><div class="lay-dial" id="layDial" hidden>' +
-    '<button type="button" data-l="scan"><span>Scansiona il codice</span>' + NL.icon('scan') + '</button>' +
-    '<button type="button" data-l="photo"><span>Foto della copertina</span>' + NL.icon('cam') + '</button>' +
-    '<button type="button" data-l="type"><span>Scrivi titolo o ISBN</span>' + NL.icon('key') + '</button>' +
-    '<button type="button" data-l="check"><span>Ce l\'ho già?</span>' + NL.icon('check') + '</button></div>' +
-    '<button type="button" class="lay-fab-b" id="layFabB" aria-label="Aggiungi un libro" aria-expanded="false">' + svg(I.plus, 30) + '</button></div>'));
-  document.body.appendChild(el('<div class="lay-scrim" id="layScrim" hidden></div>'));
   document.body.appendChild(el('<div class="sheet" id="layAdd" hidden><div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="layAddH">' +
     '<h2 id="layAddH">Aggiungi un libro</h2><div class="lay-grid">' +
     '<button type="button" class="lay-big pri" data-l="scan">' + NL.icon('scan') + '<b>Scansiona</b><small>il codice a barre: il modo più preciso</small></button>' +
@@ -60,9 +50,6 @@ function build() {
   document.body.appendChild(el('<div class="sheet" id="layYou" hidden><div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="layYouH">' +
     '<h2 id="layYouH">Per te</h2><div class="dlist dmenu" id="layYouList"></div>' +
     '<div class="row-btns"><button type="button" class="btn" data-l="close">Chiudi</button></div></div></div>'));
-  var strip = el('<div class="lay-strip" id="layStrip" role="toolbar" aria-label="Scorciatoie"></div>');
-  var chips = document.querySelector('#stick .chips');
-  if (chips) chips.parentNode.insertBefore(strip, chips);
   document.addEventListener('click', onClick);
 }
 function youItems() {
@@ -79,19 +66,8 @@ function paintYou() {
     return '<button type="button" class="dopt dgo lay-you" data-l="' + x.l + '"><span class="lay-yi">' + svg(x.i) + '</span><span><b>' + esc(x.t) + '</b><small>' + esc(x.s) + '</small></span><span class="n" aria-hidden="true">›</span></button>';
   }).join('');
 }
-function paintStrip() {
-  var s = $('#layStrip'); if (!s) return;
-  s.innerHTML = youItems().concat([{ l: 'check', i: '', t: 'Ce l\'ho già?' }]).map(function (x) {
-    return '<button type="button" class="chip lay-chip" data-l="' + x.l + '">' + (x.i ? svg(x.i, 16) : '') + esc(x.l === 'wrap' ? 'Trimestre' : x.l === 'quotes' ? 'Citazioni' : x.l === 'export' ? 'Backup' : x.t) + '</button>';
-  }).join('');
-}
 function sheetOpen(id) { var s = $(id); s.hidden = false; if (id === '#layYou') paintYou(); setTimeout(function () { try { s.querySelector('button').focus({ preventScroll: true }); } catch (e) {} }, 30); }
-function sheetsClose() { ['#layAdd', '#layYou'].forEach(function (k) { var s = $(k); if (s) s.hidden = true; }); dial(false); }
-function dial(on) {
-  var d = $('#layDial'); if (!d) return;
-  d.hidden = !on; $('#layScrim').hidden = !on; $('#layFabB').setAttribute('aria-expanded', on ? 'true' : 'false');
-  $('#layFab').classList.toggle('open', !!on);
-}
+function sheetsClose() { ['#layAdd', '#layYou'].forEach(function (k) { var s = $(k); if (s) s.hidden = true; }); }
 function act(l) {
   sheetsClose();
   if (l === 'lib' || l === 'wish') { NL.setTab(l); window.scrollTo({ top: 0 }); paintNav(); }
@@ -110,18 +86,16 @@ function act(l) {
 }
 function onClick(e) {
   var t = e.target;
-  if (t.id === 'layScrim') { dial(false); return; }
-  if (t.closest('#layFabB')) { dial($('#layDial').hidden); return; }
   var sh = t.closest('#layAdd, #layYou');
   if (sh && t === sh) { sheetsClose(); return; }
   var b = t.closest('[data-l]');
-  if (!b || !b.closest('#layNav, #layFab, #layAdd, #layYou, #layStrip')) return;
+  if (!b || !b.closest('#layNav, #layAdd, #layYou')) return;
   if (b.dataset.l === 'close') { sheetsClose(); return; }
   act(b.dataset.l);
 }
 window.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
-  var open = ['#layAdd', '#layYou'].some(function (k) { var s = $(k); return s && !s.hidden; }) || ($('#layDial') && !$('#layDial').hidden);
+  var open = ['#layAdd', '#layYou'].some(function (k) { var s = $(k); return s && !s.hidden; });
   if (open) { e.stopImmediatePropagation(); sheetsClose(); }
 }, true);
 function paintNav() {
@@ -136,7 +110,7 @@ function notes() {
   var all = NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean);
   all.forEach(function (x) { x.classList.remove('lay-later'); });
   var more = $('#layMore');
-  if (cur === 'classico') { if (more) more.hidden = true; return; }
+  if (cur === 'classico' || !one) { if (more) more.hidden = true; return; }
   var vis = all.filter(function (x) { return !x.hidden; });
   if (!more) {
     more = el('<button type="button" class="lay-more" id="layMore" hidden></button>');
@@ -159,28 +133,41 @@ function notes() {
 function apply() {
   root.setAttribute('data-layout', cur);
   if (cur !== 'classico') build();
-  var many = NL.books().filter(function (b) { return !b.w; }).length >= 10;
-  root.classList.toggle('lay-tipoff', many);
-  loans0();
-  paintNav(); paintStrip(); notes(); sheetsClose();
+  place(); loans0();
+  paintNav(); notes(); sheetsClose();
   setTimeout(function () { try { NL.updateStick(); } catch (e) {} }, 0);
 }
 function paintOption(sec) {
   if (sec !== 'look') return;
   var box = document.getElementById('optLayout');
   if (!box) {
-    var anchor = document.querySelector('#optSheet input[name="viewDef"]');
-    var fs = anchor && anchor.closest('fieldset'); if (!fs) return;
+    var fs = document.querySelector('#optSheet .sum-opts') || (document.querySelector('#optSheet input[name="viewDef"]') || { closest: function () { return null; } }).closest('fieldset');
+    if (!fs) return;
     box = el('<fieldset class="choice lay-opt" id="optLayout"><legend>Disposizione dello schermo</legend>' + LAYOUTS.map(function (x) {
       return '<label class="lay-o"><input type="radio" name="layout" value="' + x.k + '"><span><b>' + esc(x.t) + '</b><small>' + esc(x.d) + '</small></span></label>';
-    }).join('') + '<p class="hint">Si vede subito: prova e scegli quella che ti trovi meglio.</p></fieldset>');
+    }).join('') + '<label class="check lay-one" id="layOneL"><input type="checkbox" id="layOne"><span>Avvisi in cima uno alla volta<small>Prestiti, «Hai finito…», trimestre, installazione: se sono più di uno, «Il prossimo» passa al successivo.</small></span></label>' +
+      '<p class="hint">Si vede subito. Nella A gli avvisi stanno sopra la ricerca.</p></fieldset>');
     fs.parentNode.insertBefore(box, fs);
-    box.addEventListener('change', function (e) { if (e.target.name === 'layout') { cur = e.target.value; save(); apply(); } });
+    box.addEventListener('change', function (e) {
+      if (e.target.name === 'layout') { cur = e.target.value; save(); apply(); paintOption('look'); }
+      else if (e.target.id === 'layOne') { one = e.target.checked; save(); notes(); }
+    });
   }
-  Array.prototype.forEach.call(box.querySelectorAll('input'), function (i) { i.checked = i.value === cur; });
+  $('#layOne').checked = one; $('#layOneL').hidden = cur !== 'a';
+  Array.prototype.forEach.call(box.querySelectorAll('input[name="layout"]'), function (i) { i.checked = i.value === cur; });
 }
-function loans0() { var c = document.getElementById('cntLoan'); root.classList.toggle('lay-loans0', !c || !(parseInt(c.textContent, 10) > 0)); }
-NL.on('list', function () { paintNav(); paintStrip(); notes(); setTimeout(loans0, 0); });
+function loans0() {                        // nella A la riga «Prestati» serve solo se il riepilogo non li mostra gia' (toccandoli)
+  var c = document.getElementById('cntLoan');
+  root.classList.toggle('lay-loans0', !c || !(parseInt(c.textContent, 10) > 0) || NL.settings.sumLoan !== false);
+}
+/* nella A gli avvisi che stanno sotto la ricerca salgono sopra; nella classica tornano al loro posto */
+var MOVE = ['#wrapAsk', '#nxBox', '#donAsk', '#donRow'];
+function place() {
+  var a = cur === 'a', ref = a ? document.getElementById('stickSentinel') : document.getElementById('thead');
+  if (!ref) return;
+  MOVE.forEach(function (k) { var e = document.querySelector(k); if (e) ref.parentNode.insertBefore(e, ref); });
+}
+NL.on('list', function () { paintNav(); notes(); setTimeout(loans0, 0); });
 NL.on('options', paintOption);
 apply();
 window.NLLayout = { get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: LAYOUTS };

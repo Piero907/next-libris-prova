@@ -231,6 +231,7 @@ function persist() {
   var el = $('#sync');
   $('#syncTxt').textContent = ok ? (navigator.onLine === false ? 'Offline · salvato su questo telefono' : 'Salvato su questo telefono') : 'Impossibile salvare: scarica un backup';
   el.classList.toggle('off', !ok || navigator.onLine === false);
+  el.classList.toggle('quiet-ok', ok && navigator.onLine !== false && settings.showSync === false);
   checkBackupNag();
 }
 function touch() {
@@ -270,6 +271,10 @@ function loadAll() {
     settings.instSnooze = Number(s.instSnooze) || 0;
     settings.goal = Math.max(0, Math.min(999, parseInt(s.goal, 10) || 0));          // obiettivo di lettura
     settings.newsAuto = s.newsAuto !== false;                                       // novita' degli autori: controllo automatico
+    settings.sumEur = s.sumEur === true;                                            // riepilogo in alto: valore in euro (spento di predefinito)
+    settings.sumLoan = s.sumLoan !== false;                                         // riepilogo: «N in prestito» (si tocca per vederli)
+    settings.sumGone = s.sumGone === true;                                          // riepilogo: «N non più in libreria» (spento di predefinito)
+    settings.showSync = s.showSync !== false;                                       // «Salvato su questo telefono» (gli errori si vedono sempre)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
     settings.suggLang = s.suggLang === 'all' ? 'all' : 'it';                        // «Da scoprire»: solo italiano o tutte le lingue
     settings.nxSeen = L.str(s.nxSeen).slice(0, 40);                                 // riquadro «Cosa leggere dopo» chiuso per questo libro finito
@@ -3598,7 +3603,9 @@ function updateSummary() {
   var n = done.length;
   $('#summary').innerHTML = tab === 'wish'
     ? (n ? '<b>' + n + '</b> da comprare · <b>' + esc(eur(total)) + '</b>' : 'Nessun libro da comprare')
-    : (n ? '<b>' + n + '</b> ' + (n === 1 ? 'libro' : 'libri') + ' · <b>' + esc(eur(total)) + '</b>' + (g ? ' · ' + g + ' da verificare' : '') + (loans ? ' · ' + loans + ' in prestito' : '') + (gone ? ' · ' + gone + ' non più in libreria' : '')
+    : (n ? '<b>' + n + '</b> ' + (n === 1 ? 'libro' : 'libri') + (settings.sumEur ? ' · <b>' + esc(eur(total)) + '</b>' : '') + (g ? ' · ' + g + ' da verificare' : '') +
+        (loans && settings.sumLoan ? ' · <button type="button" class="sum-link" data-sum="loan" aria-pressed="' + (flt === 'loan' ? 'true' : 'false') + '">' + loans + ' in prestito</button>' : '') +
+        (gone && settings.sumGone ? ' · ' + gone + ' non più in libreria' : '')
       : (gone ? gone + ' non più in libreria' : 'Ancora nessun libro'));
   var nl = state.books.filter(function (b) { return !b.w && !b.xs && hasData(b); }).length, nw = state.books.filter(function (b) { return b.w && hasData(b); }).length;
   $('#cntLib').textContent = nl; $('#cntWish').textContent = nw;
@@ -4642,8 +4649,9 @@ $('#verUpdate').addEventListener('click', updateNow);
 /* Pagina delle opzioni: una sezione alla volta, con «‹» per tornare al menu e il tasto Indietro del telefono per chiudere */
 var optOpen = false, optPushed = false;
 function openOptions(sec, reuse) {
-  try { paintLensState(); } catch (e) {}
-  emit('options', sec);                 // stato dell'obiettivo con la luce, sempre aggiornato
+  try { paintLensState(); } catch (e) {}                 // stato dell'obiettivo con la luce, sempre aggiornato
+  emit('options', sec);
+  paintSumOpts();
   var found = false;
   Array.prototype.forEach.call(document.querySelectorAll('#optSheet .opt-sec'), function (s) {
     var on = s.dataset.sec === sec; s.hidden = !on;
@@ -5777,7 +5785,7 @@ $('#fltLoan').addEventListener('click', function () {
 });
 function allLoansText() {
   var n = state.books.filter(function (b) { return !b.w && b.p; }).length;
-  return n ? (n === 1 ? '1 libro in prestito.' : n + ' libri in prestito, dai più vecchi.') + ' Tocca di nuovo «Prestati» per vederli tutti.' : 'Nessun libro in prestito.';
+  return n ? (n === 1 ? '1 libro in prestito.' : n + ' libri in prestito, dai più vecchi.') + (document.querySelector('#fltLoan') && document.querySelector('#fltLoan').offsetParent ? ' Tocca di nuovo «Prestati» per vederli tutti.' : ' Tocca di nuovo «in prestito» per vederli tutti.') : 'Nessun libro in prestito.';
 }
 $('#optOpenAll').addEventListener('change', function (e) { settings.openAll = e.target.checked; openState = {}; saveSettings(); renderList(); });
 $('#tabLib').addEventListener('click', function () { setTab('lib'); });
@@ -6177,6 +6185,15 @@ $('#lightYes').addEventListener('click', function () { lightAnswer(true); });
 $('#lightNo').addEventListener('click', function () { lightAnswer(false); });
 $('#optCamNative').addEventListener('change', function (e) { settings.camNative = e.target.checked; saveSettings(); toast(settings.camNative ? 'Foto con la fotocamera del telefono.' : 'Foto con la fotocamera dell\'app.'); });
 $('#optSound').addEventListener('change', function (e) { setSound(e.target.checked, true); });
+/* riepilogo in alto: cosa mostrare (valore e «non più in libreria» spenti di predefinito) */
+function paintSumOpts() {
+  [['#optSumEur', 'sumEur'], ['#optSumLoan', 'sumLoan'], ['#optSumGone', 'sumGone'], ['#optShowSync', 'showSync']].forEach(function (x) { var e = $(x[0]); if (e) e.checked = settings[x[1]] !== false && (x[1] === 'sumLoan' || x[1] === 'showSync' || settings[x[1]] === true); });
+}
+[['#optSumEur', 'sumEur'], ['#optSumLoan', 'sumLoan'], ['#optSumGone', 'sumGone'], ['#optShowSync', 'showSync']].forEach(function (x) {
+  var e = $(x[0]); if (!e) return;
+  e.addEventListener('change', function () { settings[x[1]] = e.checked; saveSettings(); updateSummary(); persist(); emit('list'); });
+});
+$('#summary').addEventListener('click', function (e) { if (e.target.closest('[data-sum="loan"]')) $('#fltLoan').click(); });
 $('#scanSound').addEventListener('click', function () { setSound(settings.sound === false, true); });
 $('#optExtra').checked = settings.extra;
 $('#optOpenAll').checked = settings.openAll;

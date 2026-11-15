@@ -542,6 +542,14 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
         <input type="checkbox" id="optSound">
         <span>Suoni<small>Il bip quando legge un codice e il «fatto» quando salvi il prezzo. Si accendono e spengono anche dalla fotocamera, con 🔊 in alto. La vibrazione resta.</small></span>
       </label>
+      <fieldset class="choice sum-opts">
+        <legend>Riepilogo in alto</legend>
+        <p class="hint">Sotto il nome compare sempre il numero dei libri. Puoi aggiungere:</p>
+        <label class="check"><input type="checkbox" id="optSumEur"><span>Valore in euro<small>La somma dei prezzi dei libri in libreria.</small></span></label>
+        <label class="check"><input type="checkbox" id="optSumLoan"><span>Libri in prestito<small>«4 in prestito»: toccandolo vedi solo quelli.</small></span></label>
+        <label class="check"><input type="checkbox" id="optSumGone"><span>Libri non più in libreria<small>Venduti, regalati o smarriti.</small></span></label>
+        <label class="check"><input type="checkbox" id="optShowSync"><span>«Salvato su questo telefono»<small>Se qualcosa non va (offline o salvataggio non riuscito) l'avviso compare comunque.</small></span></label>
+      </fieldset>
       <fieldset class="choice">
         <legend>All'apertura mostra</legend>
         <div class="seg seg-view">

@@ -614,21 +614,27 @@ la X lo chiude per quel libro.
 DISPOSIZIONE DELLO SCHERMO
 --------------------------
 Opzioni > Aspetto > "Disposizione dello schermo" (si vede subito):
-- Classico: come prima (tasti grandi in alto, Scansiona, Foto e Digita
-  in basso).
+- Classico: tasti grandi in alto, Scansiona, Foto e Digita in basso.
 - A - Barra in basso: Libreria, Desideri, + (Scansiona, Foto, Digita,
   Ce l'ho gia'?), Per te (Suggerimenti, trimestre, citazioni,
-  Statistiche, Backup) e Menu.
-- B - Leggera: come la classica, ma Statistiche ed Esporta stanno nel
-  menu e il testo d'aiuto in basso sparisce dopo i primi 10 libri.
-- C - Pulsante tondo: un + tondo in basso a destra apre Scansiona, Foto,
-  Digita e Ce l'ho gia'?; sotto la ricerca, scorciatoie da scorrere.
-- D - Tutto in basso: ricerca, Libreria/Desideri/Prestati e i tasti di
-  scansione stanno in basso, per usarla con una mano.
-In A, B, C e D gli avvisi in cima (prestiti, "Hai finito...", trimestre,
-installazione, sostieni) si vedono uno alla volta: "Il prossimo" passa
-al successivo. Per chi sviluppa: e' un modulo a parte (layout.js e
-layout.css); nella copia di prova si parte dalla A.
+  Statistiche, Backup) e Menu. In alto solo filtri, ricerca e vista;
+  gli avvisi (prestiti, "Hai finito...", trimestre, installazione,
+  sostieni) stanno sopra la ricerca e, con "Avvisi in cima uno alla
+  volta" (acceso di predefinito), se ne vede uno: "Il prossimo" passa al
+  successivo. La riga "Prestati" compare solo se il riepilogo non mostra
+  gia' "N in prestito".
+Per chi sviluppa: e' un modulo a parte (layout.js e layout.css); nella
+copia di prova si parte dalla A.
+
+RIEPILOGO IN ALTO
+-----------------
+Opzioni > Aspetto > "Riepilogo in alto": sotto il nome c'e' sempre il
+numero dei libri. Si possono aggiungere il valore in euro (spento di
+predefinito), "N in prestito" (acceso; toccandolo mostra solo i libri
+prestati, toccandolo di nuovo tutti) e "N non piu' in libreria" (spento).
+"Salvato su questo telefono" si puo' nascondere: se qualcosa non va
+(offline o salvataggio non riuscito) l'avviso compare comunque. Nei
+Desideri il totale da spendere resta sempre.
 
 IL TUO TRIMESTRE IN LIBRI (riepilogo ogni tre mesi)
 ---------------------------------------------------

@@ -1523,3 +1523,7 @@ html[data-look="nuovo"] .sg-tabs button[aria-pressed="true"]{color:var(--accent-
 .nx-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
 .nx-acts .link{margin-left:auto;font-size:14px}
 body.selecting .nx-box,body.scanning .nx-box{display:none}
+/* riepilogo in alto: «N in prestito» si tocca */
+.sum-link{display:inline;padding:0;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;text-decoration-color:var(--info-line);text-underline-offset:3px;cursor:pointer}
+.sum-link[aria-pressed="true"]{color:var(--info);font-weight:600}
+.sync.quiet-ok{display:none}

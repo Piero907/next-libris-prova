@@ -1,5 +1,5 @@
-/* Next Libris · modulo «Disposizione dello schermo» (si toglie insieme a layout.js). Senza data-layout, o con «classico», nulla cambia. */
-.lay-nav,.lay-fab,.lay-strip,.lay-scrim{display:none}
+/* Next Libris · modulo «Disposizione dello schermo» (si toglie insieme a layout.js). Con «classico», o senza modulo, nulla cambia. */
+.lay-nav{display:none}
 .lay-later{display:none!important}
 .lay-more{display:block;margin:-6px 0 12px auto;padding:4px 10px;border:0;border-radius:999px;background:var(--surface2);color:var(--muted);font:500 13px var(--font-body);cursor:pointer}
 .lay-more b{color:var(--accent);font-weight:600}
@@ -13,35 +13,29 @@
 .lay-big.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .lay-big.pri svg,.lay-big.pri small{color:inherit}
 .lay-yi{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent)}
-.lay-you{gap:12px}
+.dmenu .dopt.lay-you{justify-content:flex-start;gap:12px}
+.dmenu .dopt.lay-you>.lay-yi{flex:0 0 40px;width:40px;height:40px}
+.dmenu .dopt.lay-you>span:nth-child(2){flex:1 1 auto;text-align:left;min-width:0}
 .lay-opt .lay-o{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer}
-.lay-opt .lay-o:last-of-type{border-bottom:0}
 .lay-opt .lay-o input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
 .lay-opt .lay-o b{display:block;font-size:15px}
 .lay-opt .lay-o small{display:block;font-size:13px;line-height:1.35;color:var(--muted);margin-top:2px}
-
-/* strumenti con le icone sole (A, B, C, D) */
-html[data-layout]:not([data-layout="classico"]) .tools{flex-wrap:nowrap}
-html[data-layout]:not([data-layout="classico"]) .acts{display:contents}
-html[data-layout]:not([data-layout="classico"]) #btnFilters,
-html[data-layout]:not([data-layout="classico"]) #btnView,
-html[data-layout]:not([data-layout="classico"]) #btnCheck{font-size:0;gap:0;min-width:46px;min-height:46px;padding:0 11px;flex:none;position:relative}
-html[data-layout]:not([data-layout="classico"]) #btnFilters .badge{font-size:11px;position:absolute;top:2px;right:2px;margin:0}
-html[data-layout]:not([data-layout="classico"]) #btnStats,
-html[data-layout]:not([data-layout="classico"]) #btnExport{display:none}
-html[data-layout="a"] #btnCheck,html[data-layout="c"] #btnCheck{display:none}
-html[data-layout="b"] #btnView{order:3}
-html[data-layout="b"] #btnCheck{order:4}
-html.lay-tipoff[data-layout="b"] .tip,html[data-layout="d"] .tip{display:none}
-html.lay-tipoff[data-layout="b"] main{padding-bottom:120px}
-html.lay-tipoff[data-layout="b"] .toast{bottom:calc(92px + env(safe-area-inset-bottom))}
+.lay-opt .lay-one{margin-top:12px}
+.lay-opt .lay-one[hidden]{display:none}
 
 /* A · barra in basso */
-html[data-layout="a"] .dock,html[data-layout="c"] .dock{display:none}
+html[data-layout="a"] .dock{display:none}
 html[data-layout="a"] main{padding-bottom:120px}
-html[data-layout="a"] h1{font-size:28px}
+html[data-layout="a"] h1{font-size:30px}
+html[data-layout="a"] .top{margin-bottom:12px}
 html[data-layout="a"] .tabbar .tabs{display:none}
 html[data-layout="a"] .tabbar{justify-content:flex-end;margin-bottom:6px}
+html.lay-loans0[data-layout="a"] .tabbar{display:none}
+html[data-layout="a"] .tools{flex-wrap:nowrap}
+html[data-layout="a"] .acts{display:contents}
+html[data-layout="a"] #btnFilters,html[data-layout="a"] #btnView{font-size:0;gap:0;min-width:46px;min-height:46px;padding:0 11px;flex:none;position:relative}
+html[data-layout="a"] #btnFilters .badge{font-size:11px;position:absolute;top:2px;right:2px;margin:0}
+html[data-layout="a"] #btnCheck,html[data-layout="a"] #btnStats,html[data-layout="a"] #btnExport{display:none}
 html[data-layout="a"] .lay-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:6;justify-content:space-around;align-items:flex-end;
   background:var(--surface);border-top:1px solid var(--line);padding:4px 6px calc(4px + env(safe-area-inset-bottom))}
 .lay-nav button{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;padding:4px 0;border:0;background:none;color:var(--muted);font:600 12px var(--font-body);cursor:pointer}
@@ -50,42 +44,3 @@ html[data-layout="a"] .lay-nav{display:flex;position:fixed;left:0;right:0;bottom
 .lay-nav .lay-plus{flex:0 0 60px;width:60px;height:60px;min-height:0;margin:-22px 6px 4px;border-radius:50%;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px #0003}
 html[data-layout="a"] .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
 html[data-layout="a"] body.selecting .lay-nav,html[data-layout="a"] body.scanning .lay-nav{display:none}
-
-/* C · pulsante tondo, scorciatoie da scorrere, forme arrotondate */
-html[data-layout="c"] main{padding-bottom:110px}
-html[data-layout="c"] .lay-fab{display:block;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:8}
-.lay-fab-b{display:flex;align-items:center;justify-content:center;width:64px;height:64px;border:0;border-radius:22px;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 18px #0004;cursor:pointer;transition:transform .2s}
-.lay-fab.open .lay-fab-b{transform:rotate(45deg)}
-.lay-dial{position:absolute;right:4px;bottom:76px;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-.lay-dial[hidden]{display:none}
-.lay-dial button{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;cursor:pointer;font:600 15px var(--font-body);color:#fff}
-.lay-dial button span{padding:7px 12px;border-radius:10px;background:var(--ink);color:var(--bg);white-space:nowrap}
-.lay-dial button svg{box-sizing:content-box;padding:13px;border-radius:50%;background:var(--surface);color:var(--accent);box-shadow:0 3px 10px #0003}
-html[data-layout="c"] .lay-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:7;background:rgba(0,0,0,.4)}
-html[data-layout="c"] .lay-strip{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 10px;padding:0 16px 2px;scrollbar-width:none}
-html[data-layout="c"] .lay-strip::-webkit-scrollbar{display:none}
-.lay-chip{flex:none;display:inline-flex;align-items:center;gap:6px}
-html[data-layout="c"] .tools input[type="search"],html[data-layout="c"] .tools .btn,html[data-layout="c"] .tabbar .quick{border-radius:999px}
-html[data-layout="c"] .tabs{border-radius:999px}
-html[data-layout="c"] .toast{bottom:calc(96px + env(safe-area-inset-bottom))}
-html[data-layout="c"] body.selecting .lay-fab,html[data-layout="c"] body.scanning .lay-fab{display:none}
-
-/* D · tutto in basso: ricerca, elenchi e tasti sopra la barra di Scansiona */
-html[data-layout="d"] .stick{position:fixed;top:auto;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:5;margin:0;
-  display:flex;flex-direction:column;padding:10px 16px 2px;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 20px #0000000f}
-html[data-layout="d"] .stick .chips{order:1}
-html[data-layout="d"] .stick .tools{order:2;margin-bottom:8px}
-html[data-layout="d"] .stick .tabbar{order:3;margin-bottom:6px}
-html[data-layout="d"] .stick .chips:not(:has(:not([hidden]):not(:empty))){display:none}
-html[data-layout="d"] .dock{background:var(--surface);border-top:0;padding-top:4px}
-html[data-layout="d"] main{padding-bottom:230px}
-html[data-layout="d"] .row{scroll-margin-top:8px}
-html[data-layout="d"] .toast{bottom:calc(206px + env(safe-area-inset-bottom))}
-html[data-layout="d"] h1{font-size:30px}
-/* ritocchi */
-.dmenu .dopt.lay-you{justify-content:flex-start}
-.dmenu .dopt.lay-you>.lay-yi{flex:0 0 40px;width:40px;height:40px}
-.dmenu .dopt.lay-you>span:nth-child(2){flex:1 1 auto;text-align:left;min-width:0}
-.chip.lay-chip{border-color:var(--line);background:var(--surface);color:var(--ink)}
-.chip.lay-chip svg{color:var(--accent)}
-html.lay-loans0[data-layout="a"] .tabbar{display:none}
