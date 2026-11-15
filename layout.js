@@ -108,28 +108,26 @@ function paintNav() {
 var NOTES = ['#notice', '#nxBox', '#wrapAsk', '#donAsk', '#instCard', '#donRow'], noteIdx = 0, mo = null;
 function notes() {
   var all = NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean).concat(Array.prototype.slice.call(document.querySelectorAll('.lay-note')));   // .lay-note: avvisi aggiunti da altri moduli
-  all.forEach(function (x) { x.classList.remove('lay-later'); x.removeAttribute('data-noswipe'); x.removeAttribute('data-lay-swipe'); x.style.transform = ''; x.style.opacity = ''; x.style.transition = ''; });
+  all.forEach(function (x) { x.classList.remove('lay-later', 'lay-has-dots'); x.removeAttribute('data-noswipe'); x.removeAttribute('data-lay-swipe'); x.style.transform = ''; x.style.opacity = ''; x.style.transition = ''; });
   var more = $('#layMore');
   if (cur === 'classico' || !one) { if (more) more.hidden = true; return; }
   var vis = all.filter(function (x) { return !x.hidden; });
   if (!more) {
     more = el('<button type="button" class="lay-more" id="layMore" hidden></button>');
-    more.addEventListener('click', function () { noteIdx++; notes(); });
+    more.addEventListener('click', function (e) { e.stopPropagation(); var x = document.querySelector('[data-lay-swipe]'); if (x) slide(1, x, -100); else { noteIdx++; notes(); } });
   }
-
   if (!mo && window.MutationObserver) mo = new MutationObserver(function () { notes(); });
   if (mo) all.forEach(function (x) { if (!x.__layObs) { x.__layObs = 1; mo.observe(x, { attributes: true, attributeFilter: ['hidden'] }); } });
   if (vis.length < 2) { more.hidden = true; return; }
   noteIdx = ((noteIdx % vis.length) + vis.length) % vis.length;
   vis.forEach(function (x, i) { if (i !== noteIdx) x.classList.add('lay-later'); });
   var shown = vis[noteIdx];
-  shown.parentNode.insertBefore(more, shown.nextSibling);
+  shown.appendChild(more);                   // i pallini stanno dentro l'avviso, in basso al centro
+  shown.classList.add('lay-has-dots');
   more.hidden = false;
   shown.setAttribute('data-lay-swipe', ''); shown.setAttribute('data-noswipe', '');     // si scorre col dito; il menu non si apre
-  more.innerHTML = '<span class="lay-dots" aria-hidden="true">' + vis.map(function (x, i) { return '<i' + (i === noteIdx ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' +
-    'Avviso ' + (noteIdx + 1) + ' di ' + vis.length + ' · <b>Il prossimo ›</b>';
+  more.innerHTML = vis.map(function (x, i) { return '<i' + (i === noteIdx ? ' class="on"' : '') + '></i>'; }).join('');
   more.setAttribute('aria-label', 'Avviso ' + (noteIdx + 1) + ' di ' + vis.length + ': mostra il prossimo (si scorrono anche col dito)');
-
 }
 
 /* scorrere gli avvisi col dito: verso sinistra il prossimo, verso destra quello prima (in giro) */

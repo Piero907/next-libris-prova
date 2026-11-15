@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.10 · 15/11/2026 21:42
+- **Pallini dentro l'avviso**: in basso al centro del riquadro, senza più «Avviso 1 di …» e «Il prossimo»; toccandoli si passa al successivo.
+- Mentre un avviso scivola via la pagina non si allarga più di lato.
+
 ## Prova 94.9 · 15/11/2026 21:36
 - **Registro della copia di prova**: ogni pubblicazione ha un numero che avanza (94.9, 94.10…) e una riga qui; in Menu › «Novità delle versioni» lo trovi sopra quello della versione vera. In fondo al Menu: «prova 94.9 del …».
 

@@ -621,8 +621,9 @@ Opzioni > Aspetto > "Disposizione dello schermo" (si vede subito):
   gli avvisi (prestiti, "Hai finito...", trimestre, installazione,
   sostieni) stanno sopra la ricerca e, con "Avvisi in cima uno alla
   volta" (acceso di predefinito), se ne vede uno: si scorrono col dito
-  (verso sinistra il prossimo, verso destra quello prima) o con "Il
-  prossimo"; i pallini dicono quanti sono. La riga "Prestati" compare solo se il riepilogo non mostra
+  (verso sinistra il prossimo, verso destra quello prima); i pallini in
+  basso dentro l'avviso dicono quanti sono (toccandoli si passa al
+  prossimo). La riga "Prestati" compare solo se il riepilogo non mostra
   gia' "N in prestito".
 Per chi sviluppa: e' un modulo a parte (layout.js e layout.css); nella
 copia di prova si parte dalla A.

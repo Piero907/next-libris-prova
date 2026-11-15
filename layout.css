@@ -1,8 +1,10 @@
 /* Next Libris · modulo «Disposizione dello schermo» (si toglie insieme a layout.js). Con «classico», o senza modulo, nulla cambia. */
 .lay-nav{display:none}
 .lay-later{display:none!important}
-.lay-more{display:block;margin:-6px 0 12px auto;padding:4px 10px;border:0;border-radius:999px;background:var(--surface2);color:var(--muted);font:500 13px var(--font-body);cursor:pointer}
-.lay-more b{color:var(--accent);font-weight:600}
+.lay-has-dots{position:relative;padding-bottom:26px!important}
+.lay-more{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);display:flex;gap:7px;align-items:center;padding:6px 10px;border:0;background:none;color:inherit;cursor:pointer;line-height:0}
+.lay-more i{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.25}
+.lay-more i.on{opacity:.85;transform:scale(1.15)}
 .lay-more[hidden]{display:none}
 /* finestre del modulo */
 .lay-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:6px 0 4px}
@@ -46,6 +48,4 @@ html[data-layout="a"] .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
 html[data-layout="a"] body.selecting .lay-nav,html[data-layout="a"] body.scanning .lay-nav{display:none}
 /* avvisi da scorrere col dito */
 [data-lay-swipe]{touch-action:pan-y;will-change:transform}
-.lay-dots{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}
-.lay-dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
-.lay-dots i.on{background:var(--accent)}
+html[data-layout="a"] main{overflow-x:clip}   /* l'avviso che scivola via non deve allargare la pagina */
