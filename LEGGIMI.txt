@@ -599,6 +599,16 @@ interessa". Usa una richiesta Google per autore. Con la chiave Google
 controlla da solo ogni due settimane e avvisa se trova qualcosa (si
 puo' spegnere nella stessa finestra).
 
+LIBRI PUBBLICATI CON AMAZON (ISBN 979-8)
+----------------------------------------
+Gli ISBN che iniziano con 979-8 sono quasi sempre quelli che Amazon da'
+gratis a chi si pubblica il libro da solo: le banche dati (SBN, Google
+Libri, Open Library) di solito non li conoscono. Se un 979-8 non si
+trova, l'app scrive come casa editrice "Amazon (pubblicazione in
+proprio)" e nella scheda mostra un riquadro con "Fotografa la copertina"
+(riconosce titolo e autore dalla foto; il codice resta quello del libro)
+e "Cerca sul web".
+
 SUGGERIMENTI
 ------------
 Menu > "Suggerimenti", con due schede:

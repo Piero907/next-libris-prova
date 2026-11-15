@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.17 · 15/11/2026 23:06
+- **Libri pubblicati con Amazon (ISBN 979-8)**: se le banche dati non li conoscono, nella scheda compare il riquadro «Libro pubblicato in proprio tramite Amazon» con «Fotografa la copertina» e «Cerca sul web».
+- La foto della copertina riconosce titolo e autore e il libro tiene il suo codice.
+- Casa editrice «Amazon (pubblicazione in proprio)» per i 979-8 non trovati, anche per quelli che avevi già.
+
 ## Prova 94.16 · 15/11/2026 22:57
 - Disposizione A: scorrendo la pagina, nella barra che resta in alto il pulsante **Copertine/Elenco** mostra la sua icona (prima restava vuoto).
 

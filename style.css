@@ -1534,3 +1534,8 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .sum-alert svg{display:block;width:1.05em;height:1.05em}
 .sum-alert::before{content:'';position:absolute;inset:-10px}   /* tocco piu' comodo senza spostare il disegno */
 .sum-alert:hover,.sum-alert:focus-visible{background:var(--warn-bg)}
+/* libro 979-8 non trovato: pubblicazione Amazon */
+.kdp-hint{margin:2px 0 12px;padding:12px 14px;border-radius:12px;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-line)}
+.kdp-hint p{margin:0 0 10px;font-size:14.5px;line-height:1.4}
+.kdp-acts{display:flex;flex-wrap:wrap;gap:8px}
+.kdp-acts .btn{gap:6px}

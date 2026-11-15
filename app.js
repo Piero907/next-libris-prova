@@ -477,6 +477,10 @@ function applyResult(b, r, code) {
 /* Se manca la casa editrice, la deduce dall'ISBN (codice dell'editore). Se la copia dai tuoi libri gia' verificati con lo
    stesso codice, e quei libri hanno tutti lo stesso editore, e' affidabile: niente "da verificare". Se viene dalla
    tabellina generica, o i tuoi libri con quel codice hanno editori diversi, resta "da verificare". */
+/* ISBN 979-8: quasi sempre l'ISBN gratuito che Amazon (KDP) da' a chi si pubblica da solo; le banche dati di solito non lo conoscono */
+var KDP_E = 'Amazon (pubblicazione in proprio)';
+function isKdp(b) { return /^9798/.test(L.toIsbn13(b && b.i) || ''); }
+function markKdp(b) { if (b && b.nf && !b.t && !b.e && isKdp(b)) { b.e = KDP_E; b.g = b.g.filter(function (k) { return k !== 'e'; }); return true; } return false; }
 function guessEditor(b) {
   if (b.e) return false;
   var g = L.guessPublisher(b.i, state.books);
@@ -531,7 +535,7 @@ async function doLookup(id) {
       delete s.heard;
     } else {
       b.nf = true;
-      guessEditor(b);
+      if (!markKdp(b)) guessEditor(b);           // 979-8 non trovato: e' una pubblicazione Amazon
       delete s.st;
       heardFail(id);
     }
@@ -646,17 +650,18 @@ function fromIsbn(id, code, price) {
 function applyCandidate(id, c) {
   var b = get(id), s = S[id];
   if (!b) return;
-  b.t = c.t; b.a = c.a; b.e = c.e; b.y = c.y;
+  var keep = s && s.keep;                          // libro col suo ISBN (es. pubblicazione Amazon) riconosciuto dalla foto: il codice resta il suo
+  b.t = c.t; b.a = c.a; if (c.e || !keep) b.e = c.e; b.y = c.y;
   if (c.gen && !b.gen) b.gen = c.gen;
   if (c.pg && !b.pg) b.pg = c.pg;
   takeDesc(b, c.ds, '');
-  if (c.i && !findByIsbn(c.i)) b.i = c.i;
+  if (c.i && !findByIsbn(c.i) && !keep) b.i = c.i;
   if (c.img) b.img = c.img;
   if (!b.img && s.big && !coverURL[id]) saveCoverData(id, s.big);
-  b.g = ['e', 'y', 'i'].filter(function (k) { return b[k]; });
+  b.g = (keep ? ['y'] : ['e', 'y', 'i']).filter(function (k) { return b[k] && !(k === 'e' && b.e === KDP_E); });
   if (s.price != null && b.c == null) b.c = s.price;
   b.nf = false;
-  ['st', 'cands', 'lines', 'price', 'err', 'retry'].forEach(function (k) { delete s[k]; });
+  ['st', 'cands', 'lines', 'price', 'err', 'retry', 'keep'].forEach(function (k) { delete s[k]; });
   touch(); refreshRow(id); updateSummary();
   queueDesc(id);
 }
@@ -779,7 +784,7 @@ async function processPhoto(id, file) {
     s.msg = 'Cerco il codice a barre…'; setStatusText(id, s.msg);
     var code = await decodeCanvasBarcode(canvas);
     if (stop()) return;
-    if (code) { s.pct = 100; await fromIsbn(id, code); return; }
+    if (code && !(s.keep && code === L.toIsbn13(b.i))) { s.pct = 100; await fromIsbn(id, code); return; }   // per un libro che ha gia' il suo codice si legge il testo
     s.pct = 25;
     s.msg = ocrP ? 'Leggo il testo della copertina…' : 'Preparo la lettura del testo (solo la prima volta)…'; setStatusText(id, s.msg);
     ocrMsg = function (m) {
@@ -796,6 +801,7 @@ async function processPhoto(id, file) {
     var price = L.extractPrice(data.text || '');
     var written = L.extractIsbns(data.text || '');
     if (!written.length) written = L.ocrIsbns(data.text || '', true);
+    if (s.keep) written = written.filter(function (x) { return x !== L.toIsbn13(b.i); });
     if (written.length) { await fromIsbn(id, written[0], price); return; }
     var qs = L.buildQueries(lines);
     s.lines = lines; s.price = price;
@@ -1390,6 +1396,21 @@ function cmpFor(k) {
   return function (x, y) { return y.ts - x.ts; };
 }
 function computeDups() { return L.analyzeDups(state.books); }
+function kdpHint(b, busy) {
+  if (busy || b.t || !b.nf || !isKdp(b)) return '';
+  return '<div class="kdp-hint"><p><b>Libro pubblicato in proprio tramite Amazon.</b> Le banche dati di solito non lo conoscono: fotografa la copertina per riconoscerlo, oppure cercalo sul web.</p>' +
+    '<div class="kdp-acts"><button type="button" class="btn primary" data-act="kdpphoto">' + icon('cam') + 'Fotografa la copertina</button><button type="button" class="btn" data-act="websearch">' + icon('search') + 'Cerca sul web</button></div></div>';
+}
+function photoForBook(id) {                      // foto della copertina per riconoscere un libro che ha gia' il suo ISBN
+  snapPhoto('Foto della copertina', '#fileCover').then(function (f) {
+    var b = get(id); if (!f || !b) return;
+    var s = S[id] || (S[id] = {});
+    s.keep = true; s.st = 'queued'; s.file = f; delete s.manual;
+    refreshRow(id);
+    photoPool(function () { return processPhoto(id, f); });
+    startFlow(id);
+  });
+}
 function flagsHTML(b, dups) {
   var s = S[b.id] || {}, o = '';
   if (b.p) o += '<span class="tag loan tap" data-act="loan" role="button" tabindex="0" title="In prestito' + (b.pd ? ' dal ' + esc(L.itDate(b.pd)) : '') + '. Toccalo per segnarlo come restituito.">' + esc(loanText(b)) + '</span>';
@@ -3488,7 +3509,8 @@ function rowHTML(b, dups, ex) {
       ? act('tolib', 'tolib', 'Libreria', 'Sposta in Libreria (l\'ho comprato)', ' move')
       : act('towish', 'towish', 'Desideri', 'Sposta nei Desideri', ' move')) : '';
     var favBtn = !busy && !b.w && hasData(b) ? act('fav', 'fav', 'Preferito', b.fav ? 'È tra i preferiti: tocca per toglierlo' : 'Metti tra i preferiti', b.fav ? ' fav on' : ' fav') : '';
-    var webBtn = !busy && (b.t || b.i) ? act('websearch', 'search', 'Cerca sul web', 'Cerca questo libro su Google: prezzo, recensioni, dove comprarlo') : '';
+    var kdp = kdpHint(b, busy);                  // pubblicazione Amazon non trovata: «Cerca sul web» sta nel suo riquadro
+    var webBtn = !kdp && !busy && (b.t || b.i) ? act('websearch', 'search', 'Cerca sul web', 'Cerca questo libro su Google: prezzo, recensioni, dove comprarlo') : '';
     var shareBtn = !busy && (b.t || L.toIsbn13(b.i)) ? act('share', 'share', 'Condividi', 'Manda questo libro a un amico') : '';
     var moreActs = shareBtn + (canLookup ? act('lookup', 'redo', 'Cerca di nuovo', 'Cerca di nuovo nelle banche dati') : '') +
 
@@ -3497,7 +3519,7 @@ function rowHTML(b, dups, ex) {
         '';
     body = (openCard ? '<div class="card-top"><span class="top-acts"><span class="acts-main">' + loanBtn + moveBtn + favBtn + webBtn + delBtn + '</span><span class="acts-win">' +
         '<button class="chev-btn" data-act="toggle" aria-expanded="true" aria-label="Chiudi la scheda" title="Chiudi la scheda">' + icon('chev') + '</button></span></span>' +
-        '<span class="flags">' + flagsHTML(b, dups) + '</span></div>' : '') +
+        '<span class="flags">' + flagsHTML(b, dups) + '</span></div>' + kdp : '') +
       '<div class="head">' + thumb + ta('t', 'Titolo', b.t, 'Titolo') + ta('a', 'Autore', b.a, 'Autore') + '</div>' +
       '<div class="meta">' + ta('e', 'Casa editrice', b.e, 'Casa editrice') + inp('y', 'Anno', b.y, 'numeric', 'Anno', 4) + inp('c', 'Costo €', b.c == null ? '' : L.fmtNum(b.c), 'decimal', '—') + '</div>' +
       (settings.extra ? '<div class="more">' + inp('sh', 'Scaffale', b.sh || '', 'text', 'Scaffale', 80) + inp('gen', 'Genere', b.gen || '', 'text', 'Genere', 80) +
@@ -4646,7 +4668,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 22:57", "n": "94.16", "note": "Disposizione A: scorrendo la pagina, nella barra che resta in alto il pulsante Copertine/E"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 23:06", "n": "94.17", "note": "Libri pubblicati con Amazon (ISBN 979-8)"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5651,6 +5673,7 @@ list.addEventListener('click', function (e) {
   else if (act === 'author') { q = btn.dataset.q; $('#q').value = q; flt = ''; readFlt = ''; shFlt = ''; genFlt = ''; renderList(); updateSummary(); window.scrollTo({ top: 0 }); toast('Libri di ' + q + '. Svuota la ricerca per vederli tutti.'); }
   else if (act === 'zoom') openCover(id);
   else if (act === 'coverphoto') coverTap(id);
+  else if (act === 'kdpphoto') photoForBook(id);
   else if (act === 'bought') moveToLib(id);
   else if (act === 'priceweb') {
     var pw = get(id);
@@ -6296,6 +6319,7 @@ setTimeout(function () {
   });
 }, 2500);
 confirmLearnedPublishers();
+if (state.books.filter(markKdp).length) touch();      // libri 979-8 gia' «non trovati»: casa editrice «Amazon (pubblicazione in proprio)»
 if (!settings.swiped) setTimeout(function () { var t = $('#edgeTab'); t.classList.add('nudge'); setTimeout(function () { t.classList.remove('nudge'); }, 3000); }, 1500);
 setTab('lib');
 updateBackupInfo();
