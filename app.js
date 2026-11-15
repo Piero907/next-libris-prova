@@ -4610,14 +4610,17 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
+var BUILD = '2026-11-15 21:26';                     // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): cosi' sa se ce n'e' una piu' nuova anche a parita' di versione
+function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD && j.build && j.build !== BUILD))); }
+function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
 function renderVersion() {
   $('#verNum').textContent = 'Versione ' + APP_VERSION.v;
-  $('#verDate').textContent = 'del ' + itLongDate(APP_VERSION.date);
+  $('#verDate').textContent = 'del ' + itLongDate(APP_VERSION.date) + (PROVA && BUILD ? ' · prova del ' + buildText(BUILD) : '');
   $('#verNote').textContent = 'Ultime novità: ' + APP_VERSION.note;
   var st = $('#verState'), up = $('#verUpdate');
-  if (latestVer && latestVer.v > APP_VERSION.v) {
-    st.textContent = 'È disponibile la versione ' + latestVer.v + ' del ' + itLongDate(latestVer.date) + '.';
+  if (verNewer(latestVer)) {
+    st.textContent = latestVer.v > APP_VERSION.v ? 'È disponibile la versione ' + latestVer.v + ' del ' + itLongDate(latestVer.date) + '.' : 'C\'è un aggiornamento della prova (del ' + buildText(latestVer.build) + ').';
     st.className = 'ver-state new'; up.hidden = false;
   } else if (latestVer) { st.textContent = '✓ È l\'ultima versione.'; st.className = 'ver-state ok'; up.hidden = true; }
   else if (navigator.onLine === false) { st.textContent = 'Senza rete: non posso controllare se ce n\'è una più nuova.'; st.className = 'ver-state'; up.hidden = true; }
@@ -4628,7 +4631,7 @@ function checkVersion() {
   if (navigator.onLine === false) { renderVersion(); return Promise.resolve(null); }
   if (verChecking) return verChecking;
   verChecking = fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-    if (j && j.v) latestVer = { v: +j.v, date: String(j.date || ''), note: String(j.note || '') };
+    if (j && j.v) latestVer = { v: +j.v, date: String(j.date || ''), note: String(j.note || ''), build: String(j.build || '') };
     return latestVer;
   }).catch(function () { return null; }).then(function (x) { verChecking = null; renderVersion(); return x; });
   return verChecking;
@@ -6208,6 +6211,7 @@ updateInstallUi();
 setTimeout(function () {
   checkVersion().then(function (j) {
     if (j && j.v > APP_VERSION.v) notice('È disponibile la versione ' + j.v + ' dell\'app (stai usando la ' + APP_VERSION.v + ').', 'Aggiorna adesso', updateNow);
+    else if (verNewer(j)) notice('C\'è un aggiornamento della copia di prova (del ' + buildText(j.build) + ').', 'Aggiorna adesso', updateNow);
   });
 }, 2500);
 confirmLearnedPublishers();
