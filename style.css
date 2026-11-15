@@ -1544,3 +1544,7 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .wn-list li{font-size:15px;line-height:1.45}
 .wn-list li::marker{color:var(--accent)}
 .wn-list code{font-size:.92em}
+/* «Aggiornato in questa versione»: finestra al centro dello schermo, non in basso */
+#wnSheet{align-items:center}
+#wnSheet .sheet-in{border-radius:20px;max-height:86vh;overflow:auto;margin:auto}
+#wnSheet .sheet-in::before{display:none}
