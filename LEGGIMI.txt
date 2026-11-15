@@ -611,6 +611,25 @@ non ne stai leggendo un altro, compare "Hai finito ... E adesso?" con un
 libro da leggere: "Inizio questo", "Un altro", "Tutti i suggerimenti";
 la X lo chiude per quel libro.
 
+DISPOSIZIONE DELLO SCHERMO
+--------------------------
+Opzioni > Aspetto > "Disposizione dello schermo" (si vede subito):
+- Classico: come prima (tasti grandi in alto, Scansiona, Foto e Digita
+  in basso).
+- A - Barra in basso: Libreria, Desideri, + (Scansiona, Foto, Digita,
+  Ce l'ho gia'?), Per te (Suggerimenti, trimestre, citazioni,
+  Statistiche, Backup) e Menu.
+- B - Leggera: come la classica, ma Statistiche ed Esporta stanno nel
+  menu e il testo d'aiuto in basso sparisce dopo i primi 10 libri.
+- C - Pulsante tondo: un + tondo in basso a destra apre Scansiona, Foto,
+  Digita e Ce l'ho gia'?; sotto la ricerca, scorciatoie da scorrere.
+- D - Tutto in basso: ricerca, Libreria/Desideri/Prestati e i tasti di
+  scansione stanno in basso, per usarla con una mano.
+In A, B, C e D gli avvisi in cima (prestiti, "Hai finito...", trimestre,
+installazione, sostieni) si vedono uno alla volta: "Il prossimo" passa
+al successivo. Per chi sviluppa: e' un modulo a parte (layout.js e
+layout.css); nella copia di prova si parte dalla A.
+
 IL TUO TRIMESTRE IN LIBRI (riepilogo ogni tre mesi)
 ---------------------------------------------------
 Nel primo mese di ogni trimestre, in cima all'elenco compare l'invito

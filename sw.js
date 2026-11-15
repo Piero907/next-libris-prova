@@ -5,7 +5,8 @@ const CACHE = (PROVA ? 'prova-' : '') + 'catalogo-libri-v94';
 const MINE = (k) => (PROVA ? k.startsWith('prova-') : !k.startsWith('prova-'));
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'lib.js', 'manifest.json',
   'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md',
-  'wrap.js', 'wrap.css'];   // modulo: riepilogo ogni tre mesi
+  'wrap.js', 'wrap.css',   // modulo: riepilogo ogni tre mesi
+  'layout.js', 'layout.css'];   // modulo: disposizione dello schermo
 
 self.addEventListener('install', (e) => {
   // un file mancante non deve impedire al service worker di partire (addAll fallirebbe per intero)

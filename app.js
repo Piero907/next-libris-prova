@@ -6227,7 +6227,10 @@ window.NL = {
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,
   name: function () { return settings.name || ''; }, goal: function () { return settings.goal || 0; },
-  closeDrawer: function () { closeDrawer(); }, refresh: function () { renderList(); updateSummary(); }
+  closeDrawer: function () { closeDrawer(); }, refresh: function () { renderList(); updateSummary(); },
+  icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
+  openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
+  updateStick: function () { updateStick(); }
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
 window.__app = { sugg: function () { return sugg; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
