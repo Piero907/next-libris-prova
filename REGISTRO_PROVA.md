@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.26 · 15/11/2026 23:55
+- «Presta, vendi o regala» si apre **senza il cursore su «A chi»**: la tastiera non salta fuori da sola, la apri toccando il campo quando serve.
+
 ## Prova 94.25 · 15/11/2026 23:52
 - **Scheda D**: la **descrizione** sta subito sotto la riga editore · anno · pagine, come testo semplice senza riquadro (se non c'è ancora, un link per cercarla).
 - Le **etichette-filtro** (genere, scaffale, autore, editore, serie) sono scese in fondo, sotto «Vedi tutti i libri di», prima di Presta e Cerca sul web.
