@@ -22,8 +22,6 @@
 .lay-opt .lay-o input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
 .lay-opt .lay-o b{display:block;font-size:15px}
 .lay-opt .lay-o small{display:block;font-size:13px;line-height:1.35;color:var(--muted);margin-top:2px}
-.lay-opt .lay-one{margin-top:12px}
-.lay-opt .lay-one[hidden]{display:none}
 
 /* A · barra in basso */
 html[data-layout="a"] .dock{display:none}

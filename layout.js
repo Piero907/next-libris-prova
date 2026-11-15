@@ -13,8 +13,8 @@ var LAYOUTS = [
   { k: 'classico', t: 'Classico', d: 'Tasti grandi in alto, Scansiona, Foto e Digita in basso.' },
   { k: 'a', t: 'A · Barra in basso', d: 'Libreria, Desideri, + per aggiungere, Per te e Menu sempre sotto il pollice.' }
 ];
-var cur = DEF, one = true;
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'classico' && LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; one = c0.one !== false; } catch (e) {}   // fuori dalle prove: sempre la A
+var cur = DEF, one = true;   // avvisi in cima sempre uno alla volta (l'opzione e' stata tolta il 16/11/2026)
+try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'classico' && LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) {}   // fuori dalle prove: sempre la A
 var root = document.documentElement;
 function svg(p, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
 var I = {
@@ -29,7 +29,7 @@ var I = {
   cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   next: '<path d="M5 6h14M5 12h9M5 18h6"/><path d="M17 15l3 3-3 3"/>'
 };
-function save() { NL.ls.set(LS, JSON.stringify({ v: cur, one: one })); }
+function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
 
 /* ---------- barra in basso (A), pulsante tondo (C), tasto menu nella barra di D ---------- */
 var built = false;
@@ -186,19 +186,6 @@ function apply() {
   paintNav(); notes(); sheetsClose();
   setTimeout(function () { try { NL.updateStick(); } catch (e) {} }, 0);
 }
-function paintOption(sec) {                        // in Opzioni › Aspetto resta solo «Avvisi in cima uno alla volta»
-  if (sec !== 'look') return;
-  var box = document.getElementById('layOneL');
-  if (!box) {
-    var fs = document.querySelector('#optSheet .sum-opts') || (document.querySelector('#optSheet input[name="viewDef"]') || { closest: function () { return null; } }).closest('fieldset');
-    if (!fs) return;
-    box = el('<label class="check lay-one" id="layOneL"><input type="checkbox" id="layOne"><span>Avvisi in cima uno alla volta<small>Prestiti, «Hai finito…», trimestre, installazione: se sono più di uno si scorrono col dito.</small></span></label>');
-    fs.parentNode.insertBefore(box, fs);
-    box.querySelector('input').addEventListener('change', function (e) { one = e.target.checked; save(); notes(); });
-  }
-  box.hidden = cur !== 'a';
-  $('#layOne').checked = one;
-}
 function loans0() {                        // nella A la riga «Prestati» serve solo se il riepilogo non li mostra gia' (toccandoli)
   var c = document.getElementById('cntLoan');
   root.classList.toggle('lay-loans0', !c || !(parseInt(c.textContent, 10) > 0) || NL.settings.sumLoan !== false);
@@ -211,7 +198,6 @@ function place() {
   MOVE.forEach(function (k) { var e = document.querySelector(k); if (e) ref.parentNode.insertBefore(e, ref); });
 }
 NL.on('list', function () { paintNav(); notes(); setTimeout(loans0, 0); });
-NL.on('options', paintOption);
 NL.on('reopen', function () { noteIdx = 0; notes(); });   // avvisi riaperti dal triangolino: si riparte dal primo
 apply();
 window.NLLayout = { get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: LAYOUTS };

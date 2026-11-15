@@ -1548,3 +1548,16 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 #wnSheet{align-items:center}
 #wnSheet .sheet-in{border-radius:20px;max-height:86vh;overflow:auto;margin:auto}
 #wnSheet .sheet-in::before{display:none}
+/* menu: «Impostazioni» raccoglie le voci delle impostazioni, aperte solo a richiesta (16/11/2026) */
+.dmenu.dset{margin-top:14px;border-top:1px solid var(--line);padding-top:6px}
+.dmenu .dset-t{gap:12px}
+.dmenu .dset-t > .dset-i{flex:0 0 36px;width:36px;height:36px;min-height:36px;align-self:center;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.dmenu .dset-t > .dset-i svg{width:20px;height:20px;display:block}
+.dmenu .dset-t > span:nth-child(2){flex:1 1 auto;min-width:0}
+.dmenu .dset-c{transition:transform .2s ease;display:inline-block}
+.dmenu .dset-t[aria-expanded="true"] .dset-c{transform:rotate(90deg)}
+.dmenu .dset-t[aria-expanded="true"] b{color:var(--accent)}
+.dsub{margin:2px 0 6px 18px;padding-left:12px;border-left:2px solid var(--accent-soft)}
+.dsub[hidden]{display:none}
+.dmenu .dopt small.dbk{margin-top:3px;color:var(--ink);opacity:.7}
+@media (prefers-reduced-motion:reduce){.dmenu .dset-c{transition:none}}

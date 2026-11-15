@@ -92,7 +92,7 @@ var S = {};                                  // stato di sessione per riga: st, 
 var settings = { gbKey: '', price: true, extra: true, lastBackup: 0, snooze: 0, view: 'grid', viewDef: 'grid', openAll: false, sbnUrl: '', loanSnooze: 0, look: 'nuovo', theme: 'light', pal: 'bosco', ft: 'literata', fb: 'plex' };
 var PALS = { inchiostro: ['#EDF0F5', '#10141D'], bordeaux: ['#F2EFEE', '#161112'], bosco: ['#EEF1EE', '#0F1513'] };
 var FONTS_T = ['literata', 'garamond', 'playfair', 'lora', 'merriweather', 'montserrat', 'roboto'], FONTS_B = ['plex', 'roboto', 'lato', 'atkinson', 'lora'];
-var openState = {};
+var openState = {}, autoOpened = {};
 function collapseCards() { if (!settings.openAll) openState = {}; if (cardPushed) { cardPushed = null; try { history.back(); } catch (e) {} } }   // quando si filtra l'elenco torna compatto   // schede aperte/chiuse in questa sessione (true/false); se manca vale la regola di isOpen
 var q = '', sortBy = 'recent', flt = '', tab = 'lib', readFlt = '', shFlt = '', genFlt = '', autFlt = '', autName = '', edFlt = '';   // shFlt, genFlt: chiave normalizzata, NONE = senza   // flt: '' | 'guess' | 'loan'; tab: 'lib' (Libreria) | 'wish' (Desideri)
 var tSave = null, toastTimer = null, scanning = false, offlineNoted = false;
@@ -555,7 +555,7 @@ async function doLookup(id) {
       if (rate && s.tries > waits.length) {
         s.st = 'error'; heardFail(id);
         s.err = settings.gbKey ? 'Google Libri ha raggiunto il limite di richieste della tua chiave. Riprova più tardi.'
-          : 'Google Libri rifiuta le richieste senza chiave (limite raggiunto). Soluzione stabile: inserisci la tua chiave gratuita in Menu › Opzioni › Ricerca dei libri. Intanto puoi premere Riprova.';
+          : 'Google Libri rifiuta le richieste senza chiave (limite raggiunto). Soluzione stabile: inserisci la tua chiave gratuita in Menu › Impostazioni › Ricerca dei libri. Intanto puoi premere Riprova.';
       } else {
         s.st = 'wait';
         s.err = (rate ? (settings.gbKey && !googleLeft(false) ? 'Ricerche di oggi su Google quasi finite (' + quota.g + ' su 1.000): riprovo con le altre banche dati tra ' + when + ' (Google riparte verso le 9 del mattino)' : 'Google Libri è al limite di richieste' + (settings.gbKey ? '' : ' (senza chiave)')) : (navigator.onLine === false ? 'Senza connessione' : 'Connessione debole')) + (rate && settings.gbKey && !googleLeft(false) ? '.' : ': riprovo da solo tra ' + when + '.');
@@ -1430,7 +1430,9 @@ function isOpen(b) {
   if (settings.openAll) return true;
   if (openState[b.id] != null) return openState[b.id];
   var st = (S[b.id] || {}).st, busy = st === 'queued' || st === 'reading' || st === 'lookup' || st === 'search';
-  if (!b.t && !busy) { openState[b.id] = true; return true; }
+  /* senza titolo («Non trovato»): si apre da sola una volta sola, appena aggiunta in questa sessione; mai tutte insieme
+     quando l'elenco si ridisegna (filtro tolto, cambio vista, riapertura dell'app). Piero, 16/11/2026 */
+  if (!b.t && !busy && S[b.id] && !autoOpened[b.id]) { autoOpened[b.id] = 1; openState[b.id] = true; return true; }
   return false;
 }
 /* libro arrivato da una condivisione: da chi, e da quale lista */
@@ -4659,6 +4661,7 @@ function openDrawer(t, reuse) {
   if (t === 'opt' || t === 'flt') setDrawerTab(t);
   else if (!drawerOpen) setDrawerTab('opt');          // dal bordo o dalla linguetta: il menu, non direttamente i filtri
   if (reuse) { try { history.replaceState({ drawer: 1 }, ''); drawerPushed = true; } catch (e) {} }
+  if (!drawerOpen && !reuse && typeof setsOpen === 'function') setsOpen(false);   // il Menu si apre con le impostazioni chiuse (tornando da una di esse restano aperte)
   if (!drawerOpen) { renderDrawer(); drawerReturn = document.activeElement; }
   showDrawerEls();
   void drawerEl.offsetWidth;                         // parte dalla posizione attuale
@@ -4687,7 +4690,20 @@ function closeDrawer(fromPop) {
 }
 $('#btnFilters').addEventListener('click', function () { drawerOpen ? closeDrawer() : openDrawer('flt'); });
 $('#edgeTab').addEventListener('click', function () { openDrawer('opt'); });
-$('#btnOpts').addEventListener('click', function () { openDrawer('opt'); });
+$('#btnOpts').addEventListener('click', function () { openDrawer('opt'); setsOpen(true); });   // l'ingranaggio porta dritto alle impostazioni
+/* menu: le impostazioni stanno tutte sotto «Impostazioni», chiuse finche' non le apri (Piero, 16/11/2026) */
+var setsShown = false;
+function setsOpen(on) {
+  setsShown = !!on;
+  $('#setList').hidden = !setsShown;
+  $('#goSettings').setAttribute('aria-expanded', setsShown ? 'true' : 'false');
+  $('#goSettings').classList.toggle('on', setsShown);
+}
+$('#goSettings').querySelector('.dset-i').innerHTML = icon('gear');
+$('#goSettings').addEventListener('click', function () {
+  setsOpen(!setsShown);
+  if (setsShown) setTimeout(function () { var l = $('#setList'); if (l.scrollIntoView) l.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30);
+});
 $('#goFilters').addEventListener('click', goFilters);
 $('#drawerBack').addEventListener('click', function () { if (drawerSub) history.back(); else setDrawerTab('opt'); });
 $('#goQuotes').addEventListener('click', function () { closeDrawer(); openAllQuotes(); });
@@ -4735,7 +4751,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 00:18", "n": "94.29", "note": "Pagina del libro e barra in basso diventano quelle dell'app"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 00:43", "n": "94.30", "note": "Menu riordinato"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5233,7 +5249,7 @@ function renderSvcShare() {
   $('#svcShareNone').hidden = has;
 }
 function openSvcShare() {
-  if (!settings.sbnUrl && !settings.gbKey) { toast('Non hai né chiave Google né worker da condividere: impostali in Opzioni › Ricerca dei libri.'); return; }
+  if (!settings.sbnUrl && !settings.gbKey) { toast('Non hai né chiave Google né worker da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
   $('#svcWhat').textContent = [settings.sbnUrl ? 'Worker SBN: ' + svcShort('sbn', settings.sbnUrl) : '', settings.gbKey ? 'Chiave Google: ' + svcShort('key', settings.gbKey) : ''].filter(Boolean).join(' · ');
   $('#svcSbnOn').checked = !!settings.sbnUrl; $('#svcSbnOn').disabled = !settings.sbnUrl;
   $('#svcKeyOn').checked = !!settings.gbKey; $('#svcKeyOn').disabled = !settings.gbKey;
@@ -5280,13 +5296,13 @@ $('#svcInUse').addEventListener('click', function () {
   if (x.sb) setSvc('sbn', x.sb);
   if (x.gk) setSvc('key', x.gk);
   closeSvcImport();
-  toast((x.sb && x.gk ? 'Worker e chiave in uso' : x.gk ? 'Chiave in uso' : 'Worker in uso') + '. Li trovi in Opzioni › Ricerca dei libri.', { label: 'Annulla', fn: function () { setSvc('sbn', before.sbn); setSvc('key', before.key); } });
+  toast((x.sb && x.gk ? 'Worker e chiave in uso' : x.gk ? 'Chiave in uso' : 'Worker in uso') + '. Li trovi in Menu › Impostazioni › Ricerca dei libri.', { label: 'Annulla', fn: function () { setSvc('sbn', before.sbn); setSvc('key', before.key); } });
 });
 $('#svcInLater').addEventListener('click', function () {
   var x = svcIn; if (!x) return;
   if (x.sb) remember('sbn', x.sb); if (x.gk) remember('key', x.gk);
   renderSvc(); closeSvcImport();
-  toast('Messi tra i salvati: li rimetti quando vuoi da Opzioni › Ricerca dei libri.');
+  toast('Messi tra i salvati: li rimetti quando vuoi da Menu › Impostazioni › Ricerca dei libri.');
 });
 $('#svcInNo').addEventListener('click', closeSvcImport);
 $('#svcShareBtn').addEventListener('click', openSvcShare);
@@ -5946,7 +5962,6 @@ $('#tabLib').addEventListener('click', function () { setTab('lib'); });
 $('#tabWish').addEventListener('click', function () { setTab('wish'); });
 $('#btnView').addEventListener('click', function () {
   gridRet = null;
-  if (settings.view === 'grid' && !settings.openAll) state.books.forEach(function (x) { if (!x.t && openState[x.id] == null) openState[x.id] = false; });   // dalle copertine all'elenco: le schede «non trovato» restano chiuse (Piero, 16/11/2026)
   setView(settings.view === 'grid' ? 'list' : 'grid'); renderList();
 });
 $('#btnCheck').addEventListener('click', function () { startScan('check'); });
@@ -6224,7 +6239,7 @@ var INST_STEPS = {
     note: 'In alternativa apri il link in Chrome: lì basta premere «Installa».', copy: true },
   desktop: { lead: 'Sul computer si installa da Chrome o Edge.',
     steps: ['Nella barra dell\'indirizzo, a destra, clicca l\'icona <b>Installa</b>.', 'Se non c\'è: menu <b>⋮</b> › <b>Trasmetti, salva e condividi</b> › <b>Installa pagina come app</b>.', 'Conferma con <b>Installa</b>.'],
-    note: 'Sul telefono è più comoda: apri Opzioni › Condividi l\'app e inquadra il QR code.' }
+    note: 'Sul telefono è più comoda: apri Menu › Impostazioni › Condivisione e inquadra il QR code.' }
 };
 var instPushed = false;
 function openInstallHelp() {
@@ -6256,7 +6271,7 @@ async function doInstall() {
   d.prompt();
   try { out = await d.userChoice; } catch (e) {}
   deferred = null;
-  if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Menu › Opzioni › App.');
+  if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Menu › Impostazioni › App.');
   updateInstallUi();
 }
 window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; updateInstallUi(); });
@@ -6268,7 +6283,7 @@ $('#btnInstall').addEventListener('click', doInstall);
 $('#instGo').addEventListener('click', doInstall);
 $('#instLater').addEventListener('click', function () {
   settings.instSnooze = Date.now(); saveSettings(); updateInstallUi();
-  toast('Quando vuoi: Menu › Opzioni › App.', { label: 'Annulla', fn: function () { settings.instSnooze = 0; saveSettings(); updateInstallUi(); } });
+  toast('Quando vuoi: Menu › Impostazioni › App.', { label: 'Annulla', fn: function () { settings.instSnooze = 0; saveSettings(); updateInstallUi(); } });
 });
 $('#instOk').addEventListener('click', function () { closeInstallHelp(); });
 $('#instSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeInstallHelp(); });

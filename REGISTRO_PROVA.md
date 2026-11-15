@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.30 · 16/11/2026 00:43
+- **Menu riordinato**: in alto Filtri, Suggerimenti e Statistiche; poi «La tua libreria» (Sistema l'elenco, Backup con la data dell'ultimo); tutte le impostazioni sotto la voce «Impostazioni», che si apre quando la tocchi (l'ingranaggio in alto la apre già); Sostieni e versione restano in fondo.
+- **Le schede «Non trovato» non si aprono più tutte insieme** (togliendo un filtro, passando da Copertine a Elenco, riaprendo l'app): si apre da sola solo quella appena aggiunta.
+- Tolta l'opzione «Avvisi in cima uno alla volta»: ora è sempre così.
+
 ## Prova 94.29 · 16/11/2026 00:18
 - **Pagina del libro e barra in basso diventano quelle dell'app**: tolte le scelte «Scheda aperta del libro» e «Disposizione dello schermo» da Opzioni › Aspetto (resta «Avvisi in cima uno alla volta»).
 - Nei Desideri la scheda aperta ha anche il preferito e «Presta, vendi o regala».

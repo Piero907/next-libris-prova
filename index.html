@@ -681,7 +681,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <h3 class="opt-h3">Chiave Google e worker</h3>
       <p class="hint">Puoi mandarli a un familiare o a un amico che usa Next Libris: la sua ricerca diventa completa come la tua.</p>
       <button class="btn" id="svcShareBtn" type="button">Condividi chiave e worker</button>
-      <p class="hint" id="svcShareNone" hidden>Non ne hai ancora: si impostano in Opzioni › Ricerca dei libri.</p>
+      <p class="hint" id="svcShareNone" hidden>Non ne hai ancora: si impostano in Menu › Impostazioni › Ricerca dei libri.</p>
       <h3 class="opt-h3">Fai conoscere l'app</h3>
       <p class="share-lead">Fai inquadrare il codice con la fotocamera del telefono, oppure manda il link.</p>
       <figure class="qr-box">
@@ -715,7 +715,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       </div>
       <ul class="lens-list" id="lensList"></ul>
       <p class="hint" id="verApp"></p>
-      <p class="hint">I libri sono salvati solo su questo telefono: fai ogni tanto un backup (Menu › Opzioni › Backup ed esportazione) e tienilo su Drive o nella mail.</p>
+      <p class="hint">I libri sono salvati solo su questo telefono: fai ogni tanto un backup (Menu › Backup ed esportazione) e tienilo su Drive o nella mail.</p>
     </section>
   </div>
 </div>
@@ -748,7 +748,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <button class="btn" type="button" id="priceSkip">Salta</button>
     </div>
     <button class="link quiet pa-undo" type="button" id="priceUndo">Non volevo aggiungerlo: togli il libro</button>
-    <p class="hint">Puoi non farti più chiedere il prezzo: Menu › Opzioni › Schede e prezzo.</p>
+    <p class="hint">Puoi non farti più chiedere il prezzo: Menu › Impostazioni › Schede e prezzo.</p>
   </div>
 </div>
 
@@ -768,18 +768,24 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
         <button type="button" class="dopt dgo dq-all" id="goQuotes" hidden><span><b>Tutte le citazioni</b><small id="goQTxt"></small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, valore, pagine e letture</small></span><span class="n" aria-hidden="true">›</span></button>
       </div>
-      <h3>Impostazioni</h3>
+      <h3>La tua libreria</h3>
       <div class="dlist dmenu">
+      <button type="button" class="dopt" data-sec="fix"><span><b>Sistema l'elenco</b><small>Doppioni, case editrici, copertine</small></span><span class="n" aria-hidden="true">›</span></button>
+      <button type="button" class="dopt" data-sec="export"><span><b>Backup ed esportazione</b><small>Backup, Excel, PDF</small><small class="dbk" id="optBackupHint"></small></span><span class="n" aria-hidden="true">›</span></button>
+      </div>
+      <div class="dlist dmenu dset">
+        <button type="button" class="dopt dset-t" id="goSettings" aria-expanded="false" aria-controls="setList"><span class="dset-i" aria-hidden="true"></span><span><b>Impostazioni</b><small>Aspetto, ricerca dei libri, schede, condivisione, app</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
+        <div class="dsub" id="setList" hidden>
         <button type="button" class="dopt" data-sec="look"><span><b>Aspetto</b><small>Tema chiaro o scuro, colori, caratteri, suoni</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="search"><span><b>Ricerca dei libri</b><small>Chiave Google, catalogo SBN, richieste di oggi</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="cards"><span><b>Schede e prezzo</b><small>Campi in più, schede aperte, prezzo</small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Niente pubblicità, niente abbonamenti. Se ti piace, offrimi una birra!</small></span><span class="n" aria-hidden="true">♥</span></button>
-        <button type="button" class="dopt" data-sec="fix"><span><b>Sistema l'elenco</b><small>Doppioni, case editrici, copertine</small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt" data-sec="export"><span><b>Backup ed esportazione</b><small>Backup, Excel, PDF</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="share"><span><b>Condivisione</b><small>Il tuo nome; link e QR code dell'app</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="app"><span><b>App</b><small>Installazione e versione</small></span><span class="n" aria-hidden="true">›</span></button>
+        </div>
       </div>
-      <p class="dhint" id="optBackupHint"></p>
+      <div class="dlist dmenu">
+        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Niente pubblicità, niente abbonamenti. Se ti piace, offrimi una birra!</small></span><span class="n" aria-hidden="true">♥</span></button>
+      </div>
       <div class="ver" id="verBox">
         <p class="ver-h"><b id="verNum"></b> <span id="verDate"></span></p>
         <p class="ver-note" id="verNote"></p>
