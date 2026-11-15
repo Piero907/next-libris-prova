@@ -699,13 +699,13 @@ html[data-look="nuovo"] .scan-kinds button[aria-checked="true"]{color:#18202F}
 .sw i{flex:1 1 0}
 .sw-nuovo i:nth-child(1){background:#EDF0F5}.sw-nuovo i:nth-child(2){background:#2C47A3}.sw-nuovo i:nth-child(3){background:#A77A1E}
 .sw-classico i:nth-child(1){background:#EDF1EE}.sw-classico i:nth-child(2){background:#1B6A4F}.sw-classico i:nth-child(3){background:#FFEFCF}
-.seg-theme{display:flex;width:100%}
-.seg-theme label{flex:1 1 0;display:flex;cursor:pointer}
-.seg-theme input{position:absolute;opacity:0;pointer-events:none}
-.seg-theme span{flex:1;display:grid;place-items:center;min-height:44px;padding:6px 8px;border-right:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:14.5px;font-weight:600}
-.seg-theme label:last-child span{border-right:0}
-.seg-theme input:checked+span{background:var(--accent);color:var(--accent-ink)}
-.seg-theme input:focus-visible+span{outline:2px solid var(--accent);outline-offset:-3px}
+.seg-theme,.seg-view{display:flex;width:100%}
+.seg-theme label,.seg-view label{flex:1 1 0;display:flex;cursor:pointer}
+.seg-theme input,.seg-view input{position:absolute;opacity:0;pointer-events:none}
+.seg-theme span,.seg-view span{flex:1;display:grid;place-items:center;min-height:44px;padding:6px 8px;border-right:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:14.5px;font-weight:600}
+.seg-theme label:last-child span,.seg-view label:last-child span{border-right:0}
+.seg-theme input:checked+span,.seg-view input:checked+span{background:var(--accent);color:var(--accent-ink)}
+.seg-theme input:focus-visible+span,.seg-view input:focus-visible+span{outline:2px solid var(--accent);outline-offset:-3px}
 /* la riga in cima non deve allargare la scheda oltre lo schermo: le etichette lunghe vanno a capo */
 @media (max-width:879px){ .row.has-top{grid-template-columns:minmax(0,1fr)} }
 .card-top .flags{min-width:0}
