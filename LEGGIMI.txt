@@ -653,19 +653,23 @@ Opzioni > Aspetto > "Disposizione dello schermo" (si vede subito):
 Per chi sviluppa: e' un modulo a parte (layout.js e layout.css); nella
 copia di prova si parte dalla A.
 
-SCHEDA APERTA DEL LIBRO (da provare)
-------------------------------------
-Opzioni > Aspetto > "Scheda aperta del libro":
-- Attuale: tutti i campi uno sotto l'altro.
-- A - Ordinata: gli stessi campi piu' stretti; i pulsanti in alto sono
-  icone rotonde in una riga.
-- B - A sezioni: titolo e autore in alto; sotto, sezioni da aprire
-  (Dati del libro, Lettura, In libreria, Altro) con un riassunto quando
-  sono chiuse.
-- C - A linguette: Dati, Lettura, In libreria, Altro, una alla volta.
-- D - Pagina del libro: si legge come una pagina (copertina grande, dati
-  in una riga, scaffale, serie, lettura, note); "Modifica" apre i campi,
-  "Fatto" torna alla pagina.
+SCHEDA APERTA DEL LIBRO
+-----------------------
+Opzioni > Aspetto > "Scheda aperta del libro": Classica (tutti i campi
+da modificare) oppure "Pagina del libro" (nella copia di prova e' gia'
+scelta). La pagina del libro:
+- in alto, solo icone su una riga: preferito, Desideri, condividi, la
+  matita (Modifica: apre i campi; toccala di nuovo, o "Fatto", per
+  tornare alla pagina), la X per eliminare;
+- copertina (toccala per ingrandirla; senza copertina la cerca o la
+  fotografi), titolo, autore (toccalo: chi e'), editore, anno, pagine,
+  prezzo;
+- la descrizione in tre righe: la freccetta la apre tutta, con la fonte
+  e "Non e' questo libro";
+- Da leggere / In lettura / Letto, le stelle e la data, da cambiare
+  direttamente;
+- note, citazioni, le etichette-filtro (genere, scaffale, autore,
+  editore, serie) e in fondo "Presta, vendi o regala" e "Cerca sul web".
 
 RIEPILOGO IN ALTO
 -----------------

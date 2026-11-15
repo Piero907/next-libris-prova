@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.27 · 16/11/2026 00:01
+- **Pagina del libro**: la **matita (Modifica)** sta in alto come icona, sulla stessa riga delle altre; toccata di nuovo torna alla pagina.
+- **Descrizione in tre righe** con una freccetta per aprirla tutta; fonte e «Non è questo libro» si vedono solo aperta.
+- **Copertina toccabile**: si ingrandisce come nella scheda classica; senza copertina la cerca online o la fotografi.
+- Restano solo «Classica» e «Pagina del libro» (già scelta); le prove A, B e C sono tolte.
+
 ## Prova 94.26 · 15/11/2026 23:55
 - «Presta, vendi o regala» si apre **senza il cursore su «A chi»**: la tastiera non salta fuori da sola, la apri toccando il campo quando serve.
 
