@@ -107,7 +107,7 @@ function paintNav() {
 /* ---------- avvisi in cima: uno alla volta ---------- */
 var NOTES = ['#notice', '#nxBox', '#wrapAsk', '#donAsk', '#instCard', '#donRow'], noteIdx = 0, mo = null;
 function notes() {
-  var all = NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean);
+  var all = NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean).concat(Array.prototype.slice.call(document.querySelectorAll('.lay-note')));   // .lay-note: avvisi aggiunti da altri moduli
   all.forEach(function (x) { x.classList.remove('lay-later'); x.removeAttribute('data-noswipe'); x.removeAttribute('data-lay-swipe'); x.style.transform = ''; x.style.opacity = ''; x.style.transition = ''; });
   var more = $('#layMore');
   if (cur === 'classico' || !one) { if (more) more.hidden = true; return; }
