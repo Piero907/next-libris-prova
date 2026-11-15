@@ -1,7 +1,7 @@
 /* Next Libris: funziona anche senza rete. Le ricerche (Google Libri, Open Library) passano sempre dalla rete. */
 // la copia di prova (…/next-libris-prova/) sta allo stesso indirizzo di base: copie offline con un prefisso suo, e ognuna cancella solo le proprie
 const PROVA = /\/next-libris-prova\//.test(self.registration.scope);
-const CACHE = (PROVA ? 'prova-' : '') + 'catalogo-libri-v93';
+const CACHE = (PROVA ? 'prova-' : '') + 'catalogo-libri-v94';
 const MINE = (k) => (PROVA ? k.startsWith('prova-') : !k.startsWith('prova-'));
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'lib.js', 'manifest.json',
   'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md'];

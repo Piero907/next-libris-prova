@@ -3,6 +3,12 @@
 Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in Opzioni › App.
 L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
 
+## Versione 94 · 15/11/2026
+- **Suggerimenti** (menu › Suggerimenti), con due schede:
+  - **Cosa leggere dopo:** sceglie tra i tuoi libri «Da leggere» e dice sempre perché: il seguito di una serie che stai leggendo, un autore o un genere che leggi spesso o hai votato bene, un libro che aspetta da tanto, un libro breve dopo uno lungo. Non propone i libri prestati né quelli che non hai più. «Inizio questo» lo segna «In lettura» (si può annullare), «Un altro» passa al successivo. Funziona anche senza internet.
+  - **Da scoprire:** libri che non hai e non sono nei Desideri: altri libri dei tuoi autori, novità dei tuoi generi preferiti, volumi che mancano alle tue serie, ognuno col suo perché. «+ Desideri» o «No, grazie» (non torna più). Solo libri in italiano, oppure in tutte le lingue con la casella apposita. Cerca da sola una volta a settimana (si può spegnere) e avvisa se trova qualcosa di nuovo.
+- **Riquadro in cima all'elenco:** quando hai finito un libro negli ultimi 3 giorni e non ne stai leggendo un altro, compare «Hai finito «…». E adesso?» con un libro da iniziare. La × lo chiude per quel libro.
+
 ## Versione 93 · 15/11/2026
 - **Pronta la copia di prova:** nasce una seconda copia dell'app, per provare le novità prima di portarle qui. Sta a un indirizzo suo, ha l'etichetta PROVA e **dati tutti suoi**: libri, foto, impostazioni e copia offline non si mescolano mai con quelli di questa versione. In questa versione non cambia nulla di visibile.
 
