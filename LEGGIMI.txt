@@ -611,6 +611,27 @@ non ne stai leggendo un altro, compare "Hai finito ... E adesso?" con un
 libro da leggere: "Inizio questo", "Un altro", "Tutti i suggerimenti";
 la X lo chiude per quel libro.
 
+IL TUO TRIMESTRE IN LIBRI (riepilogo ogni tre mesi)
+---------------------------------------------------
+Nel primo mese di ogni trimestre, in cima all'elenco compare l'invito
+"La tua estate in libri: e' pronto" (inverno, primavera, estate, autunno),
+se nei tre mesi prima hai letto almeno un libro o ne hai aggiunti almeno
+3. "Guarda" apre le schermate a tutto schermo, come le storie: tocca a
+destra per andare avanti, a sinistra per tornare indietro.
+- quanti libri hai letto, le pagine (e quante al giorno), il mese piu'
+  letto, il confronto con i tre mesi prima, l'obiettivo dell'anno;
+- i tuoi generi in percentuale e l'autore del trimestre;
+- il libro piu' lungo e quello con il voto piu' alto;
+- i libri nuovi in libreria (con il valore), Desideri, prestiti,
+  citazioni (con l'ultima salvata);
+- il riassunto, con "Condividi l'immagine" (un'immagine da mandare o
+  salvare).
+Sulla prima schermata "Prima" e "Dopo" passano agli altri trimestri. Si
+apre anche dal menu ("Il tuo trimestre in libri"). Contano come letti
+solo i libri segnati "Letto" con la data. Si spegne in Opzioni >
+Aspetto > "Riepilogo ogni tre mesi" (acceso di predefinito).
+Per chi sviluppa: e' un modulo a parte (wrap.js e wrap.css).
+
 SELEZIONARE PIU' LIBRI
 ----------------------
 - Tieni premuto un libro (nell'elenco o nelle Copertine): entri nella

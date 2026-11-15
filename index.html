@@ -39,6 +39,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 @media (prefers-reduced-motion:reduce){html[data-splash] #splash{transition:none}}
 </style>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="wrap.css"><!-- modulo: riepilogo ogni tre mesi -->
 </head>
 <body>
 <div id="splash" aria-hidden="true"><img src="icons/next-libris-192.png" alt="" width="168" height="168"><b>Next Libris</b><span id="splashWho"></span></div>
@@ -948,6 +949,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 <script src="vendor/tesseract.min.js" defer></script>
 <script src="lib.js" defer></script>
 <script src="app.js" defer></script>
+<script src="wrap.js" defer></script><!-- modulo: riepilogo ogni tre mesi -->
 <div id="printView" aria-hidden="true"></div>
 </body>
 </html>
