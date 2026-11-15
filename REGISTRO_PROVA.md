@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.20 · 15/11/2026 23:20
+- **Scheda aperta del libro: quattro aspetti da provare** in Opzioni › Aspetto: A ordinata (icone, campi più stretti), B a sezioni, C a linguette, D pagina del libro con «Modifica». «Attuale» resta come prima.
+
 ## Prova 94.19 · 15/11/2026 23:14
 - Il file del backup ha anche **l'ora** nel nome: «Libreria di Piero - Next Libris - 2026-11-15 22.58», così più backup dello stesso giorno non si confondono.
 

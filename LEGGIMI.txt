@@ -651,6 +651,20 @@ Opzioni > Aspetto > "Disposizione dello schermo" (si vede subito):
 Per chi sviluppa: e' un modulo a parte (layout.js e layout.css); nella
 copia di prova si parte dalla A.
 
+SCHEDA APERTA DEL LIBRO (da provare)
+------------------------------------
+Opzioni > Aspetto > "Scheda aperta del libro":
+- Attuale: tutti i campi uno sotto l'altro.
+- A - Ordinata: gli stessi campi piu' stretti; i pulsanti in alto sono
+  icone rotonde in una riga.
+- B - A sezioni: titolo e autore in alto; sotto, sezioni da aprire
+  (Dati del libro, Lettura, In libreria, Altro) con un riassunto quando
+  sono chiuse.
+- C - A linguette: Dati, Lettura, In libreria, Altro, una alla volta.
+- D - Pagina del libro: si legge come una pagina (copertina grande, dati
+  in una riga, scaffale, serie, lettura, note); "Modifica" apre i campi,
+  "Fatto" torna alla pagina.
+
 RIEPILOGO IN ALTO
 -----------------
 Se chiudi con la X un avviso che vale ancora (prestiti da piu' di un

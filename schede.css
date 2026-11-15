@@ -1,0 +1,66 @@
+/* Next Libris · modulo «Aspetto della scheda aperta» (si toglie insieme a schede.js). Con «attuale», o senza modulo, nulla cambia. */
+#optCard .lay-o{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+#optCard .lay-o input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
+#optCard .lay-o b{display:block;font-size:15px}
+#optCard .lay-o small{display:block;font-size:13px;line-height:1.35;color:var(--muted);margin-top:2px}
+
+/* A, B, C, D: azioni in alto solo icone, rotonde, in una riga; campi piu' stretti */
+html[data-card]:not([data-card="attuale"]) .row.open .acts-main{flex-wrap:nowrap;gap:6px}
+html[data-card]:not([data-card="attuale"]) .row.open .acts-main .ico.act{width:42px;min-width:42px;height:42px;min-height:42px;padding:0;justify-content:center;border-radius:50%}
+html[data-card]:not([data-card="attuale"]) .row.open .acts-main .ico.act .al{display:none}
+html[data-card]:not([data-card="attuale"]) .row.open .acts-main .ico.act.danger{margin-left:auto}
+html[data-card]:not([data-card="attuale"]) .row.open .card-top{margin-bottom:4px}
+html[data-card]:not([data-card="attuale"]) .row.open .f textarea,html[data-card]:not([data-card="attuale"]) .row.open .f input{padding:3px 4px}
+html[data-card]:not([data-card="attuale"]) .row.open .lbl{font-size:10.5px;margin-bottom:0}
+html[data-card]:not([data-card="attuale"]) .row.open .meta,html[data-card]:not([data-card="attuale"]) .row.open .more,html[data-card]:not([data-card="attuale"]) .row.open .ser{row-gap:4px;margin-top:2px}
+html[data-card]:not([data-card="attuale"]) .row.open .serbox{padding:8px 10px;font-size:13.5px}
+html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:34px;padding:3px 10px;font-size:13px}
+
+/* A · ordinata: Note su tutta la riga, ISBN accanto ai dati */
+html[data-card="a"] .row.open .more{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 72px}
+html[data-card="a"] .row.open .more .f-n{grid-column:1 / -1}
+html[data-card="a"] .row.open .ser{grid-template-columns:minmax(0,1fr) 64px 64px}
+
+/* griglia dei campi spostati (B, C) */
+.cv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 10px}
+.cv-grid .f-e,.cv-grid .f-n,.cv-grid .f-sh,.cv-grid .ser{grid-column:span 3}
+.cv-grid .f-gen,.cv-grid .f-i{grid-column:span 2}
+.cv-grid .ser{display:grid;grid-template-columns:minmax(0,1fr) 64px 64px;gap:8px}
+
+/* B · sezioni da aprire */
+.cv-secs{display:grid;gap:8px;margin:10px 0 6px}
+.cv-sec{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.cv-sec>summary{display:flex;align-items:baseline;gap:10px;min-height:46px;padding:12px 14px;cursor:pointer;list-style:none;font-weight:600}
+.cv-sec>summary::-webkit-details-marker{display:none}
+.cv-sec>summary::after{content:'';margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);flex:none;align-self:center}
+.cv-sec[open]>summary::after{transform:rotate(-135deg)}
+.cv-sum{font-weight:400;font-size:13.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cv-sec[open] .cv-sum{display:none}
+.cv-body{padding:0 14px 12px;display:grid;gap:10px}
+
+/* C · linguette */
+.cv-tabs{display:flex;gap:4px;margin:12px 0 0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.cv-tabs::-webkit-scrollbar{display:none}
+.cv-tab{flex:none;min-height:44px;padding:8px 14px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);font:600 15px var(--font-body);cursor:pointer}
+.cv-tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.cv-panes{padding:12px 0 4px}
+.cv-pane{display:grid;gap:10px}
+.cv-pane[hidden]{display:none}
+
+/* D · pagina del libro */
+.row.cv-view .head,.row.cv-view .meta,.row.cv-view .more,.row.cv-view .ser,.row.cv-view .read,.row.cv-view .foot .f-i,.row.cv-view .serbox,.row.cv-view .facets,.row.cv-view .links{display:none}
+.cv-page{display:grid;gap:10px;margin:8px 0 12px}
+.cv-hero{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:start}
+.cv-hero img,.cv-ph{width:96px;height:142px;object-fit:cover;border-radius:4px 8px 8px 4px;box-shadow:0 4px 12px #0002;display:block}
+.cv-ph{display:grid;place-items:center;background:hsl(var(--h) 32% 40%);color:#f3e3b8;font:700 40px var(--font-display)}
+.cv-ht h3{margin:2px 0 4px;font:700 22px/1.2 var(--font-display);text-wrap:balance}
+.cv-au{margin:0;font-size:16px;color:var(--ink)}
+.cv-meta{margin:6px 0 0;font-size:14px;line-height:1.4;color:var(--muted)}
+.cv-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.cv-chips span{padding:4px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:13.5px}
+.cv-read{margin:0;font-size:15px}
+.cv-st{color:var(--brass,#A3741C);letter-spacing:1px}
+.cv-st i{font-style:normal;opacity:.25}
+.cv-note{margin:0;padding:8px 12px;border-left:3px solid var(--line);font-size:14.5px;color:var(--ink)}
+.cv-editb{justify-self:start;gap:6px}
+.cv-done{display:block;margin:6px 0 10px auto}
