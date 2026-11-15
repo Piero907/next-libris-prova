@@ -212,6 +212,16 @@ COME SI USA
   * Prezzo di copertina = quello stampato sul libro, non quanto l'hai pagato.
   * Quando salvi il prezzo suona un "fatto" (due note che salgono),
     diverso dal bip della scansione.
+  * I suoni, uno per ogni cosa:
+    - bip acuto e breve: codice letto, libro aggiunto;
+    - bip basso e breve: gia' in elenco (doppione);
+    - due bip acuti: "Ce l'ho gia'?" -> si', ce l'hai;
+    - due note basse che scendono, un po' ruvide (con una vibrazione
+      doppia): "non trovato" - il codice e' stato letto ma titolo e
+      autore non si trovano (o la foto non porta a nessun libro);
+    - due note morbide che salgono: "fatto", prezzo salvato.
+    Il "non trovato" suona solo per i libri appena scansionati, scritti
+    a mano o fotografati, non per quelli cercati in sottofondo.
   * Suoni: si spengono e accendono in Opzioni > Aspetto ("Suoni") oppure
     al volo dalla fotocamera, con il pulsante 🔊/🔇 in alto a destra. La
     vibrazione resta comunque.

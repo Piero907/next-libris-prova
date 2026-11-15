@@ -345,6 +345,29 @@ function chime() {
     chime.n = (chime.n || 0) + 1;
   } catch (e) {}
 }
+// suono di «non trovato»: due note basse che scendono, un po' ruvide. Si sente quando il codice e' stato letto ma
+// le banche dati non danno titolo e autore (o la foto non porta a nessun libro), solo per i libri appena aggiunti a mano.
+function failSound() {
+  if (settings.sound === false) return;
+  try {
+    beep.ctx = beep.ctx || new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = beep.ctx, t0 = ctx.currentTime + 0.01, f = ctx.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 1400; f.connect(ctx.destination);
+    [[392, 0], [262, 0.17]].forEach(function (n) {
+      var o = ctx.createOscillator(), g = ctx.createGain(), t = t0 + n[1];
+      o.type = 'square'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.01); g.gain.setValueAtTime(0.05, t + 0.12); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      o.connect(g); g.connect(f); o.start(t); o.stop(t + 0.22);
+    });
+    failSound.n = (failSound.n || 0) + 1;
+  } catch (e) {}
+}
+function heardFail(id) {                           // il libro appena aggiunto (scansione, ISBN scritto, foto) non e' stato trovato
+  var s = S[id];
+  if (!s || !s.heard) return;
+  delete s.heard;
+  failSound(); vibrate([90, 70, 90]);
+}
 function paintSound() {
   var on = settings.sound !== false, b = $('#scanSound');
   if (b) { b.textContent = on ? '🔊' : '🔇'; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.setAttribute('aria-label', on ? 'Suoni accesi: tocca per spegnerli' : 'Suoni spenti: tocca per accenderli'); }
@@ -505,10 +528,12 @@ async function doLookup(id) {
       delete s.st;
       coverPool(function () { return probeCover(id); });
       queueDesc(id);
+      delete s.heard;
     } else {
       b.nf = true;
       guessEditor(b);
       delete s.st;
+      heardFail(id);
     }
     touch();
   } catch (e) {
@@ -522,7 +547,7 @@ async function doLookup(id) {
       var when = sec < 60 ? sec + ' secondi' : sec === 90 ? 'un minuto e mezzo' : Math.round(sec / 60) + (sec === 60 ? ' minuto' : ' minuti');
       s.retry = 'lookup';
       if (rate && s.tries > waits.length) {
-        s.st = 'error';
+        s.st = 'error'; heardFail(id);
         s.err = settings.gbKey ? 'Google Libri ha raggiunto il limite di richieste della tua chiave. Riprova più tardi.'
           : 'Google Libri rifiuta le richieste senza chiave (limite raggiunto). Soluzione stabile: inserisci la tua chiave gratuita in Menu › Opzioni › Ricerca dei libri. Intanto puoi premere Riprova.';
       } else {
@@ -775,7 +800,7 @@ async function processPhoto(id, file) {
     var qs = L.buildQueries(lines);
     s.lines = lines; s.price = price;
     s.msg = 'Cerco il libro nelle banche dati…'; s.pct = 88;
-    if (!qs.length) { s.st = 'error'; s.err = 'Non riesco a leggere il testo della copertina.'; s.retry = null; refreshRow(id); autoManual(id); return; }
+    if (!qs.length) { s.st = 'error'; s.err = 'Non riesco a leggere il testo della copertina.'; s.retry = null; if (flow.id === id) { failSound(); vibrate([90, 70, 90]); } refreshRow(id); autoManual(id); return; }
     s.st = 'search'; refreshRow(id);
     var out = await Promise.allSettled(qs.map(function (qq) { return L.searchText(qq, lookupOpts()); }));
     if (stop()) return;
@@ -788,7 +813,7 @@ async function processPhoto(id, file) {
       refreshRow(id); return;
     }
     var ranked = L.rankCandidates(all, lines);
-    if (!ranked.length) { s.st = 'nf'; refreshRow(id); updateSummary(); autoManual(id); return; }   // nessun libro trovato: subito titolo e autore a mano
+    if (!ranked.length) { s.st = 'nf'; if (flow.id === id) { failSound(); vibrate([90, 70, 90]); } refreshRow(id); updateSummary(); autoManual(id); return; }   // nessun libro trovato: suona e subito titolo e autore a mano
     if (L.strongMatch(ranked)) { applyCandidate(id, ranked[0]); return; }
     s.st = 'choose'; s.cands = ranked.slice(0, 6);
     refreshRow(id); updateSummary();
@@ -1207,6 +1232,7 @@ function onScanned(code) {
     return;
   }
   beep(true); vibrate(50);
+  if (res.book) (S[res.book.id] || (S[res.book.id] = {})).heard = true;   // se poi non si trova, suona «non trovato»
   scanCtx.count++; scanCtx.added++;
   setScanCount(scanCtx.count + (scanCtx.count === 1 ? ' aggiunto' : ' aggiunti'));
   scanMsg('Aggiunto ' + code + '. Cerco il titolo…');
@@ -3780,6 +3806,7 @@ function submitIsbn() {
     var res = addIsbn(code);
     if (res.dup) { dupes++; if (!res.dup.w && tab === 'lib') dupIds.push(res.dup.id); } else if (res.moved) moved++; else { added++; newBook = res.book; }
   });
+  if (r.valid.length === 1 && newBook) (S[newBook.id] || (S[newBook.id] = {})).heard = true;   // un ISBN scritto a mano: se non si trova, suona
   $('#isbnSheet').hidden = true;
   renderList(); updateSummary();
   if (added === 1 && r.valid.length === 1 && newBook && settings.price) { askPrice(newBook.id); return; }
@@ -4619,7 +4646,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 21:58", "n": "94.12", "note": "Dalle copertine alla scheda e ritorno"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 22:39", "n": "94.13", "note": "Suono «non trovato»"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -6282,6 +6309,6 @@ window.NL = {
   updateStick: function () { updateStick(); }
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
-window.__app = { sugg: function () { return sugg; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
+window.__app = { sugg: function () { return sugg; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
   get scanning() { return scanning; }, setScanMode: function (m) { scanMode = m; }, setScanKind: setScanKind, get scanKind() { return scanKind; } };
 })();
