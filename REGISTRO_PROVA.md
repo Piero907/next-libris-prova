@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.25 · 15/11/2026 23:52
+- **Scheda D**: la **descrizione** sta subito sotto la riga editore · anno · pagine, come testo semplice senza riquadro (se non c'è ancora, un link per cercarla).
+- Le **etichette-filtro** (genere, scaffale, autore, editore, serie) sono scese in fondo, sotto «Vedi tutti i libri di», prima di Presta e Cerca sul web.
+
 ## Prova 94.24 · 15/11/2026 23:49
 - **Scheda D**: in alto, tutte su una riga, le icone preferito, Desideri, condividi ed elimina; **Presta, vendi o regala** e **Cerca sul web** stanno in fondo alla scheda, con la scritta.
 

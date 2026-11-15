@@ -67,3 +67,19 @@ html[data-card="a"] .row.open .ser{grid-template-columns:minmax(0,1fr) 64px 64px
 .cv-note{margin:0;padding:8px 12px;border-left:3px solid var(--line);font-size:14.5px;color:var(--ink)}
 .cv-editb{justify-self:start;gap:6px}
 .cv-done{display:block;margin:6px 0 10px auto}
+
+/* D: descrizione sobria sotto i dati; etichette-filtro in fondo */
+.cv-desc{border:0!important;background:none!important;padding:0!important;margin:0!important;box-shadow:none!important}
+.cv-desc[open]>summary{display:none}
+.cv-desc>summary{min-height:0;padding:0;font-size:14px;color:var(--accent);text-decoration:underline;text-underline-offset:3px;background:none}
+.cv-desc>summary::after{display:none}
+.cv-desc .desc-b{padding:0}
+.cv-desc .desc-t{font-size:14.5px;line-height:1.5;color:var(--ink)}
+.cv-desc .desc-t p{margin:0 0 6px}
+.cv-desc .desc-src{font-size:12px;color:var(--muted);margin:2px 0 0}
+.cv-tags{margin:12px 0 0;display:grid;gap:6px}
+.cv-tags-h{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.cv-tags-h svg{width:15px;height:15px}
+.cv-desc .desc-src,.cv-desc .desc-acts{display:inline}
+.cv-desc .desc-acts .link{font-size:12px;color:var(--muted);margin-left:6px}
+.cv-desc .link[data-act="descmore"]{font-size:13.5px}

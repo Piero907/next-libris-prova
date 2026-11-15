@@ -133,6 +133,23 @@ function doD(card, id) {
   v.querySelector('.cv-editb').addEventListener('click', function (e) { e.stopPropagation(); editing[id] = true; NL.refreshRow(id); });
   head.parentNode.insertBefore(v, head);
   card.classList.add('cv-view');
+  /* descrizione: sobria, subito sotto la riga «editore · anno · pagine», senza riquadro; se non c'e' ancora, un link per cercarla */
+  var ds = q(card, 'details.desc:not(.quotes)');
+  if (ds) {
+    if (b.dsn && !b.ds) ds.remove();
+    else {
+      ds.classList.add('cv-desc');
+      v.insertBefore(ds, q(v, '.cv-hero').nextSibling);
+      if (b.ds && !ds.open) ds.open = true;      // l'app la segna aperta (e la tiene cosi')
+    }
+  }
+  /* etichette-filtro: in fondo, prima di Presta e Cerca sul web */
+  if (chips.parentNode) {
+    var tags = document.createElement('div'); tags.className = 'cv-tags';
+    tags.innerHTML = '<span class="cv-tags-h">' + NL.icon('filt') + 'Vedi tutti i libri di</span>';
+    tags.appendChild(chips);
+    card.insertBefore(tags, q(card, '.cv-acts2'));
+  }
 }
 function dActs(card) {                            // in alto, solo icone: preferito, desideri, condividi, elimina; in fondo, con la scritta: presta, cerca sul web
   var main = q(card, '.acts-main'); if (!main) return;
