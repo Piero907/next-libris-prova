@@ -96,7 +96,7 @@ function doC(card, id) {
 }
 
 /* D · pagina del libro: si legge; «Modifica» mostra i campi.
-   In alto restano solo le icone piu' chiare (preferito, condividi, elimina); le altre azioni stanno sotto, con la scritta. */
+   In alto solo icone (preferito, desideri, condividi, elimina), tutte su una riga; Presta e Cerca sul web in fondo, con la scritta. */
 function doD(card, id) {
   var b = NL.get(id), head = q(card, '.head');
   if (!b || !head) return;
@@ -134,16 +134,16 @@ function doD(card, id) {
   head.parentNode.insertBefore(v, head);
   card.classList.add('cv-view');
 }
-function dActs(card) {                            // in alto: preferito, condividi, elimina; sotto con la scritta: presta, desideri, cerca sul web
+function dActs(card) {                            // in alto, solo icone: preferito, desideri, condividi, elimina; in fondo, con la scritta: presta, cerca sul web
   var main = q(card, '.acts-main'); if (!main) return;
-  var share = q(card, '.foot .tail [data-act="share"]'), del = q(main, '[data-act="del"]');
+  var share = q(card, '.foot .tail [data-act="share"]'), del = q(main, '[data-act="del"]'), move = q(main, '[data-act="towish"], [data-act="tolib"]'), fav = q(main, '[data-act="fav"]');
+  if (move) main.insertBefore(move, fav ? fav.nextSibling : main.firstChild);
   if (share) main.insertBefore(share, del || null);
-  var low = ['loan', 'towish', 'tolib', 'websearch'].map(function (a) { return q(main, '[data-act="' + a + '"]'); }).filter(Boolean);
+  var low = ['loan', 'websearch'].map(function (a) { return q(main, '[data-act="' + a + '"]'); }).filter(Boolean);
   if (!low.length) return;
   var row = document.createElement('div'); row.className = 'cv-acts2';
   low.forEach(function (x) { row.appendChild(x); });
-  var top = q(card, '.card-top');
-  top.parentNode.insertBefore(row, top.nextSibling);
+  card.appendChild(row);                          // in fondo alla scheda
 }
 function addDone(card, id) {
   var top = q(card, '.head'); if (!top) return;

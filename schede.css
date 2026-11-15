@@ -48,7 +48,7 @@ html[data-card="a"] .row.open .ser{grid-template-columns:minmax(0,1fr) 64px 64px
 .cv-pane[hidden]{display:none}
 
 /* D · pagina del libro */
-.row.cv-view .head,.row.cv-view .meta,.row.cv-view .more,.row.cv-view .ser,.row.cv-view .foot .f-i,.row.cv-view .serbox,.row.cv-view .facets,.row.cv-view .links{display:none}
+.row.cv-view .head,.row.cv-view .meta,.row.cv-view .more,.row.cv-view .ser,.row.cv-view .foot,.row.cv-view .serbox,.row.cv-view .facets,.row.cv-view .links{display:none}
 .cv-page{display:grid;gap:10px;margin:8px 0 12px}
 .cv-hero{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:start}
 .cv-hero img,.cv-ph{width:96px;height:142px;object-fit:cover;border-radius:4px 8px 8px 4px;box-shadow:0 4px 12px #0002;display:block}
@@ -62,7 +62,7 @@ html[data-card="a"] .row.open .ser{grid-template-columns:minmax(0,1fr) 64px 64px
 .cv-readbox{margin:2px 0 0}
 .cv-readbox>.lbl{display:none}
 /* D: azioni con la scritta sotto la riga delle icone */
-.cv-acts2{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.cv-acts2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px;padding-top:12px;border-top:1px solid var(--line)}
 .cv-acts2 .ico.act{min-height:40px}
 .cv-note{margin:0;padding:8px 12px;border-left:3px solid var(--line);font-size:14.5px;color:var(--ink)}
 .cv-editb{justify-self:start;gap:6px}

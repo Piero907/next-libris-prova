@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.24 · 15/11/2026 23:49
+- **Scheda D**: in alto, tutte su una riga, le icone preferito, Desideri, condividi ed elimina; **Presta, vendi o regala** e **Cerca sul web** stanno in fondo alla scheda, con la scritta.
+
 ## Prova 94.23 · 15/11/2026 23:43
 - La finestra **«Aggiornato in questa versione»** compare al centro dello schermo, non più in basso.
 
