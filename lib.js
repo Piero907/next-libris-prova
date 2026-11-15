@@ -1049,20 +1049,93 @@
   /* ---------- novita' di un autore ---------- */
   function titleKey(t) { return norm(str(t).split(/\s*[:.(\[]\s*/)[0]).replace(/[^a-z0-9]+/g, ' ').trim(); }
   /* dai risultati di Google (i piu' recenti di un autore) tiene i libri usciti da minYear che non hai gia' */
-  function pickNews(json, author, own, minYear, maxYear) {
+  function pickNews(json, author, own, minYear, maxYear, lang) {
     var aw = words(author), seen = {}, out = [];
+    if (lang == null) lang = 'it';                     // '' = tutte le lingue
     var titles = (own && own.titles) || {}, isbns = (own && own.isbns) || {}, hide = (own && own.hide) || {};
     parseGoogle(json).forEach(function (c) {
       var y = parseInt(c.y, 10) || 0, k = titleKey(c.t);
       if (!k || y < minYear || (maxYear && y > maxYear)) return;
       var ca = words(c.a);
-      if (!aw.length || !aw.every(function (w) { return ca.indexOf(w) >= 0; })) return;
-      if (c.lang && c.lang !== 'it') return;
+      if (author !== '' && (!aw.length || !aw.every(function (w) { return ca.indexOf(w) >= 0; }))) return;
+      if (lang && c.lang && c.lang !== lang) return;
       if (titles[k] || hide[k] || c.isbns.some(function (i) { return isbns[i]; })) return;
       if (seen[k]) { if (!seen[k].img && c.img) seen[k].img = c.img; return; }
       out.push(seen[k] = { k: k, t: c.t, a: c.a, e: c.e, y: c.y, i: c.i, img: c.img, by: author });
     });
     return out.sort(function (x, y) { return y.y - x.y; });
+  }
+  /* ---------- cosa leggere dopo: i libri «da leggere», in ordine, ognuno col suo perché ----------
+     Serie (il seguito di quello letto), autori e generi letti spesso o votati bene, attesa in libreria,
+     un libro breve dopo uno lungo. Esclusi i prestati e quelli non più in libreria. */
+  function authorList(a) { return str(a).split(/\s*[,;]\s*/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 1; }); }
+  function pagesNum(b) { var n = parseInt(b && b.pg, 10); return n > 0 && n < 20000 ? n : 0; }
+  function stars(n) { return '★'.repeat(Math.max(1, Math.min(5, Math.round(n)))); }
+  function nextReads(books, now) {
+    now = now || Date.now();
+    var all = (books || []).filter(function (b) { return b && !b.w; });
+    var read = all.filter(function (b) { return b.rs === 'ok'; });
+    var last = read.filter(function (b) { return b.rd; }).sort(function (x, y) { return x.rd < y.rd ? 1 : x.rd > y.rd ? -1 : (y.ts || 0) - (x.ts || 0); })[0] || null;
+    var au = {}, ge = {}, ser = {};
+    function add(m, k, name, rt) { var s = m[k] || (m[k] = { name: name, n: 0, r: 0, rn: 0 }); s.n++; if (rt) { s.r += rt; s.rn++; } }
+    read.forEach(function (b) {
+      authorList(b.a).forEach(function (n) { add(au, norm(n), n, b.rt); });
+      var g = norm(str(b.gen).trim()); if (g) add(ge, g, str(b.gen).trim(), b.rt);
+    });
+    all.forEach(function (b) {
+      var k = serKey(b.se); if (!k) return;
+      var s = ser[k] || (ser[k] = { name: str(b.se).trim(), read: 0, todo: [] }), n = parseInt(b.sn, 10) || 0;
+      if ((b.rs === 'ok' || b.rs === 'in') && n > s.read) { s.read = n; s.readT = b.t; }
+      if (b.rs === 'da' && n && !b.p && !b.xs) s.todo.push(n);
+    });
+    var cands = all.filter(function (b) { return b.rs === 'da' && !b.p && !b.xs && (b.t || b.a); });
+    var lastPg = last ? pagesNum(last) : 0;
+    return cands.map(function (c) {
+      var sc = 0, why = [];
+      function say(w, txt) { why.push({ w: w, txt: txt }); }
+      var sk = serKey(c.se), s = sk && ser[sk], cn = parseInt(c.sn, 10) || 0;
+      if (s && cn) {
+        var lowest = Math.min.apply(null, s.todo.length ? s.todo : [cn]);
+        if (s.read && cn === s.read + 1) { sc += 100; say(100, 'È il seguito: vol. ' + cn + ' di «' + s.name + '», hai letto il ' + s.read + '.'); }
+        else if (s.read && cn > s.read && cn === lowest) { sc += 60; say(60, 'Il prossimo che hai della serie «' + s.name + '».'); }
+        else if (!s.read && cn === lowest) { sc += 12; say(12, 'Il primo che hai della serie «' + s.name + '».'); }
+        if (cn > lowest) sc -= 45;                       // prima i volumi precedenti
+      }
+      var bestA = null;
+      authorList(c.a).forEach(function (n) { var x = au[norm(n)]; if (x && (!bestA || x.n + (x.rn ? x.r / x.rn : 0) > bestA.n + (bestA.rn ? bestA.r / bestA.rn : 0))) bestA = x; });
+      if (bestA) {
+        var avg = bestA.rn ? bestA.r / bestA.rn : 0;
+        if (avg >= 4) { var pa = 25 + 5 * Math.min(bestA.n, 3); sc += pa; say(pa, 'Di ' + bestA.name + ': ai suoi libri hai dato ' + stars(avg) + (bestA.rn > 1 ? ' in media' : '') + '.'); }
+        else if (bestA.n >= 2) { var pb = 8 * Math.min(bestA.n, 4); sc += pb; say(pb, 'Di ' + bestA.name + ': ne hai già letti ' + bestA.n + '.'); }
+        else if (!bestA.rn || avg >= 3) { sc += 5; say(5, 'Di ' + bestA.name + ', che hai già letto.'); }
+        else sc -= 5;
+      }
+      var g = ge[norm(str(c.gen).trim())];
+      if (g && g.n >= 2) {
+        var ga = g.rn ? g.r / g.rn : 0, pg = 5 * Math.min(g.n, 5) + (ga >= 4 ? 10 : 0);
+        sc += pg; say(pg, 'Genere che leggi spesso: ' + g.name + '.');
+      }
+      if (c.ts > 946684800000) {                         // aggiunto dopo il 2000: una data vera
+        var days = (now - c.ts) / 864e5, pw = Math.min(25, Math.max(0, days / 30));
+        sc += pw;
+        var yrs = Math.floor(days / 365);
+        if (yrs >= 1) say(pw, yrs === 1 ? 'Aspetta in libreria da più di un anno.' : 'Aspetta in libreria da ' + yrs + ' anni.');
+      }
+      var cp = pagesNum(c);
+      if (lastPg >= 450 && cp && cp <= 250) { sc += 20; say(20, 'È breve (' + cp + ' pagine): una pausa dopo le ' + lastPg + ' di «' + str(last.t) + '».'); }
+      if (!why.length) say(0, 'È tra i tuoi libri da leggere.');
+      return { id: c.id, score: Math.round(sc * 10) / 10, why: why.sort(function (x, y) { return y.w - x.w; }).map(function (x) { return x.txt; }) };
+    }).sort(function (x, y) { return y.score - x.score; });
+  }
+  /* il genere com'e' nell'app («Gialli», «Storia»...) -> la parola che usa Google Libri per cercarlo */
+  function genreSubject(gen) {
+    var g = str(gen).trim(), lg = g.toLowerCase();
+    if (!g) return '';
+    var more = { 'gialli': 'mystery', 'giallo': 'mystery', 'thriller': 'thrillers', 'noir': 'noir', 'fantascienza': 'science fiction', 'fantasy': 'fantasy',
+      'romanzi': 'fiction', 'romanzo': 'fiction', 'horror': 'horror', 'rosa': 'romance', 'romanzi rosa': 'romance', 'classici': 'classics', 'storici': 'historical fiction', 'romanzi storici': 'historical fiction' };
+    if (more[lg]) return more[lg];
+    for (var k in GENRE_IT) if (GENRE_IT[k].toLowerCase() === lg) return k;
+    return g;
   }
   /* ---------- testo di una pagina letta da foto: righe riunite in paragrafi ---------- */
   function ocrParagraph(text, max) {
@@ -1091,6 +1164,6 @@
     csvCell: csvCell, buildCSV: buildCSV, buildTSV: buildTSV, rowsFor: rowsFor, colsFor: colsFor, itDate: itDate,
     genreIt: genreIt, crc32: crc32, zipStore: zipStore, buildXLSX: buildXLSX, publisherGroups: publisherGroups, pubTokens: pubTokens,
     computeStats: computeStats, agoText: agoText, coverCandidates: coverCandidates, googleVolumeId: googleVolumeId, bestGoogleImage: bestGoogleImage, getJson: getJson,
-    parseSbn: parseSbn, sbnUrl: sbnUrl, deweyGenre: deweyGenre, dupGroups: dupGroups, analyzeDups: analyzeDups, mergeBooks: mergeBooks, serKey: serKey, seriesInfo: seriesInfo, titleKey: titleKey, pickNews: pickNews, ocrParagraph: ocrParagraph, cleanDesc: cleanDesc, guessLang: guessLang, pickDesc: pickDesc, olDesc: olDesc, DESC_MAX: DESC_MAX, READ_LABEL: READ_LABEL, GONE_LABEL: GONE_LABEL
+    parseSbn: parseSbn, sbnUrl: sbnUrl, deweyGenre: deweyGenre, dupGroups: dupGroups, analyzeDups: analyzeDups, mergeBooks: mergeBooks, serKey: serKey, seriesInfo: seriesInfo, titleKey: titleKey, pickNews: pickNews, nextReads: nextReads, genreSubject: genreSubject, authorList: authorList, ocrParagraph: ocrParagraph, cleanDesc: cleanDesc, guessLang: guessLang, pickDesc: pickDesc, olDesc: olDesc, DESC_MAX: DESC_MAX, READ_LABEL: READ_LABEL, GONE_LABEL: GONE_LABEL
   };
 });

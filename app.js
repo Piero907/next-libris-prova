@@ -268,6 +268,9 @@ function loadAll() {
     settings.instSnooze = Number(s.instSnooze) || 0;
     settings.goal = Math.max(0, Math.min(999, parseInt(s.goal, 10) || 0));          // obiettivo di lettura
     settings.newsAuto = s.newsAuto !== false;                                       // novita' degli autori: controllo automatico
+    settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
+    settings.suggLang = s.suggLang === 'all' ? 'all' : 'it';                        // «Da scoprire»: solo italiano o tutte le lingue
+    settings.nxSeen = L.str(s.nxSeen).slice(0, 40);                                 // riquadro «Cosa leggere dopo» chiuso per questo libro finito
     settings.selTip = s.selTip ? 1 : 0;
     settings.sound = s.sound !== false;                                             // suoni: bip della scansione e «fatto» (accesi di predefinito)
     settings.camNative = s.camNative === true;                                      // foto con la fotocamera del telefono (flash del telefono)
@@ -3022,6 +3025,194 @@ function autoNews() {
     if (fresh.length && $('#newsSheet').hidden) toast(fresh.length === 1 ? 'È uscito un libro di ' + fresh[0].by + ' che non hai.' : fresh.length + ' novità dei tuoi autori.', { label: 'Vedi', fn: openNews });
   }, function () {});
 }
+/* ---- Suggerimenti: «Cosa leggere dopo» (dai tuoi «da leggere», senza rete) e «Da scoprire» (libri che non hai:
+   altri dei tuoi autori, novità dei tuoi generi, volumi che mancano alle tue serie). Da scoprire cerca da solo una volta a settimana. ---- */
+var LS_SUGG = 'catalogo-libri-sugg', SUGG_EVERY = 7 * 864e5, SUGG_RETRY = 864e5;
+var sugg = { at: 0, tried: 0, items: [], hide: [], busy: false }, sgTab = 'next', nxIdx = 0, nxBoxIdx = 0;
+function loadSugg() { try { var n = JSON.parse(ls.get(LS_SUGG) || '{}'); sugg.at = Number(n.at) || 0; sugg.tried = Number(n.tried) || 0; sugg.items = Array.isArray(n.items) ? n.items.filter(function (x) { return x && x.t && x.k; }).slice(0, 60) : []; sugg.hide = Array.isArray(n.hide) ? n.hide.map(L.str).slice(-400) : []; } catch (e) {} }
+function saveSugg() { ls.set(LS_SUGG, JSON.stringify({ at: sugg.at, tried: sugg.tried, items: sugg.items, hide: sugg.hide })); }
+function nextList() { return L.nextReads(state.books, Date.now()); }
+function nxCardHTML(r, small) {
+  var b = get(r.id); if (!b) return '';
+  var img = bigImg(b), why = small ? r.why.slice(0, 1) : r.why.slice(0, 3);
+  return '<div class="nx-card" data-id="' + b.id + '">' + (img ? '<img src="' + esc(img) + '" alt="" referrerpolicy="no-referrer">' :
+      '<span class="nimg ph" style="--h:' + hue(b.t + b.a + b.i) + '" aria-hidden="true"></span>') +
+    '<div class="nt"><b>' + esc(b.t || 'Senza titolo') + '</b><span>' + esc([b.a, b.pg ? b.pg + ' pagine' : ''].filter(Boolean).join(' · ')) + '</span>' +
+    '<ul class="nx-why">' + why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div></div>';
+}
+function renderNext() {
+  var list = nextList(), card = $('#sgNextCard');
+  if (!list.length) {
+    var inRead = state.books.filter(function (b) { return !b.w && b.rs === 'in'; }).length;
+    $('#sgNextMsg').textContent = 'Non hai libri segnati «da leggere»' + (inRead ? ' (ne stai leggendo ' + (inRead === 1 ? 'uno' : inRead) + ')' : '') + '. Guarda in «Da scoprire» qualcosa di nuovo.';
+    card.innerHTML = ''; return;
+  }
+  nxIdx = ((nxIdx % list.length) + list.length) % list.length;
+  $('#sgNextMsg').textContent = list.length === 1 ? 'Hai un solo libro da leggere:' : 'Tra i tuoi ' + list.length + ' libri da leggere ti propongo questo (' + (nxIdx + 1) + ' di ' + list.length + '):';
+  card.innerHTML = nxCardHTML(list[nxIdx]) + '<div class="row-btns nx-btns"><button class="btn primary" type="button" data-act="nxstart" data-id="' + list[nxIdx].id + '">Inizio questo</button>' +
+    (list.length > 1 ? '<button class="btn" type="button" data-act="nxother">Un altro</button>' : '') + '</div>';
+}
+function startReading(id, after) {
+  var b = get(id); if (!b) return;
+  var was = b.rs;
+  b.rs = 'in'; touch(); renderList(); updateSummary();
+  toast('Buona lettura! «' + (b.t || 'Senza titolo') + '» è in lettura.', { label: 'Annulla', fn: function () { b.rs = was; touch(); renderList(); updateSummary(); if (!$('#suggSheet').hidden) renderSugg(); } });
+  if (after) after();
+}
+/* --- Da scoprire --- */
+function suggAuthors() {
+  var m = {};
+  state.books.forEach(function (b) { if (b.w || b.g.indexOf('a') >= 0) return; authorsOf(b).forEach(function (n) { var k = L.norm(n); var x = m[k] || (m[k] = { name: n, n: 0, r: 0 }); x.n++; if (b.rt >= 4) x.r++; }); });
+  return Object.keys(m).map(function (k) { return m[k]; }).filter(function (x) { return x.n >= 2 && !/^(aa\.? ?vv\.?|autori vari|anonimo)$/i.test(x.name); })
+    .sort(function (x, y) { return (y.n + 2 * y.r) - (x.n + 2 * x.r) || coll.compare(x.name, y.name); }).slice(0, 4);
+}
+function suggGenres() {
+  var m = {};
+  state.books.forEach(function (b) { if (b.w) return; var g = L.str(b.gen).trim(); if (!g) return; var k = L.norm(g); (m[k] || (m[k] = { name: g, n: 0 })).n++; });
+  return Object.keys(m).map(function (k) { return m[k]; }).filter(function (x) { return x.n >= 3; }).sort(function (x, y) { return y.n - x.n; }).slice(0, 2);
+}
+function suggSeries() {                       // volumi che mancano alle tue serie: si sa gia' quali sono, senza cercare
+  var m = L.seriesInfo(state.books), out = [];
+  Object.keys(m).forEach(function (k) {
+    var s = m[k]; if (!s.n || !s.toAdd.length) return;
+    s.toAdd.slice(0, 2).forEach(function (n) {
+      out.push({ k: 'se:' + k + ':' + n, t: s.name + ', vol. ' + n, a: s.author, se: s.name, sn: String(n), sq: s.total ? String(s.total) : '',
+        why: 'Manca alla serie «' + s.name + '»: ne hai ' + s.n + (s.total ? ' su ' + s.total : '') + '.' });
+    });
+  });
+  return out.slice(0, 8);
+}
+function suggFresh() {
+  var own = newsOwn(), hide = {};
+  sugg.hide.forEach(function (k) { hide[k] = 1; });
+  var net = sugg.items.filter(function (x) { return !own.titles[x.k] && !own.hide[x.k] && !hide[x.k] && !(x.i && own.isbns[x.i]); });
+  return suggSeries().filter(function (x) { return !hide[x.k]; }).concat(net);
+}
+function suggUrl(q, newest) {
+  var lang = settings.suggLang === 'all' ? '' : '&langRestrict=it';
+  return 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(q) + (newest ? '&orderBy=newest' : '') + lang +
+    '&printType=books&maxResults=20&fields=items(id,volumeInfo(title,subtitle,authors,publisher,publishedDate,language,industryIdentifiers,imageLinks))' +
+    (settings.gbKey ? '&key=' + encodeURIComponent(settings.gbKey) : '');
+}
+async function findSugg() {
+  if (sugg.busy) return null;
+  var authors = suggAuthors(), genres = suggGenres(), y = new Date().getFullYear(), own = newsOwn(), found = [], seen = {}, errs = 0, done = 0;
+  var lang = settings.suggLang === 'all' ? '' : 'it', jobs = [];
+  authors.forEach(function (a) { jobs.push({ q: 'inauthor:"' + a.name.replace(/"/g, '') + '"', by: a.name, min: 0, max: 0, n: 4,
+    why: 'Di ' + a.name + (a.r ? ', che ti piace: ' + (a.r === 1 ? 'un suo libro' : a.r + ' suoi libri') + ' con 4 stelle o più.' : ': ne hai ' + a.n + '.') }); });
+  genres.forEach(function (g) { jobs.push({ q: 'subject:"' + L.genreSubject(g.name).replace(/"/g, '') + '"', by: '', min: y - 2, max: y + 1, n: 4, newest: true,
+    why: 'Uscito da poco, nel genere che hai di più: ' + g.name + ' (' + g.n + ' libri).' }); });
+  if (!jobs.length) return [];
+  sugg.busy = true; sugg.tried = Date.now(); saveSugg();
+  try {
+    for (var i = 0; i < jobs.length; i++) {
+      var j = jobs[i];
+      if (!googleLeft(true)) break;
+      try {
+        var json = await L.getJson(apiFetch, suggUrl(j.q, j.newest), { waits: [900], timeout: 9000 });
+        var picked = L.pickNews(json, j.by, own, j.min, j.max, lang);
+        picked.filter(function (x) { return !seen[x.k]; }).slice(0, j.n).forEach(function (x) { seen[x.k] = 1; x.why = j.why; delete x.by; found.push(x); });
+        done++;
+      } catch (e) { errs++; if (errs >= 2 && !done) break; }
+      if (!$('#suggSheet').hidden && sgTab === 'disc') $('#sgDiscMsg').textContent = 'Cerco… ' + (i + 1) + ' di ' + jobs.length;
+    }
+  } finally { sugg.busy = false; }
+  if (!done) { saveSugg(); throw { net: true }; }
+  sugg.items = found.slice(0, 60); sugg.at = Date.now(); saveSugg();
+  return found;
+}
+function renderDisc(note) {
+  var items = suggFresh(), can = suggAuthors().length || suggGenres().length;
+  $('#sgDiscMsg').textContent = note || (sugg.busy ? 'Cerco…' : items.length ? 'Libri che non hai, ognuno col suo perché.' + (sugg.at ? ' Ultima ricerca: ' + L.agoText(sugg.at) + '.' : '') :
+    !can ? 'Aggiungi qualche libro con autore e genere: cerco altri libri dei tuoi autori e novità dei tuoi generi.' :
+    sugg.at ? 'Per ora niente di nuovo che non hai già. Ultima ricerca: ' + L.agoText(sugg.at) + '.' : '');
+  $('#sgList').innerHTML = items.map(function (x) {
+    return '<li data-k="' + esc(x.k) + '">' + (x.img ? '<img src="' + esc(x.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="nimg" aria-hidden="true"></span>') +
+      '<div class="nt"><b>' + esc(x.t) + '</b><span>' + esc([x.a, x.e, x.y].filter(Boolean).join(' · ')) + '</span><p class="sg-why">' + esc(x.why || '') + '</p>' +
+      '<div class="desc-acts"><button type="button" class="link" data-act="sgwish">+ Desideri</button><button type="button" class="link quiet" data-act="sghide">No, grazie</button></div></div></li>';
+  }).join('');
+  $('#sgAgain').disabled = sugg.busy || !can;
+}
+async function runSugg() {
+  if (navigator.onLine === false) { renderDisc('Sei offline. Riprova quando c\'è connessione.'); return; }
+  if (!googleLeft(true)) { renderDisc('Le ricerche di Google per oggi le tengo per i libri nuovi: riprova domani.'); return; }
+  $('#sgAgain').disabled = true; $('#sgDiscMsg').textContent = 'Cerco…';
+  try { await findSugg(); renderDisc(); }
+  catch (e) { renderDisc('Non sono riuscito a cercare (connessione o limite di Google' + (settings.gbKey ? '' : ': senza chiave capita spesso') + '). Riprova più tardi.'); }
+}
+function suggPick(k, wish) {
+  var x = suggFresh().find(function (n) { return n.k === k; });
+  if (!x) return;
+  if (wish) {
+    var w = blankBook({ t: x.t, a: x.a || '', e: x.e || '', y: x.y || '', i: x.i || '', img: /^https:\/\//.test(x.img || '') ? x.img : '', se: x.se || '', sn: x.sn || '', sq: x.sq || '', w: true, rs: '' });
+    state.books.push(w); touch(); renderList(); updateSummary();
+    toast('Nei Desideri: ' + x.t, { label: 'Annulla', fn: function () { state.books = state.books.filter(function (b) { return b.id !== w.id; }); touch(); renderList(); updateSummary(); if (!$('#suggSheet').hidden) renderDisc(); } });
+  } else { sugg.hide.push(k); saveSugg(); }
+  renderDisc();
+}
+function autoSugg() {
+  var now = Date.now();
+  if (settings.suggAuto === false || navigator.onLine === false || now - sugg.at < SUGG_EVERY || now - sugg.tried < SUGG_RETRY || !(suggAuthors().length || suggGenres().length) || !googleLeft(true)) return;
+  var before = {}; suggFresh().forEach(function (x) { before[x.k] = 1; });
+  findSugg().then(function () {
+    var fresh = suggFresh().filter(function (x) { return !before[x.k] && !/^se:/.test(x.k); });
+    if (fresh.length && $('#suggSheet').hidden) toast(fresh.length === 1 ? 'Un libro nuovo da scoprire.' : fresh.length + ' libri nuovi da scoprire.', { label: 'Vedi', fn: function () { openSugg('disc'); } });
+  }, function () {});
+}
+/* --- finestra --- */
+function setSgTab(t) {
+  sgTab = t === 'disc' ? 'disc' : 'next';
+  $('#sgTabNext').setAttribute('aria-pressed', sgTab === 'next' ? 'true' : 'false'); $('#sgTabNext').setAttribute('aria-selected', sgTab === 'next' ? 'true' : 'false');
+  $('#sgTabDisc').setAttribute('aria-pressed', sgTab === 'disc' ? 'true' : 'false'); $('#sgTabDisc').setAttribute('aria-selected', sgTab === 'disc' ? 'true' : 'false');
+  $('#sgNext').hidden = sgTab !== 'next'; $('#sgDisc').hidden = sgTab !== 'disc'; $('#sgAgain').hidden = sgTab !== 'disc';
+  renderSugg();
+  if (sgTab === 'disc' && !sugg.at && !sugg.busy && (suggAuthors().length || suggGenres().length)) runSugg();
+}
+function renderSugg() { if (sgTab === 'disc') renderDisc(); else renderNext(); }
+function openSugg(t) {
+  $('#sgAuto').checked = settings.suggAuto !== false;
+  $('#sgLang').checked = settings.suggLang === 'all';
+  $('#suggSheet').hidden = false;
+  setSgTab(t || 'next');
+}
+function closeSugg() { $('#suggSheet').hidden = true; }
+$('#goSugg').addEventListener('click', function () { closeDrawer(); openSugg('next'); });
+$('#sgTabNext').addEventListener('click', function () { setSgTab('next'); });
+$('#sgTabDisc').addEventListener('click', function () { setSgTab('disc'); });
+$('#sgClose').addEventListener('click', closeSugg);
+$('#sgAgain').addEventListener('click', runSugg);
+$('#sgAuto').addEventListener('change', function (e) { settings.suggAuto = e.target.checked; saveSettings(); });
+$('#sgLang').addEventListener('change', function (e) { settings.suggLang = e.target.checked ? 'all' : 'it'; saveSettings(); sugg.items = []; sugg.at = 0; saveSugg(); renderDisc(); runSugg(); });
+$('#suggSheet').addEventListener('click', function (e) {
+  if (e.target === e.currentTarget) { closeSugg(); return; }
+  var b = e.target.closest('[data-act]'); if (!b) return;
+  var act = b.dataset.act;
+  if (act === 'nxother') { nxIdx++; renderNext(); }
+  else if (act === 'nxstart') startReading(b.dataset.id, function () { nxIdx = 0; renderNext(); });
+  else if (act === 'sgwish' || act === 'sghide') { var li = b.closest('li[data-k]'); if (li) suggPick(li.dataset.k, act === 'sgwish'); }
+});
+/* --- riquadro in cima all'elenco: hai appena finito un libro e non ne stai leggendo un altro --- */
+function nxJustRead() {
+  var lim = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+  var last = state.books.filter(function (b) { return !b.w && b.rs === 'ok' && b.rd && b.rd >= lim; }).sort(function (x, y) { return x.rd < y.rd ? 1 : x.rd > y.rd ? -1 : 0; })[0];
+  return last || null;
+}
+function nxBoxPaint() {
+  var box = $('#nxBox'); if (!box) return;
+  var last = tab === 'lib' && !q && !activeCount() ? nxJustRead() : null;
+  var list = last && last.id !== settings.nxSeen && !state.books.some(function (b) { return !b.w && b.rs === 'in'; }) ? nextList() : [];
+  box.hidden = !list.length;
+  if (!list.length) return;
+  nxBoxIdx = ((nxBoxIdx % list.length) + list.length) % list.length;
+  $('#nxBoxH').textContent = 'Hai finito «' + (last.t || 'un libro') + '». E adesso?';
+  $('#nxBoxCard').innerHTML = nxCardHTML(list[nxBoxIdx], true);
+  $('#nxBoxGo').dataset.id = list[nxBoxIdx].id;
+  $('#nxBoxNext').hidden = list.length < 2;
+}
+$('#nxBoxGo').addEventListener('click', function (e) { startReading(e.currentTarget.dataset.id); });
+$('#nxBoxNext').addEventListener('click', function () { nxBoxIdx++; nxBoxPaint(); });
+$('#nxBoxAll').addEventListener('click', function () { nxIdx = nxBoxIdx; openSugg('next'); });
+$('#nxBoxX').addEventListener('click', function () { var l = nxJustRead(); settings.nxSeen = l ? l.id : ''; saveSettings(); nxBoxPaint(); });
 $('#btnNews').addEventListener('click', openNews);
 $('#newsClose').addEventListener('click', function () { $('#newsSheet').hidden = true; });
 $('#newsAgain').addEventListener('click', runNews);
@@ -3356,7 +3547,7 @@ function renderList() {
   clearTimeout(tGrid);
   setTimeout(updateStick, 0);
   if (scanning) return;
-  donPaint();
+  donPaint(); nxBoxPaint();
   var list = $('#list');
   syncThumbs();
   fillDatalists();
@@ -3411,6 +3602,7 @@ function updateSummary() {
   $('#cntLib').textContent = nl; $('#cntWish').textContent = nw;
   $('#tabLib').setAttribute('aria-selected', tab === 'lib' ? 'true' : 'false');
   $('#tabWish').setAttribute('aria-selected', tab === 'wish' ? 'true' : 'false');
+  nxBoxPaint();
   $('#btnNews').hidden = tab !== 'wish' || !state.books.some(function (b) { return !b.w && b.a; });
   $('#btnShareWish').hidden = !shareable().length || !(tab === 'wish' || activeCount() || q);     // Desideri, oppure una selezione (preferiti, genere, ricerca...)
   updateActiveFilters();
@@ -5511,6 +5703,7 @@ document.addEventListener('keydown', function (e) {
   if (!$('#recSheet').hidden) { flowLater(); return; }
   if (!$('#allqSheet').hidden) { closeAllQuotes(); return; }
   if (!$('#newsSheet').hidden) { $('#newsSheet').hidden = true; return; }
+  if (!$('#suggSheet').hidden) { closeSugg(); return; }
   if (!$('#priceAsk').hidden) closePriceAsk();
   if (!$('#bkFailSheet').hidden) { $('#bkFailSheet').hidden = true; return; }
   ['#statsSheet', '#exportSheet', '#pubSheet', '#dupSheet', '#photoSheet'].forEach(function (k) { $(k).hidden = true; });
@@ -5523,7 +5716,7 @@ function closeSheetEl(sh) {
   function hide() { sh.hidden = true; }
   var map = {
     covSheet: closeCovAsk, svcSheet: closeSvcShare, svcInSheet: closeSvcImport, shareSheet: closeShare, importSheet: closeImport,
-    quoteSheet: closeQuote, logSheet: function () { closeLog(); }, auSheet: closeAuthor, donSheet: function () { closeDon(); }, manSheet: closeManual,
+    quoteSheet: closeQuote, suggSheet: closeSugg, logSheet: function () { closeLog(); }, auSheet: closeAuthor, donSheet: function () { closeDon(); }, manSheet: closeManual,
     recSheet: flowLater, allqSheet: closeAllQuotes, priceAsk: closePriceAsk, loanSheet: closeLoan, instSheet: closeInstallHelp,
     confirmSheet: function () { hide(); confirmFn = null; },
     pickSheet: function () { $('#pickClose').click(); }, isbnSheet: function () { $('#isbnCancel').click(); }, copySheet: function () { $('#copyClose').click(); }
@@ -6007,7 +6200,7 @@ try { if (navigator.storage && navigator.storage.persisted) navigator.storage.pe
 updateSummary();
 persist();
 checkIncoming();
-loadNews(); setTimeout(autoNews, 12000); setTimeout(runDescQueue, 6000);
+loadNews(); loadSugg(); setTimeout(autoNews, 12000); setTimeout(autoSugg, 20000); setTimeout(runDescQueue, 6000);
 /* schermata d'apertura (solo app installata): resta almeno ~0,7 s dall'avvio, poi sfuma */
 (function () {
   var el = document.getElementById('splash');
@@ -6024,6 +6217,6 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   navigator.serviceWorker.register('sw.js').catch(function () {});
 }
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
-window.__app = { sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
+window.__app = { sugg: function () { return sugg; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
   get scanning() { return scanning; }, setScanMode: function (m) { scanMode = m; }, setScanKind: setScanKind, get scanKind() { return scanKind; } };
 })();

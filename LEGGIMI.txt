@@ -249,7 +249,7 @@ OPZIONI
 Il menu laterale si apre dall'ingranaggio in alto a destra, dalla
 linguetta ">" a sinistra o trascinando dal bordo sinistro. Occupa due terzi
 dello schermo. In cima: "Filtri e ordine" (con il riassunto dei filtri
-attivi), "Tutte le citazioni", "Statistiche"; sotto, le Impostazioni, con
+attivi), "Suggerimenti", "Tutte le citazioni", "Statistiche"; sotto, le Impostazioni, con
 in mezzo il riquadro "Sostieni Next Libris". Le Impostazioni sono divise in:
 - Ricerca dei libri: chiave Google, catalogo SBN, richieste di oggi,
   "Prova la ricerca ISBN";
@@ -588,6 +588,28 @@ libri usciti da un anno a questa parte degli autori che hai di piu'
 interessa". Usa una richiesta Google per autore. Con la chiave Google
 controlla da solo ogni due settimane e avvisa se trova qualcosa (si
 puo' spegnere nella stessa finestra).
+
+SUGGERIMENTI
+------------
+Menu > "Suggerimenti", con due schede:
+- "Cosa leggere dopo": sceglie tra i tuoi libri "Da leggere" (non quelli
+  prestati o non piu' in libreria) e dice sempre perche': il seguito di
+  una serie che stai leggendo, un autore o un genere che leggi spesso o
+  hai votato bene, un libro che aspetta da tanto, un libro breve dopo uno
+  lungo. "Inizio questo" lo segna "In lettura" (con Annulla); "Un altro"
+  passa al successivo. Funziona senza rete.
+- "Da scoprire": libri che non hai e non hai nei Desideri. Altri libri
+  degli autori che hai di piu' (fino a 4), novita' dei tuoi due generi
+  preferiti (almeno 3 libri), volumi che mancano alle tue serie. Ognuno
+  col suo perche'; "+ Desideri" o "No, grazie" (non lo propone piu').
+  Di solito solo libri in italiano; la casella "Anche libri in altre
+  lingue" li cerca tutti. Cerca da sola una volta a settimana (si puo'
+  spegnere) e avvisa se trova qualcosa di nuovo. Usa al massimo 6
+  richieste Google per volta e si ferma se quelle di oggi stanno finendo.
+In cima all'elenco, quando hai finito un libro negli ultimi 3 giorni e
+non ne stai leggendo un altro, compare "Hai finito ... E adesso?" con un
+libro da leggere: "Inizio questo", "Un altro", "Tutti i suggerimenti";
+la X lo chiude per quel libro.
 
 SELEZIONARE PIU' LIBRI
 ----------------------

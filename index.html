@@ -97,6 +97,12 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   </div>
 
 
+  <section class="nx-box" id="nxBox" hidden aria-labelledby="nxBoxH">
+    <button type="button" class="ico nx-x" id="nxBoxX" aria-label="Chiudi">×</button>
+    <h3 id="nxBoxH">Hai finito un libro. E adesso?</h3>
+    <div id="nxBoxCard"></div>
+    <div class="nx-acts"><button class="btn primary" type="button" id="nxBoxGo">Inizio questo</button><button class="btn" type="button" id="nxBoxNext">Un altro</button><button class="link" type="button" id="nxBoxAll">Tutti i suggerimenti</button></div>
+  </section>
   <section class="don-ask" id="donAsk" hidden aria-labelledby="donAskT">
     <h3 id="donAskT">50 libri catalogati</h3>
     <p>Next Libris è gratis e senza pubblicità. Se ti è utile, una piccola donazione aiuta a farlo crescere.</p>
@@ -302,6 +308,30 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
     <div class="row-btns">
       <button class="btn" type="button" id="newsAgain">Cerca di nuovo</button>
       <button class="btn" type="button" id="newsClose">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="suggSheet" hidden>
+  <div class="sheet-in wide" role="dialog" aria-modal="true" aria-labelledby="suggH">
+    <h2 id="suggH">Suggerimenti</h2>
+    <div class="seg kinds sg-tabs" role="tablist" aria-label="Tipo di suggerimento">
+      <button type="button" role="tab" id="sgTabNext" aria-controls="sgNext" aria-pressed="true" aria-selected="true">Cosa leggere dopo</button>
+      <button type="button" role="tab" id="sgTabDisc" aria-controls="sgDisc" aria-pressed="false" aria-selected="false">Da scoprire</button>
+    </div>
+    <div id="sgNext" role="tabpanel" aria-labelledby="sgTabNext">
+      <p class="msg" id="sgNextMsg" aria-live="polite"></p>
+      <div id="sgNextCard"></div>
+    </div>
+    <div id="sgDisc" role="tabpanel" aria-labelledby="sgTabDisc" hidden>
+      <p class="msg" id="sgDiscMsg" aria-live="polite"></p>
+      <ul class="news sg-list" id="sgList"></ul>
+      <label class="check small"><input type="checkbox" id="sgAuto"><span>Cerca da solo una volta a settimana</span></label>
+      <label class="check small"><input type="checkbox" id="sgLang"><span>Anche libri in altre lingue (non solo in italiano)</span></label>
+    </div>
+    <div class="row-btns">
+      <button class="btn" type="button" id="sgAgain" hidden>Cerca di nuovo</button>
+      <button class="btn" type="button" id="sgClose">Chiudi</button>
     </div>
   </div>
 </div>
@@ -711,6 +741,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
     <div id="drawerOpts" hidden>
       <div class="dlist dmenu dmain">
         <button type="button" class="dopt dgo" id="goFilters"><span><b>Filtri e ordine</b><small id="goFltTxt">Tutti i libri, dai più recenti</small></span><span class="dbadge" id="goFltN" hidden></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dgo" id="goSugg"><span><b>Suggerimenti</b><small>Cosa leggere dopo e libri da scoprire</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo dq-all" id="goQuotes" hidden><span><b>Tutte le citazioni</b><small id="goQTxt"></small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, valore, pagine e letture</small></span><span class="n" aria-hidden="true">›</span></button>
       </div>
