@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.15 · 15/11/2026 22:52
+- **Copertina di un libro «Non trovato»**: toccandola si apre solo la sua scheda, non più tutte quelle dei libri senza titolo; chiudendola (anche dopo «Cerca sul web» e Indietro) si torna alle copertine, allo stesso punto.
+- **Triangolino ⚠** allineato alla scritta del riepilogo, della stessa altezza del testo.
+
 ## Prova 94.14 · 15/11/2026 22:47
 - **Triangolino ⚠ nel riepilogo**: accanto a «N in prestito» compare quando hai chiuso con la × un avviso che vale ancora (prestiti lunghi, backup, «Hai finito… E adesso?», trimestre, avvisi di prova); toccandolo gli avvisi chiusi tornano in cima, dal primo.
 

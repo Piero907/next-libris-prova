@@ -1465,7 +1465,7 @@ function toggleRow(id, fromPop) {
     try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) {}
   } else if (!open && cardPushed && !fromPop) { cardPushed = null; try { history.back(); } catch (e) {} }
   openState[id] = open;
-  if (!open && gridRet && !anyOpen() && backToGrid()) { updateStick(); return; }   // aperta dalle copertine: si torna li'
+  if (!open && gridRet && (gridRet.id === id || !anyOpen()) && backToGrid()) { updateStick(); return; }   // aperta dalle copertine: si torna li'
   refreshRow(id);
   updateStick();
   var el = rowEl(id);
@@ -4646,7 +4646,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 22:47", "n": "94.14", "note": "Triangolino ⚠ nel riepilogo"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 22:52", "n": "94.15", "note": "Copertina di un libro «Non trovato»"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5396,7 +5396,7 @@ function setView(v) {
 /* Dalle copertine: la scheda si apre nell'elenco; chiudendola (freccetta o Indietro) si torna alle copertine, allo stesso punto */
 var gridRet = null;
 function openFromGrid(id) {
-  if (!settings.openAll) Object.keys(openState).forEach(function (k) { if (k !== id) openState[k] = false; });
+  if (!settings.openAll) state.books.forEach(function (x) { if (x.id !== id) openState[x.id] = false; });   // solo la sua scheda aperta (anche i libri senza titolo restano chiusi)
   gridRet = { id: id, y: window.scrollY };
   openState[id] = true;
   setView('list');
