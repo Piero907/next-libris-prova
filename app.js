@@ -3172,15 +3172,30 @@ function startReading(id, after) {
   if (after) after();
 }
 /* --- Da scoprire --- */
+function suggUnit(b) { var k = L.serKey(b.se); return k ? 'se:' + k : 'b:' + b.id; }   // una serie o collana conta come un libro solo
 function suggAuthors() {
   var m = {};
-  state.books.forEach(function (b) { if (b.w || b.g.indexOf('a') >= 0) return; authorsOf(b).forEach(function (n) { var k = L.norm(n); var x = m[k] || (m[k] = { name: n, n: 0, r: 0 }); x.n++; if (b.rt >= 4) x.r++; }); });
+  state.books.forEach(function (b) {
+    if (b.w || b.g.indexOf('a') >= 0) return;
+    var u = suggUnit(b);
+    authorsOf(b).forEach(function (n) {
+      var k = L.norm(n), x = m[k] || (m[k] = { name: n, n: 0, r: 0, books: 0, seen: {}, liked: {} });
+      x.books++;                                                     // i libri veri (per il testo); n = unita' (per la classifica)
+      if (!x.seen[u]) { x.seen[u] = 1; x.n++; }
+      if (b.rt >= 4 && !x.liked[u]) { x.liked[u] = 1; x.r++; }
+    });
+  });
   return Object.keys(m).map(function (k) { return m[k]; }).filter(function (x) { return x.n >= 2 && !/^(aa\.? ?vv\.?|autori vari|anonimo)$/i.test(x.name); })
     .sort(function (x, y) { return (y.n + 2 * y.r) - (x.n + 2 * x.r) || coll.compare(x.name, y.name); }).slice(0, 4);
 }
 function suggGenres() {
   var m = {};
-  state.books.forEach(function (b) { if (b.w) return; var g = L.str(b.gen).trim(); if (!g) return; var k = L.norm(g); (m[k] || (m[k] = { name: g, n: 0 })).n++; });
+  state.books.forEach(function (b) {
+    if (b.w) return; var g = L.str(b.gen).trim(); if (!g) return;
+    var k = L.norm(g), x = m[k] || (m[k] = { name: g, n: 0, books: 0, seen: {} }), u = suggUnit(b);
+    x.books++;
+    if (!x.seen[u]) { x.seen[u] = 1; x.n++; }                // una collana di 30 volumi conta come un libro
+  });
   return Object.keys(m).map(function (k) { return m[k]; }).filter(function (x) { return x.n >= 3; }).sort(function (x, y) { return y.n - x.n; }).slice(0, 2);
 }
 function suggSeries() {                       // volumi che mancano alle tue serie: si sa gia' quali sono, senza cercare
@@ -3211,9 +3226,9 @@ async function findSugg() {
   var authors = suggAuthors(), genres = suggGenres(), y = new Date().getFullYear(), own = newsOwn(), found = [], seen = {}, errs = 0, done = 0;
   var lang = settings.suggLang === 'all' ? '' : 'it', jobs = [];
   authors.forEach(function (a) { jobs.push({ q: 'inauthor:"' + a.name.replace(/"/g, '') + '"', by: a.name, min: 0, max: 0, n: 4,
-    why: 'Di ' + a.name + (a.r ? ', che ti piace: ' + (a.r === 1 ? 'un suo libro' : a.r + ' suoi libri') + ' con 4 stelle o più.' : ': ne hai ' + a.n + '.') }); });
+    why: 'Di ' + a.name + (a.r ? ', che ti piace: ' + (a.r === 1 ? 'un suo libro' : a.r + ' suoi libri') + ' con 4 stelle o più.' : ': ne hai ' + a.books + '.') }); });
   genres.forEach(function (g) { jobs.push({ q: 'subject:"' + L.genreSubject(g.name).replace(/"/g, '') + '"', by: '', min: y - 2, max: y + 1, n: 4, newest: true,
-    why: 'Uscito da poco, nel genere che hai di più: ' + g.name + ' (' + g.n + ' libri).' }); });
+    why: 'Uscito da poco, nel genere che hai di più: ' + g.name + ' (' + g.books + ' libri).' }); });
   if (!jobs.length) return [];
   sugg.busy = true; sugg.tried = Date.now(); saveSugg();
   try {
@@ -4720,7 +4735,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 23:20", "n": "94.20", "note": "Scheda aperta del libro"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 23:25", "n": "94.21", "note": "«Da scoprire»"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -6419,6 +6434,6 @@ window.NL = {
   get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); }
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
-window.__app = { sugg: function () { return sugg; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
+window.__app = { sugg: function () { return sugg; }, suggRank: function () { return { a: suggAuthors().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }), g: suggGenres().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }) }; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
   get scanning() { return scanning; }, setScanMode: function (m) { scanMode = m; }, setScanKind: setScanKind, get scanKind() { return scanKind; } };
 })();

@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.21 · 15/11/2026 23:25
+- **«Da scoprire»: una serie o collana conta come un libro solo** per scegliere gli autori e i generi da cercare, così una collana grande non schiaccia gli altri; i volumi che le mancano continuano a comparire a parte.
+
 ## Prova 94.20 · 15/11/2026 23:20
 - **Scheda aperta del libro: quattro aspetti da provare** in Opzioni › Aspetto: A ordinata (icone, campi più stretti), B a sezioni, C a linguette, D pagina del libro con «Modifica». «Attuale» resta come prima.
 

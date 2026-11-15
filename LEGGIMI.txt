@@ -623,7 +623,9 @@ Menu > "Suggerimenti", con due schede:
   passa al successivo. Funziona senza rete.
 - "Da scoprire": libri che non hai e non hai nei Desideri. Altri libri
   degli autori che hai di piu' (fino a 4), novita' dei tuoi due generi
-  preferiti (almeno 3 libri), volumi che mancano alle tue serie. Ognuno
+  preferiti (almeno 3 libri), volumi che mancano alle tue serie. Per
+  scegliere autori e generi una serie o collana conta come un libro
+  solo, cosi' una collana grande non schiaccia gli altri. Ognuno
   col suo perche'; "+ Desideri" o "No, grazie" (non lo propone piu').
   Di solito solo libri in italiano; la casella "Anche libri in altre
   lingue" li cerca tutti. Cerca da sola una volta a settimana (si puo'
