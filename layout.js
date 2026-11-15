@@ -108,7 +108,7 @@ function paintNav() {
 var NOTES = ['#notice', '#nxBox', '#wrapAsk', '#donAsk', '#instCard', '#donRow'], noteIdx = 0, mo = null;
 function notes() {
   var all = NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean);
-  all.forEach(function (x) { x.classList.remove('lay-later'); });
+  all.forEach(function (x) { x.classList.remove('lay-later'); x.removeAttribute('data-noswipe'); x.removeAttribute('data-lay-swipe'); x.style.transform = ''; x.style.opacity = ''; x.style.transition = ''; });
   var more = $('#layMore');
   if (cur === 'classico' || !one) { if (more) more.hidden = true; return; }
   var vis = all.filter(function (x) { return !x.hidden; });
@@ -120,14 +120,63 @@ function notes() {
   if (!mo && window.MutationObserver) mo = new MutationObserver(function () { notes(); });
   if (mo) all.forEach(function (x) { if (!x.__layObs) { x.__layObs = 1; mo.observe(x, { attributes: true, attributeFilter: ['hidden'] }); } });
   if (vis.length < 2) { more.hidden = true; return; }
-  noteIdx = noteIdx % vis.length;
+  noteIdx = ((noteIdx % vis.length) + vis.length) % vis.length;
   vis.forEach(function (x, i) { if (i !== noteIdx) x.classList.add('lay-later'); });
   var shown = vis[noteIdx];
   shown.parentNode.insertBefore(more, shown.nextSibling);
   more.hidden = false;
-  more.innerHTML = 'Avviso ' + (noteIdx + 1) + ' di ' + vis.length + ' · <b>Il prossimo ›</b>';
+  shown.setAttribute('data-lay-swipe', ''); shown.setAttribute('data-noswipe', '');     // si scorre col dito; il menu non si apre
+  more.innerHTML = '<span class="lay-dots" aria-hidden="true">' + vis.map(function (x, i) { return '<i' + (i === noteIdx ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' +
+    'Avviso ' + (noteIdx + 1) + ' di ' + vis.length + ' · <b>Il prossimo ›</b>';
+  more.setAttribute('aria-label', 'Avviso ' + (noteIdx + 1) + ' di ' + vis.length + ': mostra il prossimo (si scorrono anche col dito)');
 
 }
+
+/* scorrere gli avvisi col dito: verso sinistra il prossimo, verso destra quello prima (in giro) */
+var sw = null;
+function slide(step, el, dx) {
+  var w = el.offsetWidth || 300;
+  el.style.transition = 'transform .16s ease-in, opacity .16s ease-in';
+  el.style.transform = 'translateX(' + (step > 0 ? -w : w) + 'px)'; el.style.opacity = '0';
+  setTimeout(function () {
+    noteIdx += step; notes();
+    var nx = document.querySelector('[data-lay-swipe]');
+    if (!nx || reduce()) return;
+    nx.style.transition = 'none'; nx.style.transform = 'translateX(' + (step > 0 ? w * 0.6 : -w * 0.6) + 'px)'; nx.style.opacity = '0';
+    void nx.offsetWidth;
+    nx.style.transition = 'transform .2s ease-out, opacity .2s ease-out'; nx.style.transform = ''; nx.style.opacity = '';
+    setTimeout(function () { nx.style.transition = ''; }, 220);
+  }, reduce() ? 0 : 160);
+}
+function reduce() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+document.addEventListener('touchstart', function (e) {
+  sw = null;
+  if (e.touches.length !== 1) return;
+  var el = e.target.closest && e.target.closest('[data-lay-swipe]');
+  if (!el || e.target.closest('input, textarea, select')) return;
+  sw = { el: el, x0: e.touches[0].clientX, y0: e.touches[0].clientY, dir: 0, dx: 0, t0: Date.now() };
+}, { passive: true });
+document.addEventListener('touchmove', function (e) {
+  if (!sw || e.touches.length !== 1) return;
+  var dx = e.touches[0].clientX - sw.x0, dy = e.touches[0].clientY - sw.y0;
+  if (!sw.dir) {
+    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+    if (Math.abs(dx) > Math.abs(dy) * 1.3) sw.dir = 1; else { sw = null; return; }
+  }
+  sw.dx = dx;
+  sw.el.style.transition = 'none';
+  sw.el.style.transform = 'translateX(' + dx + 'px)'; sw.el.style.opacity = String(Math.max(0.4, 1 - Math.abs(dx) / 500));
+}, { passive: true });
+function swEnd(cancel) {
+  var s = sw; sw = null;
+  if (!s || !s.dir) return;
+  var fast = Math.abs(s.dx) / Math.max(1, Date.now() - s.t0) > 0.5;
+  if (!cancel && (Math.abs(s.dx) > 70 || (fast && Math.abs(s.dx) > 30))) slide(s.dx < 0 ? 1 : -1, s.el, s.dx);
+  else { s.el.style.transition = 'transform .18s ease-out, opacity .18s'; s.el.style.transform = ''; s.el.style.opacity = ''; }
+}
+document.addEventListener('touchend', function () { swEnd(false); }, { passive: true });
+document.addEventListener('touchcancel', function () { swEnd(true); }, { passive: true });
+window.NLLayoutSwipe = { next: function () { var el = document.querySelector('[data-lay-swipe]'); if (el) slide(1, el, -100); }, prev: function () { var el = document.querySelector('[data-lay-swipe]'); if (el) slide(-1, el, 100); } };
 
 /* ---------- applica ---------- */
 function apply() {

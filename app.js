@@ -4692,7 +4692,7 @@ window.addEventListener('popstate', function (e) { if (drawerOpen && !(e.state &
 var swipe = null;
 function swipeBlocked(target) {
   if (scanning || !$('#lightbox').hidden || document.querySelector('.sheet:not([hidden])')) return true;
-  return !!(target.closest && target.closest('input, textarea, select, [contenteditable="true"], .chips, .cand, video, .lightbox'));
+  return !!(target.closest && target.closest('input, textarea, select, [contenteditable="true"], .chips, .cand, video, .lightbox, [data-noswipe]'));   // [data-noswipe]: elementi che scorrono da soli (avvisi della disposizione A)
 }
 document.addEventListener('touchstart', function (e) {
   swipe = null;

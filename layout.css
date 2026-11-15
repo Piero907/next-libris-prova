@@ -44,3 +44,8 @@ html[data-layout="a"] .lay-nav{display:flex;position:fixed;left:0;right:0;bottom
 .lay-nav .lay-plus{flex:0 0 60px;width:60px;height:60px;min-height:0;margin:-22px 6px 4px;border-radius:50%;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px #0003}
 html[data-layout="a"] .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
 html[data-layout="a"] body.selecting .lay-nav,html[data-layout="a"] body.scanning .lay-nav{display:none}
+/* avvisi da scorrere col dito */
+[data-lay-swipe]{touch-action:pan-y;will-change:transform}
+.lay-dots{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}
+.lay-dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.lay-dots i.on{background:var(--accent)}
