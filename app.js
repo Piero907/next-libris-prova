@@ -4013,10 +4013,11 @@ function saveXLSX() {
 }
 /* ---------- backup ---------- */
 var backupReady = null;
-/* «Libreria di Piero - Next Libris - 2026-11-14»: si riconosce a colpo d'occhio tra i file */
+/* «Libreria di Piero - Next Libris - 2026-11-14 22.58»: si riconosce a colpo d'occhio tra i file, anche con piu' backup nello stesso giorno */
 function backupName() {
   var who = String(settings.name || '').replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 30);
-  return (who ? 'Libreria di ' + who : 'La mia libreria') + ' - Next Libris - ' + today();
+  var d = new Date(), hm = String(d.getHours()).padStart(2, '0') + '.' + String(d.getMinutes()).padStart(2, '0');   // ora con il punto: i due punti non vanno nei nomi dei file
+  return (who ? 'Libreria di ' + who : 'La mia libreria') + ' - Next Libris - ' + today() + ' ' + hm;
 }
 function coverIds() { return Object.keys(coverURL).filter(function (id) { return !!get(id); }).concat(quotePhKeys().filter(function (k) { return !!qphURL[k]; })); }
 /* Senza foto tue il backup e' pronto subito; con le foto va preparato prima (si leggono dal telefono), cosi' la condivisione parte al tocco. */
@@ -4717,7 +4718,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-15 23:09", "n": "94.18", "note": "«Aggiornato in questa versione»"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-15 23:14", "n": "94.19", "note": "Il file del backup ha anche l'ora nel nome: «Libreria di Piero - Next Libris - 2026-11-15 "};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }

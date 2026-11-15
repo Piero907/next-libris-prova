@@ -905,7 +905,8 @@ disinstalli l'app o cambi telefono, si perde. Per questo:
 - Esporta > "Fai il backup e mandalo su Drive, email..." apre il menu di
   condivisione del telefono (e' la scelta piu' sicura):
   scegli Drive, Gmail, WhatsApp (anche a te stesso)... Il file si chiama
-  "Libreria di NOME - Next Libris - DATA". Chrome a volte non permette di condividere
+  "Libreria di NOME - Next Libris - DATA ORA" (per esempio
+  "... - 2026-11-15 22.58"). Chrome a volte non permette di condividere
   file .json: in quel caso lo stesso backup parte come file .txt (il
   contenuto e' identico). Se la condivisione non parte compare "Il
   backup non e' partito": "Riprova a inviarlo" (di solito basta) oppure
