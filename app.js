@@ -3566,13 +3566,13 @@ function rowHTML(b, dups, ex) {
     /* azioni con icona e scritta, tutte nello stesso stile; la × (elimina) e la freccetta (chiudi) restano solo icona */
     function act(a, ic, label, title, cls) { return '<button class="ico act' + (cls || '') + '" data-act="' + a + '" title="' + esc(title) + '" aria-label="' + esc(title) + '">' + icon(ic) + '<span class="al" aria-hidden="true">' + esc(label) + '</span></button>'; }
     var stateLabel = b.xs ? (L.GONE_LABEL[b.xs] || 'Non più qui') : b.p ? 'Prestato' : 'Presta, vendi o regala';
-    var loanBtn = (!busy && !b.w && hasData(b) && (openCard || !stateOn))
+    var loanBtn = (!busy && hasData(b) && (openCard || !stateOn))           // anche nei Desideri (Piero, 16/11/2026)
       ? act('loan', 'loan', stateLabel, stateOn ? (b.xs ? goneText(b) : loanText(b)) + ': tocca per cambiare' : 'Presta, vendi o regala il libro', stateOn ? ' on' : '') : '';
     var delBtn = act('del', 'x', 'Elimina', 'Elimina il libro', ' danger');
     var moveBtn = !busy && hasData(b) ? (b.w
       ? act('tolib', 'tolib', 'Libreria', 'Sposta in Libreria (l\'ho comprato)', ' move')
       : act('towish', 'towish', 'Desideri', 'Sposta nei Desideri', ' move')) : '';
-    var favBtn = !busy && !b.w && hasData(b) ? act('fav', 'fav', 'Preferito', b.fav ? 'È tra i preferiti: tocca per toglierlo' : 'Metti tra i preferiti', b.fav ? ' fav on' : ' fav') : '';
+    var favBtn = !busy && hasData(b) ? act('fav', 'fav', 'Preferito', b.fav ? 'È tra i preferiti: tocca per toglierlo' : 'Metti tra i preferiti', b.fav ? ' fav on' : ' fav') : '';
     var kdp = kdpHint(b, busy);                  // pubblicazione Amazon non trovata: «Cerca sul web» sta nel suo riquadro
     var webBtn = !kdp && !busy && (b.t || b.i) ? act('websearch', 'search', 'Cerca sul web', 'Cerca questo libro su Google: prezzo, recensioni, dove comprarlo') : '';
     var shareBtn = !busy && (b.t || L.toIsbn13(b.i)) ? act('share', 'share', 'Condividi', 'Manda questo libro a un amico') : '';
@@ -4735,7 +4735,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 00:01", "n": "94.27", "note": "Pagina del libro"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 00:18", "n": "94.29", "note": "Pagina del libro e barra in basso diventano quelle dell'app"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5944,7 +5944,11 @@ function allLoansText() {
 $('#optOpenAll').addEventListener('change', function (e) { settings.openAll = e.target.checked; openState = {}; saveSettings(); renderList(); });
 $('#tabLib').addEventListener('click', function () { setTab('lib'); });
 $('#tabWish').addEventListener('click', function () { setTab('wish'); });
-$('#btnView').addEventListener('click', function () { gridRet = null; setView(settings.view === 'grid' ? 'list' : 'grid'); renderList(); });
+$('#btnView').addEventListener('click', function () {
+  gridRet = null;
+  if (settings.view === 'grid' && !settings.openAll) state.books.forEach(function (x) { if (!x.t && openState[x.id] == null) openState[x.id] = false; });   // dalle copertine all'elenco: le schede «non trovato» restano chiuse (Piero, 16/11/2026)
+  setView(settings.view === 'grid' ? 'list' : 'grid'); renderList();
+});
 $('#btnCheck').addEventListener('click', function () { startScan('check'); });
 $('#btnStats').addEventListener('click', openStats);
 $('#statsClose').addEventListener('click', function () { $('#statsSheet').hidden = true; });

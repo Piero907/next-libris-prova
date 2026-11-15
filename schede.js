@@ -11,8 +11,10 @@ var STYLES = [
   { k: 'attuale', t: 'Classica', d: 'Tutti i campi uno sotto l\'altro, da modificare subito.' },
   { k: 'd', t: 'Pagina del libro', d: 'Si legge come una pagina: copertina, dati in una riga, descrizione, lettura. La matita in alto apre i campi.' }
 ];
-var cur = NL.PROVA ? 'd' : 'attuale';          // nella copia di prova si parte dalla pagina del libro
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (STYLES.some(function (x) { return x.k === c0.v; })) cur = c0.v; else if (/^[abc]$/.test(c0.v)) cur = 'd'; } catch (e) {}
+/* la pagina del libro e' la scheda dell'app (Piero, 16/11/2026); la classica resta solo per le prove automatiche (localhost) */
+var DEF = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'attuale' : 'd';
+var cur = DEF;
+try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'attuale' && STYLES.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) {}   // fuori dalle prove: sempre la pagina del libro
 function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
 var root = document.documentElement;
 var editing = {}, descExp = {};                 // per libro: campi aperti, descrizione aperta
@@ -127,24 +129,7 @@ function decorate(el) {
   });
 }
 function apply() { root.setAttribute('data-card', cur); NL.refresh(); }
-function paintOption(sec) {
-  if (sec !== 'look') return;
-  var box = document.getElementById('optCard');
-  if (!box) {
-    var anchor = document.querySelector('#optSheet .sum-opts') || document.querySelector('#optSheet input[name="viewDef"]');
-    var fs = anchor && (anchor.closest ? anchor.closest('fieldset') || anchor : anchor); if (!fs) return;
-    var f = document.createElement('fieldset'); f.className = 'choice lay-opt'; f.id = 'optCard';
-    f.innerHTML = '<legend>Scheda aperta del libro</legend>' + STYLES.map(function (x) {
-      return '<label class="lay-o"><input type="radio" name="cardv" value="' + x.k + '"><span><b>' + esc(x.t) + '</b><small>' + esc(x.d) + '</small></span></label>';
-    }).join('') + '<p class="hint">Si vede subito: apri un libro.</p>';
-    fs.parentNode.insertBefore(f, fs);
-    f.addEventListener('change', function (e) { if (e.target.name === 'cardv') { cur = e.target.value; save(); apply(); } });
-    box = f;
-  }
-  Array.prototype.forEach.call(box.querySelectorAll('input'), function (i) { i.checked = i.value === cur; });
-}
 NL.on('rows', decorate);
-NL.on('options', paintOption);
 root.setAttribute('data-card', cur);
 if (cur !== 'attuale') NL.refresh();
 window.NLCard = { get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: STYLES };

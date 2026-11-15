@@ -2,6 +2,16 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.29 · 16/11/2026 00:18
+- **Pagina del libro e barra in basso diventano quelle dell'app**: tolte le scelte «Scheda aperta del libro» e «Disposizione dello schermo» da Opzioni › Aspetto (resta «Avvisi in cima uno alla volta»).
+- Nei Desideri la scheda aperta ha anche il preferito e «Presta, vendi o regala».
+- Passando da Copertine a Elenco le schede «Non trovato» non si aprono più tutte.
+
+## Prova 94.28 · 16/11/2026 00:18
+- **Pagina del libro e barra in basso diventano quelle dell'app**: tolte le scelte «Scheda aperta del libro» e «Disposizione dello schermo» da Opzioni › Aspetto (resta «Avvisi in cima uno alla volta»).
+- Nei Desideri la scheda aperta ha anche il preferito e «Presta, vendi o regala».
+- Passando da Copertine a Elenco le schede «Non trovato» non si aprono più tutte.
+
 ## Prova 94.27 · 16/11/2026 00:01
 - **Pagina del libro**: la **matita (Modifica)** sta in alto come icona, sulla stessa riga delle altre; toccata di nuovo torna alla pagina.
 - **Descrizione in tre righe** con una freccetta per aprirla tutta; fonte e «Non è questo libro» si vedono solo aperta.
