@@ -95,24 +95,55 @@ function doC(card, id) {
   tidy(card);
 }
 
-/* D · pagina del libro: si legge; «Modifica» mostra i campi */
+/* D · pagina del libro: si legge; «Modifica» mostra i campi.
+   In alto restano solo le icone piu' chiare (preferito, condividi, elimina); le altre azioni stanno sotto, con la scritta. */
 function doD(card, id) {
   var b = NL.get(id), head = q(card, '.head');
-  if (!b || !head || !b.t) return;               // senza titolo (da completare) restano i campi
+  if (!b || !head) return;
+  dActs(card);
+  if (!b.t) return;                               // senza titolo (da completare) restano i campi
   if (editing[id]) { card.classList.add('cv-edit'); addDone(card, id); return; }
   var img = NL.bigImg(b), dati = [b.e, b.y, b.pg ? b.pg + ' pagine' : '', b.c != null ? NL.eur(b.c) : ''].filter(Boolean);
-  var chips = [b.gen, b.sh ? 'Scaffale: ' + b.sh : '', b.se ? b.se + (b.sn ? ', vol. ' + b.sn : '') : ''].filter(Boolean);
-  var read = b.w ? '' : b.rs === 'ok' ? 'Letto' + (b.rd ? ' il ' + NL.itDate(b.rd) : '') : b.rs === 'in' ? 'In lettura' : b.rs === 'da' ? 'Da leggere' : '';
+  var names = NL.authorsOf(b);
   var v = document.createElement('div'); v.className = 'cv-page';
   v.innerHTML = '<div class="cv-hero">' + (img ? '<img src="' + esc(img) + '" alt="" referrerpolicy="no-referrer">' : '<span class="cv-ph" style="--h:' + NL.hue(b.t + b.a + b.i) + '">' + esc(b.t.slice(0, 1)) + '</span>') +
-    '<div class="cv-ht"><h3>' + esc(b.t) + '</h3><p class="cv-au">' + esc(b.a || '') + '</p>' + (dati.length ? '<p class="cv-meta">' + esc(dati.join(' · ')) + '</p>' : '') + '</div></div>' +
-    (chips.length ? '<p class="cv-chips">' + chips.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</p>' : '') +
-    (read ? '<p class="cv-read"><b>' + esc(read) + '</b>' + (b.rt ? ' <span class="cv-st" aria-label="' + b.rt + ' stelle su 5">' + '★'.repeat(b.rt) + '<i>' + '★'.repeat(5 - b.rt) + '</i></span>' : '') + '</p>' : '') +
+    '<div class="cv-ht"><h3>' + esc(b.t) + '</h3>' +
+    (names.length ? '<p class="cv-au">' + names.map(function (n) { return '<button type="button" class="au-name" data-act="auinfo" data-n="' + esc(n) + '" title="Chi è ' + esc(n) + '">' + esc(n) + '</button>'; }).join('<span class="au-sep">, </span>') + '</p>' : '') +
+    (dati.length ? '<p class="cv-meta">' + esc(dati.join(' · ')) + '</p>' : '') + '</div></div>' +
+    '<div class="cv-chips"></div>' +
     (b.n ? '<p class="cv-note">' + esc(b.n) + '</p>' : '') +
     '<button type="button" class="btn cv-editb">' + NL.icon('pen') + 'Modifica</button>';
+  /* etichette = filtri, come nella scheda classica: gli stessi pulsanti di «Vedi tutti i libri di» (autore, editore, genere, scaffale) e la serie */
+  var chips = q(v, '.cv-chips');
+  function fkey(x) { return NL.L.norm(String(x || '').trim().replace(/\s+/g, ' ')); }
+  [['gen', b.gen, NL.icon('tag')], ['sh', b.sh, NL.icon('shelf')]].forEach(function (p) {     // genere e scaffale: sempre, anche se e' l'unico libro
+    var val = String(p[1] || '').trim(); if (!val) return;
+    var ex = q(card, '.facets .fchip[data-f="' + p[0] + '"]');
+    if (ex) { chips.appendChild(ex); return; }
+    var c = document.createElement('button'); c.type = 'button'; c.className = 'fchip'; c.dataset.act = 'facet'; c.dataset.f = p[0]; c.dataset.v = fkey(val); c.dataset.name = val;
+    c.title = 'Mostra i libri: ' + (p[0] === 'gen' ? 'genere ' : 'scaffale ') + val; c.innerHTML = p[2] + '<span class="fl">' + esc(val) + '</span>';
+    chips.appendChild(c);
+  });
+  qa(card, '.facets .fchip').forEach(function (c) { chips.appendChild(c); });   // autore ed editore, quando hai altri loro libri
+  if (b.se) { var sc = document.createElement('button'); sc.type = 'button'; sc.className = 'fchip cv-serchip'; sc.dataset.act = 'serall'; sc.title = 'Vedi i libri della serie'; sc.innerHTML = '<span class="fl">' + esc(b.se + (b.sn ? ', vol. ' + b.sn : '')) + '</span>'; chips.appendChild(sc); }
+  if (!chips.children.length) chips.remove();
+  /* lettura: gli stessi pulsanti della scheda (Da leggere / In lettura / Letto, stelle, data) */
+  var rd = q(card, '.read');
+  if (rd) { rd.classList.add('cv-readbox'); v.insertBefore(rd, q(v, '.cv-note') || q(v, '.cv-editb')); }
   v.querySelector('.cv-editb').addEventListener('click', function (e) { e.stopPropagation(); editing[id] = true; NL.refreshRow(id); });
   head.parentNode.insertBefore(v, head);
   card.classList.add('cv-view');
+}
+function dActs(card) {                            // in alto: preferito, condividi, elimina; sotto con la scritta: presta, desideri, cerca sul web
+  var main = q(card, '.acts-main'); if (!main) return;
+  var share = q(card, '.foot .tail [data-act="share"]'), del = q(main, '[data-act="del"]');
+  if (share) main.insertBefore(share, del || null);
+  var low = ['loan', 'towish', 'tolib', 'websearch'].map(function (a) { return q(main, '[data-act="' + a + '"]'); }).filter(Boolean);
+  if (!low.length) return;
+  var row = document.createElement('div'); row.className = 'cv-acts2';
+  low.forEach(function (x) { row.appendChild(x); });
+  var top = q(card, '.card-top');
+  top.parentNode.insertBefore(row, top.nextSibling);
 }
 function addDone(card, id) {
   var top = q(card, '.head'); if (!top) return;

@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.22 · 15/11/2026 23:42
+- **Scheda D (pagina del libro)**: toccando l'autore si apre la sua finestra; lo stato Da leggere / In lettura / Letto, le stelle e la data si cambiano direttamente dalla pagina.
+- **Etichette sotto la copertina = filtri**: genere, scaffale, autore, editore mostrano i libri con quel valore; la serie mostra i suoi volumi.
+- In alto restano solo le icone più chiare (preferito, condividi, elimina); Presta, Desideri e Cerca sul web stanno sotto, con la scritta.
+
 ## Prova 94.21 · 15/11/2026 23:25
 - **«Da scoprire»: una serie o collana conta come un libro solo** per scegliere gli autori e i generi da cercare, così una collana grande non schiaccia gli altri; i volumi che le mancano continuano a comparire a parte.
 
