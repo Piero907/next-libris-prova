@@ -1527,3 +1527,4 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .sum-link{display:inline;padding:0;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;text-decoration-color:var(--info-line);text-underline-offset:3px;cursor:pointer}
 .sum-link[aria-pressed="true"]{color:var(--info);font-weight:600}
 .sync.quiet-ok{display:none}
+.log-part{margin:6px 0 4px;font:600 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0}
