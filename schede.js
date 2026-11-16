@@ -18,17 +18,6 @@ try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'attuale' && STYLE
 function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
 var root = document.documentElement;
 var editing = {}, descExp = {};                 // per libro: campi aperti, descrizione aperta
-/* PROVA TEMPORANEA (16/11/2026): dove stanno stato di lettura, voto e «Letto il». Cinque proposte A-E da scegliere in Opzioni › Aspetto;
-   quando Piero sceglie, si tiene solo quella e si toglie la scelta (READPOS, paintReadOpt). */
-var READPOS = [
-  { k: 'a', t: 'A · Accanto alla copertina', d: 'Stato e stelle sotto casa editrice, anno e pagine; «Letto il» sotto la descrizione.' },
-  { k: 'b', t: 'B · Riquadro «La tua lettura»', d: 'Stato, stelle e data in un riquadro sotto la descrizione e la nota.' },
-  { k: 'c', t: 'C · Striscia sotto la copertina', d: 'Subito dopo copertina e titolo, a tutta larghezza, senza riquadro; stelle e data sulla stessa riga.' },
-  { k: 'd', t: 'D · Stelle sotto la copertina', d: 'Le stelle piccole sotto la copertina, lo stato accanto al titolo; «Letto il» sotto la descrizione.' },
-  { k: 'e', t: 'E · In fondo alla scheda', d: 'Il riquadro «La tua lettura» dopo le citazioni, prima delle etichette.' }
-];
-var LSR = 'catalogo-libri-readpos', readPos = 'b';
-try { var r0 = NL.ls.get(LSR); if (READPOS.some(function (x) { return x.k === r0; })) readPos = r0; } catch (e) {}
 
 function q(el, sel) { return el.querySelector(sel); }
 function qa(el, sel) { return Array.prototype.slice.call(el.querySelectorAll(sel)); }
@@ -95,25 +84,13 @@ function doD(card, id) {
       }
     }
   }
-  /* stato, voto e data: dove li mette la proposta scelta (A-E, prova temporanea) */
-  var panel = null;
+  /* stato, voto e data: una striscia a tutta larghezza subito sotto copertina e titolo, tra due righe sottili;
+     stelle e «Letto il» sulla stessa riga quando c'e' posto (Piero ha scelto la C tra cinque proposte, 16/11/2026) */
   if (rd) {
-    var rdate = q(rd, '.f-rd'), stars = q(rd, '.stars'), after = q(v, '.cv-note') || q(v, '.cv-desc') || q(v, '.cv-hero');
-    var dateBelow = function () { if (!rdate) return; var bx = document.createElement('div'); bx.className = 'cv-rdate'; bx.appendChild(rdate); after.parentNode.insertBefore(bx, after.nextSibling); };
-    var mkLine = function () { if (!stars) return; var line = document.createElement('div'); line.className = 'cv-rline'; stars.parentNode.insertBefore(line, stars); line.appendChild(stars); if (rdate) line.appendChild(rdate); };
-    card.setAttribute('data-rp', readPos);
-    if (readPos === 'a') { q(v, '.cv-ht').appendChild(rd); dateBelow(); }
-    else if (readPos === 'c') { mkLine(); rd.classList.add('cv-strip'); var hero = q(v, '.cv-hero'); hero.parentNode.insertBefore(rd, hero.nextSibling); }
-    else if (readPos === 'd') {
-      var cov = q(v, '.cv-cov'), col = document.createElement('div'); col.className = 'cv-covcol';
-      cov.parentNode.insertBefore(col, cov); col.appendChild(cov); if (stars) col.appendChild(stars);
-      q(v, '.cv-ht').appendChild(rd); dateBelow();
-    } else {
-      panel = document.createElement('section'); panel.className = 'cv-reading'; panel.setAttribute('aria-label', 'La tua lettura');
-      panel.innerHTML = '<h4 class="cv-rh">La tua lettura</h4>';
-      panel.appendChild(rd); mkLine();
-      if (readPos === 'b') after.parentNode.insertBefore(panel, after.nextSibling);
-    }
+    var rdate = q(rd, '.f-rd'), stars = q(rd, '.stars');
+    if (stars) { var line = document.createElement('div'); line.className = 'cv-rline'; stars.parentNode.insertBefore(line, stars); line.appendChild(stars); if (rdate) line.appendChild(rdate); }
+    rd.classList.add('cv-strip');
+    var hero = q(v, '.cv-hero'); hero.parentNode.insertBefore(rd, hero.nextSibling);
   }
   /* etichette-filtro: in fondo, prima di Presta e Cerca sul web */
   if (chips.parentNode) {
@@ -122,7 +99,6 @@ function doD(card, id) {
     tags.appendChild(chips);
     card.insertBefore(tags, q(card, '.cv-acts2'));
   }
-  if (panel && readPos === 'e') card.insertBefore(panel, q(card, '.cv-tags') || q(card, '.cv-acts2'));
 }
 function dActs(card) {                            // in alto, solo icone: preferito, desideri, condividi, elimina; in fondo, con la scritta: presta, cerca sul web
   var main = q(card, '.acts-main'); if (!main) return;
@@ -161,23 +137,8 @@ function decorate(el) {
   });
 }
 function apply() { root.setAttribute('data-card', cur); NL.refresh(); }
-function paintReadOpt(sec) {                       // PROVA TEMPORANEA: scelta A-E in Opzioni › Aspetto, in cima
-  if (sec !== 'look' || cur !== 'd') { var o = document.getElementById('optReadPos'); if (o) o.hidden = cur !== 'd'; return; }
-  var box = document.getElementById('optReadPos');
-  if (!box) {
-    var sect = document.querySelector('#optSheet .opt-sec[data-sec="look"]'); if (!sect) return;
-    box = document.createElement('fieldset'); box.className = 'choice lay-opt rp-opt'; box.id = 'optReadPos';
-    box.innerHTML = '<legend>Prova: lettura e voto nella scheda</legend><p class="hint">Temporaneo: scegli dove stanno Da leggere / In lettura / Letto, le stelle e «Letto il». Poi teniamo quella giusta e questa scelta sparisce.</p>' +
-      READPOS.map(function (x) { return '<label class="lay-o"><input type="radio" name="readpos" value="' + x.k + '"><span><b>' + esc(x.t) + '</b><small>' + esc(x.d) + '</small></span></label>'; }).join('');
-    sect.insertBefore(box, sect.firstChild);
-    box.addEventListener('change', function (e) { if (e.target.name !== 'readpos') return; readPos = e.target.value; try { NL.ls.set(LSR, readPos); } catch (x) {} NL.refresh(); });
-  }
-  box.hidden = false;
-  Array.prototype.forEach.call(box.querySelectorAll('input'), function (i) { i.checked = i.value === readPos; });
-}
-NL.on('options', paintReadOpt);
 NL.on('rows', decorate);
 root.setAttribute('data-card', cur);
 if (cur !== 'attuale') NL.refresh();
-window.NLCard = { readPos: function (v) { if (v) { readPos = v; NL.refresh(); } return readPos; }, get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: STYLES };
+window.NLCard = { get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: STYLES };
 })();

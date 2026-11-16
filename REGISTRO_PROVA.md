@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.33 · 16/11/2026 02:00
+- **Lettura e voto: resta la striscia (C)** sotto copertina e titolo, a tutta larghezza: stato su una riga, sotto le stelle e «Letto il» sulla stessa riga. Tolta la scelta temporanea A–E da Opzioni › Aspetto.
+
 ## Prova 94.32 · 16/11/2026 01:50
 - **Prova: lettura e voto in cinque posizioni (A–E)**, da scegliere in cima a Opzioni › Aspetto: A accanto alla copertina, B riquadro «La tua lettura», C striscia sotto la copertina, D stelle sotto la copertina, E riquadro in fondo. Scelta temporanea.
 - **Si vede sempre quale filtro è attivo**: anche «In prestito» (toccato dal riepilogo) ha la sua pillola con la × sotto la ricerca.
