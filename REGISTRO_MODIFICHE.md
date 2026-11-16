@@ -3,6 +3,9 @@
 Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in fondo al menu.
 L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
 
+## Versione 97 · 16/11/2026
+- Correzione interna: ogni copia dell'app (vera, prova e la nuova copia «social») tiene i suoi dati e le sue copie per l'uso senza rete, e aggiornandosi cancella solo le proprie. Per chi usa la versione vera non cambia niente.
+
 ## Versione 96 · 16/11/2026
 > **Il triangolino degli avvisi** Accanto al numero dei libri: toccalo e vai subito agli avvisi in cima, anche a quelli che avevi chiuso.
 > **Novità in parole semplici** Dopo ogni aggiornamento questa pagina ti dice in breve cosa cambia; «Tutti i dettagli» apre l'elenco completo.

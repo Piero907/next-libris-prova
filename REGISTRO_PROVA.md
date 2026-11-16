@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 97.1 · 16/11/2026 09:43
+- Allineata alla versione 97 (ogni copia tiene solo le sue copie offline); restano le novità della prova: preferiti con la stella, voto a libricini, «Letto il» sotto casa editrice.
+
 ## Prova 96.4 · 16/11/2026 09:29
 - **«Letto il» in piccolo sotto casa editrice e anno**, nello stesso stile; toccando la data si apre il calendario.
 - Ogni copia (vera, prova, social) cancella solo le sue copie offline: unita la correzione della copia social.
