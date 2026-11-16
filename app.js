@@ -274,7 +274,8 @@ function loadAll() {
     settings.sumEur = s.sumEur === true;                                            // riepilogo in alto: valore in euro (spento di predefinito)
     settings.sumLoan = s.sumLoan !== false;                                         // riepilogo: «N in prestito» (si tocca per vederli)
     settings.sumGone = s.sumGone === true;                                          // riepilogo: «N non più in libreria» (spento di predefinito)
-    settings.showSync = s.showSync !== false;                                       // «Salvato su questo telefono» (gli errori si vedono sempre)
+    settings.showSync = s.syncOff ? s.showSync === true : false;                     // «Salvato su questo telefono»: spento di predefinito (16/11/2026); gli errori si vedono sempre
+    settings.syncOff = 1;
     settings.seenV = Number(s.seenV) || 0;                                         // ultima versione di cui si sono viste le novita'
     settings.seenB = L.str(s.seenB).slice(0, 12);                                   // nella copia di prova: ultima prova vista («94.17»)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
@@ -1509,6 +1510,7 @@ window.addEventListener('popstate', function (e) {
 });
 /* ---- uscire dall'app: serve premere Indietro due volte ---- */
 var exitArmed = 0;
+try { history.scrollRestoration = 'manual'; } catch (e) {}   // le schede usano la cronologia: il browser non deve riportare la pagina dove era (filtro da un'etichetta finiva a meta' elenco, 16/11/2026)
 (function () {
   var push = history.pushState.bind(history);
   history.pushState = function (st, t, u) { if (history.state && history.state.root) push({ guard: 1 }, ''); return push(st, t, u); };   // sotto ogni finestra c'e' sempre la «guardia»
@@ -3521,7 +3523,7 @@ function applyFacet(f, key, name) {
   else if (f === 'gen') genFlt = key;
   else if (f === 'sh') shFlt = key;
   renderList(); updateSummary();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo(0, 0); setTimeout(function () { window.scrollTo(0, 0); }, 60); setTimeout(function () { window.scrollTo(0, 0); }, 300);   // anche dopo l'Indietro che chiude la scheda
   var n = visible().length;
   toast((f === 'a' ? 'Libri di ' : FACET_WORD[f] + ' «') + name + (f === 'a' ? '' : '»') + ': ' + n + '. Per tornare a tutti, tocca la × del filtro sotto la ricerca.');
 }
@@ -4531,7 +4533,7 @@ function clearFilters() {
 function updateActiveFilters() {
   var o = '';
   function chip(k, txt) { o += '<button class="chip on" data-clear="' + k + '" aria-label="Togli il filtro ' + esc(txt) + '">' + esc(txt) + '<span class="x" aria-hidden="true">×</span></button>'; }
-  if (flt === 'gone' || flt === 'dup' || flt === 'fav' || flt === 'qs') chip('flt', FLT_TXT[flt]);
+  if (flt && FLT_TXT[flt]) chip('flt', FLT_TXT[flt]);   // anche «In prestito» e «Da verificare»: il filtro usato si vede sempre (16/11/2026)
   if (frFlt) chip('fr', 'Ricevuti da ' + frFlt);
   if (readFlt && tab === 'lib') chip('read', READ_TXT[readFlt]);
   if (shFlt) chip('sh', shFlt === NONE ? 'Senza scaffale' : 'Scaffale: ' + facetName('sh', shFlt));
@@ -4771,7 +4773,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 01:25", "n": "94.31", "note": "Pagina del libro più compatta"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 01:50", "n": "94.32", "note": "Prova"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }

@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.32 · 16/11/2026 01:50
+- **Prova: lettura e voto in cinque posizioni (A–E)**, da scegliere in cima a Opzioni › Aspetto: A accanto alla copertina, B riquadro «La tua lettura», C striscia sotto la copertina, D stelle sotto la copertina, E riquadro in fondo. Scelta temporanea.
+- **Si vede sempre quale filtro è attivo**: anche «In prestito» (toccato dal riepilogo) ha la sua pillola con la × sotto la ricerca.
+- Toccando un'etichetta nella scheda, l'elenco filtrato parte dall'inizio (prima poteva restare a metà).
+- «Salvato su questo telefono» spento di predefinito; l'opzione si chiama «Conferma del salvataggio» e spiega cosa vuol dire.
+
 ## Prova 94.31 · 16/11/2026 01:25
 - **Pagina del libro più compatta**: Da leggere / In lettura / Letto e le stelle accanto alla copertina, sotto casa editrice, anno e pagine; «Letto il» sotto la descrizione e la nota.
 - **Impostazioni riordinate**: in Aspetto tema, colori e caratteri vicini; «Schede e prezzo» diventa «Aggiunta dei libri» (prezzo, suoni, fotocamera, prova della luce); «App» diventa «Installazione sul telefono», con la spiegazione.

@@ -32,16 +32,18 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .cv-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
 .cv-au .au-name{padding:0;border:0;background:none;color:var(--ink);font:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
 .cv-au .au-sep{color:var(--muted)}
-.cv-readbox{margin:10px 0 0;gap:6px 8px}
+/* «La tua lettura»: un riquadro come quello delle citazioni; stato su tutta la larghezza, sotto le stelle e la data */
+.cv-reading{border:1px solid var(--line);border-radius:14px;background:var(--surface2);padding:12px 14px 10px;display:grid;gap:8px}
+.cv-rh{margin:0;font:600 15px/1.3 var(--font-body);color:var(--ink)}
+.cv-readbox{display:grid!important;gap:6px;margin:0}
 .cv-readbox>.lbl{display:none}
-/* lettura e voto compatti, nella colonna accanto alla copertina */
-.cv-readbox>.seg{flex:0 1 auto;max-width:100%}
-.cv-readbox>.seg button{min-height:34px;padding:5px 9px;font-size:13px;white-space:nowrap}
-.cv-readbox .stars{flex-basis:100%;margin-left:-4px}
-.cv-readbox .stars .star{width:32px;height:32px;font-size:21px;padding:0}
-.cv-rdate .f-rd{min-width:0;display:flex;align-items:center;justify-content:flex-start;gap:10px;margin:0;padding:0;font-size:14px}
-.cv-rdate .f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:14px}
-.cv-rdate .f-rd input{min-height:36px;padding:4px 6px;font-size:14.5px;width:160px;flex:0 1 160px}
+.cv-readbox>.seg{display:grid;grid-template-columns:repeat(3,1fr);width:100%;background:var(--surface)}
+.cv-readbox>.seg button{min-height:40px;padding:6px 4px;font-size:14px;white-space:nowrap}
+.cv-rline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px}
+.cv-rline .stars{margin-left:-6px}
+.cv-rline .f-rd{min-width:0;display:flex;align-items:center;gap:8px;margin:0;padding:0}
+.cv-rline .f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:13.5px;white-space:nowrap}
+.cv-rline .f-rd input{min-height:36px;padding:4px 4px;font-size:14.5px;width:auto;max-width:150px;background:transparent}
 /* D: azioni con la scritta sotto la riga delle icone */
 .cv-acts2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px;padding-top:12px;border-top:1px solid var(--line)}
 .cv-acts2 .ico.act{min-height:40px}
@@ -76,3 +78,25 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .cv-dmore:focus-visible{outline:2px solid var(--accent);border-radius:8px}
 .acts-main .cv-editb.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .acts-main .cv-editb.on svg{color:inherit}
+/* PROVA TEMPORANEA (16/11/2026): lettura e voto, proposte A-E (data-rp sulla scheda). Da togliere quando Piero sceglie. */
+#optReadPos .lay-o{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+#optReadPos .lay-o input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
+#optReadPos .lay-o b{display:block;font-size:15px}
+#optReadPos .lay-o small{display:block;font-size:13px;line-height:1.35;color:var(--muted);margin-top:2px}
+#optReadPos[hidden]{display:none}
+/* «Letto il» da solo, sotto la descrizione (A e D) */
+.cv-rdate .f-rd{min-width:0;display:flex;align-items:center;gap:10px;margin:0;padding:0}
+.cv-rdate .f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:14px}
+.cv-rdate .f-rd input{min-height:36px;padding:4px 6px;font-size:14.5px;width:160px;flex:0 1 160px}
+/* A e D: compatti nella colonna del titolo */
+.cv-ht .cv-readbox{display:flex!important;flex-wrap:wrap;gap:6px 8px;margin-top:10px}
+.cv-ht .cv-readbox>.seg{display:inline-flex;width:auto;max-width:100%}
+.cv-ht .cv-readbox>.seg button{min-height:34px;padding:5px 9px;font-size:13px}
+.cv-ht .cv-readbox .stars{flex-basis:100%;margin-left:-4px}
+.cv-ht .cv-readbox .stars .star{width:32px;height:32px;font-size:21px}
+/* C: striscia a tutta larghezza tra due righe sottili */
+.cv-readbox.cv-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0 6px}
+/* D: stelle piccole sotto la copertina */
+.cv-covcol{display:grid;gap:6px;justify-items:center;align-content:start}
+.cv-covcol .stars{display:flex;justify-content:center;width:96px}
+.cv-covcol .stars .star{width:19px;height:24px;font-size:17px}
