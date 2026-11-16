@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 97.4 · 16/11/2026 10:24
+- «Sono a pagina» al centro, allineato con i libricini.
+
 ## Prova 97.3 · 16/11/2026 10:15
 - **Segnalibro**: con «In lettura», nella pagina del libro scrivi la pagina a cui sei arrivato («Sono a pagina 212 di 624») e vedi la barra con la percentuale.
 - L'avanzamento si vede anche nell'elenco («In lettura · 34%» con una linea sottile) e sulle copertine (una barretta in basso).
