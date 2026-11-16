@@ -112,3 +112,28 @@ html.guest #list .row.open :is(.acts-main,.cv-editb,[data-act="del"],[data-act="
 .fri .fr-key{align-items:center}
 .fri .fr-key small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
 html.guest #list .row.g-noread :is(.cv-strip,.read){display:none}
+/* elenco di amici da scegliere (al posto delle pillole: regge anche 20-30 amici) */
+.fr-pick{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.fr-pick-list{display:grid;max-height:264px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.fr-pick-row{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 12px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.fr-pick-row:last-child{border-bottom:0}
+.fr-pick-row[hidden],.fri .fr-go[hidden]{display:none}
+.fr-pick-n{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.fr-pick-n small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.fr-pick-c{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line)}
+.fr-pick-row[aria-pressed="true"]{background:var(--accent-soft)}
+.fr-pick-row[aria-pressed="true"] .fr-pick-c{border-color:var(--accent);background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/16px no-repeat}
+.fr-libq{width:100%;box-sizing:border-box;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:8px 12px;font:16px var(--font-body);color:var(--ink)}
+/* Condividi: prima gli amici dentro l'app, il link in seconda fila */
+.share-app{display:grid;gap:8px;grid-template-columns:minmax(0,1fr);padding:12px;border:2px solid var(--accent);border-radius:14px}
+.share-app[hidden]{display:none}
+.share-app .fr-h{margin:0;font-size:16px}
+.share-app .fr-small{margin:0;font-size:13px;color:var(--muted);line-height:1.4}
+.share-ext{display:grid;gap:10px}
+.share-ext>summary{cursor:pointer;color:var(--accent);font-weight:600;padding:8px 2px}
+.share-ext.only>summary{display:none}
+.share-ext[open]{display:grid}
+.share-close[hidden]{display:none}
+.fri .fr-optlink{justify-self:start;text-align:left;font-size:14px}
+.opt-fri{display:grid;gap:6px;margin:6px 0}
+.opt-fri .hint{margin:0}

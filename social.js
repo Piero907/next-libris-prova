@@ -421,10 +421,10 @@ function paint() {
 function paintMenu() {
   var b = document.getElementById('goAcc');
   if (!b) {
-    var exp = document.querySelector('#drawerOpts .dopt[data-sec="export"]'); if (!exp) return;   // in «La tua libreria», dopo il backup
+    var set = document.getElementById('setList'); if (!set) return;   // sotto «Impostazioni» (Piero, 16/11/2026), per primo
     b = document.createElement('button'); b.type = 'button'; b.id = 'goAcc'; b.className = 'dopt dgo';
     b.innerHTML = '<span><b>Account e sincronizzazione</b><small id="goAccTxt"></small></span><span class="n" aria-hidden="true">›</span>';
-    exp.parentNode.insertBefore(b, exp.nextSibling);
+    set.insertBefore(b, set.firstChild);
     b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(open, 60); });
   }
   paint();

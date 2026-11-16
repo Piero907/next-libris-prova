@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.8 · 16/11/2026 16:33
+- **Condividi un libro**: prima «Consiglialo a un amico» (lo trova nella sua app), il link per WhatsApp o email in seconda fila.
+- **Tanti amici**: al posto delle pillole un elenco con la ricerca (in Condividi, in «Presta, vendi o regala» e per la chiave).
+- **Finestra Amici più semplice**: richieste in cima, poi i tuoi amici con amici e libri in comune, poi «Aggiungi un amico». Nome, chi vede cosa, chiave e worker sono in Menu › Impostazioni › **Amici e privacy**; lì c'è anche **Account e sincronizzazione**.
+- Chiave e worker con un amico anche da Impostazioni › Condivisione e con un tocco dalla libreria dell'amico. Gli avvisi si aggiornano anche da soli ogni pochi minuti.
+
 ## Prova 98.7 · 16/11/2026 16:10
 - **La libreria di un amico come la tua**: toccando un amico si apre la sua libreria nella schermata principale, con gli stessi filtri, la ricerca, Copertine ed Elenco (Libreria e Desideri). In cima: amici e libri in comune, cosa sta leggendo, cosa ha letto di recente, «Solo quelli che non hai». Indietro torna ai tuoi libri.
 - Sulla scheda di un suo libro: **Aggiungi ai miei desideri**, «Ce l'hai anche tu», **Me lo presti?** (lui risponde Presta o No da un avviso) e, sui suoi desideri, «Te lo regalo io».
