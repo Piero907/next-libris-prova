@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.4 · 16/11/2026 15:18
+- **I desideri agli amici**: in Amici l'interruttore «Gli amici vedono i miei desideri» (spento di partenza). Toccando un amico vedi i suoi desideri e puoi dire «Te lo regalo io»: lui non lo vede, gli altri amici sì, così non lo regalate in due.
+- **Prestiti e regali tra amici**: in «Presta, vendi o regala» scegli un amico con un tocco. Il libro gli compare subito nella sua Libreria con «Prestato da …» o «Regalato da …» (un regalo che era tra i suoi desideri ci passa da solo).
+- Chi ha ricevuto il prestito tocca «Prestato da …» › Restituito; chi presta tocca «Restituito» come sempre: vale per tutti e due. Un avviso in cima dice cosa ti è arrivato.
+
 ## Prova 98.3 · 16/11/2026 13:51
 - **Un solo nome**: il nome di «Libreria di …» è anche quello con cui ti trovano gli amici (anche con maiuscole, accenti e spazi, es. «Piero R.»). Se lo cambi nelle Impostazioni cambia anche per gli amici.
 - **Amici più a portata di mano**: icona accanto all'ingranaggio, con il numero delle richieste; nel Menu una parte tutta sua, «Amici», subito sotto Statistiche (con «Invita un amico»).

@@ -47,3 +47,28 @@ html.has-fri .top{padding-right:96px}
 .fri-note .fn-go{margin-left:auto;flex:none;font-weight:700;font-size:14px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.18)}
 .fri-note .ico{color:inherit}
 body.selecting .fri-note,body.scanning .fri-note{display:none}
+/* amici da aprire (riga intera toccabile) */
+.fri .fr-go{padding:0;gap:0;flex-wrap:nowrap}
+.fri .fr-open{flex:1 1 auto;min-width:0;display:grid;gap:1px;text-align:left;background:none;border:0;padding:10px 0;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+.fri .fr-open small,.fri .fr-swap small,.fri .fr-bk small{font-weight:400;font-size:13px;color:var(--muted)}
+.fri .fr-go .n{flex:none;color:var(--muted);font-size:22px;padding:0 2px 0 8px}
+.fri .fr-wish{margin:0}
+/* pagina di un amico */
+.fri .fr-back{justify-self:start;font-size:15px}
+.fri .fr-fname{font:700 22px/1.2 var(--font-display);overflow-wrap:anywhere}
+.fri .fr-book{flex-wrap:wrap;align-items:center}
+.fri .fr-cov{flex:none;width:40px;height:58px;border-radius:4px;object-fit:cover;background:var(--surface2);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.fri .fr-cov.ph{display:flex;align-items:center;justify-content:center;font:700 18px var(--font-display);color:var(--muted)}
+.fri .fr-bk{flex:1 1 140px;min-width:0;display:grid;gap:1px;overflow-wrap:anywhere}
+.fri .fr-mine{color:var(--accent);font-weight:600}
+.fri .fr-swap{display:grid;gap:1px;font-weight:400}
+.fri .fr-drop{justify-self:start;color:var(--bad)}
+.fri > .sheet-in > #friBody > .fr-conf,.fri .fr-conf{display:grid;gap:10px}
+/* in «Presta, vendi o regala» */
+.loan-fri{display:grid;gap:6px;grid-template-columns:minmax(0,1fr)}
+.loan-fri[hidden]{display:none}
+.loan-fri .chips{margin:0}
+.loan-fri .fr-small{font-size:13px;color:var(--muted);margin:0;line-height:1.4}
+.loan-fri .fr-ok{color:var(--accent);font-weight:600}
+
+.fri .fr-conf .row-btns .btn,#recvSheet .row-btns .btn{flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px}   /* due pulsanti affiancati anche a 360 px */

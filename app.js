@@ -181,11 +181,11 @@ function inTab(b) { return !!b.w === (tab === 'wish'); }
 function tabBooks() { return state.books.filter(inTab); }
 function blankBook(o) {
   var b = Object.assign({ id: newId(), t: '', a: '', e: '', y: '', c: null, i: '', g: [], img: '', nf: false, ts: Date.now(),
-    sh: '', n: '', gen: '', pg: '', p: '', pd: '', w: tab === 'wish', rs: '', rt: 0, rd: '', pp: '', ppd: '', cp: false, ck: '', nb: false, xs: '', xd: '', xa: '', fav: false, fr: '', fl: '', ds: '', dsf: '', dsl: '', dsn: 0, dsq: 0, se: '', sn: '', sq: '', qs: [] }, o || {});
+    sh: '', n: '', gen: '', pg: '', p: '', pd: '', w: tab === 'wish', rs: '', rt: 0, rd: '', pp: '', ppd: '', cp: false, ck: '', nb: false, xs: '', xd: '', xa: '', sx: '', sk: '', sda: '', fav: false, fr: '', fl: '', ds: '', dsf: '', dsl: '', dsn: 0, dsq: 0, se: '', sn: '', sq: '', qs: [] }, o || {});
   if (!b.w && !(o && o.rs != null)) b.rs = 'da';        // un libro appena entrato in libreria e' da leggere
   return b;
 }
-var FIELDS = ['id', 't', 'a', 'e', 'y', 'c', 'i', 'g', 'img', 'imgL', 'nf', 'ts', 'sh', 'n', 'gen', 'pg', 'p', 'pd', 'w', 'rs', 'rt', 'rd', 'pp', 'ppd', 'cp', 'ck', 'nb', 'xs', 'xd', 'xa', 'fav', 'fr', 'fl', 'ds', 'dsf', 'dsl', 'dsn', 'dsq', 'se', 'sn', 'sq', 'qs'];
+var FIELDS = ['id', 't', 'a', 'e', 'y', 'c', 'i', 'g', 'img', 'imgL', 'nf', 'ts', 'sh', 'n', 'gen', 'pg', 'p', 'pd', 'w', 'rs', 'rt', 'rd', 'pp', 'ppd', 'cp', 'ck', 'nb', 'xs', 'xd', 'xa', 'fav', 'fr', 'fl', 'ds', 'dsf', 'dsl', 'dsn', 'dsq', 'se', 'sn', 'sq', 'qs', 'sx', 'sk', 'sda'];
 function isBusy(b) { var st = (S[b.id] || {}).st; return st === 'queued' || st === 'reading' || st === 'lookup' || st === 'search'; }
 function cleanBook(x) {
   if (!x || typeof x !== 'object') return null;
@@ -212,9 +212,11 @@ function cleanBook(x) {
     cp: !!x.cp,
     ck: /^\d{4}-\d\d-\d\d$/.test(L.str(x.ck)) ? x.ck : '',
     nb: !!x.nb,
-    xs: ['v', 'r', 's'].indexOf(x.xs) >= 0 ? x.xs : '',
+    xs: ['v', 'r', 's', 'b'].indexOf(x.xs) >= 0 ? x.xs : '',   // b: libro ricevuto in prestito da un amico e restituito
     xd: /^\d{4}-\d\d-\d\d$/.test(L.str(x.xd)) ? x.xd : '',
     xa: L.str(x.xa).slice(0, 80),
+    sx: /^[0-9a-f-]{36}$/.test(L.str(x.sx)) ? x.sx : '',                 // prestito o regalo tra amici dell'app (modulo amici, 16/11/2026)
+    sk: x.sk === 'p' || x.sk === 'r' ? x.sk : '', sda: L.str(x.sda).slice(0, 30),   // ricevuto: in prestito (p) o in regalo (r), da chi
     fav: !!x.fav,                                   // preferito
     fr: L.str(x.fr).slice(0, 30), fl: L.str(x.fl).slice(0, 40),     // ricevuto da (nome) e da quale lista
     ds: L.str(x.ds).slice(0, L.DESC_MAX + 1), dsf: x.dsf === 'g' || x.dsf === 'o' ? x.dsf : '',   // descrizione e fonte (Google, Open Library)
@@ -1431,6 +1433,7 @@ function flagsHTML(b, dups) {
   var s = S[b.id] || {}, o = '';
   if (b.p) o += '<span class="tag loan tap" data-act="loan" role="button" tabindex="0" title="In prestito' + (b.pd ? ' dal ' + esc(L.itDate(b.pd)) : '') + '. Toccalo per segnarlo come restituito.">' + esc(loanText(b)) + '</span>';
   o += goneTag(b);
+  o += recvTag(b);
   o += fromTag(b);
   if (b.g.length) o += '<span class="tag warn tap" data-act="verify" role="button" tabindex="0" title="Dati dedotti (dalla copertina o dal codice ISBN): controllali, potrebbero non coincidere con il tuo libro. Toccalo quando hai controllato.">Da verificare ✓</span>';
   o += dupTag(dups && dups[b.id]);
@@ -1454,7 +1457,7 @@ function fromTag(b) {
   if (!b.fr) return '';
   return '<span class="tag from" title="' + esc('Ricevuto da ' + b.fr + (b.fl ? ', dalla lista «' + b.fl + '»' : '')) + '">Da ' + esc(b.fr) + '</span>';
 }
-var GONE_VERB = { v: 'Venduto', r: 'Regalato', s: 'Smarrito' };
+var GONE_VERB = { v: 'Venduto', r: 'Regalato', s: 'Smarrito', b: 'Restituito' };
 function aChi(p) { return (/^[aA]/.test(p) ? 'ad ' : 'a ') + p; }
 function goneText(b) {
   if (!b.xs) return '';
@@ -1463,7 +1466,14 @@ function goneText(b) {
   return GONE_VERB[b.xs] + (b.xa ? ' ' + aChi(b.xa) : '') + (d ? ' il ' + d : '');
 }
 function goneTag(b) {
+  if (b.xs === 'b') return '<span class="tag gone">' + esc(goneText(b)) + '</span>';   // prestito ricevuto, restituito: solo storico
   return b.xs ? '<span class="tag gone tap" data-act="loan" role="button" tabindex="0" title="Non è più in libreria. Tocca per cambiare o se è tornato.">' + esc(goneText(b)) + '</span>' : '';
+}
+/* ricevuto da un amico dell'app: «Prestato da Anna» (toccandolo: restituito) o «Regalato da Anna» */
+function recvTag(b) {
+  if (!b.sk || !b.sda || b.xs) return '';
+  if (b.sk === 'p') return '<span class="tag loan tap recv" data-act="recv" role="button" tabindex="0" title="Te l\'ha prestato ' + esc(b.sda) + '. Toccalo quando l\'hai restituito.">Prestato da ' + esc(b.sda) + '</span>';
+  return '<span class="tag from">Regalato da ' + esc(b.sda) + '</span>';
 }
 function prestatoA(p) { return 'Prestato ' + (/^[aA]/.test(p) ? 'ad ' : 'a ') + p; }   // «ad Anna», «a Marco»
 function loanText(b) {
@@ -1475,6 +1485,7 @@ function summaryHTML(b, dups, status) {
   var s = S[b.id] || {}, tags = '';
   if (b.p) tags += '<span class="tag loan tap" data-act="loan" role="button" tabindex="0" title="Tocca per segnarlo come restituito">' + esc(loanText(b)) + '</span>';
   tags += goneTag(b);
+  tags += recvTag(b);
   if (b.fav && !b.w) tags += '<span class="tag fav">Preferito</span>';
   tags += fromTag(b);
   if (b.g.length) tags += '<span class="tag warn">Da verificare</span>';
@@ -4845,7 +4856,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 13:51", "n": "98.3", "note": "Un solo nome"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 15:18", "n": "98.4", "note": "I desideri agli amici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -5535,6 +5546,7 @@ function saveLoan() {
   updateSummary();
   var msg = loanKind === 'p' ? prestatoA(b.p) + '.' : goneText(b) + '.';
   toast(msg, { label: 'Annulla', fn: function () { var x = get(id); if (x) { Object.assign(x, old); renderList(); touch(); updateSummary(); } } });
+  emit('loan', { id: id, kind: loanKind, who: who, old: old });   // il modulo amici: se e' un amico dell'app, lo vede anche lui
 }
 function returnLoan() {
   var b = get(loanId);
@@ -5546,6 +5558,7 @@ function returnLoan() {
     if (flt === 'gone') renderList(); else refreshRow(gid);
     touch(); updateSummary();
     toast(was === 's' ? 'Ritrovato: di nuovo in libreria.' : 'Di nuovo in libreria.', { label: 'Annulla', fn: function () { var x = get(gid); if (x) { Object.assign(x, gold); renderList(); touch(); updateSummary(); } } });
+    emit('loanBack', { id: gid, old: gold });
     return;
   }
   var id = loanId, old = { p: b.p, pd: b.pd };
@@ -5554,6 +5567,7 @@ function returnLoan() {
   if (flt === 'loan') renderList(); else refreshRow(id);
   touch(); updateSummary();
   toast('Segnato come restituito.', { label: 'Annulla', fn: function () { var x = get(id); if (x) { x.p = old.p; x.pd = old.pd; renderList(); touch(); updateSummary(); } } });
+  emit('loanBack', { id: id, old: old });
 }
 /* ---------- desideri ---------- */
 function moveToLib(id, quiet) {
@@ -5812,7 +5826,7 @@ list.addEventListener('toggle', function (e) {
   if (d.open) loadDesc(d.dataset.id, false);
 }, true);
 list.addEventListener('keydown', function (e) {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && (((e.target.dataset.act === 'verify' || e.target.dataset.act === 'loan' || e.target.dataset.act === 'dup') && e.target.classList.contains('tag')) || (e.target.dataset.act === 'toggle' && e.target.classList.contains('sum')) || (e.target.dataset.act === 'zoom' && e.target.classList.contains('thumb')))) { e.preventDefault(); e.target.click(); return; }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && (((e.target.dataset.act === 'verify' || e.target.dataset.act === 'loan' || e.target.dataset.act === 'recv' || e.target.dataset.act === 'dup') && e.target.classList.contains('tag')) || (e.target.dataset.act === 'toggle' && e.target.classList.contains('sum')) || (e.target.dataset.act === 'zoom' && e.target.classList.contains('thumb')))) { e.preventDefault(); e.target.click(); return; }
   if (e.key === 'Enter' && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) { e.preventDefault(); e.target.blur(); }
 });
 list.addEventListener('click', function (e) {          // sezioni «In lettura» / «Gli altri libri»: si aprono e chiudono, e se lo ricorda
@@ -5847,6 +5861,7 @@ list.addEventListener('click', function (e) {
   else if (act === 'manual') openManual(id);
   else if (act === 'ocrtext') applyOcrText(id);
   else if (act === 'loan') openLoan(id);
+  else if (act === 'recv') emit('recv', id);      // «Prestato da …»: lo gestisce il modulo amici
   else if (act === 'toggle') toggleRow(id);
   else if (act === 'dup') openDup(id);
   else if (act === 'facet') applyFacet(btn.dataset.f, btn.dataset.v, btn.dataset.name);
@@ -6566,7 +6581,7 @@ window.NL = {
   on: function (name, fn) { (hooks[name] || (hooks[name] = [])).push(fn); },
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA, COPIA: COPIA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,
-  name: function () { return settings.name || ''; }, setName: function (v) { saveName(v); }, goal: function () { return settings.goal || 0; },
+  name: function () { return settings.name || ''; }, setName: function (v) { saveName(v); }, newId: newId, today: today, goal: function () { return settings.goal || 0; },
   closeDrawer: function () { closeDrawer(); }, refresh: function () { renderList(); updateSummary(); },
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
@@ -6575,6 +6590,6 @@ window.NL = {
   fields: FIELDS, clean: function (x) { return cleanBook(x); }, stored: function () { return storable(); }, save: function () { touch(); }   // per la sincronizzazione (modulo social)
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
-window.__app = { sugg: function () { return sugg; }, suggRank: function () { return { a: suggAuthors().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }), g: suggGenres().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }) }; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
+window.__app = { openLoan: openLoan, sugg: function () { return sugg; }, suggRank: function () { return { a: suggAuthors().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }), g: suggGenres().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }) }; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
   get scanning() { return scanning; }, setScanMode: function (m) { scanMode = m; }, setScanKind: setScanKind, get scanKind() { return scanKind; } };
 })();
