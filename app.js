@@ -3499,7 +3499,10 @@ $('#allqSheet').addEventListener('click', function (e) {
   var c = e.target.closest('[data-copy]'); if (c) shareQuote(c.dataset.copy, +c.dataset.i);
 });
 /* stato di lettura, voto e data (solo Libreria) */
-var RATE_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.8A1.8 1.8 0 0 1 7.3 3H18.5v14.6H7.3a1.8 1.8 0 0 0-1.8 1.8z"/><path d="M5.5 19.4A1.8 1.8 0 0 0 7.3 21.2h11.2v-3.6"/></svg>';
+var MESI_IT = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+function rdLong(v) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? (+m[3]) + ' ' + MESI_IT[+m[2] - 1] + ' ' + m[1] : 'aggiungi la data'; }   // «10 febbraio 2026»
+var RD_CAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>';
+var RATE_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="pg" d="M3 6a9 9 0 0 1 9 0v13a9 9 0 0 0-9 0z"/><path class="pg" d="M12 6a9 9 0 0 1 9 0v13a9 9 0 0 0-9 0z"/></svg>';   // libro aperto (Piero: «era più bella l'icona con il libro aperto»)
 function readHTML(b, off) {
   if (b.w) return '';
   var d = off ? ' disabled' : '';
@@ -3512,7 +3515,7 @@ function readHTML(b, off) {
   }).join('');
   return '<div class="read"><span class="lbl">Lettura</span><div class="seg" role="group" aria-label="Stato di lettura">' + seg + '</div>' +
     '<div class="rate"><div class="stars" role="radiogroup" aria-label="Voto">' + stars + '</div><span class="rt-word' + (b.rt ? '' : ' none') + '">' + (b.rt ? L.rateWord(b.rt) : 'Dai un voto') + '</span></div>' +
-    (b.rs === 'ok' ? '<label class="f f-rd"><span class="lbl">Letto il</span><input type="date" data-k="rd" id="rd-' + b.id + '" value="' + esc(b.rd || '') + '"' + d + '></label>' : '') + '</div>';
+    (b.rs === 'ok' ? '<label class="f f-rd"><span class="lbl">Letto il</span><span class="rd-show' + (b.rd ? '' : ' none') + '">' + esc(rdLong(b.rd)) + RD_CAL + '</span><input type="date" data-k="rd" id="rd-' + b.id + '" value="' + esc(b.rd || '') + '"' + d + '></label>' : '') + '</div>';
 }
 /* «Tutti i libri di …» se dello stesso autore ce ne sono altri */
 function authorLinkHTML(b, ex) {
@@ -4802,7 +4805,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 09:04", "n": "96.2", "note": "Il voto con i libricini al posto delle stelle, con la parola"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 09:15", "n": "96.3", "note": "Libricini aperti, su una riga al centro, con la parola a destra; tolta la scelta temporane"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -6512,7 +6515,7 @@ window.NL = {
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
   updateStick: function () { updateStick(); }, summary: function () { updateSummary(); }, autosize: function (el) { autosizeAll(el); },
-  get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); }
+  rdLong: function (v) { return rdLong(v); }, get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); }
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
 window.__app = { sugg: function () { return sugg; }, suggRank: function () { return { a: suggAuthors().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }), g: suggGenres().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }) }; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,

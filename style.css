@@ -1581,11 +1581,8 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 /* voto a libricini, con la parola (prova del 16/11/2026) */
 .rate{display:flex;align-items:center;gap:4px 12px;flex-wrap:wrap}
 .star.bk{width:36px;height:40px;display:inline-flex;align-items:center;justify-content:center;color:color-mix(in srgb,var(--muted) 55%,transparent)}
-.star.bk svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+.star.bk svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
 .star.bk.on,html[data-look="nuovo"] .star.bk.on{color:var(--accent)}
-.star.bk.on svg{fill:color-mix(in srgb,var(--accent) 30%,transparent)}
+.star.bk.on svg{fill:color-mix(in srgb,var(--accent) 28%,transparent)}
 .rt-word{font-size:15px;font-weight:600;color:var(--accent)}
 .rt-word.none{font-weight:400;color:var(--muted)}
-/* A: libricini al centro, parola sotto; B: a sinistra, parola a destra */
-html[data-rtp="a"] .rate{flex-direction:column;gap:0}
-html[data-rtp="a"] .read>.f-rd{justify-content:center}

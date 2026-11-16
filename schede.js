@@ -135,26 +135,13 @@ function decorate(el) {
   });
 }
 function apply() { root.setAttribute('data-card', cur); NL.refresh(); }
-/* PROVA TEMPORANEA (16/11/2026): voto a libricini, due disposizioni. A: al centro con la parola sotto; B: a sinistra con la parola a destra.
-   Quando Piero sceglie: tenere solo quella (regola in style.css con html[data-rtp]) e togliere RTP, paintRtOpt. */
-var RTP = [{ k: 'a', t: 'A · Al centro, parola sotto' }, { k: 'b', t: 'B · A sinistra, parola a destra' }];
-var LSV = 'catalogo-libri-rtpos', rtp = 'a';
-try { var v0 = NL.ls.get(LSV); if (v0 === 'a' || v0 === 'b') rtp = v0; } catch (e) {}
-root.setAttribute('data-rtp', rtp);
-function paintRtOpt(sec) {
-  if (sec !== 'look') return;
-  var box = document.getElementById('optRtPos');
-  if (!box) {
-    var sect = document.querySelector('#optSheet .opt-sec[data-sec="look"]'); if (!sect) return;
-    box = document.createElement('fieldset'); box.className = 'choice'; box.id = 'optRtPos';
-    box.innerHTML = '<legend>Prova: voto con i libricini</legend><p class="hint">Temporaneo: dove stanno i libricini e la parola nella pagina del libro.</p>' +
-      RTP.map(function (x) { return '<label class="rtp-o"><input type="radio" name="rtpos" value="' + x.k + '"><span>' + esc(x.t) + '</span></label>'; }).join('');
-    sect.insertBefore(box, sect.firstChild);
-    box.addEventListener('change', function (e) { if (e.target.name !== 'rtpos') return; rtp = e.target.value; root.setAttribute('data-rtp', rtp); try { NL.ls.set(LSV, rtp); } catch (x) {} });
-  }
-  Array.prototype.forEach.call(box.querySelectorAll('input'), function (i) { i.checked = i.value === rtp; });
+/* «Letto il»: la data scritta per esteso si aggiorna appena la scegli */
+function rdShow(e) {
+  var t = e.target; if (!t || t.getAttribute('data-k') !== 'rd') return;
+  var sh = t.parentNode && t.parentNode.querySelector('.rd-show'); if (!sh || !NL.rdLong) return;
+  sh.firstChild.nodeValue = NL.rdLong(t.value); sh.classList.toggle('none', !t.value);
 }
-NL.on('options', paintRtOpt);
+document.addEventListener('input', rdShow, true); document.addEventListener('change', rdShow, true);
 NL.on('rows', decorate);
 root.setAttribute('data-card', cur);
 if (cur !== 'attuale') NL.refresh();
