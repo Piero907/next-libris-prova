@@ -37,7 +37,7 @@ body.wrap-open{overflow:hidden}
 .w-bars .w-bn{font-weight:600}
 .w-bars .w-bar{grid-column:1 / -1;grid-row:2;height:12px;border-radius:6px;background:rgba(255,255,255,.2);overflow:hidden}
 .w-bars .w-bar i{display:block;height:100%;border-radius:6px;background:#fff}
-.w-stars{margin:8px 0 0;font-size:28px;letter-spacing:3px}
+.w-stars{margin:8px 0 0;font-size:24px;font-weight:600;letter-spacing:.01em}
 .w-off{opacity:.3}
 .w-q{margin:22px 0 0;padding:0 0 0 16px;border-left:3px solid rgba(255,255,255,.7);font:italic 500 18px/1.45 var(--font-body)}
 .w-q cite{display:block;margin-top:6px;font-style:normal;font-size:14px;opacity:.8}

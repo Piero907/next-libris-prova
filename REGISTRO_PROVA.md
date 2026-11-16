@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 96.2 · 16/11/2026 09:04
+- **Il voto con i libricini** al posto delle stelle, con la parola: Non mi è piaciuto, Così così, Bello, Bellissimo, Capolavoro. La parola compare anche nell'elenco, nelle statistiche e nella stagione in libri.
+- **Prova: due disposizioni**, da scegliere in cima a Impostazioni › Aspetto: A libricini al centro con la parola sotto, B a sinistra con la parola a destra.
+
 ## Prova 96.1 · 16/11/2026 07:14
 - **Preferiti con la stella** invece del segnalibro: nella scheda (in alto) e sulla copertina (stellina gialla in alto a destra).
 

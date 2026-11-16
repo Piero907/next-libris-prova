@@ -37,11 +37,11 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .cv-readbox>.lbl{display:none}
 .cv-readbox>.seg{display:grid;grid-template-columns:repeat(3,1fr);width:100%;background:var(--surface)}
 .cv-readbox>.seg button{min-height:40px;padding:6px 4px;font-size:14px;white-space:nowrap}
-.cv-rline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px}
-.cv-rline .stars{margin-left:-6px}
-.cv-rline .f-rd{min-width:0;display:flex;align-items:center;gap:8px;margin:0;padding:0}
-.cv-rline .f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:13.5px;white-space:nowrap}
-.cv-rline .f-rd input{min-height:36px;padding:4px 4px;font-size:14.5px;width:auto;max-width:150px;background:transparent}
+.cv-readbox .rate .stars{margin-left:-6px}
+html[data-rtp="a"] .cv-readbox .rate .stars{margin-left:0}
+.cv-readbox>.f-rd{min-width:0;display:flex;align-items:center;gap:8px;margin:0;padding:0}
+.cv-readbox>.f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:13.5px;white-space:nowrap}
+.cv-readbox>.f-rd input{min-height:36px;padding:4px 4px;font-size:14.5px;width:auto;max-width:150px;background:transparent}
 /* D: azioni con la scritta sotto la riga delle icone */
 .cv-acts2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px;padding-top:12px;border-top:1px solid var(--line)}
 .cv-acts2 .ico.act{min-height:40px}
@@ -77,5 +77,6 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .acts-main .cv-editb.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .acts-main .cv-editb.on svg{color:inherit}
 .cv-readbox.cv-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0 6px}
-.cv-rline .stars .star{width:32px}
-.cv-rline .f-rd input{max-width:140px}
+.cv-readbox>.f-rd input{max-width:140px}
+#optRtPos .rtp-o{display:flex;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer;font-size:15px}
+#optRtPos .rtp-o input{width:20px;height:20px;accent-color:var(--accent)}

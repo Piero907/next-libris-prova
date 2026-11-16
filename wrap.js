@@ -85,7 +85,7 @@ function quarters(now) {                      // le stagioni con qualcosa da rac
 
 /* ---------- le schermate ---------- */
 var nf = new Intl.NumberFormat('it-IT');
-function stars(n) { return '★'.repeat(n) + '<span class="w-off">' + '★'.repeat(5 - n) + '</span>'; }
+function stars(n) { return esc(NL.L.rateWord ? NL.L.rateWord(n) : String(n)); }   // il voto a parole (i libricini, 16/11/2026)
 function slides(d) {
   var Q = d.Q, out = [];
   var name = NL.name();

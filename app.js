@@ -1257,7 +1257,7 @@ function onScanned(code) {
 /* ---------- «Ce l'ho già?»: controlla senza aggiungere ---------- */
 var checkCache = {}, resCode = '', resKind = '';
 function readLabel(b) {
-  if (b.rs === 'ok') return 'Letto' + (b.rt ? ' · ' + '★'.repeat(b.rt) : '');
+  if (b.rs === 'ok') return 'Letto' + (b.rt ? ' · ' + L.rateWord(b.rt) : '');
   return b.rs === 'in' ? 'In lettura' : b.rs === 'da' ? 'Da leggere' : '';
 }
 function shelfLine(b) {
@@ -3499,17 +3499,19 @@ $('#allqSheet').addEventListener('click', function (e) {
   var c = e.target.closest('[data-copy]'); if (c) shareQuote(c.dataset.copy, +c.dataset.i);
 });
 /* stato di lettura, voto e data (solo Libreria) */
+var RATE_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.8A1.8 1.8 0 0 1 7.3 3H18.5v14.6H7.3a1.8 1.8 0 0 0-1.8 1.8z"/><path d="M5.5 19.4A1.8 1.8 0 0 0 7.3 21.2h11.2v-3.6"/></svg>';
 function readHTML(b, off) {
   if (b.w) return '';
   var d = off ? ' disabled' : '';
   var seg = [['da', 'Da leggere'], ['in', 'In lettura'], ['ok', 'Letto']].map(function (x) {
     return '<button type="button" data-act="rs" data-v="' + x[0] + '" aria-pressed="' + (b.rs === x[0]) + '"' + d + '>' + x[1] + '</button>';
   }).join('');
+  /* il voto: cinque libricini, con la parola sotto o accanto (Piero, 16/11/2026: le stelle si confondevano con il preferito) */
   var stars = [1, 2, 3, 4, 5].map(function (n) {
-    return '<button type="button" class="star' + (b.rt >= n ? ' on' : '') + '" data-act="rt" data-v="' + n + '" role="radio" aria-checked="' + (b.rt === n) + '" aria-label="' + n + (n === 1 ? ' stella' : ' stelle') + '"' + d + '>★</button>';
+    return '<button type="button" class="star bk' + (b.rt >= n ? ' on' : '') + '" data-act="rt" data-v="' + n + '" role="radio" aria-checked="' + (b.rt === n) + '" aria-label="' + n + (n === 1 ? ' libricino' : ' libricini') + ': ' + L.rateWord(n) + '"' + d + '>' + RATE_BOOK + '</button>';
   }).join('');
   return '<div class="read"><span class="lbl">Lettura</span><div class="seg" role="group" aria-label="Stato di lettura">' + seg + '</div>' +
-    '<div class="stars" role="radiogroup" aria-label="Voto">' + stars + '</div>' +
+    '<div class="rate"><div class="stars" role="radiogroup" aria-label="Voto">' + stars + '</div><span class="rt-word' + (b.rt ? '' : ' none') + '">' + (b.rt ? L.rateWord(b.rt) : 'Dai un voto') + '</span></div>' +
     (b.rs === 'ok' ? '<label class="f f-rd"><span class="lbl">Letto il</span><input type="date" data-k="rd" id="rd-' + b.id + '" value="' + esc(b.rd || '') + '"' + d + '></label>' : '') + '</div>';
 }
 /* «Tutti i libri di …» se dello stesso autore ce ne sono altri */
@@ -4800,7 +4802,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 07:14", "n": "96.1", "note": "Preferiti con la stella invece del segnalibro"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 09:04", "n": "96.2", "note": "Il voto con i libricini al posto delle stelle, con la parola"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5624,7 +5626,7 @@ function openStats() {
     (st.gone ? tile(String(st.gone), 'non più in libreria', [st.goneBy.v ? st.goneBy.v + (st.goneBy.v === 1 ? ' venduto' : ' venduti') : '', st.goneBy.r ? st.goneBy.r + (st.goneBy.r === 1 ? ' regalato' : ' regalati') : '', st.goneBy.s ? st.goneBy.s + (st.goneBy.s === 1 ? ' smarrito' : ' smarriti') : ''].filter(Boolean).join(' · ')) : '') +
     (tab === 'lib' && (st.read || st.reading || st.toRead) ? tile(String(st.read), 'letti', [st.reading ? st.reading + ' in lettura' : '', st.toRead ? st.toRead + ' da leggere' : ''].filter(Boolean).join(' · ')) : '') +
     (st.pagesRead ? tile(nf.format(st.pagesRead), 'pagine lette') : '') +
-    (st.rated ? tile('★ ' + st.avgRating.toFixed(1).replace('.', ','), 'voto medio', 'su ' + st.rated + (st.rated === 1 ? ' libro' : ' libri')) : '') +
+    (st.rated ? tile(st.avgRating.toFixed(1).replace('.', ',') + ' su 5', 'voto medio: ' + L.rateWord(st.avgRating).toLowerCase(), 'su ' + st.rated + (st.rated === 1 ? ' libro' : ' libri')) : '') +
     (st.guess ? tile(String(st.guess), 'da verificare') : '');
   var loans = st.loans.length ? '<section class="st-sec"><h3>In prestito</h3><ul class="loans">' + st.loans.map(function (x) {
     return '<li><b>' + esc(x.p) + '</b> · ' + esc(x.t) + (x.pd ? ' <small>dal ' + esc(L.itDate(x.pd)) + ', ' + esc(L.agoText(Date.parse(x.pd))) + '</small>' : '') + '</li>';

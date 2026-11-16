@@ -1070,7 +1070,10 @@
      un libro breve dopo uno lungo. Esclusi i prestati e quelli non più in libreria. */
   function authorList(a) { return str(a).split(/\s*[,;]\s*/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 1; }); }
   function pagesNum(b) { var n = parseInt(b && b.pg, 10); return n > 0 && n < 20000 ? n : 0; }
-  function stars(n) { return '★'.repeat(Math.max(1, Math.min(5, Math.round(n)))); }
+  /* il voto: da 1 a 5 libricini, ognuno con la sua parola (prova del 16/11/2026: prima erano stelle) */
+  var RATE_WORDS = ['Non mi è piaciuto', 'Così così', 'Bello', 'Bellissimo', 'Capolavoro'];
+  function rateWord(n) { n = Math.round(Number(n) || 0); return n >= 1 && n <= 5 ? RATE_WORDS[n - 1] : ''; }
+  function stars(n) { return '«' + rateWord(Math.max(1, Math.min(5, Math.round(n)))) + '»'; }
   function nextReads(books, now) {
     now = now || Date.now();
     var all = (books || []).filter(function (b) { return b && !b.w; });
@@ -1105,7 +1108,7 @@
       authorList(c.a).forEach(function (n) { var x = au[norm(n)]; if (x && (!bestA || x.n + (x.rn ? x.r / x.rn : 0) > bestA.n + (bestA.rn ? bestA.r / bestA.rn : 0))) bestA = x; });
       if (bestA) {
         var avg = bestA.rn ? bestA.r / bestA.rn : 0;
-        if (avg >= 4) { var pa = 25 + 5 * Math.min(bestA.n, 3); sc += pa; say(pa, 'Di ' + bestA.name + ': ai suoi libri hai dato ' + stars(avg) + (bestA.rn > 1 ? ' in media' : '') + '.'); }
+        if (avg >= 4) { var pa = 25 + 5 * Math.min(bestA.n, 3); sc += pa; say(pa, 'Di ' + bestA.name + ': ai suoi libri hai dato ' + (bestA.rn > 1 ? 'in media ' : '') + stars(avg) + '.'); }
         else if (bestA.n >= 2) { var pb = 8 * Math.min(bestA.n, 4); sc += pb; say(pb, 'Di ' + bestA.name + ': ne hai già letti ' + bestA.n + '.'); }
         else if (!bestA.rn || avg >= 3) { sc += 5; say(5, 'Di ' + bestA.name + ', che hai già letto.'); }
         else sc -= 5;
@@ -1164,6 +1167,6 @@
     csvCell: csvCell, buildCSV: buildCSV, buildTSV: buildTSV, rowsFor: rowsFor, colsFor: colsFor, itDate: itDate,
     genreIt: genreIt, crc32: crc32, zipStore: zipStore, buildXLSX: buildXLSX, publisherGroups: publisherGroups, pubTokens: pubTokens,
     computeStats: computeStats, agoText: agoText, coverCandidates: coverCandidates, googleVolumeId: googleVolumeId, bestGoogleImage: bestGoogleImage, getJson: getJson,
-    parseSbn: parseSbn, sbnUrl: sbnUrl, deweyGenre: deweyGenre, dupGroups: dupGroups, analyzeDups: analyzeDups, mergeBooks: mergeBooks, serKey: serKey, seriesInfo: seriesInfo, titleKey: titleKey, pickNews: pickNews, nextReads: nextReads, genreSubject: genreSubject, authorList: authorList, ocrParagraph: ocrParagraph, cleanDesc: cleanDesc, guessLang: guessLang, pickDesc: pickDesc, olDesc: olDesc, DESC_MAX: DESC_MAX, READ_LABEL: READ_LABEL, GONE_LABEL: GONE_LABEL
+    parseSbn: parseSbn, sbnUrl: sbnUrl, deweyGenre: deweyGenre, dupGroups: dupGroups, analyzeDups: analyzeDups, mergeBooks: mergeBooks, serKey: serKey, seriesInfo: seriesInfo, titleKey: titleKey, pickNews: pickNews, nextReads: nextReads, genreSubject: genreSubject, authorList: authorList, ocrParagraph: ocrParagraph, cleanDesc: cleanDesc, guessLang: guessLang, pickDesc: pickDesc, olDesc: olDesc, DESC_MAX: DESC_MAX, READ_LABEL: READ_LABEL, GONE_LABEL: GONE_LABEL, RATE_WORDS: RATE_WORDS, rateWord: rateWord
   };
 });
