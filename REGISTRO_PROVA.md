@@ -2,6 +2,13 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 94.31 · 16/11/2026 01:25
+- **Pagina del libro più compatta**: Da leggere / In lettura / Letto e le stelle accanto alla copertina, sotto casa editrice, anno e pagine; «Letto il» sotto la descrizione e la nota.
+- **Impostazioni riordinate**: in Aspetto tema, colori e caratteri vicini; «Schede e prezzo» diventa «Aggiunta dei libri» (prezzo, suoni, fotocamera, prova della luce); «App» diventa «Installazione sul telefono», con la spiegazione.
+- Tolte le opzioni «schede sempre aperte», «scaffale, genere, pagine e note» (ora sempre visibili) e «leggi subito il testo delle citazioni».
+- **Autore**: trovato su Wikipedia anche se non è uno scrittore (fotografi, cuochi…), con la sua foto accanto al nome; con nomi uguali vince chi scrive.
+- Statistiche: toccando un autore, una casa editrice, un genere o uno scaffale si apre un filtro, che si vede tra i filtri.
+
 ## Prova 94.30 · 16/11/2026 00:43
 - **Menu riordinato**: in alto Filtri, Suggerimenti e Statistiche; poi «La tua libreria» (Sistema l'elenco, Backup con la data dell'ultimo); tutte le impostazioni sotto la voce «Impostazioni», che si apre quando la tocchi (l'ingranaggio in alto la apre già); Sostieni e versione restano in fondo.
 - **Le schede «Non trovato» non si aprono più tutte insieme** (togliendo un filtro, passando da Copertine a Elenco, riaprendo l'app): si apre da sola solo quella appena aggiunta.

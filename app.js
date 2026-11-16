@@ -248,11 +248,11 @@ function loadAll() {
   } catch (e) {}
   try {
     var s = JSON.parse(ls.get(LS_SET) || '{}');
-    settings.gbKey = L.str(s.gbKey); settings.price = s.price !== false; settings.extra = s.extra !== false;
+    settings.gbKey = L.str(s.gbKey); settings.price = s.price !== false; settings.extra = true;   // scaffale, genere, pagine e note sempre visibili (opzione tolta il 16/11/2026)
     settings.lastBackup = Number(s.lastBackup) || 0; settings.snooze = Number(s.snooze) || 0;
     settings.viewDef = s.viewDef === 'list' ? 'list' : 'grid';                       // vista all'apertura: copertine (predefinita) o elenco
     settings.view = settings.viewDef;                                               // il pulsante sopra i libri la cambia fino alla prossima apertura
-    settings.openAll = s.openAll === true;
+    settings.openAll = s.openAll === true && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);   // «schede sempre aperte» tolta il 16/11/2026: resta solo per le prove automatiche
     settings.sbnUrl = /^https:\/\//.test(L.str(s.sbnUrl)) ? L.str(s.sbnUrl) : '';
     settings.loanSnooze = Number(s.loanSnooze) || 0;
     settings.swiped = s.swiped === true;
@@ -285,7 +285,7 @@ function loadAll() {
     settings.camNative = s.camNative === true;                                      // foto con la fotocamera del telefono (flash del telefono)
     settings.torchCam = typeof s.torchCam === 'string' ? s.torchCam : '';            // obiettivo con la luce ('none' = nessuno, o non si accende davvero)
     settings.lightOk = s.lightOk === true;                                          // «Prova la luce»: vista accendersi
-    settings.quoteOcrAuto = s.quoteOcrAuto === true;                                // citazioni: leggi subito il testo delle foto
+    settings.quoteOcrAuto = false;                                                  // citazioni: il testo delle foto si legge quando tocchi «Leggi il testo» (opzione tolta il 16/11/2026)
     settings.donUntil = Number(s.donUntil) || 0;                                    // donazioni: richieste in pausa fino a
     settings.donNever = s.donNever === true;                                        // promemoria ogni 50 libri spento
     settings.donMs = typeof s.donMs === 'number' ? s.donMs : null;                  // ultimo traguardo gia' visto (multiplo di 50)
@@ -1814,7 +1814,7 @@ async function torchOnTrack(tr, on) {
 }
 function trackTorch(st) { try { var t = st && st.getVideoTracks()[0], c = t && t.getCapabilities ? t.getCapabilities() : {}; return !!c.torch; } catch (e) { return false; } }
 function lensMsg(t) { if (!$('#snap').hidden) $('#snapMsg').textContent = t; else if (scanning) scanMsg(t); else if (optOpen) $('#lensMsg').textContent = t; else toast(t); }
-/* Opzioni › App › «Fotocamera e luce»: prova gli obiettivi e mostra quali hanno la luce (per capire perche' non si accende) */
+/* Impostazioni › Aggiunta dei libri › «Fotocamera e luce»: prova gli obiettivi e mostra quali hanno la luce (per capire perche' non si accende) */
 function lensRows(list, pick) {
   return list.map(function (r) {
     return '<li><b>' + esc(r.label) + '</b><span>' + (r.ok ? (r.back === false ? 'anteriore' : r.back ? 'posteriore' : 'lato non indicato') + ' · ' + (r.torch ? '<em class="yes">luce sì</em>' : 'luce no') : 'non si apre') +
@@ -2394,26 +2394,36 @@ document.addEventListener('focusout', function (e) {               // finito di 
   setTimeout(function () { if (document.activeElement === t) return; delete auEditing[id]; var b = get(id); if (b && b.a.trim()) refreshRow(id); }, 120);
 });
 function auWikiUrl(t) { return 'https://it.wikipedia.org/wiki/' + encodeURIComponent(String(t).replace(/ /g, '_')); }
-var AU_WORDS = /scritt|autor|romanz|poet|saggist|giornalist|drammaturg|filosof|storic|letterat|narrat|fumett|sceneggiat|critic|traduttor|accademic|docent|scienziat|teolog|biograf|novellier/i;
+/* chi ha scritto un libro puo' fare qualsiasi mestiere: fotografi, cuochi, musicisti… (Sebastiao Salgado non veniva trovato: «fotografo», 16/11/2026) */
+var AU_WRITE = /scritt|autor|romanz|poet|saggist|giornalist|drammaturg|filosof|storic|letterat|narrat|fumett|sceneggiat|critic|traduttor|accademic|docent|scienziat|teolog|biograf|novellier/i;
+var AU_WORDS = /scritt|autor|romanz|poet|saggist|giornalist|drammaturg|filosof|storic|letterat|narrat|fumett|sceneggiat|critic|traduttor|accademic|docent|scienziat|teolog|biograf|novellier|fotograf|illustrat|disegnat|pittor|artist|scultor|architett|design|music|compositor|cantaut|cantant|regist|attor|attric|cuoc|chef|gastronom|politic|economist|psicolog|psicoanal|psichiatr|medic|biolog|chimic|fisic|matematic|astronom|astrofisic|geolog|naturalist|etolog|sociolog|antropolog|archeolog|linguist|filolog|pedagog|educat|divulgat|alpinist|esplorat|viaggiat|sportiv|calciator|allenator|ciclist|imprenditor|avvocat|magistrat|giurist|militar|diplomat|religios|monac|sacerdot|vescov|papa|santo|attivist|conduttor|comic|umorist|blogger|youtuber|influencer|editor|curator|insegnant|professor|ricercat|ingegner|informatic|inventor|stilist|fumettist/i;
 async function auLookup(name) {
   if (auCache[name]) return auCache[name];
   async function summary(title) {
     var j = await L.getJson(fetch, 'https://it.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title.replace(/ /g, '_')) + '?redirect=true', { waits: [], timeout: 8000 });
-    return j && j.type !== 'disambiguation' && j.extract ? { title: j.title, desc: L.str(j.description), text: L.str(j.extract), url: (j.content_urls && j.content_urls.mobile && j.content_urls.mobile.page) || auWikiUrl(j.title) } : null;
+    return j && j.type !== 'disambiguation' && j.extract ? { title: j.title, desc: L.str(j.description), text: L.str(j.extract), url: (j.content_urls && j.content_urls.mobile && j.content_urls.mobile.page) || auWikiUrl(j.title),
+      img: j.thumbnail && /^https:\/\/upload\.wikimedia\.org\//.test(j.thumbnail.source || '') ? j.thumbnail.source : '' } : null;   // foto dell'autore, se Wikipedia ce l'ha
   }
   var r = null;
   try { r = await summary(name); } catch (e) { if (!(e && e.status === 404)) throw e; }
-  if (!r || !AU_WORDS.test(r.desc + ' ' + r.text.slice(0, 300))) {          // nome ambiguo: cerco «nome scrittore»
+  var direct = r && AU_WORDS.test(r.desc + ' ' + r.text.slice(0, 300)) ? r : null;   // la voce col suo nome, se e' una persona con un mestiere
+  if (!r || !AU_WRITE.test(r.desc + ' ' + r.text.slice(0, 300))) {          // non e' (solo) uno scrittore: cerco «nome scrittore», magari e' un omonimo
+    r = null;
     var j = null;
-    try { j = await L.getJson(fetch, 'https://it.wikipedia.org/w/api.php?action=query&list=search&srlimit=3&format=json&origin=*&srsearch=' + encodeURIComponent(name + ' scrittore'), { waits: [], timeout: 8000 }); }
+    try { j = await L.getJson(fetch, 'https://it.wikipedia.org/w/api.php?action=query&list=search&srlimit=3&format=json&origin=*&srsearch=' + encodeURIComponent(name + ' scrittore'), { waits: [], timeout: 8000 }); if (!(j && j.query && j.query.search && j.query.search.length)) j = await L.getJson(fetch, 'https://it.wikipedia.org/w/api.php?action=query&list=search&srlimit=3&format=json&origin=*&srsearch=' + encodeURIComponent(name), { waits: [], timeout: 8000 }); }
     catch (e3) { if (!(e3 && e3.status)) throw e3; }              // risposta d'errore: come «nessun risultato»; senza rete: avviso
     var hits = (j && j.query && j.query.search) || [], want = L.norm(name).split(/\s+/).filter(function (w) { return w.length > 2; });
+    var other = null;                                   // con nomi ambigui vince chi scrive; un fotografo o un cuoco solo se non c'e' uno scrittore
     for (var i = 0; i < hits.length; i++) {
       var tn = L.norm(hits[i].title);
       if (!want.every(function (w) { return tn.indexOf(w) >= 0; })) continue;
-      try { var r2 = await summary(hits[i].title); if (r2 && AU_WORDS.test(r2.desc + ' ' + r2.text.slice(0, 300))) { r = r2; break; } } catch (e2) {}
+      try {
+        var r2 = await summary(hits[i].title), t2 = r2 ? r2.desc + ' ' + r2.text.slice(0, 300) : '';
+        if (r2 && AU_WRITE.test(t2)) { r = r2; break; }
+        if (r2 && !other && AU_WORDS.test(t2)) other = r2;
+      } catch (e2) {}
     }
-    if (r && !AU_WORDS.test(r.desc + ' ' + r.text.slice(0, 300))) r = null;
+    if (!r) r = direct || other;                        // nessuno scrittore: la voce col suo nome (fotografo, cuoco…) o il primo trovato
   }
   auCache[name] = r || { none: true };
   return auCache[name];
@@ -2421,7 +2431,7 @@ async function auLookup(name) {
 async function openAuthor(id, name) {
   auNow = { id: id, name: name };
   var mine = state.books.filter(function (x) { return !x.w && authorsOf(x).some(function (n) { return L.norm(n) === L.norm(name); }); }).length;
-  $('#auH').textContent = name; $('#auDesc').textContent = ''; $('#auSrc').hidden = true; $('#auWiki').hidden = true;
+  $('#auH').textContent = name; $('#auDesc').textContent = ''; $('#auSrc').hidden = true; $('#auWiki').hidden = true; auPic('');
   $('#auMine').textContent = mine > 1 ? 'I suoi libri nella tua libreria (' + mine + ')' : 'Il suo libro nella tua libreria';
   $('#auMine').hidden = mine < 2;
   $('#auTxt').innerHTML = '<p class="desc-wait"><span class="spin" aria-hidden="true"></span>Cerco chi è…</p>';
@@ -2432,6 +2442,7 @@ async function openAuthor(id, name) {
     if (!auNow || auNow.name !== name) return;
     if (r.none) { $('#auTxt').innerHTML = '<p class="desc-none">Non ho trovato una voce di Wikipedia su questo autore. Prova «Cerca sul web».</p>'; return; }
     $('#auDesc').textContent = r.desc ? r.desc.charAt(0).toUpperCase() + r.desc.slice(1) : '';
+    auPic(r.img || '', name);
     $('#auTxt').innerHTML = r.text.split(/\n+/).map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
     $('#auSrc').hidden = false;
     var w = $('#auWiki'); w.href = r.url; w.hidden = false;
@@ -2439,8 +2450,17 @@ async function openAuthor(id, name) {
     if (auNow && auNow.name === name) $('#auTxt').innerHTML = '<p class="desc-none">Connessione debole: non sono riuscito a cercare. Prova «Cerca sul web».</p>';
   }
 }
+function auPic(src, name) {                        // foto dell'autore da Wikipedia (Commons); se non c'e' o non si carica, niente riquadro
+  var f = $('#auPic'), im = f.querySelector('img');
+  f.hidden = true; f.classList.remove('big'); im.removeAttribute('src');
+  if (!src) return;
+  im.onload = function () { if (auNow && auNow.name === name) f.hidden = false; };
+  im.onerror = function () { f.hidden = true; };
+  im.alt = 'Foto di ' + name; im.src = src;
+}
 function closeAuthor() { $('#auSheet').hidden = true; auNow = null; }
 $('#auClose').addEventListener('click', closeAuthor);
+$('#auPic').addEventListener('click', function () { var f = $('#auPic'), on = !f.classList.contains('big'); f.classList.toggle('big', on); f.setAttribute('aria-label', on ? 'Rimpicciolisci la foto' : 'Ingrandisci la foto'); });
 $('#auSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeAuthor(); });
 $('#auWeb').addEventListener('click', function () { if (auNow) window.open('https://www.google.com/search?q=' + encodeURIComponent(auNow.name + ' scrittore'), '_blank', 'noopener'); });
 $('#auMine').addEventListener('click', function () { if (!auNow) return; var n = auNow.name; closeAuthor(); applyFacet('a', L.norm(n), n); });
@@ -4751,7 +4771,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 00:43", "n": "94.30", "note": "Menu riordinato"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 01:25", "n": "94.31", "note": "Pagina del libro più compatta"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5534,7 +5554,7 @@ function barsHTML(title, items, filterable) {
   var max = items.reduce(function (m, x) { return Math.max(m, x.n); }, 1);
   return '<section class="st-sec"><h3>' + esc(title) + '</h3><div class="bars">' + items.map(function (x) {
     var inner = '<span class="bl">' + esc(x.k) + '</span><span class="bt"><span class="bf" style="width:' + Math.max(2, Math.round(x.n / max * 100)) + '%"></span></span><span class="bv">' + x.n + '</span>';
-    return filterable ? '<button class="bar-row" data-q="' + esc(x.k) + '" title="Mostra questi libri">' + inner + '</button>' : '<div class="bar-row">' + inner + '</div>';
+    return filterable ? '<button class="bar-row" data-sf="' + filterable + '" data-sv="' + esc(x.k) + '" title="Mostra questi libri">' + inner + '</button>' : '<div class="bar-row">' + inner + '</div>';   // filterable: il campo (a, e, gen, sh)
   }).join('') + '</div></section>';
 }
 /* obiettivo di lettura dell'anno: libri segnati «Letto» con la data in quest'anno */
@@ -5582,8 +5602,8 @@ function openStats() {
   }).join('') + '</ul></section>' : '';
   $('#statsH').textContent = 'Statistiche · ' + (tab === 'wish' ? 'Desideri' : 'Libreria');
   $('#statsBody').innerHTML = '<div class="tiles">' + tiles + '</div>' + (tab === 'lib' ? goalHTML() : '') + loans + (tab === 'lib' ? seriesStatsHTML() : '') +
-    barsHTML('Autori più presenti', st.topAuthors, true) + barsHTML('Case editrici', st.topPublishers, true) +
-    barsHTML('Generi', st.topGenres, true) + barsHTML('Scaffali', st.topShelves, true) + barsHTML('Anno di pubblicazione, per decennio', st.byDecade, false) +
+    barsHTML('Autori più presenti', st.topAuthors, 'a') + barsHTML('Case editrici', st.topPublishers, 'e') +
+    barsHTML('Generi', st.topGenres, 'gen') + barsHTML('Scaffali', st.topShelves, 'sh') + barsHTML('Anno di pubblicazione, per decennio', st.byDecade, false) +
     barsHTML('Libri letti, per anno', st.byReadYear, false) +
     '<p class="msg">Tocca un nome per vedere quei libri.</p>';
   $('#statsSheet').hidden = false;
@@ -5957,7 +5977,6 @@ function allLoansText() {
   var n = state.books.filter(function (b) { return !b.w && b.p; }).length;
   return n ? (n === 1 ? '1 libro in prestito.' : n + ' libri in prestito, dai più vecchi.') + (document.querySelector('#fltLoan') && document.querySelector('#fltLoan').offsetParent ? ' Tocca di nuovo «Prestati» per vederli tutti.' : ' Tocca di nuovo «in prestito» per vederli tutti.') : 'Nessun libro in prestito.';
 }
-$('#optOpenAll').addEventListener('change', function (e) { settings.openAll = e.target.checked; openState = {}; saveSettings(); renderList(); });
 $('#tabLib').addEventListener('click', function () { setTab('lib'); });
 $('#tabWish').addEventListener('click', function () { setTab('wish'); });
 $('#btnView').addEventListener('click', function () {
@@ -5970,12 +5989,14 @@ $('#statsClose').addEventListener('click', function () { $('#statsSheet').hidden
 $('#statsBody').addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'goalIn') { e.preventDefault(); saveGoal(); } });
 $('#statsBody').addEventListener('click', function (e) {
   if (e.target.closest('#goalSave')) { saveGoal(); return; }
-  var r = e.target.closest('[data-q]');
+  var sq = e.target.closest('[data-q]');               // serie e collane: come «Vedi i libri della serie», con la ricerca
+  if (sq) { flt = ''; readFlt = ''; shFlt = ''; genFlt = ''; autFlt = ''; autName = ''; edFlt = ''; frFlt = ''; q = sq.dataset.q; $('#q').value = q; $('#statsSheet').hidden = true; collapseCards(); renderList(); updateSummary(); window.scrollTo({ top: 0 }); return; }
+  var r = e.target.closest('[data-sf]');
   if (!r) return;
-  q = r.dataset.q; $('#q').value = q; flt = '';
+  /* un vero filtro (autore, casa editrice, genere, scaffale), non una ricerca: si vede e si toglie dai filtri del menu (Piero, 16/11/2026) */
+  var f = r.dataset.sf, v = r.dataset.sv;
   $('#statsSheet').hidden = true;
-  renderList(); updateSummary();
-  window.scrollTo({ top: 0 });
+  applyFacet(f, facetKey(v), v);
 });
 function openExport() {
   var n = exportBooks().length;
@@ -6020,7 +6041,6 @@ $('#btnVerifyAll').addEventListener('click', function () {
   renderList(); touch(); updateSummary();
   toast(n + (n === 1 ? ' libro segnato come verificato.' : ' libri segnati come verificati.'), { label: 'Annulla', fn: function () { state.books = JSON.parse(snapshot); renderList(); touch(); updateSummary(); } });
 });
-$('#optExtra').addEventListener('change', function (e) { settings.extra = e.target.checked; saveSettings(); renderList(); });
 $('#btnTodo').addEventListener('click', runTodo);
 $('#btnCopy').addEventListener('click', copyTSV);
 $('#btnCsv').addEventListener('click', saveCSV);
@@ -6122,7 +6142,6 @@ $('#btnInstDiag').addEventListener('click', async function () {
   btn.disabled = false;
 });
 $('#gbKey').value = '';
-$('#optQuoteOcr').addEventListener('change', function (e) { settings.quoteOcrAuto = e.target.checked; saveSettings(); toast(e.target.checked ? 'Le foto delle citazioni verranno lette subito.' : 'Il testo delle foto si leggerà solo quando tocchi «Leggi il testo».'); });
 $('#optPrice').addEventListener('change', function (e) { settings.price = e.target.checked; saveSettings(); toast(settings.price ? 'Dopo ogni libro ti chiederò il prezzo (puoi sempre saltarlo).' : 'Non chiederò più il prezzo: puoi scriverlo quando vuoi nel campo «Costo» della scheda.'); });
 /* l'indirizzo del worker si puo' incollare anche senza https:// o con ?isbn=... della prova a mano */
 function cleanWorker(v) {
@@ -6271,7 +6290,7 @@ async function doInstall() {
   d.prompt();
   try { out = await d.userChoice; } catch (e) {}
   deferred = null;
-  if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Menu › Impostazioni › App.');
+  if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Menu › Impostazioni › Installazione sul telefono.');
   updateInstallUi();
 }
 window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; updateInstallUi(); });
@@ -6283,7 +6302,7 @@ $('#btnInstall').addEventListener('click', doInstall);
 $('#instGo').addEventListener('click', doInstall);
 $('#instLater').addEventListener('click', function () {
   settings.instSnooze = Date.now(); saveSettings(); updateInstallUi();
-  toast('Quando vuoi: Menu › Impostazioni › App.', { label: 'Annulla', fn: function () { settings.instSnooze = 0; saveSettings(); updateInstallUi(); } });
+  toast('Quando vuoi: Menu › Impostazioni › Installazione sul telefono.', { label: 'Annulla', fn: function () { settings.instSnooze = 0; saveSettings(); updateInstallUi(); } });
 });
 $('#instOk').addEventListener('click', function () { closeInstallHelp(); });
 $('#instSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeInstallHelp(); });
@@ -6348,7 +6367,6 @@ renderSvc();
 $('#optName').value = settings.name || '';
 renderOwner();
 $('#optPrice').checked = settings.price;
-$('#optQuoteOcr').checked = !!settings.quoteOcrAuto;
 paintSound();
 $('#optCamNative').checked = !!settings.camNative;
 paintLensState();
@@ -6394,8 +6412,6 @@ function paintSumOpts() {
 });
 $('#summary').addEventListener('click', function (e) { if (e.target.closest('[data-sum="loan"]')) $('#fltLoan').click(); else if (e.target.closest('[data-sum="alert"]')) reopenNotices(); });
 $('#scanSound').addEventListener('click', function () { setSound(settings.sound === false, true); });
-$('#optExtra').checked = settings.extra;
-$('#optOpenAll').checked = settings.openAll;
 (function () {                                   // ?vista=elenco / ?vista=copertine nell'indirizzo: quella vista per questa apertura (comodo per i link e per le prove)
   var m = /[?&]vista=(elenco|copertine)\b/.exec(location.search);
   if (m) settings.view = m[1] === 'elenco' ? 'list' : 'grid';

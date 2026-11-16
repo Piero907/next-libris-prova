@@ -57,7 +57,7 @@ function doD(card, id) {
   if (!chips.children.length) chips.remove();
   /* lettura: gli stessi pulsanti della scheda (Da leggere / In lettura / Letto, stelle, data) */
   var rd = q(card, '.read');
-  if (rd) { rd.classList.add('cv-readbox'); v.insertBefore(rd, q(v, '.cv-note')); }
+  if (rd) { rd.classList.add('cv-readbox'); q(v, '.cv-ht').appendChild(rd); }   // lettura e voto incolonnati sotto casa editrice, anno, pagine (Piero, 16/11/2026)
   head.parentNode.insertBefore(v, head);
   card.classList.add('cv-view');
   /* descrizione: sobria, subito sotto la riga «editore · anno · pagine», senza riquadro; se non c'e' ancora, un link per cercarla */
@@ -83,6 +83,14 @@ function doD(card, id) {
         ds.appendChild(more);
       }
     }
+  }
+  /* «Letto il»: sotto la descrizione e la nota (Piero, 16/11/2026); stelle e stato restano accanto alla copertina */
+  var lr = q(v, '.cv-readbox .f-rd');
+  if (lr) {
+    var after = q(v, '.cv-note') || q(v, '.cv-desc') || q(v, '.cv-hero');
+    var box = document.createElement('div'); box.className = 'cv-rdate';
+    box.appendChild(lr);
+    after.parentNode.insertBefore(box, after.nextSibling);
   }
   /* etichette-filtro: in fondo, prima di Presta e Cerca sul web */
   if (chips.parentNode) {

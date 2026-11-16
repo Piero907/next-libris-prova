@@ -32,8 +32,16 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .cv-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
 .cv-au .au-name{padding:0;border:0;background:none;color:var(--ink);font:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
 .cv-au .au-sep{color:var(--muted)}
-.cv-readbox{margin:2px 0 0}
+.cv-readbox{margin:10px 0 0;gap:6px 8px}
 .cv-readbox>.lbl{display:none}
+/* lettura e voto compatti, nella colonna accanto alla copertina */
+.cv-readbox>.seg{flex:0 1 auto;max-width:100%}
+.cv-readbox>.seg button{min-height:34px;padding:5px 9px;font-size:13px;white-space:nowrap}
+.cv-readbox .stars{flex-basis:100%;margin-left:-4px}
+.cv-readbox .stars .star{width:32px;height:32px;font-size:21px;padding:0}
+.cv-rdate .f-rd{min-width:0;display:flex;align-items:center;justify-content:flex-start;gap:10px;margin:0;padding:0;font-size:14px}
+.cv-rdate .f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:14px}
+.cv-rdate .f-rd input{min-height:36px;padding:4px 6px;font-size:14.5px;width:160px;flex:0 1 160px}
 /* D: azioni con la scritta sotto la riga delle icone */
 .cv-acts2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px;padding-top:12px;border-top:1px solid var(--line)}
 .cv-acts2 .ico.act{min-height:40px}

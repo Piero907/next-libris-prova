@@ -1561,3 +1561,13 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .dsub[hidden]{display:none}
 .dmenu .dopt small.dbk{margin-top:3px;color:var(--ink);opacity:.7}
 @media (prefers-reduced-motion:reduce){.dmenu .dset-c{transition:none}}
+/* scheda dell'autore: foto da Wikipedia accanto al nome (16/11/2026) */
+.au-head{display:flex;gap:14px;align-items:center}
+.au-head>div{min-width:0}
+.au-head h2{margin:0}
+.au-pic{flex:0 0 72px;width:72px;height:88px;padding:0;border:0;border-radius:10px;overflow:hidden;background:var(--surface2);cursor:zoom-in;box-shadow:0 2px 8px #0002}
+.au-pic[hidden]{display:none}
+.au-pic img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block}
+.au-pic:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.au-head:has(.au-pic.big){flex-direction:column;align-items:flex-start}
+.au-pic.big{flex-basis:auto;width:min(220px,60vw);height:auto;aspect-ratio:4/5;cursor:zoom-out}
