@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 97.5 · 16/11/2026 10:43
+- **I libri «In lettura» in cima**, sia in Elenco sia in Copertine, nella sezione «In lettura»; sotto «Gli altri libri». Toccando il titolo una sezione si chiude o si riapre, e l'app se lo ricorda.
+- Con una ricerca, un filtro o un altro ordine (per voto, titolo…) l'elenco torna uno solo.
+
 ## Prova 97.4 · 16/11/2026 10:24
 - «Sono a pagina» al centro, allineato con i libricini.
 

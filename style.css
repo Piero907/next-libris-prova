@@ -651,14 +651,14 @@ html[data-look="nuovo"] .dock{background:color-mix(in srgb,var(--bg) 96%,transpa
 html[data-look="nuovo"] .f textarea:focus,html[data-look="nuovo"] .f input:focus{background:var(--accent-soft)}
 
 /* l'elenco chiuso e' un indice continuo, come uno schedario; il libro aperto si solleva */
-html[data-look="nuovo"] #list>.row.closed{margin:0;border-radius:0;border-bottom-width:0}
-html[data-look="nuovo"] #list>.row.closed .sum{border-radius:inherit;min-height:84px}
-html[data-look="nuovo"] #list>.row.closed:first-child,
-html[data-look="nuovo"] #list>.row:not(.closed)+.row.closed{border-top-left-radius:14px;border-top-right-radius:14px}
-html[data-look="nuovo"] #list>.row.closed:last-child,
-html[data-look="nuovo"] #list>.row.closed:has(+ .row:not(.closed)){border-bottom-left-radius:14px;border-bottom-right-radius:14px;border-bottom-width:1px;margin-bottom:12px}
-html[data-look="nuovo"] #list>.row:not(.closed){margin:0 0 12px;border-radius:16px;border-color:color-mix(in srgb,var(--line) 70%,transparent);box-shadow:var(--lift)}
-html[data-look="nuovo"] #list>.row.bad{border-color:var(--bad)}
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row.closed{margin:0;border-radius:0;border-bottom-width:0}
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row.closed .sum{border-radius:inherit;min-height:84px}
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row.closed:first-child,
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row:not(.closed)+.row.closed{border-top-left-radius:14px;border-top-right-radius:14px}
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row.closed:last-child,
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row.closed:has(+ .row:not(.closed)){border-bottom-left-radius:14px;border-bottom-right-radius:14px;border-bottom-width:1px;margin-bottom:12px}
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row:not(.closed){margin:0 0 12px;border-radius:16px;border-color:color-mix(in srgb,var(--line) 70%,transparent);box-shadow:var(--lift)}
+html[data-look="nuovo"] :is(#list,#list .shelf-b)>.row.bad{border-color:var(--bad)}
 
 /* copertine come piccoli volumi: dorso in ombra a sinistra */
 html[data-look="nuovo"] .sum-img,html[data-look="nuovo"] .thumb:has(img),html[data-look="nuovo"] .cover .art{position:relative;border:0;border-radius:2px 5px 5px 2px;box-shadow:0 1px 1px rgba(16,22,40,.25),0 3px 9px rgba(16,22,40,.14)}
@@ -1603,3 +1603,15 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .tag.read.has-pp{background-image:linear-gradient(var(--accent),var(--accent));background-repeat:no-repeat;background-size:var(--pp) 3px;background-position:0 100%}
 .cover .pp-cov{position:absolute;left:8px;right:8px;bottom:8px;height:5px;border-radius:3px;background:rgba(255,255,255,.55);overflow:hidden;z-index:2;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
 .cover .pp-cov i{display:block;height:100%;background:var(--accent)}
+
+/* «In lettura» in cima all'elenco e alle copertine, in sezioni che si aprono e chiudono (Piero, 16/11/2026) */
+.shelf{margin:0 0 14px}
+.shelf-h{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:0 0 8px;padding:6px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font:600 16px var(--font-body);text-align:left;cursor:pointer}
+.shelf-h svg.sh-ic{width:20px;height:20px;fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:1.7;stroke-linejoin:round;flex:none}
+.shelf-h .sh-n{font-size:13px;font-weight:600;min-width:24px;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);text-align:center}
+.shelf-h .sh-c{margin-left:auto;width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2;transition:transform .2s}
+.shelf-h[aria-expanded="false"] .sh-c{transform:rotate(-90deg)}
+.shelf-h[aria-expanded="false"]{margin-bottom:0}
+.shelf-h:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.shelf-b[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.shelf-h .sh-c{transition:none}}

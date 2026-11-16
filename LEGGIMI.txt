@@ -651,6 +651,15 @@ non ne stai leggendo un altro, compare "Hai finito ... E adesso?" con un
 libro da leggere: "Inizio questo", "Un altro", "Tutti i suggerimenti";
 la X lo chiude per quel libro.
 
+LIBRI IN LETTURA IN CIMA
+------------------------
+In Libreria, con l'ordine "Piu' recenti" e senza ricerca ne' filtri, i
+libri "In lettura" stanno in cima, nella sezione "In lettura" (con il
+segnalibro e quanti sono); sotto c'e' "Gli altri libri". Vale sia in
+Elenco sia in Copertine. Toccando il titolo di una sezione la si chiude o
+la si riapre, e l'app se lo ricorda. Con una ricerca, un filtro o un
+altro ordine (per voto, titolo...) l'elenco torna uno solo.
+
 BARRA IN BASSO E AVVISI
 -----------------------
 In basso: Libreria, Desideri, + (Scansiona, Foto, Digita, Ce l'ho
