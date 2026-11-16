@@ -72,3 +72,9 @@ body.selecting .fri-note,body.scanning .fri-note{display:none}
 .loan-fri .fr-ok{color:var(--accent);font-weight:600}
 
 .fri .fr-conf .row-btns .btn,#recvSheet .row-btns .btn{flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px}   /* due pulsanti affiancati anche a 360 px */
+/* avviso «… dice di averti restituito»: due pulsanti */
+.fri-ret{flex-wrap:wrap;padding:6px 8px}
+.fri-ret .fn-open{flex:1 1 220px;cursor:default}
+.fri-ret .fn-acts{display:flex;gap:6px;margin-left:auto;padding:0 2px 4px}
+.fri-ret .fn-go{border:0;color:inherit;font:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:38px}
+.fri-ret .fn-yes{background:var(--surface);color:var(--accent)}

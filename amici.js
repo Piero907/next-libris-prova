@@ -327,11 +327,11 @@ function friendView() {
     }).join('') + '</ul>';
   }
   h += '</section>';
-  var tra = swaps.filter(function (s) { return (s.da === view || s.a === view) && (s.stato === 'aperto' || s.tipo === 'regalo'); });
+  var tra = swaps.filter(function (s) { return (s.da === view || s.a === view) && (s.stato !== 'chiuso' || s.tipo === 'regalo'); });
   h += '<section class="fr-sec"><h3 class="fr-h">Tra voi</h3>';
   h += tra.length ? '<ul class="fr-list">' + tra.map(function (s) {
     var t = '«' + esc((s.libro && s.libro.t) || 'un libro') + '»', mio = s.da === uid();
-    var txt = s.tipo === 'prestito' ? (mio ? 'Gli hai prestato ' + t : 'Ti ha prestato ' + t) : (mio ? 'Gli hai regalato ' + t : 'Ti ha regalato ' + t);
+    var txt = s.tipo === 'prestito' ? (mio ? 'Gli hai prestato ' + t : 'Ti ha prestato ' + t) + (s.stato === 'reso' ? ' · restituzione da confermare' : '') : (mio ? 'Gli hai regalato ' + t : 'Ti ha regalato ' + t);
     return '<li class="fr-row"><span class="fr-who fr-swap">' + txt + '<small>' + esc(L_date(s.creato)) + '</small></span></li>';
   }).join('') + '</ul>' : '<p class="fr-small">Nessun prestito o regalo in corso.</p>';
   h += '<p class="fr-small">Per prestargli o regalargli un libro: apri il libro › «Presta, vendi o regala» › scegli ' + n + '. Lo vedrà subito nella sua Libreria.</p></section>';
@@ -380,7 +380,7 @@ NL.on('recv', function (id) {
   var el = document.getElementById('recvSheet');
   if (!el) {
     el = document.createElement('div'); el.className = 'sheet fri'; el.id = 'recvSheet'; el.hidden = true;
-    el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="recvH"><h2 id="recvH">Prestato da un amico</h2><p class="msg" id="recvTxt"></p>' +
+    el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="recvH"><h2 id="recvH">Prestato da un amico</h2><p class="msg" id="recvTxt"></p><p class="fr-small" id="recvSub"></p>' +
       '<div class="row-btns"><button class="btn" type="button" id="recvNo">Non ancora</button><button class="btn primary" type="button" id="recvYes">Restituito</button></div></div>';
     document.body.appendChild(el);
     var shut = function () { el.hidden = true; recvId = ''; };
@@ -390,12 +390,15 @@ NL.on('recv', function (id) {
     el.querySelector('#recvYes').addEventListener('click', async function () {
       var x = NL.get(recvId); shut(); if (!x) return;
       var sx = x.sx, who = x.sda;
-      x.xs = 'b'; x.xa = who; x.xd = NL.today(); NL.save(); NL.refresh();
-      NL.toast('Restituito ' + aChi(who) + '. Lo vede anche lui.');
-      if (sx) try { await rpc('chiudi_scambio', { id: sx }); } catch (e) { NL.toast('Senza rete: ' + who + ' lo vedrà più tardi.'); }
+      if (!sx) { x.xs = 'b'; x.xa = who; x.xd = NL.today(); NL.save(); NL.refresh(); return; }
+      try { await rpc('segnala_reso', { id: sx }); }                 // il prestito lo chiude chi ha prestato, quando conferma
+      catch (e) { NL.toast(e.code === 'net' ? 'Senza rete: riprova quando c\'è la connessione.' : nice(e)); return; }
+      x = NL.get(x.id); if (x) { x.sk = 'q'; NL.save(); NL.refresh(); }
+      NL.toast(who + ' deve confermare di averlo ricevuto.');
     });
   }
-  document.getElementById('recvTxt').innerHTML = 'Hai restituito <b>«' + esc(b.t || 'questo libro') + '»</b> ' + esc(aChi(b.sda)) + '? Il libro resta nel tuo elenco come storico, in grigio; anche ' + esc(b.sda) + ' lo vedrà restituito.';
+  document.getElementById('recvTxt').innerHTML = 'Hai restituito <b>«' + esc(b.t || 'questo libro') + '»</b> ' + esc(aChi(b.sda)) + '?';
+  document.getElementById('recvSub').textContent = b.sda + ' dovrà confermare di averlo ricevuto. Poi il libro resta nel tuo elenco come storico, in grigio.';
   el.hidden = false;
 });
 /* applica quello che è arrivato: libri nuovi per chi riceve, restituzioni per tutti e due */
@@ -416,8 +419,12 @@ async function applySwaps() {
       }
       try { await rpc('segna_visto', { id: s.id }); } catch (e) {}
     }
+    if (s.tipo === 'prestito' && local && s.a === me_ && !local.xs) {           // restituzione: «da confermare» o rifiutata
+      if (s.stato === 'reso' && local.sk === 'p') { local.sk = 'q'; changed = true; }
+      if (s.stato === 'aperto' && local.sk === 'q') { local.sk = 'p'; changed = true; NL.toast((s.nome_da || 'Il tuo amico') + ' dice di non avere ancora ricevuto «' + (local.t || 'il libro') + '».'); }
+    }
     if (s.stato === 'chiuso' && s.tipo === 'prestito' && local) {
-      if (s.a === me_ && local.sk === 'p' && !local.xs) { local.xs = 'b'; local.xa = local.sda || s.nome_da || ''; local.xd = String(s.chiuso || '').slice(0, 10) || NL.today(); changed = true;
+      if (s.a === me_ && (local.sk === 'p' || local.sk === 'q') && !local.xs) { local.xs = 'b'; local.xa = local.sda || s.nome_da || ''; local.xd = String(s.chiuso || '').slice(0, 10) || NL.today(); changed = true;
         NL.toast((s.nome_da || 'Il tuo amico') + ' ha segnato «' + (local.t || 'il libro') + '» come restituito.'); }
       if (s.da === me_ && local.p) { local.p = ''; local.pd = ''; local.sx = ''; changed = true;
         NL.toast((s.nome_a || 'Il tuo amico') + ' ti ha restituito «' + (local.t || 'il libro') + '».'); }
@@ -426,7 +433,37 @@ async function applySwaps() {
   if (changed) { NL.save(); NL.refresh(); }
   if (got.length) { var g = (rd(K_GOT) || []).concat(got.map(function (s) { return { id: s.id, t: (s.libro && s.libro.t) || '', da: s.nome_da || '', k: s.tipo }; })).slice(-20); wr(K_GOT, g); }
   var p = pend(); if (p.length) { setPend([]); p.forEach(function (x) { sendSwap(x.id, x.kind, x.who, null); }); }
-  paintGot();
+  paintGot(); paintRet();
+}
+/* avviso in cima per chi ha prestato: «Bruno dice di averti restituito «X»»: Confermo / Non ancora */
+function paintRet() {
+  var r = swaps.filter(function (s) { return s.da === uid() && s.tipo === 'prestito' && s.stato === 'reso'; }), box = document.getElementById('friRet');
+  if (!box) {
+    if (!r.length) return;
+    var anchor = document.getElementById('nxBox') || document.getElementById('donAsk') || document.getElementById('list'); if (!anchor) return;
+    box = document.createElement('section'); box.id = 'friRet'; box.className = 'fri-note fri-ret lay-note lay-first'; box.hidden = true;
+    box.innerHTML = '<div class="fn-open"><span class="fn-ico" aria-hidden="true">' + ICON + '</span><span class="fn-t"><b id="friRetT"></b><small>L\'hai ricevuto?</small></span></div>' +
+      '<div class="fn-acts"><button type="button" class="fn-go" id="friRetNo">Non ancora</button><button type="button" class="fn-go fn-yes" id="friRetYes">Confermo</button></div>';
+    anchor.parentNode.insertBefore(box, anchor);
+    box.addEventListener('click', async function (e) {
+      var yes = e.target.closest('#friRetYes'), no = e.target.closest('#friRetNo'); if (!yes && !no) return;
+      var s = swaps.filter(function (x) { return x.id === box.dataset.id; })[0]; if (!s) return;
+      e.target.disabled = true;
+      try {
+        if (yes) {
+          await rpc('chiudi_scambio', { id: s.id }); s.stato = 'chiuso';
+          var b = NL.books().filter(function (x) { return x.sx === s.id; })[0];
+          if (b) { b.p = ''; b.pd = ''; b.sx = ''; NL.save(); NL.refresh(); }
+          NL.toast('Prestito chiuso: «' + ((s.libro && s.libro.t) || 'il libro') + '» è di nuovo tuo.');
+        } else { await rpc('rifiuta_reso', { id: s.id }); s.stato = 'aperto'; NL.toast((s.nome_a || 'Il tuo amico') + ' vedrà che non l\'hai ancora ricevuto.'); }
+      } catch (x2) { NL.toast(nice(x2)); }
+      e.target.disabled = false; paintRet(); NL.summary && NL.summary();
+    });
+  }
+  box.hidden = !r.length;
+  if (!r.length) return;
+  box.dataset.id = r[0].id;
+  document.getElementById('friRetT').textContent = (r[0].nome_a || 'Il tuo amico') + ' dice di averti restituito «' + ((r[0].libro && r[0].libro.t) || 'un libro') + '»';
 }
 /* avviso in cima: «Anna ti ha prestato «X»: è nella tua Libreria» */
 function paintGot() {

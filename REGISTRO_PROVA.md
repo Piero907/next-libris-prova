@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.5 · 16/11/2026 15:27
+- **La restituzione la conferma chi ha prestato**: se è l'amico a dire «Restituito», il prestito resta «da confermare»; a te compare in cima «… dice di averti restituito …» con Confermo o Non ancora. Se lo segni tu, si chiude subito come prima.
+
 ## Prova 98.4 · 16/11/2026 15:18
 - **I desideri agli amici**: in Amici l'interruttore «Gli amici vedono i miei desideri» (spento di partenza). Toccando un amico vedi i suoi desideri e puoi dire «Te lo regalo io»: lui non lo vede, gli altri amici sì, così non lo regalate in due.
 - **Prestiti e regali tra amici**: in «Presta, vendi o regala» scegli un amico con un tocco. Il libro gli compare subito nella sua Libreria con «Prestato da …» o «Regalato da …» (un regalo che era tra i suoi desideri ci passa da solo).

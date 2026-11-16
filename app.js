@@ -216,7 +216,7 @@ function cleanBook(x) {
     xd: /^\d{4}-\d\d-\d\d$/.test(L.str(x.xd)) ? x.xd : '',
     xa: L.str(x.xa).slice(0, 80),
     sx: /^[0-9a-f-]{36}$/.test(L.str(x.sx)) ? x.sx : '',                 // prestito o regalo tra amici dell'app (modulo amici, 16/11/2026)
-    sk: x.sk === 'p' || x.sk === 'r' ? x.sk : '', sda: L.str(x.sda).slice(0, 30),   // ricevuto: in prestito (p) o in regalo (r), da chi
+    sk: ['p', 'q', 'r'].indexOf(x.sk) >= 0 ? x.sk : '', sda: L.str(x.sda).slice(0, 30),   // q: prestito ricevuto che hai restituito, da confermare da chi l'ha prestato;   // ricevuto: in prestito (p) o in regalo (r), da chi
     fav: !!x.fav,                                   // preferito
     fr: L.str(x.fr).slice(0, 30), fl: L.str(x.fl).slice(0, 40),     // ricevuto da (nome) e da quale lista
     ds: L.str(x.ds).slice(0, L.DESC_MAX + 1), dsf: x.dsf === 'g' || x.dsf === 'o' ? x.dsf : '',   // descrizione e fonte (Google, Open Library)
@@ -1473,6 +1473,7 @@ function goneTag(b) {
 function recvTag(b) {
   if (!b.sk || !b.sda || b.xs) return '';
   if (b.sk === 'p') return '<span class="tag loan tap recv" data-act="recv" role="button" tabindex="0" title="Te l\'ha prestato ' + esc(b.sda) + '. Toccalo quando l\'hai restituito.">Prestato da ' + esc(b.sda) + '</span>';
+  if (b.sk === 'q') return '<span class="tag loan wait" title="Hai detto di averlo restituito: ' + esc(b.sda) + ' deve confermare">Restituito ' + esc(aChi(b.sda)) + ' · da confermare</span>';
   return '<span class="tag from">Regalato da ' + esc(b.sda) + '</span>';
 }
 function prestatoA(p) { return 'Prestato ' + (/^[aA]/.test(p) ? 'ad ' : 'a ') + p; }   // «ad Anna», «a Marco»
@@ -4856,7 +4857,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 15:18", "n": "98.4", "note": "I desideri agli amici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 15:27", "n": "98.5", "note": "La restituzione la conferma chi ha prestato"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
