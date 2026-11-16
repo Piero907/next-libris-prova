@@ -113,6 +113,7 @@ var busy = null, again = false, lastErr = '', tAuto = null;
 function schedule(ms) { if (!auth) return; clearTimeout(tAuto); tAuto = setTimeout(function () { run(false); }, ms); }
 async function run(manual) {
   if (!auth) return false;
+  if (NL.guest && NL.guest()) { schedule(5000); return false; }   // stai guardando la libreria di un amico: si sincronizza quando torni alla tua
   if (busy) { again = true; return busy; }
   busy = (async function () {
     try { await doSync(); lastErr = ''; if (manual) NL.toast('Libri sincronizzati.'); return true; }
@@ -140,7 +141,7 @@ async function doSync() {
     try { await putCopy(NL.stored()); } catch (e) { throw Err('Non riesco a salvare la copia di sicurezza sul telefono: sincronizzazione ferma.', 'copy'); }
     sync = { uid: uid, last: '', h: {}, when: 0, n: 0 };
   }
-  var books = NL.books(), byId = {};
+  var books = NL.myBooks ? NL.myBooks() : NL.books(), byId = {};   // sempre i tuoi libri, anche se stai guardando quelli di un amico
   books.forEach(function (b) { byId[b.id] = b; });
   // 1) scarico quello che e' cambiato online
   var since = sync.last ? new Date(Date.parse(sync.last) - MARGIN).toISOString() : '';
@@ -399,7 +400,7 @@ async function onClick(e) {
       sync = {}; saveSync(); logoutLocal(); NL.toast('Account eliminato. I libri restano su questo telefono.');
     } else if (act === 'restore') {
       var c = await getCopy(); if (!c) return;
-      var books = NL.books(); books.splice.apply(books, [0, books.length].concat(c.books.map(NL.clean).filter(Boolean)));
+      var books = NL.myBooks ? NL.myBooks() : NL.books(); books.splice.apply(books, [0, books.length].concat(c.books.map(NL.clean).filter(Boolean)));
       NL.save(); NL.refresh(); NL.toast('Libri ripristinati dalla copia.'); schedule(1500);
     }
   } catch (x) { NL.toast(x.message); }

@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.7 · 16/11/2026 16:10
+- **La libreria di un amico come la tua**: toccando un amico si apre la sua libreria nella schermata principale, con gli stessi filtri, la ricerca, Copertine ed Elenco (Libreria e Desideri). In cima: amici e libri in comune, cosa sta leggendo, cosa ha letto di recente, «Solo quelli che non hai». Indietro torna ai tuoi libri.
+- Sulla scheda di un suo libro: **Aggiungi ai miei desideri**, «Ce l'hai anche tu», **Me lo presti?** (lui risponde Presta o No da un avviso) e, sui suoi desideri, «Te lo regalo io».
+- **Consigli**: in «Condividi» di un libro scegli un amico e glielo consigli; lui lo trova in Amici e lo mette nei desideri con un tocco. Nei tuoi desideri vedi quali amici ce l'hanno.
+- **Chiave Google e worker SBN condivisi**: in Amici li condividi con un amico; li usate tutti e due e puoi smettere quando vuoi.
+
 ## Prova 98.6 · 16/11/2026 15:35
 - **La tua libreria agli amici, se vuoi**: in Amici l'interruttore «Gli amici vedono la mia libreria» (spento di partenza). Vedono titolo, autore, copertina, se l'hai letto e il voto; note, citazioni, appunti, prezzi, scaffali e prestiti restano tuoi.
 - Nella pagina di un amico, in fondo, «La sua libreria», con «Ce l'hai anche tu» sui libri che avete tutti e due e la ricerca.
