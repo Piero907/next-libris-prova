@@ -1,7 +1,30 @@
 # Registro delle modifiche di Next Libris
 
-Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in Opzioni › App.
+Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in fondo al menu.
 L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
+
+## Versione 95 · 16/11/2026
+- **Nuovo aspetto, con la barra in basso:** Libreria, Desideri, il **+** (Scansiona, Foto, Digita, Ce l'ho già?), **Per te** (Suggerimenti, trimestre, citazioni, Statistiche, Backup) e Menu. In alto restano filtri, ricerca e vista.
+- **Avvisi in cima, uno alla volta:** prestiti, «Hai finito…», trimestre, installazione e sostieni stanno sopra la ricerca e **si scorrono col dito**; i pallini dentro l'avviso dicono quanti sono. Se ne chiudi uno che vale ancora, accanto al riepilogo compare un **triangolino** che li fa tornare.
+- **Pagina del libro:** la scheda aperta si legge come una pagina. In alto solo icone su una riga (preferito, Desideri, condividi, la matita per modificare, elimina); copertina (si ingrandisce; senza copertina la cerchi o la fotografi), titolo, autore, editore, anno, pagine; subito sotto una striscia con **Da leggere / In lettura / Letto, le stelle e «Letto il»**; la descrizione in tre righe con la freccetta per aprirla; le **etichette sono filtri**; in fondo «Presta, vendi o regala» e «Cerca sul web». Nei Desideri ci sono anche il preferito e «Presta, vendi o regala».
+- **Il tuo trimestre in libri:** ogni tre mesi un riepilogo da sfogliare come le storie (libri letti, pagine, generi, autore del trimestre, libri nuovi, citazioni) con l'immagine da condividere. Si apre anche dal menu; si spegne in Impostazioni › Aspetto.
+- **Menu riordinato:** in alto Filtri, Suggerimenti, Citazioni, Statistiche e trimestre; poi «La tua libreria» (Sistema l'elenco, Backup con la data dell'ultimo); **tutte le impostazioni sotto la voce «Impostazioni»**, che si apre quando la tocchi (l'ingranaggio in alto la apre già); Sostieni e versione in fondo.
+- **«Aggiornato in questa versione»:** dopo un aggiornamento compare una volta la pagina con le novità, dalle più importanti.
+- **Autore:** il profilo di Wikipedia ora si trova per qualsiasi mestiere (fotografi, cuochi, musicisti…), con **la sua foto** se c'è; con nomi uguali vince chi scrive.
+- **Suoni diversi per ogni cosa:** bip per il codice letto, bip basso per il doppione, due bip per «ce l'hai già», e un suono di errore quando il codice è letto ma il libro non si trova.
+- **Libri pubblicati con Amazon (ISBN 979-8):** se non si trovano, la casa editrice diventa «Amazon (pubblicazione in proprio)» e la scheda propone «Fotografa la copertina» e «Cerca sul web».
+- Impostazioni riordinate: in **Aspetto** tema, colori e caratteri vicini, poi «All'apertura mostra» e il riepilogo in alto; «Schede e prezzo» diventa **«Aggiunta dei libri»** (prezzo, suoni, fotocamera del telefono, prova della luce); «App» diventa **«Installazione sul telefono»**, con la spiegazione.
+- Tolte tre opzioni, ora fisse: le schede si aprono quando le tocchi; scaffale, genere, pagine e note sempre visibili; il testo delle foto delle citazioni si legge con «Leggi il testo».
+- Riepilogo in alto con le sue opzioni: valore in euro (spento), «N in prestito» (acceso, toccandolo vedi solo quelli), «non più in libreria» (spento), «Conferma del salvataggio» (spenta).
+- **Il filtro attivo si vede sempre** sotto la ricerca con la sua ×, anche «In prestito»; dalle Statistiche, toccando un autore, una casa editrice, un genere o uno scaffale si apre un filtro.
+- Dalle Copertine: aprendo un libro e tornando indietro si torna alle Copertine, allo stesso punto.
+- Le schede «Non trovato» non si aprono più tutte insieme (togliendo un filtro, cambiando vista, riaprendo l'app): si apre da sola solo quella appena aggiunta.
+- Toccando un'etichetta, l'elenco filtrato parte dall'inizio.
+- Suggerimenti: una serie o collana conta come un libro solo per scegliere autori e generi.
+- «Presta, vendi o regala» non apre più subito la tastiera su «A chi».
+- Il file di backup ha nel nome anche l'ora.
+- «Aggiorna adesso» scarica davvero tutti i file nuovi.
+- Sistemato l'aspetto della scelta Copertine / Elenco in Impostazioni › Aspetto.
 
 ## Versione 94 · 15/11/2026
 - **Suggerimenti** (menu › Suggerimenti), con due schede:

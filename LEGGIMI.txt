@@ -92,8 +92,8 @@ COME SI USA
 - Aggiornamenti: l'app parte sempre subito dalla copia salvata sul telefono
   (anche senza rete) e intanto scarica la versione nuova, che vedi
   all'apertura successiva. Per averla subito: Menu > "Aggiorna adesso".
-- Sostieni Next Libris: l'app e' gratis. Nel menu (scheda Opzioni) e in
-  Opzioni > App c'e' "Sostieni Next Libris": si sceglie l'importo (2, 3,
+- Sostieni Next Libris: l'app e' gratis. Nel menu e in Impostazioni >
+  Installazione sul telefono c'e' "Sostieni Next Libris": si sceglie l'importo (2, 3,
   5 euro o "Altro") e "Dona con PayPal" apre paypal.me/PieroRagusa907.
   In cima all'elenco una riga lo ricorda, dopo 5 accessi all'app
   (tornarci dopo almeno 30 minuti conta come accesso); la x la nasconde
@@ -105,13 +105,13 @@ COME SI USA
 - Dopo un aggiornamento compare una volta "Aggiornato in questa versione"
   con l'elenco delle novita', dalle piu' importanti ai ritocchi;
   "Tutte le novita'" apre il registro completo.
-- Novita': in Opzioni > App, "Novita' delle versioni" apre dentro l'app
+- Novita': nel menu, in fondo, "Novita' delle versioni" apre dentro l'app
   il registro delle modifiche, versione per versione, dalla piu' recente
   (quella in uso e' evidenziata). Il testo e' REGISTRO_MODIFICHE.md: l'app
   ne tiene una copia sul telefono, quindi si legge anche senza rete.
-  Indietro o "Chiudi" tornano alle Opzioni.
+  Indietro o "Chiudi" tornano al menu.
 - In alto: "Next Libris" e sotto "Libreria di <il tuo nome>". Senza nome
-  c'e' "Scrivi il tuo nome", che apre Opzioni > Condivisione.
+  c'e' "Scrivi il tuo nome", che apre Impostazioni > Condivisione.
 - Scheda aperta: in alto i pulsanti con la scritta ("Presta, vendi o
   regala", che poi mostra lo stato: Prestato, Venduto o Regalato;
   "Desideri" o
@@ -125,8 +125,11 @@ COME SI USA
   Il prezzo si scrive nel riquadro che compare dopo ogni libro, oppure
   nel campo "Costo".
 - Autore: quando c'e', il nome si tocca e apre chi e' (breve profilo da
-  Wikipedia), con "I suoi libri nella tua libreria", "Cerca sul web" e
-  "Apri su Wikipedia"; con piu' autori ogni nome si tocca a parte. Per
+  Wikipedia, con la sua foto se Wikipedia ce l'ha: toccala per
+  ingrandirla), con "I suoi libri nella tua libreria", "Cerca sul web" e
+  "Apri su Wikipedia"; con piu' autori ogni nome si tocca a parte. Vale
+  per qualsiasi mestiere (scrittori, fotografi, cuochi...); se ci sono
+  piu' persone con lo stesso nome, vince quella che scrive. Per
   cambiarlo: la matita accanto (o "Modifica il nome" nel profilo).
 - Mentre scrivi in un campo, la barra in basso (Scansiona, Foto, Digita)
   sparisce e il campo viene portato sopra la tastiera.
@@ -175,8 +178,8 @@ COME SI USA
   * Obiettivo con il flash: la prima volta che apri la fotocamera dell'app,
     l'app prova gli obiettivi posteriori e usa quello con la luce (se lo
     ricorda). Se nessuno ce l'ha, o la luce non si accende davvero, i
-    pulsanti della luce non compaiono. In Opzioni > App > "Fotocamera e
-    luce" vedi cosa ha trovato; "Prova gli obiettivi" li riprova.
+    pulsanti della luce non compaiono. In Impostazioni > Aggiunta dei libri
+    > "Fotocamera e luce" vedi cosa ha trovato; "Prova gli obiettivi" li riprova.
     "Prova la luce" la accende per qualche secondo e chiede se l'hai vista:
     se rispondi "No" (succede su alcuni Samsung, come il Galaxy A32) i
     pulsanti della luce spariscono; per il flash usa la fotocamera del
@@ -185,8 +188,8 @@ COME SI USA
     "Usa la fotocamera del telefono (con il flash)" (c'e' sia nella
     fotocamera delle foto sia nella scansione): scatti con la fotocamera
     del telefono e la foto torna nell'app, che ne legge codice, ISBN o
-    copertina. Per usarla sempre: Opzioni > Schede e prezzo > "Per le foto
-    usa la fotocamera del telefono".
+    copertina. Per usarla sempre: Impostazioni > Aggiunta dei libri > "Per
+    le foto usa la fotocamera del telefono".
   * Fotocamera della scansione: in alto a destra la torcia (resta accesa)
     e, inquadrando la copertina, il flash (la luce si accende un attimo
     quando scatti). Compaiono se il telefono permette di accendere la luce.
@@ -210,7 +213,7 @@ COME SI USA
   conosce per i libri italiani: si scrive a mano (di solito e' stampato
   sul retro in basso) nel riquadro che compare dopo ogni libro, oppure
   dopo nel campo "Costo" della scheda.
-  * Non ti interessa il prezzo? Opzioni > Schede e prezzo > togli
+  * Non ti interessa il prezzo? Impostazioni > Aggiunta dei libri > togli
     "Chiedi il prezzo dopo ogni libro".
   * Prezzo di copertina = quello stampato sul libro, non quanto l'hai pagato.
   * Quando salvi il prezzo suona un "fatto" (due note che salgono),
@@ -225,7 +228,8 @@ COME SI USA
     - due note morbide che salgono: "fatto", prezzo salvato.
     Il "non trovato" suona solo per i libri appena scansionati, scritti
     a mano o fotografati, non per quelli cercati in sottofondo.
-  * Suoni: si spengono e accendono in Opzioni > Aspetto ("Suoni") oppure
+  * Suoni: si spengono e accendono in Impostazioni > Aggiunta dei libri
+    ("Suoni") oppure
     al volo dalla fotocamera, con il pulsante 🔊/🔇 in alto a destra. La
     vibrazione resta comunque.
 - Esporta: "Scarica Excel (.xlsx)" crea un vero file Excel (intestazione
@@ -236,7 +240,8 @@ COME SI USA
 
 ASPETTO: TEMA, COLORI E CARATTERI
 ---------------------------------
-Opzioni > Aspetto (o l'ingranaggio in alto a destra > Aspetto):
+Menu > Impostazioni > Aspetto (l'ingranaggio in alto a destra apre il
+menu con le Impostazioni gia' aperte):
 - Tema: Chiaro (predefinito), Scuro o Automatico (segue il telefono).
 - Colori: Bosco (verde, predefinito), Inchiostro (blu) o Bordeaux (rosso
   vino), ognuno con la sua versione scura.
@@ -257,23 +262,32 @@ I caratteri sono inclusi nell'app (cartella vendor/fonts, tutti con licenza
 SIL Open Font License), cosi' funzionano anche senza rete; ognuno si scarica
 solo la prima volta che lo usi o lo vedi nell'elenco.
 
-OPZIONI
--------
-Il menu laterale si apre dall'ingranaggio in alto a destra, dalla
-linguetta ">" a sinistra o trascinando dal bordo sinistro. Occupa due terzi
-dello schermo. In cima: "Filtri e ordine" (con il riassunto dei filtri
-attivi), "Suggerimenti", "Tutte le citazioni", "Statistiche"; sotto, le Impostazioni, con
-in mezzo il riquadro "Sostieni Next Libris". Le Impostazioni sono divise in:
-- Ricerca dei libri: chiave Google, catalogo SBN, richieste di oggi,
-  "Prova la ricerca ISBN";
-- Schede e prezzo: schede sempre aperte, campi in piu', chiedi il prezzo;
-- Sistema l'elenco: verifica, case editrici, doppioni, copertine...;
-- Backup ed esportazione: backup, Excel, CSV, PDF;
-- Condividi l'app: QR code da far inquadrare, "Manda il link" (WhatsApp,
-  SMS, email) e "Copia il link". Chi apre il link in Chrome trova la scheda
-  "Installa" in alto. Ognuno ha il proprio catalogo: i libri non si
-  condividono (si puo' passare un backup);
-- App: installazione e versione.
+MENU E IMPOSTAZIONI
+-------------------
+Il menu laterale si apre da "Menu" nella barra in basso, dall'ingranaggio
+in alto a destra, dalla linguetta ">" a sinistra o trascinando dal bordo
+sinistro. Occupa due terzi dello schermo. Dall'alto:
+- "Filtri e ordine" (con il riassunto dei filtri attivi), "Suggerimenti",
+  "Tutte le citazioni", "Statistiche", "Il tuo trimestre in libri";
+- La tua libreria: "Sistema l'elenco" (verifica, case editrici, doppioni,
+  copertine...) e "Backup ed esportazione" (backup, Excel, CSV, PDF; la
+  voce dice anche la data dell'ultimo backup);
+- "Impostazioni": tutte le impostazioni, raccolte in una voce che si apre
+  quando la tocchi (dal Menu partono chiuse, dall'ingranaggio in alto gia'
+  aperte; tornando da una di esse restano aperte):
+  - Aspetto: tema, colori, caratteri, all'apertura (Copertine o Elenco),
+    riepilogo in alto, riepilogo ogni tre mesi;
+  - Ricerca dei libri: chiave Google, catalogo SBN, richieste di oggi,
+    "Prova la ricerca ISBN";
+  - Aggiunta dei libri: chiedi il prezzo dopo ogni libro, suoni,
+    fotocamera del telefono per le foto, "Fotocamera e luce";
+  - Condivisione: il tuo nome; QR code da far inquadrare, "Manda il link"
+    (WhatsApp, SMS, email) e "Copia il link". Chi apre il link in Chrome
+    trova la scheda "Installa" in alto. Ognuno ha il proprio catalogo: i
+    libri non si condividono (si puo' passare un backup);
+  - Installazione sul telefono: installare l'app (icona tra le app, a
+    schermo intero, anche senza rete), "Perche' non si installa?";
+- il riquadro "Sostieni Next Libris" e, in fondo, la versione.
 Ogni voce apre la sua pagina; "<" torna al menu, la x o il tasto Indietro
 del telefono la chiudono.
 Le finestre che salgono dal basso (Statistiche, Citazioni, prezzo,
@@ -310,8 +324,7 @@ Filtri, ricerca e i tasti Copertine, Ce l'ho gia'?, Statistiche, Esporta
 resta ferma in alto (un po' piu' stretta, e la riga di suggerimento sotto
 Scansiona sparisce per lasciare spazio ai libri). Quando apri la scheda di
 un libro la barra scorre via con la pagina, cosi' hai tutto lo spazio per i
-campi; richiusa la scheda torna ferma. Con "Mostra le schede sempre aperte"
-la barra non resta ferma.
+campi; richiusa la scheda torna ferma.
 
 SCHEDE CHIUSE E APERTE
 ----------------------
@@ -324,8 +337,10 @@ ci sono la X (elimina il libro, dopo la conferma e con "Annulla") e il tasto per
 prestare, vendere o regalare (azzurro quando il libro e' fuori
 casa: toccalo per cambiare o per segnarlo come tornato); le etichette
 (Prestato, Da verificare...) sono in alto anche loro. In fondo restano i
-tasti per cercare di nuovo il libro o il prezzo. I libri senza titolo (per esempio
-non trovati) si aprono da soli perche' vanno completati a mano.
+tasti per cercare di nuovo il libro o il prezzo. Un libro senza titolo
+(per esempio non trovato) si apre da solo una volta, appena aggiunto,
+perche' va completato a mano; poi resta chiuso come gli altri (togliendo
+un filtro o cambiando vista non si aprono tutti insieme).
 Tocca la copertina per vederla in grande (si chiude con la X, toccando
 fuori o con il tasto "indietro").
 
@@ -334,7 +349,7 @@ COPERTINE
 - Le banche dati danno copertine piccole. Per ogni libro trovato l'app
   cerca da sola la versione grande ufficiale (Google Libri, poi Open
   Library per ISBN) e la usa nella vista Copertine e nell'ingrandimento.
-  Per i libri gia' inseriti: Opzioni > Sistema l'elenco > "Cerca copertine piu'
+  Per i libri gia' inseriti: Menu > Sistema l'elenco > "Cerca copertine piu'
   grandi".
   Molti libri italiani non hanno una versione grande: in quel caso...
 - ...usa una TUA FOTO: tocca la copertina e poi "Usa una mia foto" (per i
@@ -346,8 +361,6 @@ COPERTINE
   copertina scaricata, la tua foto diventa la copertina.
 - Con le foto il backup e' piu' pesante (circa 0,1 MB a foto) e richiede un
   attimo per essere preparato quando apri Esporta.
-Preferisci vedere sempre tutto? Opzioni > Schede e prezzo > "Mostra le schede sempre aperte"
-(sullo schermo largo torna la vista a tabella).
 
 LIBRERIA E DESIDERI
 -------------------
@@ -436,10 +449,10 @@ fatta; "Luce" accende il flash se il telefono lo permette; Indietro o
 
 SCAFFALE, GENERE, PAGINE, NOTE
 ------------------------------
-Ogni scheda ha questi campi in piu' (si nascondono in Opzioni > Schede e prezzo). Genere e
+Ogni scheda ha questi campi in piu'. Genere e
 pagine si compilano da soli quando Google Libri o Open Library li conoscono
 (il genere arriva in inglese e lo traduco quando posso). Per i libri gia'
-inseriti: Opzioni > Sistema l'elenco > "Completa genere, pagine e copertine" (una ricerca per
+inseriti: Menu > Sistema l'elenco > "Completa genere, pagine e copertine" (una ricerca per
 libro: con molti libri serve la chiave Google). Lo scaffale lo scrivi tu e
 l'app ti propone quelli gia' usati (elenco sotto il campo). La ricerca in alto cerca anche in
 scaffale, genere, note e nome di chi ha il libro; l'elenco si puo' ordinare
@@ -449,13 +462,15 @@ COPERTINE E STATISTICHE
 -----------------------
 "Copertine" mostra la libreria come una parete di copertine (quelle che
 mancano sono rettangoli colorati con il titolo); tocca un libro per aprirne
-la scheda. L'app si apre con le Copertine; in Opzioni > Aspetto ("All'apertura
+la scheda. L'app si apre con le Copertine; in Impostazioni > Aspetto ("All'apertura
 mostra") puoi scegliere l'Elenco. Il pulsante "Elenco"/"Copertine" sopra i
 libri cambia la vista solo fino alla prossima apertura (anche l'indirizzo
 dell'app con ?vista=elenco o ?vista=copertine sceglie la vista per
 quell'apertura). "Statistiche" mostra numero di libri, valore di copertina,
 prezzo medio, pagine, prestiti, e le classifiche di autori, case editrici,
-generi, scaffali e decenni: tocca un nome per vedere quei libri.
+generi, scaffali e decenni: tocca un autore, una casa editrice, un
+genere o uno scaffale per vedere quei libri (diventa un filtro, che si
+vede sotto la ricerca e si toglie con la x).
 
 LETTURA, VOTO E DATA
 --------------------
@@ -492,7 +507,7 @@ giorno, ne usi due per libro). Si fa una volta sola, da computer o tablet:
    contenuto del file cloudflare-sbn-worker.js (e' nella cartella
    dell'app e nel repository GitHub). Premi "Deploy".
 4. Copia l'indirizzo del worker, tipo https://sbn-libri.TUONOME.workers.dev
-5. Nell'app: Opzioni > Ricerca dei libri > riquadro "Catalogo SBN" > incolla
+5. Nell'app: Impostazioni > Ricerca dei libri > riquadro "Catalogo SBN" > incolla
    l'indirizzo (va bene anche senza https:// o con ?isbn=... in fondo). Poi
    "Prova la ricerca ISBN": deve comparire "✓ Catalogo SBN".
 Prova anche a mano: apri nel browser l'indirizzo con ?isbn=9788806219352
@@ -523,7 +538,7 @@ Nella scheda aperta c'e' il riquadro "Descrizione": toccalo per aprirlo.
 - Se non riguarda il tuo libro: "Non e' questo libro: rimuovila".
 - Se non la trova: "Cerca di nuovo" (le banche dati si aggiornano).
 Ogni ricerca usa 1-2 richieste Google del contatore giornaliero.
-- Tutte insieme: Opzioni > Sistema l'elenco > "Scarica tutte le
+- Tutte insieme: Menu > Sistema l'elenco > "Scarica tutte le
   descrizioni". Si ferma da sola prima di finire le ricerche Google del
   giorno; il giorno dopo riprende da dove era arrivata.
 - La ricerca nell'elenco trova anche le parole delle descrizioni e
@@ -549,9 +564,7 @@ Nella scheda aperta, riquadro "Citazioni e appunti": "+ Aggiungi".
   per ingrandirla (con piu' foto, frecce per passare dall'una all'altra).
 - Il testo dalle foto si legge quando tocchi "Leggi il testo": legge le
   foto in ordine e aggiunge il testo in fondo (tu tieni il passaggio
-  che ti interessa e correggi). Per farlo leggere subito a ogni foto:
-  Opzioni > Schede e prezzo > "Leggi subito il testo delle foto delle
-  citazioni".
+  che ti interessa e correggi).
 - Dopo ogni foto (scattata o dalla Galleria) si apre "Evidenzia o scrivi": evidenziatore
   giallo, verde o rosa (il testo sotto si legge ancora) e penna rossa,
   blu o nera; la gomma cancella i segni dove passi (non tocca la foto) e,
@@ -636,40 +649,39 @@ non ne stai leggendo un altro, compare "Hai finito ... E adesso?" con un
 libro da leggere: "Inizio questo", "Un altro", "Tutti i suggerimenti";
 la X lo chiude per quel libro.
 
-DISPOSIZIONE DELLO SCHERMO
---------------------------
-Opzioni > Aspetto > "Disposizione dello schermo" (si vede subito):
-- Classico: tasti grandi in alto, Scansiona, Foto e Digita in basso.
-- A - Barra in basso: Libreria, Desideri, + (Scansiona, Foto, Digita,
-  Ce l'ho gia'?), Per te (Suggerimenti, trimestre, citazioni,
-  Statistiche, Backup) e Menu. In alto solo filtri, ricerca e vista;
-  gli avvisi (prestiti, "Hai finito...", trimestre, installazione,
-  sostieni) stanno sopra la ricerca e, con "Avvisi in cima uno alla
-  volta" (acceso di predefinito), se ne vede uno: si scorrono col dito
-  (verso sinistra il prossimo, verso destra quello prima); i pallini in
-  basso dentro l'avviso dicono quanti sono (toccandoli si passa al
-  prossimo). La riga "Prestati" compare solo se il riepilogo non mostra
-  gia' "N in prestito".
-Per chi sviluppa: e' un modulo a parte (layout.js e layout.css); nella
-copia di prova si parte dalla A.
-
-SCHEDA APERTA DEL LIBRO
+BARRA IN BASSO E AVVISI
 -----------------------
-Opzioni > Aspetto > "Scheda aperta del libro": Classica (tutti i campi
-da modificare) oppure "Pagina del libro" (nella copia di prova e' gia'
-scelta). La pagina del libro:
-- in alto, solo icone su una riga: preferito, Desideri, condividi, la
-  matita (Modifica: apre i campi; toccala di nuovo, o "Fatto", per
-  tornare alla pagina), la X per eliminare;
+In basso: Libreria, Desideri, + (Scansiona, Foto, Digita, Ce l'ho
+gia'?), Per te (Suggerimenti, trimestre, citazioni, Statistiche, Backup)
+e Menu. In alto solo filtri, ricerca e vista (Copertine/Elenco).
+Gli avvisi (prestiti, "Hai finito...", trimestre, installazione,
+sostieni) stanno sopra la ricerca, uno alla volta: si scorrono col dito
+(verso sinistra il prossimo, verso destra quello prima); i pallini in
+basso dentro l'avviso dicono quanti sono (toccandoli si passa al
+prossimo). La riga "Prestati" compare solo se il riepilogo non mostra
+gia' "N in prestito".
+Per chi sviluppa: e' un modulo a parte (layout.js e layout.css); la
+disposizione classica resta solo per le prove automatiche.
+
+PAGINA DEL LIBRO (scheda aperta)
+--------------------------------
+Aprendo un libro si vede la sua pagina:
+- in alto, solo icone su una riga: preferito, Desideri (o Libreria, nei
+  Desideri), condividi, la matita (Modifica: apre i campi; toccala di
+  nuovo, o "Fatto", per tornare alla pagina), la X per eliminare;
 - copertina (toccala per ingrandirla; senza copertina la cerca o la
   fotografi), titolo, autore (toccalo: chi e'), editore, anno, pagine,
   prezzo;
+- subito sotto, una striscia a tutta larghezza: Da leggere / In lettura /
+  Letto, e sotto le stelle e "Letto il", da cambiare direttamente;
 - la descrizione in tre righe: la freccetta la apre tutta, con la fonte
   e "Non e' questo libro";
-- Da leggere / In lettura / Letto, le stelle e la data, da cambiare
-  direttamente;
 - note, citazioni, le etichette-filtro (genere, scaffale, autore,
-  editore, serie) e in fondo "Presta, vendi o regala" e "Cerca sul web".
+  editore, serie: toccandole si vedono quei libri, dall'inizio
+  dell'elenco) e in fondo "Presta, vendi o regala" e "Cerca sul web"
+  (anche nei Desideri, dove c'e' anche il preferito).
+Per chi sviluppa: e' un modulo a parte (schede.js e schede.css); la
+scheda classica resta solo per le prove automatiche.
 
 RIEPILOGO IN ALTO
 -----------------
@@ -678,13 +690,16 @@ mese, backup da fare, "Hai finito... E adesso?", il trimestre in libri),
 accanto al riepilogo compare un triangolino arancione: toccandolo gli
 avvisi chiusi tornano in cima.
 
-Opzioni > Aspetto > "Riepilogo in alto": sotto il nome c'e' sempre il
+Impostazioni > Aspetto > "Riepilogo in alto": sotto il nome c'e' sempre il
 numero dei libri. Si possono aggiungere il valore in euro (spento di
 predefinito), "N in prestito" (acceso; toccandolo mostra solo i libri
 prestati, toccandolo di nuovo tutti) e "N non piu' in libreria" (spento).
-"Salvato su questo telefono" si puo' nascondere: se qualcosa non va
-(offline o salvataggio non riuscito) l'avviso compare comunque. Nei
-Desideri il totale da spendere resta sempre.
+"Conferma del salvataggio" (spenta di predefinito) mostra "Salvato su
+questo telefono": vuol dire che ogni modifica e' gia' salvata. Se
+qualcosa non va (offline o salvataggio non riuscito) l'avviso compare
+comunque. Nei Desideri il totale da spendere resta sempre.
+Ogni filtro attivo si vede sotto la ricerca con la sua x, anche "In
+prestito" (toccato dal riepilogo) e quelli aperti dalle Statistiche.
 
 IL TUO TRIMESTRE IN LIBRI (riepilogo ogni tre mesi)
 ---------------------------------------------------
@@ -703,7 +718,7 @@ destra per andare avanti, a sinistra per tornare indietro.
   salvare).
 Sulla prima schermata "Prima" e "Dopo" passano agli altri trimestri. Si
 apre anche dal menu ("Il tuo trimestre in libri"). Contano come letti
-solo i libri segnati "Letto" con la data. Si spegne in Opzioni >
+solo i libri segnati "Letto" con la data. Si spegne in Impostazioni >
 Aspetto > "Riepilogo ogni tre mesi" (acceso di predefinito).
 Per chi sviluppa: e' un modulo a parte (wrap.js e wrap.css).
 
@@ -740,7 +755,7 @@ PREFERITI E CONDIVISIONE CON GLI AMICI
   "Preferito". Li ritrovi in Filtri > Preferiti; nella vista Copertine
   hanno un segnalibro giallo in alto a destra.
 - Il tuo nome: te lo chiede il benvenuto alla prima apertura, oppure la
-  prima volta che condividi; si cambia in Opzioni > Condivisione. Chi
+  prima volta che condividi; si cambia in Impostazioni > Condivisione. Chi
   riceve vede "I preferiti di Piero", "Piero ti consiglia un libro".
 - Un libro: scheda aperta > "Condividi" (in fondo).
 - Una lista: "Condividi la lista" sopra l'elenco compare nei Desideri e
@@ -761,7 +776,7 @@ PREFERITI E CONDIVISIONE CON GLI AMICI
 - Provenienza: i libri ricevuti hanno l'etichetta "Da Piero". In Filtri
   compare "Ricevuti da" con i nomi. E' anche nell'Excel.
 
-SISTEMARE L'ELENCO (Opzioni > Sistema l'elenco)
+SISTEMARE L'ELENCO (Menu > Sistema l'elenco)
 -----------------------------------------------
 - "Segna tutto come verificato": toglie in un colpo l'etichetta "Da
   verificare" da tutti i libri (subito dopo c'e' "Annulla").
@@ -796,12 +811,12 @@ limite diventa tuo e il problema sparisce. Si crea una volta sola:
    dovrebbero esserci addebiti, ma controlla le condizioni mostrate.
 3. Vai in https://console.cloud.google.com/apis/credentials > "Crea
    credenziali" > "Chiave API" e copia la chiave.
-4. Nell'app: Opzioni > Ricerca dei libri > riquadro "Google Libri" e incollala.
+4. Nell'app: Impostazioni > Ricerca dei libri > riquadro "Google Libri" e incollala.
 Poi premi "Riprova" sui libri in errore (o il pulsante "Completa n libri").
 
 WORKER E CHIAVE: CONTATORI, CANCELLA, SALVATI
 --------------------------------------------
-In Opzioni > Ricerca dei libri ci sono due riquadri, "Catalogo SBN" (worker
+In Impostazioni > Ricerca dei libri ci sono due riquadri, "Catalogo SBN" (worker
 Cloudflare) e "Google Libri" (chiave API). Ognuno mostra:
 - se e' "In uso" o "Non impostato", con l'indirizzo o la chiave nel campo;
 - le richieste di oggi: Google su 1.000 (riparte verso le 9 del mattino),
@@ -811,7 +826,7 @@ Cloudflare) e "Google Libri" (chiave API). Ognuno mostra:
 Sotto il campo compaiono i salvati (fino a 4 per tipo): un tocco lo rimette,
 la x lo dimentica. In alto, "Rimetti chiave e worker salvati" rimette in un
 colpo gli ultimi usati.
-Per darli a un familiare o a un amico: Opzioni > Condivisione > "Condividi
+Per darli a un familiare o a un amico: Impostazioni > Condivisione > "Condividi
 chiave e worker". Parte un link: chi lo apre in Next Libris sceglie "Usali"
 o "Mettili tra i salvati". Mandalo solo a persone di fiducia, in privato:
 chi ha il link usa la tua quota (gratuita). Consigliato: in Google Cloud >
@@ -845,7 +860,7 @@ LIMITI GIORNALIERI (Google Libri e Cloudflare)
   se cerchi la copertina grande: per 200 libri circa 400 ricerche in tutto.
 - Cloudflare (catalogo SBN), piano gratuito: 100.000 richieste al giorno;
   1 per libro, e le risposte restano in memoria un giorno.
-- Opzioni > Ricerca dei libri mostra quante ricerche hai fatto oggi. Arrivata a 950, l'app
+- Impostazioni > Ricerca dei libri mostra quante ricerche hai fatto oggi. Arrivata a 950, l'app
   smette di chiamare Google fino al giorno dopo (i libri restano "in
   attesa" e usano le altre banche dati); le copertine grandi si fermano gia'
   a 700, per lasciare posto ai libri nuovi.
@@ -869,7 +884,7 @@ condividono le prime cifre (per esempio 978-88-502-... = TEA).
   verificare". Se viene dalla tabella generica, o i tuoi libri con quel
   codice hanno editori diversi (es. "Mondadori" e "Oscar Mondadori"),
   resta segnato "Da verificare". Funziona solo per ISBN italiani.
-- Su un elenco gia' fatto: Opzioni > Sistema l'elenco > "Deduci le case
+- Su un elenco gia' fatto: Menu > Sistema l'elenco > "Deduci le case
   editrici mancanti"
   (c'e' "Annulla" subito dopo).
 Se le fonti dicono "non trovato" la scheda resta con l'ISBN: tocca la lente
@@ -883,7 +898,7 @@ SE L'APP NON SI INSTALLA DA CHROME
   Gmail o altre app: copia l'indirizzo e incollalo in Chrome.
 - Su Android: Menu (tre puntini) > "Installa app". Se vedi solo "Aggiungi a
   schermata Home" e non "Installa app", Chrome non la ritiene installabile.
-- Opzioni > App > "Perche' non si installa?" controlla da solo https, Chrome,
+- Impostazioni > Installazione sul telefono > "Perche' non si installa?" controlla da solo https, Chrome,
   funzionamento offline e scheda dell'app, e dice cosa manca.
 - Se "Perche' non si installa?" dice "errore 401" sulla scheda dell'app: il
   sito su Netlify e' protetto (password o accesso riservato) e Chrome, e
@@ -906,11 +921,11 @@ SE L'APP NON SI INSTALLA DA CHROME
 
 COME AGGIORNARE L'APP DOPO UNA MODIFICA
 --------------------------------------
-Che versione sto usando? Tocca l'ingranaggio in alto a destra: in fondo
-alla scheda Opzioni c'e' "Versione N del ..." con le ultime novita' e la
+Che versione sto usando? Apri il menu: in fondo c'e' "Versione N del ..." con le ultime novita' e la
 scritta "E' l'ultima versione" oppure "E' disponibile la versione N+1" con
 il pulsante "Aggiorna adesso" (lo stesso avviso compare anche in alto
-all'apertura dell'app). La versione si vede anche in Opzioni > App.
+all'apertura dell'app). La versione si vede anche in Impostazioni >
+Installazione sul telefono.
 Ogni modifica pubblicata aumenta il numero (file version.json, app.js e
 sw.js insieme).
 Le modifiche si pubblicano su GitHub (Piero907/next-libris, ramo main) e

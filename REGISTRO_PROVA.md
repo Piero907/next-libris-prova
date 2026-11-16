@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 95.1 · 16/11/2026 02:16
+- **Allineata alla versione 95**, appena pubblicata nell'app vera: tutto quello provato qui ora c'è anche lì.
+- Tolti i 4 avvisi di prova.
+
 ## Prova 94.33 · 16/11/2026 02:00
 - **Lettura e voto: resta la striscia (C)** sotto copertina e titolo, a tutta larghezza: stato su una riga, sotto le stelle e «Letto il» sulla stessa riga. Tolta la scelta temporanea A–E da Opzioni › Aspetto.
 
