@@ -684,11 +684,9 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
     <section class="opt-sec" data-sec="share" data-title="Condivisione">
       <label class="field"><span>Il tuo nome</span>
         <input type="text" id="optName" enterkeyhint="done" maxlength="30" autocomplete="given-name" autocapitalize="words" placeholder="es. Piero"></label>
-      <p class="hint">Compare quando condividi un libro o una lista: «I preferiti di Piero», «Piero ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l'elenco, oppure Esporta.</p>
+      <p class="hint" id="optNameHint">Compare quando condividi un libro o una lista: «I preferiti di Piero», «Piero ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l'elenco, oppure Esporta.</p>
       <h3 class="opt-h3">Chiave Google e worker</h3>
-      <p class="hint">Puoi mandarli a un familiare o a un amico che usa Next Libris: la sua ricerca diventa completa come la tua.</p>
-      <button class="btn" id="svcShareBtn" type="button">Condividi chiave e worker</button>
-      <p class="hint" id="svcShareNone" hidden>Non ne hai ancora: si impostano in Menu › Impostazioni › Ricerca dei libri.</p>
+      <div class="svc-box dmenu" id="svcBox"></div>
       <h3 class="opt-h3">Fai conoscere l'app</h3>
       <p class="share-lead">Fai inquadrare il codice con la fotocamera del telefono, oppure manda il link.</p>
       <figure class="qr-box">

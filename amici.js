@@ -139,6 +139,7 @@ function nameForm(first) {
     '<div class="row-btns">' + (first ? '' : '<button class="btn" type="button" data-f="name-no">Annulla</button>') + '<button class="btn primary" type="submit" id="friSaveU">Salva</button></div></form>';
 }
 function paint() {
+  paintKw(); NL.emit && NL.emit('keys');
   var body = document.getElementById('friBody'); if (!body || document.getElementById('friSheet').hidden) return;
   document.getElementById('friH').textContent = opts && !view ? 'Amici e privacy' : 'Amici';
   var h = '';
@@ -307,14 +308,6 @@ function paintSet() {
     b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(function () { open(true); }, 60); });
   }
 }
-NL.on('options', function (sec) {
-  if (sec !== 'share') return;
-  var btn = document.getElementById('svcShareBtn'); if (!btn || document.getElementById('optFriKeys')) return;
-  var d = document.createElement('div'); d.id = 'optFriKeys'; d.className = 'opt-fri';
-  d.innerHTML = '<button class="btn primary" type="button">Con un amico su Next Libris</button><p class="hint">Li usate tutti e due; smetti quando vuoi. Oppure manda un link:</p>';
-  btn.parentNode.insertBefore(d, btn);
-  d.querySelector('button').addEventListener('click', function () { var o = document.querySelector('.opts:not([hidden]), #optSheet:not([hidden])'); open(true).then(function () { var k = document.getElementById('friKeys'); if (k) k.scrollIntoView(); }); });
-});
 
 /* ---------- link d'invito: …/?amico=Nome ---------- */
 (function () {
@@ -599,8 +592,11 @@ document.addEventListener('input', function (e) {
 
 /* ---------- chiave Google e worker SBN condivisi con un amico: li usano tutti e due (Piero, 16/11/2026) ---------- */
 function borrowed() { return rd(K_KEY); }                      // { da, nome, gb, sbn } se stai usando quelli di un amico
-function ownKeys() { var st = NL.settings || {}, b = borrowed() || {}; return { gb: st.gbKey && st.gbKey !== b.gb ? st.gbKey : '', sbn: st.sbnUrl && st.sbnUrl !== b.sbn ? st.sbnUrl : '' }; }
-function keysHTML(full) {
+function ownKeys() {   // le tue, anche mentre usi quelle di un amico (tenute da parte in «chiavi-mie»)
+  var st = NL.settings || {}, b = borrowed() || {}, m = rd('catalogo-libri-amici-chiavi-mie') || {};
+  return { gb: st.gbKey && st.gbKey !== b.gb ? st.gbKey : (b.gb && m.gb) || '', sbn: st.sbnUrl && st.sbnUrl !== b.sbn ? st.sbnUrl : (b.sbn && m.sbn) || '' };
+}
+function keysInner(full) {
   var own = ownKeys(), fr = friends(), out = keys.filter(function (k) { return k.da === uid(); }), inn = keys.filter(function (k) { return k.a === uid(); }), b = borrowed(), h = '';
   if ((own.gb || own.sbn) && fr.length) {
     h += '<p class="fr-small">Presta ' + (own.gb && own.sbn ? 'la tua chiave API di Google Libri e il tuo worker SBN' : own.gb ? 'la tua chiave API di Google Libri' : 'il tuo worker SBN') + ' a un amico: li usate tutti e due e trova più libri. Tocca un amico per scegliere cosa prestare o per smettere.</p>' +
@@ -612,7 +608,55 @@ function keysHTML(full) {
       (using ? '<button class="link" type="button" data-f="keyoff" data-id="' + esc(k.da) + '">Non usarla più</button>' : '<button class="btn primary" type="button" data-f="keyuse" data-id="' + esc(k.da) + '">Usala</button>') + '</span></div>';
   });
   if (!h && full) h = '<p class="fr-small">Non hai ancora una chiave Google o un worker SBN da condividere: si impostano in Menu › Impostazioni › Ricerca dei libri. Se un amico condivide i suoi con te, li trovi qui.</p>';
-  return h ? '<section class="fr-sec" id="friKeys"><h3 class="fr-h">Chiave Google e worker SBN</h3>' + h + '</section>' : '';
+  return h;
+}
+function keysHTML(full) { var h = keysInner(full); return h ? '<section class="fr-sec" id="friKeys"><h3 class="fr-h">Chiave Google e worker SBN</h3>' + h + '</section>' : ''; }
+
+/* ---------- finestra «Chiave Google e worker» (da Condivisione; Piero, 16/11/2026): solo la chiave, e chiudendo torni dove eri ---------- */
+function kwSheet() {
+  var el = document.getElementById('kwSheet'); if (el) return el;
+  el = document.createElement('div'); el.className = 'sheet fri'; el.id = 'kwSheet'; el.hidden = true;
+  el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="kwH"><h2 id="kwH">Chiave Google e worker</h2><div id="kwBody" class="fr-sec"></div>' +
+    '<div class="row-btns"><button class="btn" type="button" id="kwClose">Chiudi</button></div></div>';
+  document.body.appendChild(el);
+  var shut = function () { el.hidden = true; };
+  el.addEventListener('click', function (e) { if (e.target === el) shut(); });
+  el.querySelector('#kwClose').addEventListener('click', shut);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden && (document.getElementById('keySheet') || {}).hidden !== false) shut(); });
+  el.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-kw]'); if (!b) return;
+    var k = b.dataset.kw;
+    if (k === 'login') { shut(); S.open(); }
+    else if (k === 'link') { shut(); NL.svcShare && NL.svcShare(); }
+    else if (k === 'guide') { var R = window.NLRicerche; if (R && R.guide) R.guide(true); }
+    else if (k === 'friends') { shut(); NL.closeDrawer && NL.closeDrawer(); open(); }
+  });
+  el.addEventListener('click', onClick);
+  return el;
+}
+function kwRow(k, t, sub) { return '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-kw="' + k + '">' + esc(t) + '<small>' + esc(sub) + '</small></button><span class="n" aria-hidden="true">›</span></li></ul>'; }
+function paintKw() {
+  var el = document.getElementById('kwSheet'), body = document.getElementById('kwBody'); if (!el || el.hidden || !body) return;
+  var own = ownKeys(), b = borrowed(), h = '';
+  if (!uid()) {
+    h = '<p class="fr-small">Per prestarli agli amici, o per usare quelli che un amico ti presta, serve l\'account.</p><button class="btn primary" type="button" data-kw="login">Entra con il tuo account</button>';
+    if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi usa Next Libris senza account.');
+  } else if (!list) {
+    h = '<p class="fr-small">' + (err ? esc(err) : 'Un momento…') + '</p>';
+    if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi non è tra i tuoi amici su Next Libris.');
+  } else {
+    h = keysInner(false);
+    if ((own.gb || own.sbn) && !friends().length) h += '<p class="fr-small">Per prestarli serve almeno un amico su Next Libris.</p>' + kwRow('friends', 'Aggiungi un amico', 'Cercalo per nome o mandagli il tuo invito.');
+    if (!h) h = '<p class="fr-small">Non hai ancora una chiave Google o un worker SBN tuoi. Se un amico ti presta i suoi, li trovi qui.</p>';
+    if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi non è tra i tuoi amici su Next Libris.');
+  }
+  if (!own.gb) h += kwRow('guide', 'Crea la tua chiave Google', 'È gratis: 1.000 ricerche al giorno solo per te.');
+  body.innerHTML = h;
+}
+function keyWin() {
+  var el = kwSheet(); document.body.appendChild(el); el.hidden = false; paintKw();
+  var si = el.querySelector('.sheet-in'); if (si) si.scrollTop = 0;
+  if (uid() && !list) load(true).then(paintKw);
 }
 /* cosa presto a un amico: dal server arrivano solo i segni ('si'), mai le chiavi; senza segni (database vecchio) valgono tutte e due */
 function outKey(id) {
@@ -658,6 +702,7 @@ function keySheet(id) {
   var cur = outKey(id), opt = function (iid, on, has, t, sub) {
     return '<label class="check fr-wish"><input type="checkbox" id="' + iid + '"' + (has && on ? ' checked' : '') + (has ? '' : ' disabled') + '><span>' + t + '<small>' + (has ? sub : 'Non ce l\'hai: si imposta in Menu › Impostazioni › Ricerca dei libri.') + '</small></span></label>';
   };
+  document.body.appendChild(el);   // sopra la finestra da cui si apre
   document.getElementById('keyH').textContent = 'Presta a ' + friendName(id);
   document.getElementById('keyOpts').innerHTML =
     opt('keyGb', cur ? cur.gb : true, !!own.gb, 'Chiave API di Google Libri', 'Più libri trovati, con copertina e descrizione.') +
@@ -696,6 +741,7 @@ function stopBorrow(msg) {
   setKeys(st.gbKey === b.gb ? back.gb : st.gbKey, st.sbnUrl === b.sbn ? back.sbn : st.sbnUrl);
   wr(K_KEY, null); wr('catalogo-libri-amici-chiavi-mie', null);
   NL.toast(msg || 'Non usi più quelli di ' + b.nome + '.');
+  paintKw(); NL.emit && NL.emit('keys');
 }
 function checkKeys() {
   var b = borrowed(), inn = keys.filter(function (k) { return k.a === uid(); });
@@ -871,5 +917,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { open: open, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { open: open, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();

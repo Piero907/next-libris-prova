@@ -4873,7 +4873,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 23:49", "n": "99.6", "note": "Notifiche push"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 00:19", "n": "99.7", "note": "Condivisione › Chiave Google e worker su misura"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -4935,7 +4935,7 @@ function openOptions(sec, reuse) {
   if (reuse) { try { history.replaceState({ opt: 1 }, ''); optPushed = true; } catch (e) {} }
   else if (!optPushed) { try { history.pushState({ opt: 1 }, ''); optPushed = true; } catch (e) {} }
   if (sec === 'search') renderSvc();
-  if (sec === 'share') renderSvcShare();
+  if (sec === 'share') { renderSvcShare(); if (window.NLAmici && window.NLAmici.load) window.NLAmici.load().catch(function () {}); }
   if (sec === 'app') { renderVersion(); checkVersion(); updateInstallUi(); }
 }
 function closeOptions(fromPop) {
@@ -5370,11 +5370,30 @@ async function shareWish() { shareList(); }
    Chi riceve vede cosa arriva e da chi, e decide; quelli che aveva gia' restano tra i salvati. */
 function cleanKey(v) { v = String(v || '').replace(/\s+/g, ''); return /^[A-Za-z0-9_-]{20,80}$/.test(v) ? v : ''; }
 function okWorker(v) { v = cleanWorker(v); return /^https:\/\/[^\s/]+\.[^\s]+$/.test(v) && v.length <= 200 ? v : ''; }
+/* Condivisione › «Chiave Google e worker», su misura (Piero, 16/11/2026): chi ha i suoi li presta; chi usa quelli di un amico
+   lo vede scritto e può smettere; chi non ha la sua trova la guida per crearla (è gratis). Il resto sta nella finestra della chiave (amici.js). */
+function svcRow(k, t, sub) { return '<button type="button" class="dopt dgo svc-go" data-svc="' + k + '"><span><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span><span class="n" aria-hidden="true">›</span></button>'; }
 function renderSvcShare() {
-  var has = !!(mine('sbn') || mine('key'));
-  $('#svcShareBtn').disabled = !has;
-  $('#svcShareNone').hidden = has;
+  var nm = ($('#optName').value || settings.name || 'Piero').trim();
+  $('#optNameHint').textContent = 'Compare quando condividi un libro o una lista: «I preferiti di ' + nm + '», «' + nm + ' ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l\'elenco, oppure Esporta.';
+  var msb = mine('sbn'), mgk = mine('key'), b = lent(), bg = !!(b.gb && b.gb === settings.gbKey), bs = !!(b.sbn && b.sbn === settings.sbnUrl), h = '';
+  if (msb || mgk) h += svcRow('lend', 'Presta a un amico', (mgk && msb ? 'La tua chiave Google e il tuo worker SBN' : mgk ? 'La tua chiave Google' : 'Il tuo worker SBN') + ': li usate tutti e due e smetti quando vuoi.');
+  var A = window.NLAmici, off = !bg && !bs && A && A.offers ? A.offers() : [];
+  if (off.length) h += svcRow('offer', off[0].nome + (off.length > 1 ? ' e altri ' + (off.length - 1) : '') + ' ti ' + (off.length > 1 ? 'prestano' : 'presta') + ' ' + (off[0].gb && off[0].sbn ? 'chiave Google e worker' : off[0].gb ? 'la chiave Google' : 'il worker SBN'), 'Tocca per usarli: la ricerca trova più libri.');
+  if (bg || bs) h += svcRow('used', 'Usi ' + (bg && bs ? 'la chiave Google e il worker SBN' : bg ? 'la chiave Google' : 'il worker SBN') + ' di ' + (b.nome || 'un amico'), 'Prestati da un amico: tocca per vedere o per smettere di usarli.');
+  if (!mgk) {
+    if (!bg && !bs && !msb && !off.length) h += '<p class="hint">Con una chiave Google tua la ricerca trova più libri, con copertina e descrizione. Se un amico ti presta la sua, la vedi qui.</p>';
+    h += svcRow('guide', 'Crea la tua chiave Google', 'È gratis: 1.000 ricerche al giorno solo per te, in circa 5 minuti.');
+  }
+  $('#svcBox').innerHTML = h;
 }
+$('#svcBox').addEventListener('click', function (e) {
+  var r = e.target.closest('[data-svc]'); if (!r) return;
+  var k = r.dataset.svc, A = window.NLAmici, R = window.NLRicerche;
+  if (k === 'guide') { if (R && R.guide) R.guide(true); else openOptions('search', true); return; }
+  if (A && A.keys) A.keys(); else if (k === 'lend') openSvcShare();
+});
+(hooks.keys || (hooks.keys = [])).push(function () { if (optOpen && !$('#optSheet .opt-sec[data-sec="share"]').hidden) renderSvcShare(); });
 function openSvcShare() {
   var msb = mine('sbn'), mgk = mine('key');
   if (!msb && !mgk) { toast('Non hai né chiave Google né worker tuoi da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
@@ -5433,7 +5452,6 @@ $('#svcInLater').addEventListener('click', function () {
   toast('Messi tra i salvati: li rimetti quando vuoi da Menu › Impostazioni › Ricerca dei libri.');
 });
 $('#svcInNo').addEventListener('click', closeSvcImport);
-$('#svcShareBtn').addEventListener('click', openSvcShare);
 $('#svcForm').addEventListener('submit', function (e) { e.preventDefault(); sendSvcShare(false); });
 $('#svcCopy').addEventListener('click', function () { sendSvcShare(true); });
 $('#svcClose').addEventListener('click', closeSvcShare);
@@ -6597,6 +6615,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 /* ---- Moduli aggiuntivi: file a parte (per esempio wrap.js) che si agganciano qui. Se il file non c'e', l'app funziona uguale.
    Un modulo si toglie cancellando i suoi file e le sue righe in index.html e sw.js (vedi togli_modulo.py nel ramo prove). ---- */
 window.NL = {
+  svcShare: function () { openSvcShare(); }, emit: function (n, a) { emit(n, a); },
   on: function (name, fn) { (hooks[name] || (hooks[name] = [])).push(fn); },
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA, COPIA: COPIA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,

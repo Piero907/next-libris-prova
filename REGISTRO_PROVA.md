@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.7 · 17/11/2026 00:19
+- **Condivisione › Chiave Google e worker su misura**: «Presta a un amico» se hai i tuoi; «Usi … di Piero R.» se usi quelli di un amico; «Crea la tua chiave Google: è gratis» se non ne hai una tua. Il tocco apre una finestra solo per la chiave e chiudendo torni a Condivisione
+- **Aggiungi un libro (+)**: in alto «In Libreria | Nei Desideri», parte dalla scheda in cui sei
+- **Scheda di un libro con solo l'ISBN** su PC: stessa disposizione di «Modifica» delle altre schede
+
 ## Prova 99.6 · 16/11/2026 23:49
 - **Notifiche push**: gli avvisi della campanella (tranne «limite») arrivano anche con l'app chiusa. Riga dopo l'accesso «Ricevi notifiche dagli amici» con la scelta dei tipi (amicizie, libri in prestito, consigli, chiavi condivise); Impostazioni › Notifiche con interruttore, tipi e orari di silenzio (22-8 di partenza: dopo arrivano, da 3 in su in un solo riepilogo); tocco sulla notifica → campanella; numero sull'icona dove il telefono lo permette
 

@@ -43,7 +43,9 @@ function build() {
     '<button type="button" data-l="you">' + svg(I.spark) + '<span>Per te</span></button>' +
     '<button type="button" data-l="menu">' + svg(I.menu) + '<span>Menu</span></button></nav>'));
   document.body.appendChild(el('<div class="sheet" id="layAdd" hidden><div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="layAddH">' +
-    '<h2 id="layAddH">Aggiungi un libro</h2><div class="lay-grid">' +
+    '<h2 id="layAddH">Aggiungi un libro</h2>' +
+    '<div class="tabs lay-dest" role="tablist" aria-label="Dove aggiungerlo"><button type="button" role="tab" data-dest="lib">In Libreria</button><button type="button" role="tab" data-dest="wish">Nei Desideri</button></div>' +
+    '<div class="lay-grid">' +
     '<button type="button" class="lay-big pri" data-l="scan">' + NL.icon('scan') + '<b>Scansiona</b><small>il codice a barre: il modo più preciso</small></button>' +
     '<button type="button" class="lay-big" data-l="photo">' + NL.icon('cam') + '<b>Foto</b><small>della copertina</small></button>' +
     '<button type="button" class="lay-big" data-l="type">' + NL.icon('key') + '<b>Digita</b><small>titolo o ISBN</small></button>' +
@@ -68,7 +70,14 @@ function paintYou() {
     return '<button type="button" class="dopt dgo lay-you" data-l="' + x.l + '"><span class="lay-yi">' + svg(x.i) + '</span><span><b>' + esc(x.t) + '</b><small>' + esc(x.s) + '</small></span><span class="n" aria-hidden="true">›</span></button>';
   }).join('');
 }
-function sheetOpen(id) { var s = $(id); s.hidden = false; if (id === '#layYou') paintYou(); setTimeout(function () { try { s.querySelector('button').focus({ preventScroll: true }); } catch (e) {} }, 30); }
+/* dove va il libro: parte dalla scheda in cui sei e si cambia con un tocco (Piero, 16/11/2026) */
+function paintDest() { var t = NL.tab ? NL.tab() : 'lib'; Array.prototype.forEach.call(document.querySelectorAll('#layAdd [data-dest]'), function (b) { b.setAttribute('aria-selected', b.dataset.dest === t ? 'true' : 'false'); }); }
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('#layAdd [data-dest]'); if (!b) return;
+  if (NL.tab && NL.tab() !== b.dataset.dest) { NL.setTab(b.dataset.dest); window.scrollTo({ top: 0 }); paintNav(); }
+  paintDest();
+});
+function sheetOpen(id) { var s = $(id); s.hidden = false; if (id === '#layYou') paintYou(); if (id === '#layAdd') paintDest(); setTimeout(function () { try { (s.querySelector('.lay-big') || s.querySelector('button')).focus({ preventScroll: true }); } catch (e) {} }, 30); }
 function sheetsClose() { ['#layAdd', '#layYou'].forEach(function (k) { var s = $(k); if (s) s.hidden = true; }); }
 function act(l) {
   sheetsClose();

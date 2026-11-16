@@ -149,3 +149,8 @@ html.guest #list .row.g-noread :is(.cv-strip,.read){display:none}
 #keySheet h2,#keySheet p{margin:0}
 #keySheet .check input:disabled+span{opacity:.6}
 #keySheet .row-btns .btn{flex:1 1 0;min-width:0}
+
+/* finestra «Chiave Google e worker» (da Condivisione) sopra le Opzioni; «Presta a …» e la guida sopra di lei (16/11/2026) */
+#kwSheet{z-index:37}
+#keySheet,#kgSheet{z-index:38}
+#kwBody{display:grid;gap:10px}

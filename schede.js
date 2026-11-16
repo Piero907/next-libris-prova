@@ -28,7 +28,7 @@ function doD(card, id) {
   var b = NL.get(id), head = q(card, '.head');
   if (!b || !head) return;
   dActs(card);
-  if (!b.t) return;                               // senza titolo (da completare) restano i campi
+  if (!b.t) { card.classList.add('cv-edit'); return; }   // senza titolo (da completare): i campi, nella stessa disposizione di «Modifica» (Piero, 17/11/2026: su PC era sballata)
   if (editing[id]) { card.classList.add('cv-edit'); addDone(card, id); return; }
   var img = NL.bigImg(b), dati = [b.e, b.y, b.pg ? b.pg + ' pagine' : '', b.c != null ? NL.eur(b.c) : ''].filter(Boolean);
   var names = NL.authorsOf(b);

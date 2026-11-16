@@ -105,7 +105,9 @@ function sheet() {
 }
 function guide(who) {
   var el = sheet();
-  document.getElementById('kgWhy').innerHTML = who
+  document.getElementById('kgWhy').innerHTML = who === true
+    ? 'Con una chiave tua la ricerca trova più libri, con copertina grande, descrizione e suggerimenti, e non dipendi dalla chiave di un amico.'
+    : who
     ? 'La chiave di <b>' + esc(who) + '</b> ha finito le ricerche di oggi. Intanto i libri si cercano con Open Library e il catalogo delle biblioteche (SBN); con una chiave tua hai di nuovo tutte le ricerche, anche le copertine grandi e i suggerimenti.'
     : 'La tua chiave ha finito le ricerche di oggi: torna domattina verso le 9. La usano anche gli amici a cui l\'hai prestata: mandagli questi passaggi, così ne creano una loro.';
   el.hidden = false;
