@@ -181,11 +181,11 @@ function inTab(b) { return !!b.w === (tab === 'wish'); }
 function tabBooks() { return state.books.filter(inTab); }
 function blankBook(o) {
   var b = Object.assign({ id: newId(), t: '', a: '', e: '', y: '', c: null, i: '', g: [], img: '', nf: false, ts: Date.now(),
-    sh: '', n: '', gen: '', pg: '', p: '', pd: '', w: tab === 'wish', rs: '', rt: 0, rd: '', cp: false, ck: '', nb: false, xs: '', xd: '', xa: '', fav: false, fr: '', fl: '', ds: '', dsf: '', dsl: '', dsn: 0, dsq: 0, se: '', sn: '', sq: '', qs: [] }, o || {});
+    sh: '', n: '', gen: '', pg: '', p: '', pd: '', w: tab === 'wish', rs: '', rt: 0, rd: '', pp: '', ppd: '', cp: false, ck: '', nb: false, xs: '', xd: '', xa: '', fav: false, fr: '', fl: '', ds: '', dsf: '', dsl: '', dsn: 0, dsq: 0, se: '', sn: '', sq: '', qs: [] }, o || {});
   if (!b.w && !(o && o.rs != null)) b.rs = 'da';        // un libro appena entrato in libreria e' da leggere
   return b;
 }
-var FIELDS = ['id', 't', 'a', 'e', 'y', 'c', 'i', 'g', 'img', 'imgL', 'nf', 'ts', 'sh', 'n', 'gen', 'pg', 'p', 'pd', 'w', 'rs', 'rt', 'rd', 'cp', 'ck', 'nb', 'xs', 'xd', 'xa', 'fav', 'fr', 'fl', 'ds', 'dsf', 'dsl', 'dsn', 'dsq', 'se', 'sn', 'sq', 'qs'];
+var FIELDS = ['id', 't', 'a', 'e', 'y', 'c', 'i', 'g', 'img', 'imgL', 'nf', 'ts', 'sh', 'n', 'gen', 'pg', 'p', 'pd', 'w', 'rs', 'rt', 'rd', 'pp', 'ppd', 'cp', 'ck', 'nb', 'xs', 'xd', 'xa', 'fav', 'fr', 'fl', 'ds', 'dsf', 'dsl', 'dsn', 'dsq', 'se', 'sn', 'sq', 'qs'];
 function isBusy(b) { var st = (S[b.id] || {}).st; return st === 'queued' || st === 'reading' || st === 'lookup' || st === 'search'; }
 function cleanBook(x) {
   if (!x || typeof x !== 'object') return null;
@@ -208,6 +208,7 @@ function cleanBook(x) {
     rs: ['da', 'in', 'ok'].indexOf(x.rs) >= 0 ? x.rs : '',
     rt: Math.max(0, Math.min(5, parseInt(x.rt, 10) || 0)),
     rd: /^\d{4}-\d\d-\d\d$/.test(L.str(x.rd)) ? x.rd : '',
+    pp: String(L.str(x.pp)).replace(/\D/g, '').slice(0, 5), ppd: /^\d{4}-\d\d-\d\d$/.test(L.str(x.ppd)) ? x.ppd : '',   // segnalibro (16/11/2026)
     cp: !!x.cp,
     ck: /^\d{4}-\d\d-\d\d$/.test(L.str(x.ck)) ? x.ck : '',
     nb: !!x.nb,
@@ -1260,7 +1261,13 @@ function onScanned(code) {
 var checkCache = {}, resCode = '', resKind = '';
 function readLabel(b) {
   if (b.rs === 'ok') return 'Letto' + (b.rt ? ' · ' + L.rateWord(b.rt) : '');
-  return b.rs === 'in' ? 'In lettura' : b.rs === 'da' ? 'Da leggere' : '';
+  if (b.rs === 'in') { var q = ppInfo(b); return 'In lettura' + (q.pct != null ? ' · ' + q.pct + '%' : q.p ? ' · pagina ' + q.p : ''); }
+  return b.rs === 'da' ? 'Da leggere' : '';
+}
+/* segnalibro: la pagina a cui sei arrivato (b.pp, con la data in b.ppd) e l'avanzamento sulle pagine del libro (Piero, 16/11/2026) */
+function ppInfo(b) {
+  var p = parseInt(b && b.pp, 10) || 0, tot = parseInt(b && b.pg, 10) || 0;
+  return { p: p, tot: tot, pct: p && tot ? Math.min(100, Math.round(p * 100 / tot)) : null };
 }
 function shelfLine(b) {
   return [b.a, b.sh ? 'Scaffale: ' + b.sh : '', readLabel(b)].filter(Boolean).join(' · ');
@@ -1469,7 +1476,7 @@ function summaryHTML(b, dups, status) {
   if (b.fav && !b.w) tags += '<span class="tag fav">Preferito</span>';
   tags += fromTag(b);
   if (b.g.length) tags += '<span class="tag warn">Da verificare</span>';
-  if (!b.w && (b.rs === 'in' || b.rs === 'ok')) tags += '<span class="tag read' + (b.rs === 'in' ? ' now' : '') + '">' + esc(readLabel(b)) + '</span>';
+  if (!b.w && (b.rs === 'in' || b.rs === 'ok')) { var qq = b.rs === 'in' ? ppInfo(b) : {}; tags += '<span class="tag read' + (b.rs === 'in' ? ' now' : '') + (qq.pct != null ? ' has-pp" style="--pp:' + qq.pct + '%' : '') + '">' + esc(readLabel(b)) + '</span>'; }
   tags += dupTag(dups && dups[b.id]);
   if (b.i && !L.toIsbn13(b.i)) tags += '<span class="tag bad">ISBN non valido</span>';
   else if (!b.t && b.i && !s.st && b.nf) tags += '<span class="tag warn">Non trovato</span>';
@@ -3503,6 +3510,13 @@ $('#allqSheet').addEventListener('click', function (e) {
 /* stato di lettura, voto e data (solo Libreria) */
 var MESI_IT = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 function rdLong(v) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? (+m[3]) + ' ' + MESI_IT[+m[2] - 1] + ' ' + m[1] : 'aggiungi la data'; }   // «10 febbraio 2026»
+function ppHTML(b, d) {                            // «Sono a pagina [212] di 624 · 34%», con la barra
+  var q = ppInfo(b);
+  return '<div class="pp"><svg class="pp-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/></svg>' +
+    '<label class="pp-l">Sono a pagina <input type="text" inputmode="numeric" pattern="[0-9]*" data-k="pp" value="' + (q.p || '') + '" placeholder="…" maxlength="5" aria-label="Pagina a cui sei arrivato"' + d + '></label>' +
+    (q.tot ? '<span class="pp-of">di ' + q.tot + '</span><span class="pp-pct">' + (q.pct != null ? q.pct + '%' : '') + '</span>' : '') +
+    (q.tot ? '<span class="pp-bar" aria-hidden="true"><i style="width:' + (q.pct || 0) + '%"></i></span>' : '') + '</div>';
+}
 var RD_CAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></svg>';
 var RATE_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="pg" d="M3 6a9 9 0 0 1 9 0v13a9 9 0 0 0-9 0z"/><path class="pg" d="M12 6a9 9 0 0 1 9 0v13a9 9 0 0 0-9 0z"/></svg>';   // libro aperto (Piero: «era più bella l'icona con il libro aperto»)
 function readHTML(b, off) {
@@ -3516,6 +3530,7 @@ function readHTML(b, off) {
     return '<button type="button" class="star bk' + (b.rt >= n ? ' on' : '') + '" data-act="rt" data-v="' + n + '" role="radio" aria-checked="' + (b.rt === n) + '" aria-label="' + n + (n === 1 ? ' libricino' : ' libricini') + ': ' + L.rateWord(n) + '"' + d + '>' + RATE_BOOK + '</button>';
   }).join('');
   return '<div class="read"><span class="lbl">Lettura</span><div class="seg" role="group" aria-label="Stato di lettura">' + seg + '</div>' +
+    (b.rs === 'in' ? ppHTML(b, d) : '') +
     '<div class="rate"><div class="stars" role="radiogroup" aria-label="Voto">' + stars + '</div><span class="rt-word' + (b.rt ? '' : ' none') + '">' + (b.rt ? L.rateWord(b.rt) : 'Dai un voto') + '</span></div>' +
     (b.rs === 'ok' ? '<label class="f f-rd"><span class="lbl">Letto il</span><span class="rd-show' + (b.rd ? '' : ' none') + '">' + esc(rdLong(b.rd)) + RD_CAL + '</span><input type="date" data-k="rd" id="rd-' + b.id + '" value="' + esc(b.rd || '') + '"' + d + '></label>' : '') + '</div>';
 }
@@ -3680,13 +3695,14 @@ function wishEmptyHTML() {
 }
 /* vista copertine */
 function hue(s) { var h = 0; s = String(s || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h % 360; }
+function ppCov(b) { var q = !b.w && b.rs === 'in' ? ppInfo(b) : {}; return q.pct != null ? '<span class="pp-cov" title="Letto il ' + q.pct + '%"><i style="width:' + q.pct + '%"></i></span>' : ''; }
 function coverHTML(b) {
   var s = S[b.id] || {}, img = bigImg(b);
   var badge = isBusy(b) ? '<span class="badge">…</span>' : b.p ? '<span class="badge loan">Prestato</span>' : b.g.length ? '<span class="badge warn">Da verificare</span>' : '';
   var fav = b.fav && !b.w ? '<span class="ribbon fav-star" title="Preferito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/></svg></span>' : '';   // stellina sulla copertina
   return '<button class="cover' + (fav ? ' is-fav' : '') + '" data-id="' + b.id + '" aria-label="' + esc([b.t || 'Senza titolo', b.a, fav ? 'preferito' : ''].filter(Boolean).join(', ')) + '">' +
     '<span class="art">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' :
-      '<span class="ph" style="--h:' + hue(b.t + b.a + b.i) + '"><b>' + esc(b.t || b.i || 'Senza titolo') + '</b><small>' + esc(b.a) + '</small></span>') + badge + fav + '</span>' +
+      '<span class="ph" style="--h:' + hue(b.t + b.a + b.i) + '"><b>' + esc(b.t || b.i || 'Senza titolo') + '</b><small>' + esc(b.a) + '</small></span>') + badge + fav + ppCov(b) + '</span>' +
     '<span class="cap">' + esc(b.t || b.i || '…') + '</span><span class="cap2">' + esc(b.a) + '</span></button>';
 }
 function autosize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
@@ -4807,7 +4823,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 10:01", "n": "97.2", "note": "Si vede bene anche su tablet e PC"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 10:15", "n": "97.3", "note": "Segnalibro"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -5727,6 +5743,11 @@ list.addEventListener('input', function (e) {
   else if (k === 'c') { b.c = L.parseNum(el.value); }
   else if (k === 'i') { var w = el.value.replace(/[^\dXx]/g, '').toUpperCase(); if (w !== el.value) el.value = w; b.i = w; }
   else if (k === 'pg') { var pv = el.value.replace(/\D/g, '').slice(0, 5); if (pv !== el.value) el.value = pv; b.pg = pv; }
+  else if (k === 'pp') {                                // segnalibro: solo cifre; la barra e la percentuale si aggiornano mentre scrivi
+    var qv = el.value.replace(/\D/g, '').slice(0, 5); if (qv !== el.value) el.value = qv; b.pp = qv; b.ppd = qv ? today() : '';
+    var qi = ppInfo(b), box = el.closest('.pp');
+    if (box) { var pc = box.querySelector('.pp-pct'), br = box.querySelector('.pp-bar i'); if (pc) pc.textContent = qi.pct != null ? qi.pct + '%' : ''; if (br) br.style.width = (qi.pct || 0) + '%'; }
+  }
   else if (k === 'sn' || k === 'sq') { var sv = el.value.replace(/\D/g, '').slice(0, 3); if (sv !== el.value) el.value = sv; b[k] = sv; }
   else { b[k] = el.value.replace(/\s*[\r\n]+\s*/g, ' '); if (el.tagName === 'TEXTAREA') autosize(el); }
   if (b.g.indexOf(k) >= 0) {

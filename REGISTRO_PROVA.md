@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 97.3 · 16/11/2026 10:15
+- **Segnalibro**: con «In lettura», nella pagina del libro scrivi la pagina a cui sei arrivato («Sono a pagina 212 di 624») e vedi la barra con la percentuale.
+- L'avanzamento si vede anche nell'elenco («In lettura · 34%» con una linea sottile) e sulle copertine (una barretta in basso).
+
 ## Prova 97.2 · 16/11/2026 10:01
 - **Si vede bene anche su tablet e PC**: la pagina del libro non si schiaccia più; su schermo largo si dispone su due colonne (copertina, dati e lettura a sinistra, descrizione a destra).
 - Su schermo largo la matita apre i campi in colonna, come sul telefono; la barra in basso resta raccolta al centro.

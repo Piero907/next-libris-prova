@@ -896,7 +896,7 @@
       (priced.length > 1 ? '\n\nTotale: ' + eu(Math.round(tot * 100) / 100) + (priced.length < bs.length ? ' (' + priced.length + ' libri con il prezzo)' : '') : '');
   }
 
-  var MERGE_KEYS = ['t', 'a', 'e', 'y', 'c', 'i', 'img', 'imgL', 'sh', 'gen', 'pg', 'p', 'pd', 'rs', 'rt', 'rd', 'ds', 'se', 'sn', 'sq'];
+  var MERGE_KEYS = ['t', 'a', 'e', 'y', 'c', 'i', 'img', 'imgL', 'sh', 'gen', 'pg', 'p', 'pd', 'rs', 'rt', 'rd', 'pp', 'ppd', 'ds', 'se', 'sn', 'sq'];
   /* Tiene il libro piu' completo (a parita', il piu' vecchio) e lo riempie con i dati degli altri; le note si sommano. */
   function mergeBooks(group) {
     function filled(b) { return MERGE_KEYS.filter(function (k) { return b[k] != null && b[k] !== '' && b[k] !== 0; }).length + (b.n ? 1 : 0); }

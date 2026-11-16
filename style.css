@@ -1587,3 +1587,18 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .star.bk.on svg{fill:color-mix(in srgb,var(--accent) 28%,transparent)}
 .rt-word{font-size:15px;font-weight:600;color:var(--accent)}
 .rt-word.none{font-weight:400;color:var(--muted)}
+/* segnalibro: «Sono a pagina [212] di 624 · 34%» con la barra (In lettura) */
+.pp{flex-basis:100%;display:grid;grid-template-columns:auto auto auto 1fr;align-items:center;column-gap:8px;row-gap:6px;font-size:15px;color:var(--ink)}
+.pp-ic{width:20px;height:20px;fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:1.7;stroke-linejoin:round}
+.pp-l{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;margin:0}
+.pp-l input{width:4.6em;min-height:38px;padding:4px 8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font:600 16px var(--font-body);color:var(--ink);text-align:center}
+.pp-l input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.pp-of{color:var(--muted);white-space:nowrap}
+.pp-pct{justify-self:end;font-weight:600;color:var(--accent)}
+.pp-bar{grid-column:1 / -1;height:8px;border-radius:4px;background:color-mix(in srgb,var(--muted) 22%,transparent);overflow:hidden}
+.pp-bar i{display:block;height:100%;border-radius:4px;background:var(--accent);transition:width .25s}
+@media (prefers-reduced-motion:reduce){.pp-bar i{transition:none}}
+/* nell'elenco: una linea sottile sotto «In lettura · 34%»; sulle copertine una barretta in fondo */
+.tag.read.has-pp{background-image:linear-gradient(var(--accent),var(--accent));background-repeat:no-repeat;background-size:var(--pp) 3px;background-position:0 100%}
+.cover .pp-cov{position:absolute;left:8px;right:8px;bottom:8px;height:5px;border-radius:3px;background:rgba(255,255,255,.55);overflow:hidden;z-index:2;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.cover .pp-cov i{display:block;height:100%;background:var(--accent)}

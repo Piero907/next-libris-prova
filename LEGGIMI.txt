@@ -675,7 +675,11 @@ Aprendo un libro si vede la sua pagina:
   fotografi), titolo, autore (toccalo: chi e'), editore, anno, pagine,
   prezzo;
 - subito sotto, una striscia a tutta larghezza: Da leggere / In lettura /
-  Letto, e sotto le stelle e "Letto il", da cambiare direttamente;
+  Letto e il voto con i libricini; "Letto il" sta sotto casa editrice e
+  anno. Con "In lettura" c'e' il segnalibro: "Sono a pagina [212] di 624",
+  con la barra e la percentuale (senza il numero di pagine del libro, solo
+  la pagina). Nell'elenco il libro mostra "In lettura · 34%" con una linea
+  sottile, sulle copertine una barretta in basso;
 - la descrizione in tre righe: la freccetta la apre tutta, con la fonte
   e "Non e' questo libro";
 - note, citazioni, le etichette-filtro (genere, scaffale, autore,
