@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.8 · 17/11/2026 00:31
+- **Amici dell'amico**: nella libreria di un amico «N amici in comune» si tocca e mostra i suoi amici, quelli in comune in cima; gli altri con «Chiedi l'amicizia», se lui lo permette
+- **Gli amici vedono i miei amici**: nuova voce in Amici e privacy, accesa di partenza; spenta, gli amici vedono solo quelli in comune
+- **Icona Amici** anche nella libreria di un amico
+
 ## Prova 99.7 · 17/11/2026 00:19
 - **Condivisione › Chiave Google e worker su misura**: «Presta a un amico» se hai i tuoi; «Usi … di Piero R.» se usi quelli di un amico; «Crea la tua chiave Google: è gratis» se non ne hai una tua. Il tocco apre una finestra solo per la chiave e chiudendo torni a Condivisione
 - **Aggiungi un libro (+)**: in alto «In Libreria | Nei Desideri», parte dalla scheda in cui sei

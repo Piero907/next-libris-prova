@@ -99,7 +99,7 @@ body.selecting .fri-note,body.scanning .fri-note{display:none}
 .guest-bar .gb-chips .chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 html.guest #notice,html.guest #nxBox,html.guest #wrapAsk,html.guest #donAsk,html.guest #instCard,html.guest #donRow,html.guest .lay-note,html.guest #layMore,
 html.guest #fltLoan,html.guest #btnCheck,html.guest #btnExport,html.guest #tipTxt,html.guest #layNav [data-l="add"],html.guest .dock,
-html.guest #btnFri,html.guest .notice-tri,html.guest #btnShareWish,html.guest #btnTodo,html.guest #fltGuess,html.guest .ret-btn{display:none!important}
+html.guest .notice-tri,html.guest #btnShareWish,html.guest #btnTodo,html.guest #fltGuess,html.guest .ret-btn{display:none!important}
 /* scheda: si guarda, non si cambia (restano copertina, autore, etichette-filtro, descrizione, cerca sul web, chiudi) */
 html.guest #list .row :is(button,input,select,textarea,label,[data-act]){pointer-events:none}
 html.guest #list .row :is([data-act="zoom"],[data-act="auinfo"],[data-act="facet"],[data-act="serall"],.cv-dmore,[data-act="descmore"],[data-act="websearch"],[data-act="toggle"],.chev-btn,.sum,.cv-guest,.cv-guest *){pointer-events:auto}
@@ -154,3 +154,6 @@ html.guest #list .row.g-noread :is(.cv-strip,.read){display:none}
 #kwSheet{z-index:37}
 #keySheet,#kgSheet{z-index:38}
 #kwBody{display:grid;gap:10px}
+
+/* striscia dell'amico: «N amici in comune» si tocca e apre gli amici dell'amico (17/11/2026) */
+.gb-num .gb-ff{font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;padding:0;min-height:0}

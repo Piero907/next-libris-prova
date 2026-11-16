@@ -17,6 +17,7 @@ var esc = NL.esc, K_INV = 'catalogo-libri-amici-invito';
 var NAME_RE = /^[0-9A-Za-zÀ-ÖØ-öø-ÿ ._'-]{3,20}$/;
 var K_PEND = 'catalogo-libri-amici-scambi-da-mandare';
 var opts = false, nums = {};
+var ffOf = null, ff = null;   // amici dell'amico: di chi, e cosa è arrivato (17/11/2026)
 var swaps = [], view = null, wishes = null, libs = null, libsShow = 30, libsQ = '', recvId = '', asks = [], tips = [], who = {}, gMeta = {}, gId = null;
 var K_KEY = 'catalogo-libri-amici-chiave-in-uso';
 var keys = [];
@@ -51,7 +52,9 @@ async function load(force) {
   if (!force && list && Date.now() - lastLoad < 60000) return;
   loading = (async function () {
     try {
-      var p = await S.call('/rest/v1/profili?select=utente,nome,desideri,libreria&id=eq.' + encodeURIComponent(uid()), { user: true });
+      var p;
+      try { p = await S.call('/rest/v1/profili?select=utente,nome,desideri,libreria,amici&id=eq.' + encodeURIComponent(uid()), { user: true }); }
+      catch (e0) { if (e0 && e0.code === 'net') throw e0; p = await S.call('/rest/v1/profili?select=utente,nome,desideri,libreria&id=eq.' + encodeURIComponent(uid()), { user: true }); }   // database senza 015
       me = (p && p[0]) || { utente: null, nome: '', desideri: false };
       list = (await rpc('miei_amici')) || [];
       try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) {}
@@ -100,11 +103,11 @@ function sheet() {
   el.addEventListener('submit', onSubmit);
   el.addEventListener('input', function (e) { if (e.target.id === 'friLibQ') { libsQ = e.target.value; libsShow = 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); } });
   el.addEventListener('change', async function (e) {
-    var k = e.target.id === 'friWish' ? 'desideri' : e.target.id === 'friLib' ? 'libreria' : ''; if (!k) return;
+    var k = e.target.id === 'friWish' ? 'desideri' : e.target.id === 'friLib' ? 'libreria' : e.target.id === 'friAmici' ? 'amici' : ''; if (!k) return;
     var on = e.target.checked, body = { id: uid() }; body[k] = on; e.target.disabled = true;
     try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: body });
       me[k] = on;
-      NL.toast(k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
+      NL.toast(k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
       if (on) S.run && S.run(false); }
     catch (x) { e.target.checked = !on; NL.toast(nice(x)); }
     e.target.disabled = false;
@@ -113,11 +116,11 @@ function sheet() {
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var el = document.getElementById('friSheet'); if (el && !el.hidden) close(); } });
 async function open(asOpts) {
-  var el = sheet(); confirmId = ''; err = ''; editName = false; view = null; wishes = null; opts = asOpts === true; el.hidden = false; paint();
+  var el = sheet(); confirmId = ''; err = ''; editName = false; view = null; wishes = null; opts = asOpts === true; ffOf = null; ff = null; el.hidden = false; paint();
   await load(true);
   if (invite && me && me.utente) await findInvite();
 }
-function close() { var el = document.getElementById('friSheet'); if (el) el.hidden = true; found = null; foundQ = ''; editName = false; view = null; wishes = null; opts = false; }
+function close() { var el = document.getElementById('friSheet'); if (el) el.hidden = true; found = null; foundQ = ''; editName = false; view = null; wishes = null; opts = false; ffOf = null; ff = null; }
 async function findInvite() {
   try { var r = await rpc('cerca_utenti', { q: invite }); found = (r || []).filter(function (x) { return (x.utente || '').toLowerCase() === invite.toLowerCase(); }); foundQ = invite; }
   catch (e) { err = nice(e); }
@@ -141,7 +144,7 @@ function nameForm(first) {
 function paint() {
   paintKw(); NL.emit && NL.emit('keys');
   var body = document.getElementById('friBody'); if (!body || document.getElementById('friSheet').hidden) return;
-  document.getElementById('friH').textContent = opts && !view ? 'Amici e privacy' : 'Amici';
+  document.getElementById('friH').textContent = ffOf ? 'Amici di ' + friendName(ffOf) : opts && !view ? 'Amici e privacy' : 'Amici';
   var h = '';
   if (!uid()) {
     h = '<p class="msg">' + (invite ? 'Ti ha invitato <b>' + esc(invite) + '</b>. ' : '') + 'Per avere amici serve l\'account: entra con Google, poi torna qui.</p>' +
@@ -152,6 +155,8 @@ function paint() {
     h = '<p class="msg">' + (invite ? 'Ti ha invitato <b>' + esc(invite) + '</b>. ' : '') + 'Prima scegli il nome con cui ti trovano gli amici.</p>' + nameForm(true);
   } else if (editName) {
     h = nameForm(false);
+  } else if (ffOf) {
+    h = ffView();
   } else if (opts) {
     h = optsView();
   } else if (view) {
@@ -234,10 +239,12 @@ async function onClick(e) {
       NL.toast(st === 'amici' ? 'Ora siete amici.' : 'Richiesta mandata a ' + b.dataset.u + '.');
       if (invite && b.dataset.u.toLowerCase() === invite.toLowerCase()) { invite = null; wr(K_INV, null); }
       (found || []).forEach(function (x) { if (x.utente === b.dataset.u) x.rel = st === 'amici' ? 'amici' : 'inviata'; });
+      ((ff && ff.amici) || []).forEach(function (x) { if (x.utente === b.dataset.u) x.rel = st === 'amici' ? 'amici' : 'inviata'; });
     } else if (a === 'yes' || a === 'no') {
       await rpc('rispondi_amicizia', { da: id, accetta: a === 'yes' });
       NL.toast(a === 'yes' ? 'Ora siete amici.' : 'Richiesta rifiutata.');
       (found || []).forEach(function (x) { if (x.id === id) x.rel = a === 'yes' ? 'amici' : ''; });
+      ((ff && ff.amici) || []).forEach(function (x) { if (x.id === id) x.rel = a === 'yes' ? 'amici' : ''; });
     } else if (a === 'gift' || a === 'ungift') {
       try { await rpc('prenota_regalo', { amico: view, libro: id, si: a === 'gift' }); NL.toast(a === 'gift' ? 'Segnato: lo regali tu. ' + friendName(view) + ' non lo vede.' : 'Non lo regali più.'); }
       catch (x3) { NL.toast(/già prenotato/.test(x3.message) ? 'L\'ha già prenotato un altro amico.' : nice(x3)); }
@@ -383,8 +390,10 @@ async function openGuest(id) {
   (ws.libri || []).forEach(function (x) { gMeta[x.id] = { w: true, prenotato: x.prenotato || '' }; books.push(Object.assign(snapG(x), { id: x.id, ts: Number(x.ts) || 0, w: true })); });
   var info = { id: id, comuni: lb.comuni, libVis: !!lb.visibili, wishVis: !!ws.visibili, totale: lb.totale || 0,
     empty: { lib: lb.visibili ? name + ' non ha ancora libri nella sua libreria.' : name + ' non mostra la sua libreria agli amici.', wish: ws.visibili ? 'La sua lista dei desideri è vuota.' : name + ' non mostra i suoi desideri agli amici.' } };
-  NL.guestEnter(name, books, info);
+  entering = true;   // passando da un amico all'altro l'uscita dal primo non deve azzerare gId e gMeta del secondo (17/11/2026)
+  try { NL.guestEnter(name, books, info); } finally { entering = false; }
 }
+var entering = false;
 function guestBar() {
   var g = NL.guest && NL.guest(), bar = document.getElementById('guestBar');
   if (!g) { if (bar) bar.hidden = true; return; }
@@ -397,6 +406,7 @@ function guestBar() {
       if (b.dataset.g === 'back') NL.guestExit();
       else if (b.dataset.g === 'notmine') NL.setFlt(NL.flt() === 'notmine' ? '' : 'notmine'), guestBar();
       else if (b.dataset.g === 'more') openFriend(gId);
+      else if (b.dataset.g === 'ff') openFF(gId);
       else if (b.dataset.g === 'key') keySheet(gId);
       else if (b.dataset.g === 'usekey') keyAct('keyuse', gId).then(guestBar);
     });
@@ -407,7 +417,7 @@ function guestBar() {
   var last = lib.filter(function (b) { return b.rs === 'ok'; }).sort(function (a, b) { return (b.rd || '') > (a.rd || '') ? 1 : (b.rd || '') < (a.rd || '') ? -1 : (b.ts || 0) - (a.ts || 0); }).slice(0, 5);   // prima chi ha la data di lettura
   var info = (window.__guestInfo || {}), comuni = info.comuni != null ? info.comuni : ((nums[gId] || {}).comuni || 0);
   var h = '<div class="gb-top"><button type="button" class="link gb-back" data-g="back">‹ La tua libreria</button><button type="button" class="link gb-more" data-g="more">Prestiti, regali e altro</button></div>';
-  h += '<p class="gb-num">' + comuni + (comuni === 1 ? ' amico' : ' amici') + ' in comune · ' + inComune + (inComune === 1 ? ' libro' : ' libri') + ' in comune</p>';
+  h += '<p class="gb-num"><button type="button" class="link gb-ff" data-g="ff">' + comuni + (comuni === 1 ? ' amico' : ' amici') + ' in comune</button> · ' + inComune + (inComune === 1 ? ' libro' : ' libri') + ' in comune</p>';
   if (now.length) h += '<p class="gb-line"><b>Sta leggendo</b> ' + now.map(function (b) {
     var tot = Number(b.pg) || 0, pp = Number(b.pp) || 0;
     return '«' + esc(b.t || 'senza titolo') + '»' + (pp ? ' <small>pagina ' + pp + (tot ? ' di ' + tot : '') + '</small>' : '');
@@ -421,7 +431,7 @@ function guestBar() {
     (fromHim && !(b0 && b0.da === gId) ? '<button type="button" class="chip todo" data-g="usekey">Usa la sua chiave</button>' : '') + '</div>';
   bar.innerHTML = h;
 }
-NL.on('guest', function (name) { if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
+NL.on('guest', function (name) { if (!name && entering) return; if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
 /* le info della libreria aperta (amici in comune): le passa openGuest prima di entrare */
 var _enter = NL.guestEnter;
 if (_enter) NL.guestEnter = function (name, books, info) { window.__guestInfo = info; var r = _enter(name, books, info); guestBar(); return r; };
@@ -571,9 +581,47 @@ function optsView() {
   var h = '<button class="link fr-back" type="button" data-f="optsback">‹ Amici</button>';
   h += '<div class="fr-me"><span class="fr-me-n"><small>Il tuo nome</small><b>' + esc(me.utente) + '</b></span><button class="link" type="button" data-f="name">Cambia</button></div>';
   h += '<section class="fr-sec"><h3 class="fr-h">Chi vede cosa</h3><div class="fr-share"><label class="check fr-wish"><input type="checkbox" id="friLib"' + (me.libreria ? ' checked' : '') + '><span>Gli amici vedono la mia libreria<small>Titolo, autore, copertina, genere, editore, anno, pagine, serie, lettura e voto. Note, citazioni, appunti, prezzi, scaffali e prestiti restano tuoi.</small></span></label>' +
-    '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label></div></section>';
+    '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friAmici"' + (me.amici !== false ? ' checked' : '') + '><span>Gli amici vedono i miei amici<small>Solo i nomi, così trovate altri amici e possono chiedervi l\'amicizia. Se la togli, vedono solo gli amici che avete in comune.</small></span></label></div></section>';
   h += keysHTML(true);
   h += '<p class="fr-small">Gli altri vedono solo il tuo nome. Il resto, solo se lo scegli qui.</p>';
+  return h;
+}
+/* ---------- gli amici dell'amico (Piero, 17/11/2026): dai suoi «amici in comune»; quelli in comune in cima, gli altri se lui lo permette ---------- */
+async function openFF(id) {
+  var el = sheet(); confirmId = ''; err = ''; editName = false; view = null; opts = false; ffOf = id; ff = null; found = null; foundQ = '';
+  el.hidden = false; paint(); var si = document.querySelector('#friSheet .sheet-in'); if (si) si.scrollTop = 0;
+  if (!list) await load(true);
+  await loadFF();
+}
+async function loadFF() {
+  var id = ffOf; if (!id) return;
+  try {
+    var r = await rpc('amici_di', { amico: id }); if (ffOf === id) ff = r || { visibili: false, amici: [] };
+    var nc = ((r && r.amici) || []).filter(function (x) { return x.comune; }).length, gi = window.__guestInfo;   // stesso numero nella striscia e nell'elenco
+    if (gi && gi.id === id && gi.comuni !== nc) { gi.comuni = nc; guestBar(); }
+  }
+  catch (e) { if (ffOf === id) ff = { err: /amici_di|PGRST202|404/.test(String(e && e.message) + (e && e.code)) ? 'Non disponibile in questa versione.' : nice(e) }; }
+  paint();
+}
+function ffView() {
+  var n = friendName(ffOf), h = '';
+  if (!ff) return '<p class="fr-small">Un momento…</p>';
+  if (ff.err) return '<p class="msg bad">' + esc(ff.err) + '</p>';
+  var all = (ff.amici || []).map(function (x) { var y = (found || []).filter(function (f) { return f.id === x.id; })[0]; return y ? Object.assign({}, x, { rel: y.rel }) : x; });
+  var com = all.filter(function (x) { return x.comune; }), oth = all.filter(function (x) { return !x.comune; });
+  h += '<section class="fr-sec"><h3 class="fr-h">In comune' + (com.length ? ' <span class="fr-n">' + com.length + '</span>' : '') + '</h3>';
+  h += com.length ? '<ul class="fr-list fr-box">' + com.map(function (x) {
+    return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>Guarda la sua libreria</small></button><span class="n" aria-hidden="true">›</span></li>';
+  }).join('') + '</ul>' : '<p class="fr-small">Nessun amico in comune.</p>';
+  h += '</section>';
+  if (ff.visibili) {
+    h += '<section class="fr-sec"><h3 class="fr-h">Altri amici di ' + esc(n) + (oth.length ? ' <span class="fr-n">' + oth.length + '</span>' : '') + '</h3>';
+    if (oth.length > 8) h += '<input type="search" class="fr-libq" data-pick-q placeholder="Cerca tra i suoi amici" autocomplete="off" enterkeyhint="search">';
+    h += oth.length ? '<ul class="fr-list">' + oth.map(function (x) { return row(x, relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessun altro.</p>';
+    h += '</section>';
+  } else h += '<p class="fr-small">' + esc(n) + ' mostra solo gli amici che avete in comune.</p>';
+  if (err) h += '<p class="msg bad" id="friErr">' + esc(err) + '</p>';
   return h;
 }
 /* elenco di amici da scegliere, con la ricerca quando sono tanti (al posto delle pillole: regge anche 20-30 amici) */
@@ -587,7 +635,7 @@ function pickerHTML(items, attr, pressed, info) {
 document.addEventListener('input', function (e) {
   if (!e.target.hasAttribute || !e.target.hasAttribute('data-pick-q')) return;
   var q = e.target.value.trim().toLowerCase(), box = e.target.parentNode;
-  Array.prototype.forEach.call(box.querySelectorAll('.fr-pick-row, .fr-go'), function (r) { r.hidden = q && r.textContent.toLowerCase().indexOf(q) < 0; });
+  Array.prototype.forEach.call(box.querySelectorAll('.fr-pick-row, .fr-go, .fr-row'), function (r) { r.hidden = q && r.textContent.toLowerCase().indexOf(q) < 0; });
 });
 
 /* ---------- chiave Google e worker SBN condivisi con un amico: li usano tutti e due (Piero, 16/11/2026) ---------- */
@@ -917,5 +965,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { open: open, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();
