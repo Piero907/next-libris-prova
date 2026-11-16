@@ -2,7 +2,8 @@
    Amicizia reciproca: chiedi, l'altro accetta o rifiuta. Il nome dell'app («Libreria di Piero») e' anche il nome per gli amici:
    unico (senza badare alle maiuscole), 3-20 caratteri (lettere anche accentate, numeri, spazi, punto, trattino, apostrofo).
    Ci si trova cercando il nome (da 3 lettere: uguale o che comincia cosi') o con il link d'invito (…/?amico=Nome).
-   Dove si vede: parte «Amici» nel Menu, icona accanto all'ingranaggio con il numero delle richieste, avviso in cima (prima degli altri).
+   Dove si vede: parte «Amici» nel Menu, icona accanto all'ingranaggio; le novità (richieste, prestiti, consigli…) nella campanella (notifiche.js).
+   In cima restano solo gli avvisi che chiedono una risposta: «Me lo presti?» e il reso da confermare.
    Le richieste si leggono all'apertura e tornando all'app (niente email, niente Realtime: limiti del piano gratuito di Supabase).
    Desideri: «Gli amici vedono i miei desideri» (spento di partenza); la pagina di un amico mostra i suoi desideri e «Te lo regalo io»
    (lui non lo vede, gli altri amici si'). Prestiti e regali: in «Presta, vendi o regala» si sceglie un amico; il libro compare subito
@@ -12,12 +13,12 @@
 (function () {
 'use strict';
 var NL = window.NL, S = window.NLSocial; if (!NL || !S || !S.call) return;
-var esc = NL.esc, K_INV = 'catalogo-libri-amici-invito', K_SEEN = 'catalogo-libri-amici-visti';
+var esc = NL.esc, K_INV = 'catalogo-libri-amici-invito';
 var NAME_RE = /^[0-9A-Za-zÀ-ÖØ-öø-ÿ ._'-]{3,20}$/;
-var K_PEND = 'catalogo-libri-amici-scambi-da-mandare', K_GOT = 'catalogo-libri-amici-ricevuti';
+var K_PEND = 'catalogo-libri-amici-scambi-da-mandare';
 var opts = false, nums = {};
 var swaps = [], view = null, wishes = null, libs = null, libsShow = 30, libsQ = '', recvId = '', asks = [], tips = [], who = {}, gMeta = {}, gId = null;
-var K_ANS = 'catalogo-libri-amici-risposte-viste', K_TIPS = 'catalogo-libri-amici-consigli-visti', K_KEY = 'catalogo-libri-amici-chiave-in-uso', K_KEYSEEN = 'catalogo-libri-amici-chiavi-viste';
+var K_KEY = 'catalogo-libri-amici-chiave-in-uso';
 var keys = [];
 var me = null, list = null, loading = null, lastLoad = 0, found = null, foundQ = '', invite = null, confirmId = '', busy = '', err = '', editName = false, syncing = false;
 var ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></svg>';
@@ -61,9 +62,11 @@ async function load(force) {
       if (me.utente && NL.name() !== me.utente) { syncing = true; NL.setName(me.utente); syncing = false; }   // il nome per gli amici vale anche nell'app
     } catch (e) { err = nice(e); }
     loading = null; paintAll();
+    loaded.forEach(function (fn) { try { fn(); } catch (e) {} });   // la campanella si aggiorna insieme
   })();
   return loading;
 }
+var loaded = [];
 function friends() { return (list || []).filter(function (x) { return x.stato === 'amici'; }); }
 function received() { return (list || []).filter(function (x) { return x.stato === 'attesa' && x.verso === 'ricevuta'; }); }
 function sent() { return (list || []).filter(function (x) { return x.stato === 'attesa' && x.verso === 'inviata'; }); }
@@ -110,7 +113,7 @@ function sheet() {
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var el = document.getElementById('friSheet'); if (el && !el.hidden) close(); } });
 async function open(asOpts) {
-  var el = sheet(); confirmId = ''; err = ''; editName = false; view = null; wishes = null; opts = asOpts === true; el.hidden = false; seenAll(); paint();
+  var el = sheet(); confirmId = ''; err = ''; editName = false; view = null; wishes = null; opts = asOpts === true; el.hidden = false; paint();
   await load(true);
   if (invite && me && me.utente) await findInvite();
 }
@@ -256,41 +259,18 @@ async function shareInvite() {
   catch (e) { NL.toast(link); }
 }
 
-/* ---------- avviso in cima (prima degli altri avvisi: .lay-first) ---------- */
-function fresh() { var seen = rd(K_SEEN) || []; return received().filter(function (x) { return seen.indexOf(x.id) < 0; }); }
-function paintNote() {
-  var nuove = fresh(), box = document.getElementById('friNote');
-  if (!box) {
-    if (!nuove.length) return;
-    var anchor = document.getElementById('nxBox') || document.getElementById('donAsk') || document.getElementById('list'); if (!anchor) return;
-    box = document.createElement('section'); box.id = 'friNote'; box.className = 'fri-note lay-note lay-first'; box.hidden = true;
-    box.innerHTML = '<button type="button" class="fn-open" id="friNoteGo"><span class="fn-ico" aria-hidden="true">' + ICON + '</span><span class="fn-t"><b id="friNoteT"></b><small>Tocca per rispondere</small></span><span class="fn-go">Vedi</span></button>' +
-      '<button type="button" class="ico" id="friNoteX" aria-label="Più tardi">×</button>';
-    anchor.parentNode.insertBefore(box, anchor);
-    box.querySelector('#friNoteGo').addEventListener('click', function () { open(); });
-    box.querySelector('#friNoteX').addEventListener('click', function () { seenAll(); NL.summary && NL.summary(); });
-  }
-  box.hidden = !nuove.length;
-  if (!nuove.length) return;
-  var x = nuove[0];
-  document.getElementById('friNoteT').textContent = nuove.length === 1 ? (x.utente || x.nome || '?') + ' vuole essere tuo amico' : nuove.length + ' richieste di amicizia';
-}
-function seenAll() { wr(K_SEEN, received().map(function (x) { return x.id; })); paintNote(); }
-
-/* ---------- icona in alto, accanto all'ingranaggio, con il numero delle richieste ---------- */
+/* ---------- icona in alto, accanto all'ingranaggio (il numero delle novità sta sulla campanella) ---------- */
 function paintTop() {
   var b = document.getElementById('btnFri');
   if (!b) {
     var gear = document.getElementById('btnOpts'); if (!gear) return;
     b = document.createElement('button'); b.type = 'button'; b.id = 'btnFri'; b.className = 'ico fri-top';
-    b.innerHTML = ICON + '<span class="fri-badge" id="btnFriN" hidden></span>';
+    b.innerHTML = ICON;
     gear.parentNode.insertBefore(b, gear);
     document.documentElement.classList.add('has-fri');
     b.addEventListener('click', function () { open(); });
   }
-  var n = received().length;
-  var badge = document.getElementById('btnFriN'); badge.hidden = !n; badge.textContent = n > 9 ? '9+' : n || '';
-  b.setAttribute('aria-label', n ? 'Amici: ' + n + (n === 1 ? ' richiesta' : ' richieste') : 'Amici');
+  b.setAttribute('aria-label', 'Amici');
   b.title = 'Amici';
 }
 
@@ -301,7 +281,7 @@ function paintMenu() {
     var top = document.querySelector('#drawerOpts .dmain'); if (!top) return;
     var h = document.createElement('h3'); h.id = 'friMenuH'; h.textContent = 'Amici';
     m = document.createElement('div'); m.className = 'dlist dmenu'; m.id = 'friMenu';
-    m.innerHTML = '<button type="button" class="dopt dgo" id="goFri"><span><b>I tuoi amici</b><small id="goFriTxt"></small></span><span class="dbadge" id="goFriN" hidden></span><span class="n" aria-hidden="true">›</span></button>' +
+    m.innerHTML = '<button type="button" class="dopt dgo" id="goFri"><span><b>I tuoi amici</b><small id="goFriTxt"></small></span><span class="n" aria-hidden="true">›</span></button>' +
       '<button type="button" class="dopt dgo" id="goInv"><span><b>Invita un amico</b><small>Manda il tuo link: con un tocco ti chiede l\'amicizia</small></span><span class="n" aria-hidden="true">›</span></button>';
     top.parentNode.insertBefore(h, top.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
     m.querySelector('#goFri').addEventListener('click', function () { NL.closeDrawer(); setTimeout(open, 60); });
@@ -313,9 +293,8 @@ function paintMenu() {
   else if (!me.utente) t = 'Scegli il nome con cui ti trovano';
   else t = (rec ? rec + (rec === 1 ? ' richiesta per te' : ' richieste per te') + ' · ' : '') + (fr ? fr + (fr === 1 ? ' amico' : ' amici') : 'Ancora nessun amico');
   document.getElementById('goFriTxt').textContent = t;
-  var n = document.getElementById('goFriN'); n.hidden = !rec; n.textContent = rec || '';
 }
-function paintAll() { paint(); paintMenu(); paintNote(); paintTop(); paintSet(); }
+function paintAll() { paint(); paintMenu(); paintTop(); paintSet(); }
 function paintSet() {
   var set = document.getElementById('setList'); if (!set) return;
   var b = document.getElementById('goFriOpt');
@@ -501,13 +480,7 @@ async function askAnswer(rid, yes) {
   } catch (e) { NL.toast(nice(e)); }
   await load(true);
 }
-/* chi chiede vede la risposta (una volta) */
-function seenAnswers() {
-  var seen = rd(K_ANS) || [], nuove = asks.filter(function (r) { return r.da === uid() && r.stato !== 'attesa' && seen.indexOf(r.id) < 0; });
-  nuove.forEach(function (r) { NL.toast(r.stato === 'accettata' ? (r.nome_a || 'Il tuo amico') + ' ti presta «' + ((r.libro && r.libro.t) || 'il libro') + '»: è nella tua Libreria.' : (r.nome_a || 'Il tuo amico') + ' ora non può prestarti «' + ((r.libro && r.libro.t) || 'il libro') + '».'); });
-  if (nuove.length) wr(K_ANS, seen.concat(nuove.map(function (r) { return r.id; })).slice(-200));
-  paintAsk(); paintTip();
-}
+function seenAnswers() { paintAsk(); }   // le risposte a «Me lo presti?» arrivano nella campanella
 function paintAsk() {
   var r = asks.filter(function (x) { return x.a === uid() && x.stato === 'attesa'; }), box = document.getElementById('friAsk');
   if (!box) {
@@ -525,27 +498,11 @@ function paintAsk() {
 }
 
 /* ---------- consigli: dalla condivisione di un libro, a un amico dell'app ---------- */
-function paintTip() {
-  var seen = rd(K_TIPS) || [], n = tips.filter(function (c) { return seen.indexOf(c.id) < 0; }), box = document.getElementById('friTip');
-  if (!box) {
-    if (!n.length) return;
-    var anchor = document.getElementById('nxBox') || document.getElementById('donAsk') || document.getElementById('list'); if (!anchor) return;
-    box = document.createElement('section'); box.id = 'friTip'; box.className = 'fri-note lay-note lay-first'; box.hidden = true;
-    box.innerHTML = '<button type="button" class="fn-open" id="friTipGo"><span class="fn-ico" aria-hidden="true">' + ICON + '</span><span class="fn-t"><b id="friTipT"></b><small>Tocca per vederlo</small></span><span class="fn-go">Vedi</span></button>' +
-      '<button type="button" class="ico" id="friTipX" aria-label="Ho visto">×</button>';
-    anchor.parentNode.insertBefore(box, anchor);
-    var seenAll2 = function () { wr(K_TIPS, tips.map(function (c) { return c.id; })); paintTip(); };
-    box.querySelector('#friTipGo').addEventListener('click', function () { seenAll2(); open(); });
-    box.querySelector('#friTipX').addEventListener('click', function () { seenAll2(); NL.summary && NL.summary(); });
-  }
-  box.hidden = !n.length; if (!n.length) return;
-  document.getElementById('friTipT').textContent = n.length === 1 ? (n[0].nome_da || 'Un amico') + ' ti consiglia «' + ((n[0].libro && n[0].libro.t) || 'un libro') + '»' : n.length + ' libri consigliati dagli amici';
-}
 async function tipAct(a, id) {
   var c = tips.filter(function (x) { return x.id === id; })[0]; if (!c) return;
   if (a === 'tipwish') { NL.addMine(Object.assign(snapG(c.libro || {}), { w: true, fr: c.nome_da || '' })); NL.toast('Aggiunto ai tuoi desideri.'); }
   try { await rpc('togli_consiglio', { id: id }); } catch (e) {}
-  tips = tips.filter(function (x) { return x.id !== id; }); paint(); paintTip();
+  tips = tips.filter(function (x) { return x.id !== id; }); paint();
 }
 var shareSel = {};
 function paintShareFriends(books) {
@@ -689,8 +646,6 @@ function checkKeys() {
     if (!k) stopBorrow(b.nome + ' non condivide più la sua chiave: torni alle tue impostazioni.');
     else if ((k.gb_key || '') !== b.gb || (k.sbn || '') !== b.sbn) { var st = NL.settings || {}; setKeys(k.gb_key || st.gbKey, k.sbn || st.sbnUrl); wr(K_KEY, { da: k.da, nome: k.nome, gb: k.gb_key || '', sbn: k.sbn || '' }); }
   }
-  var seen = rd(K_KEYSEEN) || [], nuove = inn.filter(function (k) { return seen.indexOf(k.da) < 0; });
-  if (nuove.length) { NL.toast(nuove[0].nome + ' condivide con te la sua chiave per cercare i libri: la trovi in Amici.'); wr(K_KEYSEEN, seen.concat(nuove.map(function (k) { return k.da; }))); }
 }
 
 /* ---------- prestiti e regali tra amici ---------- */
@@ -756,7 +711,7 @@ NL.on('recv', function (id) {
 });
 /* applica quello che è arrivato: libri nuovi per chi riceve, restituzioni per tutti e due */
 async function applySwaps() {
-  var me_ = uid(), books = mine(), changed = false, got = [];
+  var me_ = uid(), books = mine(), changed = false;
   for (var i = 0; i < swaps.length; i++) {
     var s = swaps[i], ofSwap = function (b) { return b.sx === s.id; };
     var local = books.filter(ofSwap)[0];
@@ -768,13 +723,13 @@ async function applySwaps() {
           var nb = NL.clean(Object.assign({}, L0, { id: NL.newId(), ts: Date.now(), w: false, rs: 'da', sx: s.id, sk: s.tipo === 'prestito' ? 'p' : 'r', sda: s.nome_da || '' }));
           if (nb) { books.unshift(nb); s._lid = nb.id; }
         }
-        changed = true; got.push(s);
+        changed = true;
       }
       try { await rpc('segna_visto', { id: s.id }); } catch (e) {}
     }
     if (s.tipo === 'prestito' && local && s.a === me_ && !local.xs) {           // restituzione: «da confermare» o rifiutata
       if (s.stato === 'reso' && local.sk === 'p') { local.sk = 'q'; changed = true; }
-      if (s.stato === 'aperto' && local.sk === 'q') { local.sk = 'p'; changed = true; NL.toast((s.nome_da || 'Il tuo amico') + ' dice di non avere ancora ricevuto «' + (local.t || 'il libro') + '».'); }
+      if (s.stato === 'aperto' && local.sk === 'q') { local.sk = 'p'; changed = true; }   // «non ancora ricevuto»: nella campanella
     }
     if (s.stato === 'chiuso' && s.tipo === 'prestito' && local) {
       if (s.a === me_ && (local.sk === 'p' || local.sk === 'q') && !local.xs) { local.xs = 'b'; local.xa = local.sda || s.nome_da || ''; local.xd = String(s.chiuso || '').slice(0, 10) || NL.today(); changed = true;
@@ -784,9 +739,8 @@ async function applySwaps() {
     }
   }
   if (changed) { NL.save(); NL.refresh(); }
-  if (got.length) { var g = (rd(K_GOT) || []).concat(got.map(function (s) { return { id: s.id, t: (s.libro && s.libro.t) || '', da: s.nome_da || '', k: s.tipo, lid: s._lid || '' }; })).slice(-20); wr(K_GOT, g); }
   var p = pend(); if (p.length) { setPend([]); p.forEach(function (x) { sendSwap(x.id, x.kind, x.who, null); }); }
-  paintGot(); paintRet();
+  paintRet();
 }
 /* avviso in cima per chi ha prestato: «Bruno dice di averti restituito «X»»: Confermo / Non ancora */
 function paintRet() {
@@ -818,30 +772,6 @@ function paintRet() {
   box.dataset.id = r[0].id;
   document.getElementById('friRetT').textContent = (r[0].nome_a || 'Il tuo amico') + ' dice di averti restituito «' + ((r[0].libro && r[0].libro.t) || 'un libro') + '»';
 }
-/* avviso in cima: «Anna ti ha prestato «X»: è nella tua Libreria» */
-function paintGot() {
-  var g = rd(K_GOT) || [], box = document.getElementById('friGot');
-  if (!box) {
-    if (!g.length) return;
-    var anchor = document.getElementById('nxBox') || document.getElementById('donAsk') || document.getElementById('list'); if (!anchor) return;
-    box = document.createElement('section'); box.id = 'friGot'; box.className = 'fri-note lay-note lay-first'; box.hidden = true;
-    box.innerHTML = '<button type="button" class="fn-open" id="friGotGo"><span class="fn-ico" aria-hidden="true">' + ICON + '</span><span class="fn-t"><b id="friGotT"></b><small id="friGotS"></small></span><span class="fn-go">Apri</span></button>' +
-      '<button type="button" class="ico" id="friGotX" aria-label="Ho visto">×</button>';
-    box.querySelector('#friGotGo').addEventListener('click', function () {      // apre la scheda del libro arrivato (Piero, 16/11/2026)
-      var g2 = rd(K_GOT) || [], x = g2.pop(); wr(K_GOT, g2.length ? g2 : null); paintGot();
-      if (x && x.lid && NL.showBook && NL.showBook(x.lid)) return;
-      var b = x && mine().filter(function (y) { return y.sx === x.id; })[0]; if (b && NL.showBook) NL.showBook(b.id);
-    });
-    anchor.parentNode.insertBefore(box, anchor);
-    box.querySelector('#friGotX').addEventListener('click', function () { wr(K_GOT, null); paintGot(); NL.summary && NL.summary(); });
-  }
-  box.hidden = !g.length;
-  if (!g.length) return;
-  var x = g[g.length - 1];
-  document.getElementById('friGotT').textContent = g.length === 1 ? x.da + (x.k === 'prestito' ? ' ti ha prestato «' : ' ti ha regalato «') + x.t + '»' : g.length + ' libri da amici: prestiti e regali';
-  document.getElementById('friGotS').textContent = g.length === 1 ? 'Tocca per aprire la sua scheda: è nella tua Libreria' : 'Tocca per aprire l\'ultimo; sono tutti nella tua Libreria';
-}
-
 /* ---------- in «Presta, vendi o regala»: gli amici da scegliere con un tocco ---------- */
 function paintLoanFriends() {
   var sh = document.getElementById('loanSheet'), who = document.getElementById('loanWhoF'); if (!sh || !who) return;
@@ -883,5 +813,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { open: open, load: load, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { open: open, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();

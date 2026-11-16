@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.2 · 16/11/2026 19:48
+- **Campanella delle notifiche** accanto all'icona Amici: richieste d'amicizia, prestiti, regali, restituzioni, «Me lo presti?», consigli e chiavi condivise, con il numero delle nuove; letto vale su tutti i dispositivi. L'icona Amici non ha più il numero e in cima restano solo gli avvisi che chiedono una risposta.
+
 ## Prova 99.1 · 16/11/2026 19:09
 - Riallineata alla versione 99 (amici)
 

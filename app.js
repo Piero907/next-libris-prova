@@ -4927,7 +4927,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 19:09", "n": "99.1", "note": "Riallineata alla versione 99 (amici)"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 19:48", "n": "99.2", "note": "Campanella delle notifiche accanto all'icona Amici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
