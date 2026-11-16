@@ -105,8 +105,9 @@ function smallImg(b) { var s = S[b.id] || {}; return coverURL[b.id] || b.img || 
 function bigImg(b) { var s = S[b.id] || {}; return coverURL[b.id] || b.imgL || b.img || s.big || s.thumb || ''; }
 /* Richieste di oggi a Google Libri e al worker SBN. Il giorno di Google finisce a mezzanotte ora del Pacifico (le 9 da noi),
    quello di Cloudflare a mezzanotte UTC (l'1 o le 2 di notte da noi). */
-var G_LIMIT = 1000, G_STOP = 950, G_EXTRA = 700;          // con la chiave: 1.000 al giorno; le copertine grandi si fermano prima
+var G_LIMIT = 1000, G_STOP = 950, G_EXTRA = 700, S_STOP = 95000;          // con la chiave: 1.000 al giorno; le copertine grandi si fermano prima
 var quota = { d: '', g: 0, ds: '', s: 0 };
+var shared = { g: 0, d: '', s: 0, ds: '' };   // totale di oggi di chi usa la stessa chiave o lo stesso worker (modulo ricerche.js, Supabase)
 function pacificDay() { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } }
 function utcDay() { return new Date().toISOString().slice(0, 10); }
 function loadQuota() { try { var q = JSON.parse(ls.get('catalogo-libri-quota') || '{}'); if (q && q.d) quota = { d: q.d, g: q.g | 0, ds: q.ds || q.d, s: q.s | 0 }; } catch (e) {} }
@@ -115,15 +116,17 @@ function rollQuota() {
   if (quota.d !== d) { quota.d = d; quota.g = 0; }
   if (quota.ds !== ds) { quota.ds = ds; quota.s = 0; }
 }
-function countCall(k) { rollQuota(); quota[k]++; ls.set('catalogo-libri-quota', JSON.stringify(quota)); if ($('#optSheet').hidden) return; updateQuotaInfo(); }
-function googleLeft(extra) { rollQuota(); return !settings.gbKey || quota.g < (extra ? G_EXTRA : G_STOP); }
+function countCall(k) { rollQuota(); quota[k]++; ls.set('catalogo-libri-quota', JSON.stringify(quota)); emit('apiCall', k); if ($('#optSheet').hidden) return; updateQuotaInfo(); }
+function gUsed() { rollQuota(); return Math.max(quota.g, shared.d === quota.d ? shared.g : 0); }
+function sUsed() { rollQuota(); return Math.max(quota.s, shared.ds === quota.ds ? shared.s : 0); }
+function googleLeft(extra) { return !settings.gbKey || gUsed() < (extra ? G_EXTRA : G_STOP); }
 function updateQuotaInfo() {
-  rollQuota();
-  var nf = new Intl.NumberFormat('it-IT');
-  $('#gbCount').innerHTML = 'Richieste oggi: <b>' + nf.format(quota.g) + '</b>' + (settings.gbKey
-    ? ' su 1.000 · si azzera verso le 9' + (quota.g >= G_STOP ? '. Limite quasi raggiunto: le ricerche riprendono domattina' : quota.g >= G_EXTRA ? '. Le copertine grandi aspettano domani' : '')
+  var nf = new Intl.NumberFormat('it-IT'), g = gUsed(), sb = sUsed();
+  var withG = g > quota.g ? ' (con chi usa la stessa chiave)' : '', withS = sb > quota.s ? ' (con chi usa lo stesso worker)' : '';
+  $('#gbCount').innerHTML = 'Richieste oggi: <b>' + nf.format(g) + '</b>' + (settings.gbKey
+    ? withG + ' su 1.000 · si azzera verso le 9' + (g >= G_STOP ? '. Limite quasi raggiunto: le ricerche riprendono domattina' : g >= G_EXTRA ? '. Le copertine grandi aspettano domani' : '')
     : ' · senza chiave il limite lo decide Google');
-  $('#sbnCount').innerHTML = 'Richieste oggi: <b>' + nf.format(quota.s) + '</b>' + (settings.sbnUrl ? ' su 100.000 · si azzera nella notte' : '');
+  $('#sbnCount').innerHTML = 'Richieste oggi: <b>' + nf.format(sb) + '</b>' + (settings.sbnUrl ? withS + ' su 100.000 · si azzera nella notte' + (sb >= S_STOP ? '. Limite quasi raggiunto: il catalogo SBN riprende domani' : '') : '');
 }
 /* Worker SBN e chiave Google: quelli usati restano tra i «salvati» (anche dopo «Cancella») per rimetterli con un tocco */
 var LS_SAVED = 'catalogo-libri-saved', saved = { sbn: [], key: [] };
@@ -175,7 +178,15 @@ function apiFetch(url, init) {
   } else if (settings.sbnUrl && u.indexOf(settings.sbnUrl) === 0) countCall('s');
   return fetch(url, init);
 }
-function lookupOpts() { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl, fetch: apiFetch, lean: !googleLeft(true) }; }
+function lookupOpts() { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl && sUsed() < S_STOP ? settings.sbnUrl : '', fetch: apiFetch, lean: !googleLeft(true) }; }
+/* ricerca per ISBN: prima l'archivio comune (modulo ricerche.js: libri gia' cercati da altri, senza Google), poi le banche dati; il risultato va nell'archivio */
+async function findIsbn(code) {
+  var A = window.NL && window.NL.archive;
+  if (A && A.get) { try { var hit = await A.get(code); if (hit) return hit; } catch (e) {} }
+  var res = await L.lookupIsbn(code, lookupOpts());
+  if (res && A && A.put) { try { A.put(code, res); } catch (e) {} }
+  return res;
+}
 function hasData(b) { return !!(b.t || b.a || b.e || b.y || b.i || b.c != null || b.n); }
 function inTab(b) { return !!b.w === (tab === 'wish'); }
 function tabBooks() { return state.books.filter(inTab); }
@@ -594,7 +605,7 @@ async function doLookup(id) {
   s.st = 'lookup';
   refreshRow(id);
   try {
-    var r = await L.lookupIsbn(code, lookupOpts());
+    var r = await findIsbn(code);
     b = get(id);
     if (!b) return;
     clearTimeout(s.timer); delete s.tries;
@@ -1376,7 +1387,7 @@ function onCheck(code) {
     if (checkCache.hasOwnProperty(code)) { showRes(code, 'no', null, checkCache[code]); return; }
     showRes(code, 'no', null, undefined);
     if (navigator.onLine === false) { showRes(code, 'no', null, false); return; }
-    L.lookupIsbn(code, lookupOpts()).then(function (r) {
+    findIsbn(code).then(function (r) {
       checkCache[code] = r || null;
       if (scanning && resCode === code && resKind === 'no') showRes(code, 'no', null, r || null);
     }, function () { if (scanning && resCode === code && resKind === 'no') showRes(code, 'no', null, false); });
@@ -2794,8 +2805,7 @@ function descBody(b) {
       '<div class="desc-acts">' + (foreign ? '<a class="link" target="_blank" rel="noopener" href="https://translate.google.com/?sl=auto&tl=it&op=translate&text=' + encodeURIComponent(b.ds) + '">Traduci in italiano</a>' : '') +
       '<button type="button" class="link quiet" data-act="descdel">Non è questo libro: rimuovila</button></div>';
   }
-  if (descErr[b.id]) return '<p class="desc-none">' + esc(descErr[b.id]) + '</p><button type="button" class="link" data-act="descretry">Riprova</button>';
-  if (b.dsn) return '<p class="desc-none">Nessuna descrizione trovata nelle banche dati per questo libro.</p><button type="button" class="link" data-act="descretry">Cerca di nuovo</button>';
+  if (b.dsn) return '<p class="desc-none">Descrizione non disponibile.</p>';
   if (navigator.onLine === false) return '<p class="desc-none">Senza connessione: la cerco appena riapri il riquadro con la rete.</p>';
   return '';
 }
@@ -2807,119 +2817,12 @@ function paintDesc(id) {
     if (b && b.ds && hint) hint.remove();
   });
 }
-async function findDesc(b) {
-  var isbn = L.toIsbn13(b.i), tries = 0, errs = 0, best = null, skipped = false;
-  var key = settings.gbKey ? '&key=' + encodeURIComponent(settings.gbKey) : '';
-  async function gq(q, n) {
-    if (!googleLeft(false)) { skipped = true; return null; }
-    tries++;
-    try {
-      return await L.getJson(apiFetch, 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(q) + '&maxResults=' + n +
-        '&fields=items(volumeInfo(title,subtitle,authors,language,description))' + key, { waits: [900], timeout: 9000 });
-    } catch (e) { errs++; return null; }
-  }
-  async function ol(path) {
-    tries++;
-    try { return await L.getJson(fetch, 'https://openlibrary.org' + path, { waits: [], timeout: 9000 }); }
-    catch (e) { if (e && e.status !== 404) errs++; return null; }
-  }
-  function take(r, src) { if (r && (!best || (best.lang !== 'it' && r.lang === 'it'))) best = { text: r.text, lang: r.lang, src: src }; }
-  if (isbn) take(L.pickDesc(await gq('isbn:' + isbn, 3), ''), 'g');
-  if ((!best || best.lang !== 'it') && b.t) {
-    var a = L.str(b.a).split(/[,;]/)[0].trim();
-    take(L.pickDesc(await gq('intitle:"' + b.t.replace(/"/g, '') + '"' + (a ? ' inauthor:"' + a.replace(/"/g, '') + '"' : ''), 6), b.t, a), 'g');
-  }
-  if (!best && isbn) {
-    var ed = await ol('/isbn/' + isbn + '.json'), t = L.olDesc(ed);
-    var wk = ed && Array.isArray(ed.works) && ed.works[0] && ed.works[0].key;
-    if (!t && /^\/works\/OL\d+W$/.test(L.str(wk))) t = L.olDesc(await ol(wk + '.json'));
-    if (t) take({ text: t, lang: L.guessLang(t) }, 'o');
-  }
-  if (!best && errs) throw { net: true };
-  if (!best && skipped) throw { quota: true };
-  return best;
-}
-/* tutte le descrizioni che mancano, una alla volta, senza consumare le ricerche Google che servono ai libri nuovi */
-var descAll = { on: false, stop: false };
-async function allDescs() {
-  var btn = $('#btnDescAll');
-  if (descAll.on) { descAll.stop = true; btn.querySelector('b').textContent = 'Mi fermo…'; return; }
-  var todo = state.books.filter(function (b) { return hasData(b) && !b.ds && !b.dsn && (b.t || L.toIsbn13(b.i)); });
-  if (!todo.length) { toast('Le descrizioni ci sono già tutte: per gli altri libri ho già cercato e non esistono.'); return; }
-  if (navigator.onLine === false) { toast('Sei offline. Riprova quando c\'è connessione.'); return; }
-  if (!googleLeft(true)) { toast('Le ricerche di Google per oggi le tengo per i libri nuovi: riprova domani.'); return; }
-  descAll = { on: true, stop: false };
-  var label = btn.querySelector('b'), old = label.textContent, done = 0, found = 0, fails = 0, why = '';
-  for (var i = 0; i < todo.length; i++) {
-    if (descAll.stop) { why = 'stop'; break; }
-    if (!googleLeft(true)) { why = 'quota'; break; }
-    if (navigator.onLine === false) { why = 'net'; break; }
-    var b = get(todo[i].id);
-    if (!b || b.ds) continue;
-    label.textContent = 'Cerco… ' + (done + 1) + ' di ' + todo.length + ' · tocca per fermare';
-    try {
-      var r = await findDesc(b);
-      b = get(todo[i].id);
-      if (b) { if (r) { b.ds = r.text; b.dsf = r.src; b.dsl = r.lang || ''; b.dsn = 0; found++; } else b.dsn = Date.now(); b.dsq = 0; touch(); paintDesc(b.id); }
-      fails = 0;
-    } catch (e) { if (++fails >= 3) { why = 'net'; break; } }
-    done++;
-    await new Promise(function (ok) { setTimeout(ok, 250); });
-  }
-  descAll.on = false; label.textContent = old;
-  var left = todo.length - done;
-  toast((found === 1 ? 'Trovata 1 descrizione' : 'Trovate ' + found + ' descrizioni') + ' su ' + done + (done === 1 ? ' libro' : ' libri') + '.' +
-    (why === 'quota' ? ' Per oggi mi fermo qui per non finire le ricerche di Google: ne restano ' + left + ', riprendi domani.' :
-     why === 'net' ? ' La connessione non regge: ne restano ' + left + ', riprova più tardi.' :
-     why === 'stop' ? ' Fermato: ne restano ' + left + '.' : ''));
-}
-/* descrizione cercata da sola per i libri appena aggiunti; senza rete (o con Google al limite) resta in sospeso e riparte dopo */
-var descQ = { busy: false, t: 0, retry: 0 };
-function queueDesc(id) {
-  var b = get(id);
-  if (!b || b.ds || b.dsn || b.dsq || !(b.t || L.toIsbn13(b.i))) return;
-  b.dsq = 1; touch();
-  clearTimeout(descQ.t); descQ.t = setTimeout(runDescQueue, 1500);
-}
-async function runDescQueue() {
-  if (descQ.busy || navigator.onLine === false) return;
-  descQ.busy = true; clearTimeout(descQ.retry);
-  try {
-    for (;;) {
-      var b = state.books.find(function (x) { return x.dsq && !x.ds && !descBusy[x.id] && (x.t || L.toIsbn13(x.i)) && !isBusy(x); });
-      if (!b || navigator.onLine === false) break;
-      var id = b.id, stop = false;
-      descBusy[id] = true; paintDesc(id);
-      try {
-        var r = await findDesc(b), x = get(id);
-        if (x) { if (r) { x.ds = r.text; x.dsf = r.src; x.dsl = r.lang || ''; x.dsn = 0; } else x.dsn = Date.now(); x.dsq = 0; touch(); }
-      } catch (e) {
-        stop = true;
-        if (!(e && e.quota)) descQ.retry = setTimeout(runDescQueue, 5 * 60000);   // rete debole: riprovo tra qualche minuto
-      } finally { delete descBusy[id]; paintDesc(id); }
-      if (stop) break;
-      await new Promise(function (ok) { setTimeout(ok, 400); });
-    }
-  } finally { descQ.busy = false; }
-}
-window.addEventListener('online', function () { setTimeout(runDescQueue, 3000); });
-async function loadDesc(id, force) {
-  var b = get(id);
-  if (!b || descBusy[id] || b.ds || (b.dsn && !force)) return;
-  if (navigator.onLine === false) { paintDesc(id); return; }
-  delete descErr[id];
-  descBusy[id] = true; paintDesc(id);
-  var r = null, failed = false;
-  try { r = await findDesc(b); } catch (e) { failed = e && e.quota ? 'quota' : true; }
-  delete descBusy[id];
-  b = get(id);
-  if (!b) return;
-  if (failed) { b.dsq = 1; touch(); }                               // resta da cercare: riprovo da solo
-  if (r) { b.ds = r.text; b.dsf = r.src; b.dsl = r.lang || ''; b.dsn = 0; b.dsq = 0; touch(); }
-  else if (failed) descErr[id] = failed === 'quota' ? 'Ricerche di Google finite per oggi: la cerco da sola domani.' : navigator.onLine === false ? 'Senza connessione: non sono riuscito a cercarla.' : 'Connessione debole: non sono riuscito a cercarla.';
-  else if (!failed) { b.dsn = Date.now(); b.dsq = 0; touch(); }
-  paintDesc(id);
-}
+/* Descrizione (scelta di Piero, 16/11/2026): arriva solo con la prima ricerca del libro (o dall'archivio comune).
+   Se non c'e': «Descrizione non disponibile» e nessun'altra richiesta, per risparmiare le ricerche di Google. */
+function noDesc(id) { var b = get(id); if (!b || b.ds || b.dsn) return; b.dsn = Date.now(); b.dsq = 0; touch(); paintDesc(id); }
+function queueDesc(id) { noDesc(id); }
+function loadDesc(id) { noDesc(id); }
+function runDescQueue() { state.books.forEach(function (b) { if (b.dsq && !b.ds) { b.dsq = 0; b.dsn = Date.now(); touch(); } }); }   // in sospeso dalle versioni vecchie
 /* ---- serie e collane: quali volumi hai, quali mancano ---- */
 function serNums(a) { return a.join(', '); }
 function seriesBody(b) {
@@ -4428,27 +4331,23 @@ function testImage(u) {
     im.src = u;
   });
 }
-/* Cerca la copertina grande: prima quella ufficiale di Google (scheda completa del volume), poi Open Library. La ricorda nel libro. */
+/* Cerca la copertina grande: prima Google (la stessa immagine, piu' grande: zoom=0 o 3, senza richieste alle API), poi Open Library. La ricorda nel libro. */
+function googleBig(img) {
+  if (!L.googleVolumeId(img)) return [];
+  var u = String(img).replace(/^http:\/\//i, 'https://').replace(/&edge=curl/g, '');
+  return ['0', '3'].map(function (z) { return /[?&]zoom=\d/.test(u) ? u.replace(/([?&]zoom=)\d/, '$1' + z) : u + '&zoom=' + z; }).filter(function (x) { return x !== img; });
+}
 function probeCover(id) {
   var b = get(id);
   if (!b || b.imgL || coverURL[id] || b.nb || !(b.img || L.toIsbn13(b.i))) return Promise.resolve(!!(b && (b.imgL || coverURL[id])));
   if (probing[id]) return probing[id];
   probing[id] = (async function () {
-    var cands = [], gid = L.googleVolumeId(b.img), sure = true;
-    if (gid && navigator.onLine !== false) {
-      sure = false;
-      try {
-        var j = await L.getJson(apiFetch, 'https://www.googleapis.com/books/v1/volumes/' + encodeURIComponent(gid) + '?fields=volumeInfo/imageLinks' + (settings.gbKey ? '&key=' + encodeURIComponent(settings.gbKey) : ''), { waits: [], timeout: 10000 });
-        var gu = L.bestGoogleImage(j);
-        if (gu) cands.push(gu);
-        sure = true;
-      } catch (e) { /* limite o rete: resta Open Library, e riproveremo un'altra volta */ }
-    }
+    var cands = googleBig(b.img), sure = navigator.onLine !== false;           // niente richieste a Google: si prova l'immagine grande dallo stesso indirizzo (16/11/2026)
     cands = cands.concat(L.coverCandidates(b.img, b.i));
     for (var i = 0; i < cands.length; i++) {
       if (await testImage(cands[i])) {
         var x = get(id);
-        if (x && !x.imgL) { x.imgL = cands[i]; x.nb = false; touch(); refreshRow(id); }
+        if (x && !x.imgL) { x.imgL = cands[i]; x.nb = false; touch(); refreshRow(id); emit('bigCover', { i: L.toIsbn13(x.i), t: x.t, imgL: cands[i] }); }
         return true;
       }
     }
@@ -4927,7 +4826,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 19:48", "n": "99.2", "note": "Campanella delle notifiche accanto all'icona Amici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 21:06", "n": "99.3", "note": "Ricerche condivise e archivio comune"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -5823,7 +5722,7 @@ async function fillMissing() {
   await Promise.all(todo.map(function (b0) {
     return lookupPool(async function () {
       try {
-        var r = await L.lookupIsbn(L.toIsbn13(b0.i), lookupOpts());
+        var r = await findIsbn(L.toIsbn13(b0.i));
         var b = get(b0.id);
         if (b) b.ck = today();
         if (r && b) {
@@ -5951,7 +5850,6 @@ list.addEventListener('click', function (e) {
   else if (act === 'quoteshare') shareQuote(id, +btn.dataset.i);
   else if (act === 'quotedel') { var qb = get(id), qi = +btn.dataset.i; if (qb && qb.qs && qb.qs[qi]) { var qold = qb.qs.splice(qi, 1)[0]; touch(); paintQuotes(id); toast('Citazione eliminata.', { label: 'Annulla', fn: function () { var x = get(id); if (x) { x.qs.splice(Math.min(qi, x.qs.length), 0, qold); touch(); paintQuotes(id); } } }); } }
   else if (act === 'quoteedit') openQuote(id, +btn.dataset.i);
-  else if (act === 'descretry') { var db = get(id); if (db) { db.dsn = 0; loadDesc(id, true); } }
   else if (act === 'descmore') { descFull[id] = true; paintDesc(id); }
   else if (act === 'descdel') { var dd = get(id); if (dd) { dd.ds = ''; dd.dsf = ''; dd.dsl = ''; dd.dsn = Date.now(); touch(); paintDesc(id); toast('Descrizione rimossa'); } }
   else if (act === 'rs' || act === 'rt') setRead(id, act, btn.dataset.v);
@@ -6203,7 +6101,6 @@ $('#pubList').addEventListener('change', function (e) {
   document.querySelectorAll('#pubList input[data-g="' + gi + '"]').forEach(function (cb) { var me = cb.dataset.n === e.target.value; cb.disabled = me; if (me) cb.checked = true; });
 });
 $('#btnFill').addEventListener('click', fillMissing);
-$('#btnDescAll').addEventListener('click', allDescs);
 $('#btnMergeDups').addEventListener('click', mergeDups);
 $('#dupCopies').addEventListener('click', dupCopies);
 $('#dupMerge').addEventListener('click', dupMerge);
@@ -6663,6 +6560,9 @@ window.NL = {
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
   updateStick: function () { updateStick(); }, summary: function () { updateSummary(); }, autosize: function (el) { autosizeAll(el); },
   rdLong: function (v) { return rdLong(v); }, get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); },
+  quota: function () { rollQuota(); return { d: quota.d, ds: quota.ds, g: quota.g, s: quota.s }; },   // contatore condiviso (modulo ricerche.js)
+  setShared: function (k, n, day) { if (k === 'g') { shared.g = n; shared.d = day; } else { shared.s = n; shared.ds = day; } if (!$('#optSheet').hidden) updateQuotaInfo(); },
+  svc: function () { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl }; }, openOptions: function (sec) { openOptions(sec); },
   fields: FIELDS, clean: function (x) { return cleanBook(x); }, stored: function () { return storable(); }, save: function () { touch(); }   // per la sincronizzazione (modulo social)
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };

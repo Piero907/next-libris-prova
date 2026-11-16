@@ -1,7 +1,7 @@
 /* Next Libris · modulo «Notifiche» (16/11/2026, nella copia di prova). Scelte di Piero del 16/11/2026.
    Campanella in alto, accanto all'icona Amici, con il numero delle notifiche non lette. Dentro: richieste e amicizie accettate,
    prestiti e regali ricevuti, restituzioni (segnalate, confermate, non ancora ricevute), «Me lo presti?» e le risposte,
-   libri consigliati, chiave e worker condivisi. Aprendo la campanella si segnano tutte lette (le nuove restano evidenziate).
+   libri consigliati, chiave e worker condivisi, chiave Google arrivata al limite (guida per crearne una gratis, ricerche.js). Aprendo la campanella si segnano tutte lette (le nuove restano evidenziate).
    Toccandone una si apre il libro o la finestra Amici.
    Le notifiche le scrive il database (trigger, supabase/011_notifiche.sql nel ramo prove): «letto» vale su tutti i dispositivi,
    si tengono 30 giorni. Si leggono insieme agli amici (apertura, ritorno all'app, ogni ~3 minuti): niente Realtime né push.
@@ -59,11 +59,13 @@ function text(x) {
     case 'richiesta_no': return who(x) + ' ora non può prestarti ' + book(x);
     case 'consiglio': return who(x) + ' ti consiglia ' + book(x);
     case 'chiavi': return who(x) + ' condivide con te la sua chiave per cercare i libri';
+    case 'limite': return x.titolo ? 'La chiave Google di <b>' + esc(x.titolo) + '</b> ha finito le ricerche di oggi: <b>creane una tua, è gratis</b>'
+      : 'La tua chiave Google ha finito le ricerche di oggi: torna domattina';
   }
   return who(x);
 }
 var KIND = { amicizia: 'fr', amico: 'fr', prestito: 'bk', regalo: 'gift', reso: 'bk', reso_ok: 'bk', reso_no: 'bk', chiuso: 'bk',
-  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key' };
+  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim' };
 function ago(t) {
   var d = new Date(t), s = (Date.now() - d.getTime()) / 1000;
   if (!(s >= 0)) s = 0;
@@ -124,7 +126,7 @@ function paint() {
   }
   body.innerHTML = '<ul class="nt-list">' + items.map(function (x) {
     return '<li><button type="button" class="nt-item' + (fresh[x.id] ? ' nt-new' : '') + '" data-n="' + esc(x.id) + '">' +
-      '<span class="nt-ico nt-' + (KIND[x.tipo] || 'fr') + '" aria-hidden="true">' + esc(((x.nome || '?').trim()[0] || '?').toUpperCase()) + '</span>' +
+      '<span class="nt-ico nt-' + (KIND[x.tipo] || 'fr') + '" aria-hidden="true">' + (x.tipo === 'limite' ? '!' : esc(((x.nome || '?').trim()[0] || '?').toUpperCase())) + '</span>' +
       '<span class="nt-t"><span class="nt-txt">' + text(x) + '</span><small>' + esc(ago(x.creata)) + (fresh[x.id] ? ' · <span class="nt-dot">nuova</span>' : '') + '</small></span>' +
       '</button></li>';
   }).join('') + '</ul>';
@@ -135,6 +137,7 @@ function go(id) {
   var x = items.filter(function (y) { return y.id === id; })[0]; if (!x) return;
   close();
   var A = amici();
+  if (x.tipo === 'limite') { if (window.NLRicerche) setTimeout(function () { window.NLRicerche.guide(x.titolo); }, 60); return; }   // guida: crea la tua chiave, è gratis
   if (/^(prestito|regalo|reso|reso_ok|reso_no|chiuso)$/.test(x.tipo) && x.rif) {
     var mine = NL.myBooks ? NL.myBooks() : NL.books();
     var b = mine.filter(function (y) { return y.sx === x.rif; })[0];

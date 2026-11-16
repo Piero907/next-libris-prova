@@ -11,7 +11,8 @@ const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'lib.js', 'manifest.js
   'schede.js', 'schede.css',   // modulo: aspetto della scheda aperta
   'social.js', 'social.css',   // modulo: account e sincronizzazione
   'amici.js', 'amici.css',   // modulo: amici
-  'notifiche.js', 'notifiche.css'];   // modulo: notifiche (campanella)
+  'notifiche.js', 'notifiche.css',   // modulo: notifiche (campanella)
+  'ricerche.js', 'ricerche.css'];   // modulo: ricerche condivise e archivio comune
 
 self.addEventListener('install', (e) => {
   // un file mancante non deve impedire al service worker di partire (addAll fallirebbe per intero)
