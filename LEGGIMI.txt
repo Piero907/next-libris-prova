@@ -959,7 +959,7 @@ inseriti restano.
 
 ACCOUNT E SINCRONIZZAZIONE (FACOLTATIVO)
 ----------------------------------------
-Menu > "Account e sincronizzazione": tocca "Accedi con Google" e i tuoi
+Menu > Impostazioni > "Account e sincronizzazione": tocca "Accedi con Google" e i tuoi
 libri si salvano anche online (Supabase, server in Europa, a Francoforte).
 Sull'altro telefono o tablet entri con lo stesso account e ritrovi i libri.
 - Il telefono resta la copia principale: senza rete l'app va come sempre,
@@ -972,6 +972,27 @@ Sull'altro telefono o tablet entri con lo stesso account e ritrovi i libri.
 - Informativa sulla privacy: link in fondo alla finestra (privacy.html).
 - La copia di prova ha un account tutto suo, separato da quello vero.
 - L'account non sostituisce il backup: continua a farlo ogni tanto.
+
+AMICI (CON L'ACCOUNT)
+---------------------
+Con l'account puoi aggiungere amici: Menu > Amici, oppure l'icona in alto
+(il numero indica le richieste in attesa).
+- Cerchi un amico per nome utente o gli mandi il link di invito; l'amicizia
+  vale quando tutti e due accettano. Il nome e' uno solo, nell'app e per
+  gli amici.
+- Menu > Impostazioni > "Amici e privacy": scegli se gli amici vedono la
+  tua lista dei desideri e la tua libreria (mai citazioni o appunti).
+- Toccando un amico vedi la sua libreria al posto della tua, solo da
+  leggere; "Torna alla tua libreria" o Indietro riportano ai tuoi libri.
+- Presta a / Regala a: il libro compare subito nella sua Libreria. Chi
+  riceve tocca "L'ho restituito", chi presta conferma "E' tornato".
+- "Te lo regalo io" sulla lista dei desideri di un amico: lui non lo vede.
+- "Me lo presti?", consigli con Condividi > "Manda a un amico", e nella
+  scheda di un desiderio quali amici lo hanno gia'.
+- Chiave Google e worker SBN: puoi farli usare a un amico (Impostazioni >
+  Condivisione); restano anche tuoi e li riprendi quando vuoi.
+- Togliendo un amico spariscono prenotazioni, richieste, consigli e chiavi
+  condivise tra voi due.
 
 ATTENZIONE: I DATI STANNO SUL TELEFONO - IL BACKUP
 --------------------------------------------------

@@ -3,6 +3,23 @@
 Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in fondo al menu.
 L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
 
+## Versione 99 · 16/11/2026
+> **Amici** Con l'account trovi gli amici per nome o con un link di invito: l'amicizia vale quando tutti e due accettano.
+> **Desideri e libreria visibili, se vuoi** In Impostazioni › Amici e privacy scegli se gli amici vedono i tuoi desideri e i tuoi libri (mai citazioni o appunti).
+> **Prestiti e regali tra amici** Il libro compare subito nella Libreria dell'amico; quando torna, chi l'ha prestato conferma la restituzione.
+> **«Te lo regalo io»** Prenoti un regalo dalla lista dei desideri di un amico: lui non lo vede, gli altri amici sì.
+> **Me lo presti? e consigli** Chiedi un libro all'amico, consigliagli una lettura da Condividi e vedi quali amici hanno già un libro.
+> **Chiave Google e worker condivisi** Puoi farli usare a un amico: restano anche sul tuo telefono e li riprendi quando vuoi.
+- **Amici (serve l'account):** Menu › Amici, o l'icona in alto con il numero delle richieste. Cerchi un amico per nome utente oppure mandi il link di invito. Il nome è uno solo, nell'app e per gli amici. Le richieste compaiono come avviso in cima. Togliendo un amico spariscono anche prenotazioni, richieste in attesa, consigli e chiavi condivise tra voi due.
+- **Opzioni in Impostazioni:** «Amici e privacy» (nome, desideri e libreria visibili agli amici, chiave e worker) e «Account e sincronizzazione» sono ora sotto Impostazioni.
+- **Libreria di un amico:** toccando un amico si vede la sua libreria al posto della tua, solo da leggere (anche il segnalibro, «È a pagina 120», e il voto); «Torna alla tua libreria» o il tasto Indietro riportano ai tuoi libri. In alto i numeri: amici in comune e libri che avete tutti e due.
+- **Prestiti e regali:** dalla scheda, «Presta a» o «Regala a» con l'elenco degli amici (con ricerca, anche per 20-30 amici). Il libro arriva subito nella sua Libreria come «Prestato da …» o «Regalato da …»; l'avviso «… ti ha prestato …» apre il libro. Chi riceve tocca «L'ho restituito», chi presta conferma con «È tornato: segna restituito» (può anche chiuderlo da solo). I libri prestati o ricevuti non vengono mai uniti come doppioni.
+- **Lista dei desideri dell'amico:** con «Te lo regalo io» prenoti il regalo; il festeggiato non lo vede, gli altri amici vedono che è già preso. Quando lo regali davvero, la prenotazione si chiude da sola.
+- **Me lo presti?** dalla libreria dell'amico; lui risponde Sì o No dall'avviso. **Consigli:** in Condividi c'è prima «Manda a un amico» dentro l'app, il link esterno resta sotto. **Chi ce l'ha:** nella scheda di un desiderio vedi quali amici lo hanno.
+- **Chiave Google e worker SBN:** da Impostazioni › Condivisione o dalla libreria dell'amico puoi farli usare a un amico; restano anche sul tuo telefono e li riprendi quando vuoi.
+- **Avvisi:** l'app controlla le novità degli amici quando la riapri e ogni tre minuti mentre è aperta, senza consumare batteria in sottofondo.
+- «Completa con l'ISBN» non apre più tutte le schede insieme.
+
 ## Versione 98 · 16/11/2026
 > **I tuoi libri anche online** Menu › Account e sincronizzazione: entra con Google e ritrovi i libri su un altro telefono o tablet.
 > **Il voto con i libricini** Cinque libri aperti con la parola: da «Non mi è piaciuto» a «Capolavoro».

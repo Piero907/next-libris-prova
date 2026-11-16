@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.1 · 16/11/2026 19:09
+- Riallineata alla versione 99 (amici)
+
 ## Prova 98.9 · 16/11/2026 18:42
 - Dopo «Completa con l'ISBN» le schede dei libri non trovati **non si aprono più tutte insieme**.
 - **La libreria di un amico non si può modificare**: niente «Completa con l'ISBN», niente «Da verificare»; nella scheda «È a pagina 120» e il voto sono solo da leggere.
