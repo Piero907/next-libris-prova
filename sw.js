@@ -12,7 +12,8 @@ const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'lib.js', 'manifest.js
   'social.js', 'social.css',   // modulo: account e sincronizzazione
   'amici.js', 'amici.css',   // modulo: amici
   'notifiche.js', 'notifiche.css',   // modulo: notifiche (campanella)
-  'ricerche.js', 'ricerche.css'];   // modulo: ricerche condivise e archivio comune
+  'ricerche.js', 'ricerche.css',   // modulo: ricerche condivise e archivio comune
+  'push.js', 'push.css'];   // modulo: notifiche push
 
 self.addEventListener('install', (e) => {
   // un file mancante non deve impedire al service worker di partire (addAll fallirebbe per intero)
@@ -79,5 +80,32 @@ self.addEventListener('fetch', (e) => {
       if (req.mode === 'navigate') { const idx = await cache.match('index.html'); if (idx) return idx; }
       throw err;
     }
+  })());
+});
+
+/* Notifiche push (modulo push.js, funzione «push» su Supabase): stesso testo della campanella; numero sull'icona dove si
+   può (iPhone, computer; su Android il pallino lo mette il telefono). Con l'app in primo piano si aggiorna solo la campanella
+   (su iPhone la notifica va mostrata sempre, altrimenti il telefono toglie l'iscrizione). */
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil((async () => {
+    const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    cl.forEach((c) => { try { c.postMessage({ nl: 'push' }); } catch (x) {} });
+    if (self.navigator.setAppBadge && d.n) { try { await self.navigator.setAppBadge(d.n); } catch (x) {} }
+    const apple = /iPhone|iPad|Macintosh/.test(self.navigator.userAgent);
+    if (!apple && cl.some((c) => c.visibilityState === 'visible' && c.focused)) return;
+    await self.registration.showNotification(d.title || 'Next Libris', {
+      body: d.body || 'Hai una novità in Next Libris', tag: d.tag || 'nl', icon: 'icons/next-libris-192.png', lang: 'it', data: { nt: 1 }
+    });
+  })());
+});
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil((async () => {
+    const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const mine = cl.find((c) => c.url.startsWith(self.registration.scope));
+    if (mine) { try { await mine.focus(); } catch (x) {} mine.postMessage({ nl: 'apri-notifiche' }); return; }
+    await self.clients.openWindow(new URL('./?nt=1', self.registration.scope).href);
   })());
 });

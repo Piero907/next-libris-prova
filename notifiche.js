@@ -4,7 +4,7 @@
    libri consigliati, chiave e worker condivisi, chiave Google arrivata al limite (guida per crearne una gratis, ricerche.js). Aprendo la campanella si segnano tutte lette (le nuove restano evidenziate).
    Toccandone una si apre il libro o la finestra Amici.
    Le notifiche le scrive il database (trigger, supabase/011_notifiche.sql nel ramo prove): «letto» vale su tutti i dispositivi,
-   si tengono 30 giorni. Si leggono insieme agli amici (apertura, ritorno all'app, ogni ~3 minuti): niente Realtime né push.
+   si tengono 30 giorni. Si leggono insieme agli amici (apertura, ritorno all'app, ogni ~3 minuti) e quando arriva un push (push.js).
    Usa window.NL, window.NLSocial (social.js) e window.NLAmici (amici.js). */
 (function () {
 'use strict';
@@ -93,6 +93,7 @@ function paintTop() {
   var n = unread(), badge = document.getElementById('btnBellN');
   badge.hidden = !n; badge.textContent = n > 9 ? '9+' : n || '';
   b.setAttribute('aria-label', n ? 'Notifiche: ' + n + (n === 1 ? ' nuova' : ' nuove') : 'Notifiche');
+  if (window.NLPush) window.NLPush.badge(n);                                         // numero sull'icona dell'app (push.js)
 }
 
 /* ---------- finestra ---------- */

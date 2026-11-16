@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.6 · 16/11/2026 23:49
+- **Notifiche push**: gli avvisi della campanella (tranne «limite») arrivano anche con l'app chiusa. Riga dopo l'accesso «Ricevi notifiche dagli amici» con la scelta dei tipi (amicizie, libri in prestito, consigli, chiavi condivise); Impostazioni › Notifiche con interruttore, tipi e orari di silenzio (22-8 di partenza: dopo arrivano, da 3 in su in un solo riepilogo); tocco sulla notifica → campanella; numero sull'icona dove il telefono lo permette
+
 ## Prova 99.5 · 16/11/2026 22:13
 - **Chiave e worker prestati nascosti**: chi li riceve li usa ma non li vede, non li salva, non li mette nel backup e non li può mandare ad altri; **Info e condivisione** nel menu: Condivisione, Installazione, Privacy e Contatti (Scrivici, Copia)
 
