@@ -15,7 +15,7 @@ var NL = window.NL, S = window.NLSocial; if (!NL || !S || !S.call) return;
 var esc = NL.esc, K_INV = 'catalogo-libri-amici-invito', K_SEEN = 'catalogo-libri-amici-visti';
 var NAME_RE = /^[0-9A-Za-zÀ-ÖØ-öø-ÿ ._'-]{3,20}$/;
 var K_PEND = 'catalogo-libri-amici-scambi-da-mandare', K_GOT = 'catalogo-libri-amici-ricevuti';
-var swaps = [], view = null, wishes = null, recvId = '';
+var swaps = [], view = null, wishes = null, libs = null, libsShow = 30, libsQ = '', recvId = '';
 var me = null, list = null, loading = null, lastLoad = 0, found = null, foundQ = '', invite = null, confirmId = '', busy = '', err = '', editName = false, syncing = false;
 var ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></svg>';
 
@@ -45,7 +45,7 @@ async function load(force) {
   if (!force && list && Date.now() - lastLoad < 60000) return;
   loading = (async function () {
     try {
-      var p = await S.call('/rest/v1/profili?select=utente,nome,desideri&id=eq.' + encodeURIComponent(uid()), { user: true });
+      var p = await S.call('/rest/v1/profili?select=utente,nome,desideri,libreria&id=eq.' + encodeURIComponent(uid()), { user: true });
       me = (p && p[0]) || { utente: null, nome: '', desideri: false };
       list = (await rpc('miei_amici')) || [];
       try { swaps = (await rpc('miei_scambi')) || []; await applySwaps(); } catch (e) { if (window.console) console.warn('scambi', e); }
@@ -87,11 +87,14 @@ function sheet() {
   el.querySelector('#friClose').addEventListener('click', close);
   el.addEventListener('click', onClick);
   el.addEventListener('submit', onSubmit);
+  el.addEventListener('input', function (e) { if (e.target.id === 'friLibQ') { libsQ = e.target.value; libsShow = 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); } });
   el.addEventListener('change', async function (e) {
-    if (e.target.id !== 'friWish') return;
-    var on = e.target.checked; e.target.disabled = true;
-    try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: { id: uid(), desideri: on } });
-      me.desideri = on; NL.toast(on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.'); if (on) S.run && S.run(false); }
+    var k = e.target.id === 'friWish' ? 'desideri' : e.target.id === 'friLib' ? 'libreria' : ''; if (!k) return;
+    var on = e.target.checked, body = { id: uid() }; body[k] = on; e.target.disabled = true;
+    try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: body });
+      me[k] = on;
+      NL.toast(k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
+      if (on) S.run && S.run(false); }
     catch (x) { e.target.checked = !on; NL.toast(nice(x)); }
     e.target.disabled = false;
   });
@@ -141,7 +144,8 @@ function paint() {
   } else {
     var rec = received(), fr = friends(), se = sent();
     h += '<div class="fr-me"><span class="fr-me-n"><small>Il tuo nome</small><b>' + esc(me.utente) + '</b></span><button class="link" type="button" data-f="name">Cambia</button></div>';
-    h += '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label>';
+    h += '<div class="fr-share"><label class="check fr-wish"><input type="checkbox" id="friLib"' + (me.libreria ? ' checked' : '') + '><span>Gli amici vedono la mia libreria<small>Titolo, autore, copertina, lettura e voto. Note, citazioni, appunti, prezzi, scaffali e prestiti restano tuoi.</small></span></label>' +
+      '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label></div>';
     h += '<button class="btn primary fr-invite" type="button" data-f="invite">Invita un amico</button>';
     if (found && foundQ === invite && found.length) h += '<div class="fr-inv"><p class="fr-small">Ti ha invitato</p><ul class="fr-list">' + found.map(function (x) { return row(x, relBtn(x)); }).join('') + '</ul></div>';
     if (rec.length) h += '<section class="fr-sec"><h3 class="fr-h">Richieste per te <span class="fr-n">' + rec.length + '</span></h3><ul class="fr-list">' + rec.map(function (x) {
@@ -154,7 +158,7 @@ function paint() {
     h += '<section class="fr-sec"><h3 class="fr-h">I tuoi amici' + (fr.length ? ' <span class="fr-n">' + fr.length + '</span>' : '') + '</h3>';
     h += fr.length ? '<ul class="fr-list">' + fr.map(function (x) {
       return confirmId === x.id ? '<li class="fr-row fr-conf"><span class="fr-who">Togli <b>' + nameOf(x) + '</b> dagli amici?</span><span class="fr-act"><button class="btn" type="button" data-f="cancel">Annulla</button><button class="btn primary" type="button" data-f="drop" data-id="' + esc(x.id) + '">Togli</button></span></li>'
-        : '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>Desideri, prestiti e regali</small></button><span class="n" aria-hidden="true">›</span></li>';
+        : '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>Libreria, desideri, prestiti e regali</small></button><span class="n" aria-hidden="true">›</span></li>';
     }).join('') + '</ul>' : '<p class="fr-small">Ancora nessuno. Cerca un amico per nome oppure mandagli il tuo link con «Invita un amico».</p>';
     h += '</section>';
     if (se.length) h += '<section class="fr-sec"><h3 class="fr-h">Richieste che hai mandato</h3><ul class="fr-list">' + se.map(function (x) {
@@ -189,7 +193,8 @@ async function onClick(e) {
   if (a === 'name-no') { editName = false; err = ''; paint(); return; }
   if (a === 'ask-drop') { confirmId = id; paint(); return; }
   if (a === 'friend') { openFriend(id); return; }
-  if (a === 'back') { view = null; wishes = null; confirmId = ''; paint(); return; }
+  if (a === 'back') { view = null; wishes = null; libs = null; confirmId = ''; paint(); return; }
+  if (a === 'more') { libsShow += 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); return; }
   if (a === 'cancel') { confirmId = ''; paint(); return; }
   b.disabled = true; err = '';
   try {
@@ -300,7 +305,25 @@ function paintAll() { paint(); paintMenu(); paintNote(); paintTop(); }
 
 /* ---------- pagina di un amico: i suoi desideri (se li mostra) e cosa c'è tra voi ---------- */
 function friendName(id) { var x = (list || []).filter(function (y) { return y.id === id; })[0]; return x ? (x.utente || x.nome || 'Il tuo amico') : 'Il tuo amico'; }
-async function openFriend(id) { view = id; wishes = null; confirmId = ''; err = ''; paint(); var si = document.querySelector('#friSheet .sheet-in'); if (si) si.scrollTop = 0; await loadWishes(); }
+async function openFriend(id) { view = id; wishes = null; libs = null; libsShow = 30; libsQ = ''; confirmId = ''; err = ''; paint(); var si = document.querySelector('#friSheet .sheet-in'); if (si) si.scrollTop = 0; await Promise.all([loadWishes(), loadLibs()]); }
+async function loadLibs() {
+  var id = view; if (!id) return;
+  try { var r = await rpc('libreria_di', { amico: id }); if (view === id) libs = r || { visibili: false, libri: [] }; }
+  catch (e) { if (view === id) libs = { err: nice(e) }; }
+  paint();
+}
+function libList() {
+  var mine = {}; NL.books().forEach(function (b) { if (b.i && !b.w && !b.xs) mine[b.i] = 1; });
+  var q = String(libsQ || '').trim().toLowerCase();
+  var all = (libs && libs.libri || []).filter(function (x) { return !q || ((x.t || '') + ' ' + (x.a || '')).toLowerCase().indexOf(q) >= 0; });
+  if (!all.length) return '<li class="fr-small">' + (q ? 'Nessun libro così.' : 'La sua libreria è vuota.') + '</li>';
+  return all.slice(0, libsShow).map(function (x) {
+    var w = NL.L && NL.L.rateWord ? NL.L.rateWord(x.rt) : '', st = x.rs === 'ok' ? 'Letto' + (w ? ' · ' + w : '') : x.rs === 'in' ? 'In lettura' : '';
+    var both = x.i && mine[x.i] ? '<span class="fr-both">Ce l\'hai anche tu</span>' : '';
+    return '<li class="fr-row fr-book">' + cover(x) + '<span class="fr-bk"><b>' + esc(x.t || (x.i ? 'ISBN ' + x.i : 'Senza titolo')) + '</b>' + (x.a ? '<small>' + esc(x.a) + '</small>' : '') +
+      (st || both ? '<small class="fr-st">' + esc(st) + (st && both ? ' · ' : '') + both + '</small>' : '') + '</span></li>';
+  }).join('') + (all.length > libsShow ? '<li class="fr-more"><button class="btn" type="button" data-f="more">Mostra altri ' + Math.min(30, all.length - libsShow) + ' (di ' + all.length + ')</button></li>' : '');
+}
 async function loadWishes() {
   var id = view; if (!id) return;
   try { var r = await rpc('desideri_di', { amico: id }); if (view === id) wishes = r || { visibili: false, libri: [] }; }
@@ -335,6 +358,15 @@ function friendView() {
     return '<li class="fr-row"><span class="fr-who fr-swap">' + txt + '<small>' + esc(L_date(s.creato)) + '</small></span></li>';
   }).join('') + '</ul>' : '<p class="fr-small">Nessun prestito o regalo in corso.</p>';
   h += '<p class="fr-small">Per prestargli o regalargli un libro: apri il libro › «Presta, vendi o regala» › scegli ' + n + '. Lo vedrà subito nella sua Libreria.</p></section>';
+  h += '<section class="fr-sec"><h3 class="fr-h">La sua libreria' + (libs && libs.visibili && libs.totale ? ' <span class="fr-n">' + libs.totale + '</span>' : '') + '</h3>';
+  if (!libs) h += '<p class="fr-small">Un momento…</p>';
+  else if (libs.err) h += '<p class="msg bad">' + esc(libs.err) + '</p>';
+  else if (!libs.visibili) h += '<p class="fr-small">' + n + ' non mostra la sua libreria agli amici.</p>';
+  else {
+    if (libs.libri.length > 12) h += '<input type="search" class="fr-libq" id="friLibQ" placeholder="Cerca nella sua libreria" autocomplete="off" enterkeyhint="search" value="' + esc(libsQ) + '">';
+    h += '<ul class="fr-list" id="friLibList">' + libList() + '</ul>';
+  }
+  h += '</section>';
   h += confirmId === view ? '<div class="fr-conf"><p>Togli <b>' + n + '</b> dagli amici?</p><div class="row-btns"><button class="btn" type="button" data-f="cancel">Annulla</button><button class="btn primary" type="button" data-f="drop" data-id="' + esc(view) + '">Togli</button></div></div>'
     : '<button class="link fr-drop" type="button" data-f="ask-drop" data-id="' + esc(view) + '">Togli dagli amici</button>';
   return h;

@@ -78,3 +78,10 @@ body.selecting .fri-note,body.scanning .fri-note{display:none}
 .fri-ret .fn-acts{display:flex;gap:6px;margin-left:auto;padding:0 2px 4px}
 .fri-ret .fn-go{border:0;color:inherit;font:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:38px}
 .fri-ret .fn-yes{background:var(--surface);color:var(--accent)}
+/* libreria dell'amico */
+.fri .fr-share{display:grid;gap:4px}
+.fri .fr-st{color:var(--muted)}
+.fri .fr-both{color:var(--accent);font-weight:600}
+.fri .fr-libq{width:100%;box-sizing:border-box;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:8px 12px;font:16px var(--font-body);color:var(--ink)}
+.fri .fr-more{list-style:none;padding-top:8px}
+.fri .fr-more .btn{width:100%}

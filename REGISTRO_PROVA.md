@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.6 · 16/11/2026 15:35
+- **La tua libreria agli amici, se vuoi**: in Amici l'interruttore «Gli amici vedono la mia libreria» (spento di partenza). Vedono titolo, autore, copertina, se l'hai letto e il voto; note, citazioni, appunti, prezzi, scaffali e prestiti restano tuoi.
+- Nella pagina di un amico, in fondo, «La sua libreria», con «Ce l'hai anche tu» sui libri che avete tutti e due e la ricerca.
+
 ## Prova 98.5 · 16/11/2026 15:27
 - **La restituzione la conferma chi ha prestato**: se è l'amico a dire «Restituito», il prestito resta «da confermare»; a te compare in cima «… dice di averti restituito …» con Confermo o Non ancora. Se lo segni tu, si chiude subito come prima.
 
