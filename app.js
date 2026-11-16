@@ -22,7 +22,7 @@ var ICON = {
   key: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   redo: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
-  fav: '<path d="M7 3.5h10a1 1 0 0 1 1 1v16l-6-4-6 4v-16a1 1 0 0 1 1-1z"/>',
+  fav: '<path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/>',   // stella (prima segnalibro: si confondeva, Piero 16/11/2026)
   share: '<circle cx="6" cy="12" r="2.5"/><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.1-4.1M8.2 13.2l7.1 4.1"/>',
   pricetag: '<path d="M3.5 12V5a1.5 1.5 0 0 1 1.5-1.5h7l8.5 8.5a1.5 1.5 0 0 1 0 2.1l-6.4 6.4a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8.2" cy="8.2" r="1.5"/>',
   grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/>',
@@ -84,7 +84,7 @@ var coll = new Intl.Collator('it', { sensitivity: 'base', numeric: true });
 /* ---------- stato ---------- */
 var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
-var APP_VERSION = { v: 95, date: '2026-11-16', note: 'Nuovo aspetto con la barra in basso, pagina del libro, trimestre in libri, menu riordinato' };
+var APP_VERSION = { v: 96, date: '2026-11-16', note: 'Novità in parole semplici, triangolino degli avvisi, la tua stagione in libri' };
 var state = { books: [], updated: 0 };
 var hooks = {};                              // moduli aggiuntivi (vedi window.NL in fondo): si agganciano dopo l'avvio
 function emit(name, arg) { (hooks[name] || []).forEach(function (fn) { try { fn(arg); } catch (e) { if (window.console) console.warn('modulo', name, e); } }); }
@@ -3676,7 +3676,7 @@ function hue(s) { var h = 0; s = String(s || ''); for (var i = 0; i < s.length; 
 function coverHTML(b) {
   var s = S[b.id] || {}, img = bigImg(b);
   var badge = isBusy(b) ? '<span class="badge">…</span>' : b.p ? '<span class="badge loan">Prestato</span>' : b.g.length ? '<span class="badge warn">Da verificare</span>' : '';
-  var fav = b.fav && !b.w ? '<span class="ribbon" title="Preferito"><svg viewBox="0 0 20 30" aria-hidden="true"><path d="M1 0h18v28l-9-6.5L1 28z"/></svg></span>' : '';
+  var fav = b.fav && !b.w ? '<span class="ribbon fav-star" title="Preferito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/></svg></span>' : '';   // stellina sulla copertina
   return '<button class="cover' + (fav ? ' is-fav' : '') + '" data-id="' + b.id + '" aria-label="' + esc([b.t || 'Senza titolo', b.a, fav ? 'preferito' : ''].filter(Boolean).join(', ')) + '">' +
     '<span class="art">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' :
       '<span class="ph" style="--h:' + hue(b.t + b.a + b.i) + '"><b>' + esc(b.t || b.i || 'Senza titolo') + '</b><small>' + esc(b.a) + '</small></span>') + badge + fav + '</span>' +
@@ -4800,7 +4800,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 02:42", "n": "95.3", "note": "«Cosa c'è di nuovo» in parole semplici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 07:14", "n": "96.1", "note": "Preferiti con la stella invece del segnalibro"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }

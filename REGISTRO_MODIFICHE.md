@@ -6,15 +6,17 @@ L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versi
 ## Versione 96 · 16/11/2026
 > **Il triangolino degli avvisi** Accanto al numero dei libri: toccalo e vai subito agli avvisi in cima, anche a quelli che avevi chiuso.
 > **Novità in parole semplici** Dopo ogni aggiornamento questa pagina ti dice in breve cosa cambia; «Tutti i dettagli» apre l'elenco completo.
+> **La tua stagione in libri** Il riepilogo delle tue letture ora segue le quattro stagioni: inverno, primavera, estate e autunno.
 - **Il triangolino accanto al riepilogo c'è anche quando gli avvisi sono aperti:** toccandolo la pagina torna in cima e l'avviso lampeggia; se ce n'erano di chiusi, li riapre.
 - **La pagina delle novità («Cosa c'è di nuovo») è più semplice:** poche righe in parole semplici, con il titolo in evidenza; «Tutti i dettagli» apre il registro completo.
+- **«Il tuo trimestre in libri» diventa «La tua stagione in libri»:** il riepilogo segue le stagioni, a mesi interi (inverno dicembre–febbraio, primavera marzo–maggio, estate giugno–agosto, autunno settembre–novembre); l'opzione è «Riepilogo di ogni stagione».
 - La pagina delle novità compare anche a chi aggiorna: nella 95 restava muta per chi arrivava dalla 94 (l'app lo scambiava per una prima installazione). Chi l'ha persa la vede una volta, con le novità della 95 e della 96.
 
 ## Versione 95 · 16/11/2026
 > **Barra in basso** Libreria, Desideri, il + per aggiungere libri, «Per te» e il Menu, sempre a portata di pollice.
 > **Avvisi in cima** Si vedono uno alla volta: scorri col dito per passare agli altri.
 > **Pagina del libro** Tocca un libro per vederlo come una pagina: copertina, descrizione, lettura e voto. La matita in alto serve per modificarlo.
-> **Il tuo trimestre in libri** Ogni tre mesi un riepilogo delle tue letture, da sfogliare e condividere.
+> **Il riepilogo delle tue letture** Un riepilogo da sfogliare e condividere, con i libri letti, i generi e gli autori.
 > **Menu più ordinato** Tutte le impostazioni stanno sotto la voce «Impostazioni».
 > **Chi è l'autore** Tocca il nome dell'autore per leggere chi è, con la sua foto.
 - **Nuovo aspetto, con la barra in basso:** Libreria, Desideri, il **+** (Scansiona, Foto, Digita, Ce l'ho già?), **Per te** (Suggerimenti, trimestre, citazioni, Statistiche, Backup) e Menu. In alto restano filtri, ricerca e vista.

@@ -1029,10 +1029,10 @@ body.welcome-on .tip{display:none}
 .imp-c{width:36px;height:52px;border-radius:4px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
 .imp-c img{width:100%;height:100%;object-fit:cover;display:block}
 
-/* ---- preferiti: segnalibro giallo in alto a destra sulla copertina ---- */
-.cover .ribbon{position:absolute;top:-2px;right:9px;z-index:3;width:clamp(18px,16%,28px);aspect-ratio:2/3;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45));pointer-events:none}
+/* ---- preferiti: stellina gialla in alto a destra sulla copertina (fino alla 96 era un segnalibro) ---- */
+.cover .ribbon{position:absolute;top:5px;right:5px;z-index:3;width:clamp(20px,22%,34px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-sizing:border-box;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.4));pointer-events:none}
 .cover .ribbon svg{display:block;width:100%;height:100%}
-.cover .ribbon path{fill:#F4C430;stroke:#9A6F00;stroke-width:1.2;stroke-linejoin:round}
+.cover .ribbon path{fill:#F4C430;stroke:#9A6F00;stroke-width:1.3;stroke-linejoin:round}
 .ico.act.fav.on svg{color:#9A6F00;fill:#F4C430}
 html[data-theme="dark"] .ico.act.fav.on svg{color:#F4C430}
 

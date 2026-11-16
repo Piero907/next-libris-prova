@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 96.1 · 16/11/2026 07:14
+- **Preferiti con la stella** invece del segnalibro: nella scheda (in alto) e sulla copertina (stellina gialla in alto a destra).
+
 ## Prova 95.3 · 16/11/2026 02:42
 - **«Cosa c'è di nuovo» in parole semplici**: dopo un aggiornamento poche righe chiare, con il titolo in evidenza; «Tutti i dettagli» per l'elenco completo. Compare anche a chi aggiorna dalla versione di prima.
 - **Triangolino degli avvisi sempre presente** quando ci sono avvisi, anche aperti: toccandolo vai in cima, l'avviso lampeggia e quelli chiusi tornano.
