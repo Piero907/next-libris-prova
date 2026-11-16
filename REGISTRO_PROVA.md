@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.4 · 16/11/2026 21:46
+- **Presta chiave API e worker**: dalla libreria di un amico si apre una finestra per scegliere se prestare tutte e due o una sola; striscia dell'amico più sobria; finestra Amici con le righe in ordine; amici in comune corretti
+
 ## Prova 99.3 · 16/11/2026 21:06
 - **Ricerche condivise e archivio comune**: chi usa la stessa chiave Google o lo stesso worker ha un solo conto del giorno; vicino al limite i dati arrivano da Open Library e SBN e nella campanella arriva l'invito a creare la propria chiave (gratis, con la guida). I libri già cercati da altri arrivano dall'archivio comune, senza Google.
 - **Meno ricerche per libro**: la descrizione arriva solo con la prima ricerca (altrimenti «Descrizione non disponibile»); la copertina grande senza richieste in più. Tolto «Scarica tutte le descrizioni».

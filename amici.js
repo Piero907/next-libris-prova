@@ -180,14 +180,14 @@ function paint() {
       return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + esc(info.join(' · ') || 'Guarda la sua libreria') + '</small></button><span class="n" aria-hidden="true">›</span></li>';
     }).join('') + '</ul>' : '<p class="fr-small">Ancora nessuno: cercalo per nome qui sotto, oppure mandagli il tuo invito.</p>';
     h += '</section>';
-    h += '<section class="fr-sec"><h3 class="fr-h">Aggiungi un amico</h3><form id="friFormQ" class="fr-q"><input type="search" id="friQ" placeholder="Il suo nome (almeno 3 lettere)" autocomplete="off" spellcheck="false" enterkeyhint="search" value="' + esc(foundQ && foundQ !== invite ? foundQ : '') + '"><button class="btn" type="submit">Cerca</button></form>';
+    h += '<section class="fr-sec"><h3 class="fr-h">Aggiungi un amico</h3><form id="friFormQ" class="fr-q"><input type="search" id="friQ" placeholder="Il suo nome" autocomplete="off" spellcheck="false" enterkeyhint="search" value="' + esc(foundQ && foundQ !== invite ? foundQ : '') + '"><button class="btn" type="submit">Cerca</button></form>';
     if (found && foundQ && foundQ !== invite) h += found.length ? '<ul class="fr-list">' + found.map(function (x) { return row(x, relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessuno con un nome così.</p>';
     if (err) h += '<p class="msg bad" id="friErr">' + esc(err) + '</p>';
     h += '<button class="btn fr-invite" type="button" data-f="invite">Invita un amico</button></section>';
     if (se.length) h += '<section class="fr-sec"><h3 class="fr-h">Richieste che hai mandato</h3><ul class="fr-list">' + se.map(function (x) {
       return row(x, '<span class="fr-tag">In attesa</span><button class="link" type="button" data-f="drop" data-id="' + esc(x.id) + '">Annulla</button>');
     }).join('') + '</ul></section>';
-    h += '<button class="link fr-optlink" type="button" data-f="opts">Il tuo nome, chi vede cosa, chiave e worker › Impostazioni degli amici</button>';
+    h += '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="opts">Impostazioni degli amici<small>Il tuo nome, chi vede cosa, chiave e worker</small></button><span class="n" aria-hidden="true">›</span></li></ul>';
   }
   body.innerHTML = h;
 }
@@ -219,7 +219,8 @@ async function onClick(e) {
   if (a === 'optsback') { opts = false; paint(); return; }
   if (a === 'friend') { close(); openGuest(id); return; }
   if (a === 'tipwish' || a === 'tipdrop') { tipAct(a, id); return; }
-  if (a === 'keyshare' || a === 'keyuse' || a === 'keyoff') { keyAct(a, id); return; }
+  if (a === 'keyshare') { keySheet(id); return; }
+  if (a === 'keyuse' || a === 'keyoff') { keyAct(a, id); return; }
   if (a === 'askyes' || a === 'askno') { askAnswer(id, a === 'askyes'); return; }
   if (a === 'back') { view = null; wishes = null; libs = null; confirmId = ''; paint(); return; }
   if (a === 'more') { libsShow += 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); return; }
@@ -387,7 +388,7 @@ async function openGuest(id) {
   var books = [];
   (lb.libri || []).forEach(function (x) { gMeta[x.id] = { fuori: !!x.fuori, w: false }; books.push(Object.assign(snapG(x), { id: x.id, rs: x.rs || '', rt: x.rt || 0, rd: x.rd || '', pp: x.pp || '', ts: Number(x.ts) || 0, w: false })); });
   (ws.libri || []).forEach(function (x) { gMeta[x.id] = { w: true, prenotato: x.prenotato || '' }; books.push(Object.assign(snapG(x), { id: x.id, ts: Number(x.ts) || 0, w: true })); });
-  var info = { id: id, comuni: lb.comuni || 0, libVis: !!lb.visibili, wishVis: !!ws.visibili, totale: lb.totale || 0,
+  var info = { id: id, comuni: lb.comuni, libVis: !!lb.visibili, wishVis: !!ws.visibili, totale: lb.totale || 0,
     empty: { lib: lb.visibili ? name + ' non ha ancora libri nella sua libreria.' : name + ' non mostra la sua libreria agli amici.', wish: ws.visibili ? 'La sua lista dei desideri è vuota.' : name + ' non mostra i suoi desideri agli amici.' } };
   NL.guestEnter(name, books, info);
 }
@@ -403,7 +404,7 @@ function guestBar() {
       if (b.dataset.g === 'back') NL.guestExit();
       else if (b.dataset.g === 'notmine') NL.setFlt(NL.flt() === 'notmine' ? '' : 'notmine'), guestBar();
       else if (b.dataset.g === 'more') openFriend(gId);
-      else if (b.dataset.g === 'key') keyAct('keyshare', gId).then(guestBar);
+      else if (b.dataset.g === 'key') keySheet(gId);
       else if (b.dataset.g === 'usekey') keyAct('keyuse', gId).then(guestBar);
     });
   }
@@ -411,7 +412,7 @@ function guestBar() {
   var all = NL.books(), lib = all.filter(function (b) { return !b.w; }), inComune = lib.filter(function (b) { return NL.isMine(b); }).length;
   var now = lib.filter(function (b) { return b.rs === 'in'; }).slice(0, 3);
   var last = lib.filter(function (b) { return b.rs === 'ok'; }).sort(function (a, b) { return (b.rd || '') > (a.rd || '') ? 1 : (b.rd || '') < (a.rd || '') ? -1 : (b.ts || 0) - (a.ts || 0); }).slice(0, 5);   // prima chi ha la data di lettura
-  var info = (window.__guestInfo || {}), comuni = info.comuni || 0;
+  var info = (window.__guestInfo || {}), comuni = info.comuni != null ? info.comuni : ((nums[gId] || {}).comuni || 0);
   var h = '<div class="gb-top"><button type="button" class="link gb-back" data-g="back">‹ La tua libreria</button><button type="button" class="link gb-more" data-g="more">Prestiti, regali e altro</button></div>';
   h += '<p class="gb-num">' + comuni + (comuni === 1 ? ' amico' : ' amici') + ' in comune · ' + inComune + (inComune === 1 ? ' libro' : ' libri') + ' in comune</p>';
   if (now.length) h += '<p class="gb-line"><b>Sta leggendo</b> ' + now.map(function (b) {
@@ -421,13 +422,13 @@ function guestBar() {
   if (last.length) h += '<p class="gb-line"><b>Letti di recente</b> ' + last.map(function (b) {
     var w = NL.L.rateWord ? NL.L.rateWord(b.rt) : ''; return '«' + esc(b.t || 'senza titolo') + '»' + (w ? ' <small>' + esc(w) + '</small>' : '');
   }).join(', ') + '</p>';
-  var own = ownKeys(), sharing = keys.some(function (k) { return k.da === uid() && k.a === gId; }), fromHim = keys.filter(function (k) { return k.a === uid() && k.da === gId; })[0], b0 = borrowed();
+  var own = ownKeys(), out = outKey(gId), fromHim = keys.filter(function (k) { return k.a === uid() && k.da === gId; })[0], b0 = borrowed();
   h += '<div class="chips gb-chips">' + (lib.length ? '<button type="button" class="chip todo" data-g="notmine" aria-pressed="' + (NL.flt() === 'notmine') + '">Solo quelli che non hai</button>' : '') +
-    (own.gb || own.sbn ? '<button type="button" class="chip todo" data-g="key" aria-pressed="' + sharing + '">' + (sharing ? 'Condividi la tua chiave con lui ✓' : 'Condividi la tua chiave con lui') + '</button>' : '') +
+    (own.gb || own.sbn ? '<button type="button" class="chip todo" data-g="key" aria-pressed="' + !!out + '">' + (out ? '✓ ' + lentLabel(out) : 'Presta ' + whatOf(!!own.gb, !!own.sbn)) + '</button>' : '') +
     (fromHim && !(b0 && b0.da === gId) ? '<button type="button" class="chip todo" data-g="usekey">Usa la sua chiave</button>' : '') + '</div>';
   bar.innerHTML = h;
 }
-NL.on('guest', function (name) { if (name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
+NL.on('guest', function (name) { if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
 /* le info della libreria aperta (amici in comune): le passa openGuest prima di entrare */
 var _enter = NL.guestEnter;
 if (_enter) NL.guestEnter = function (name, books, info) { window.__guestInfo = info; var r = _enter(name, books, info); guestBar(); return r; };
@@ -602,8 +603,8 @@ function ownKeys() { var st = NL.settings || {}, b = borrowed() || {}; return { 
 function keysHTML(full) {
   var own = ownKeys(), fr = friends(), out = keys.filter(function (k) { return k.da === uid(); }), inn = keys.filter(function (k) { return k.a === uid(); }), b = borrowed(), h = '';
   if ((own.gb || own.sbn) && fr.length) {
-    h += '<p class="fr-small">Condividi ' + (own.gb && own.sbn ? 'la tua chiave Google e il tuo worker SBN' : own.gb ? 'la tua chiave Google' : 'il tuo worker SBN') + ' con un amico: li usate tutti e due e lui troverà più libri. Tocca un amico per condividere o smettere.</p>' +
-      pickerHTML(fr, 'data-f="keyshare" data-id', function (x) { return out.some(function (k) { return k.a === x.id; }); }, function (x) { return out.some(function (k) { return k.a === x.id; }) ? 'La usa anche lui' : ''; });
+    h += '<p class="fr-small">Presta ' + (own.gb && own.sbn ? 'la tua chiave API di Google Libri e il tuo worker SBN' : own.gb ? 'la tua chiave API di Google Libri' : 'il tuo worker SBN') + ' a un amico: li usate tutti e due e trova più libri. Tocca un amico per scegliere cosa prestare o per smettere.</p>' +
+      pickerHTML(fr, 'data-f="keyshare" data-id', function (x) { return !!outKey(x.id); }, function (x) { var k = outKey(x.id); return k ? lentLabel(k) : ''; });
   }
   inn.forEach(function (k) {
     var using = b && b.da === k.da, what = k.gb_key && k.sbn ? 'la sua chiave Google e il worker SBN' : k.gb_key ? 'la sua chiave Google' : 'il suo worker SBN';
@@ -612,6 +613,63 @@ function keysHTML(full) {
   });
   if (!h && full) h = '<p class="fr-small">Non hai ancora una chiave Google o un worker SBN da condividere: si impostano in Menu › Impostazioni › Ricerca dei libri. Se un amico condivide i suoi con te, li trovi qui.</p>';
   return h ? '<section class="fr-sec" id="friKeys"><h3 class="fr-h">Chiave Google e worker SBN</h3>' + h + '</section>' : '';
+}
+/* cosa presto a un amico: dal server arrivano solo i segni ('si'), mai le chiavi; senza segni (database vecchio) valgono tutte e due */
+function outKey(id) {
+  var k = keys.filter(function (x) { return x.da === uid() && x.a === id; })[0]; if (!k) return null;
+  var own = ownKeys(), known = k.gb_key || k.sbn;
+  return { gb: known ? !!k.gb_key : !!own.gb, sbn: known ? !!k.sbn : !!own.sbn };
+}
+function whatOf(gb, sbn) { return gb && sbn ? 'chiave API e worker' : gb ? 'la chiave API' : 'il worker'; }
+function lentLabel(k) { return k.gb && k.sbn ? 'Prestati: chiave API e worker' : k.gb ? 'Prestata: chiave API' : 'Prestato: worker'; }
+/* finestra «Presta chiave API e worker»: si sceglie se prestare tutte e due o una sola (Piero, 16/11/2026) */
+var keyTo = '';
+function keySheet(id) {
+  var own = ownKeys(); if (!own.gb && !own.sbn) return;
+  keyTo = id;
+  var el = document.getElementById('keySheet');
+  if (!el) {
+    el = document.createElement('div'); el.className = 'sheet fri'; el.id = 'keySheet'; el.hidden = true;
+    el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="keyH"><h2 id="keyH"></h2>' +
+      '<p class="fr-small">Li usate tutti e due e puoi smettere quando vuoi. Le chiavi non si vedono: passano dal server.</p>' +
+      '<div class="fr-share" id="keyOpts"></div>' +
+      '<div class="row-btns"><button class="btn" type="button" id="keyNo">Annulla</button><button class="btn primary" type="button" id="keyGo">Presta</button></div></div>';
+    document.body.appendChild(el);
+    var shut = function () { el.hidden = true; keyTo = ''; };
+    el.addEventListener('click', function (e) { if (e.target === el) shut(); });
+    el.querySelector('#keyNo').addEventListener('click', shut);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) shut(); });
+    el.addEventListener('change', keyBtn);
+    el.querySelector('#keyGo').addEventListener('click', async function () {
+      var id = keyTo, o = ownKeys(), gb = document.getElementById('keyGb'), sb = document.getElementById('keySbn');
+      var pg = !!(gb && gb.checked && o.gb), ps = !!(sb && sb.checked && o.sbn), was = outKey(id), name = friendName(id);
+      if (!pg && !ps && !was) return;
+      this.disabled = true;
+      try {
+        if (!pg && !ps) { await rpc('riprendi_chiavi', { a: id }); NL.toast('Non presti più niente a ' + name + '.'); }
+        else { await rpc('presta_chiavi', { a: id, gb_key: pg ? o.gb : '', sbn: ps ? o.sbn : '' }); NL.toast((pg && ps ? 'Chiave API e worker prestati' : pg ? 'Chiave API prestata' : 'Worker prestato') + ' a ' + name + '.'); }
+        shut();
+      } catch (e) { NL.toast(nice(e)); }
+      this.disabled = false;
+      try { keys = (await rpc('chiavi_mie')) || []; } catch (e) {}
+      paint(); guestBar();
+    });
+  }
+  var cur = outKey(id), opt = function (iid, on, has, t, sub) {
+    return '<label class="check fr-wish"><input type="checkbox" id="' + iid + '"' + (has && on ? ' checked' : '') + (has ? '' : ' disabled') + '><span>' + t + '<small>' + (has ? sub : 'Non ce l\'hai: si imposta in Menu › Impostazioni › Ricerca dei libri.') + '</small></span></label>';
+  };
+  document.getElementById('keyH').textContent = 'Presta a ' + friendName(id);
+  document.getElementById('keyOpts').innerHTML =
+    opt('keyGb', cur ? cur.gb : true, !!own.gb, 'Chiave API di Google Libri', 'Più libri trovati, con copertina e descrizione.') +
+    opt('keySbn', cur ? cur.sbn : true, !!own.sbn, 'Worker SBN', 'Cerca nel catalogo delle biblioteche italiane.');
+  keyBtn();
+  el.hidden = false;
+}
+function keyBtn() {
+  var b = document.getElementById('keyGo'); if (!b) return;
+  var gb = document.getElementById('keyGb'), sb = document.getElementById('keySbn'), any = (gb && gb.checked) || (sb && sb.checked), was = !!outKey(keyTo);
+  b.textContent = !any && was ? 'Smetti di prestare' : was ? 'Salva' : 'Presta';
+  b.disabled = !any && !was;
 }
 function setKeys(gb, sbn) { var st = NL.settings; if (!st) return; st.gbKey = gb || ''; st.sbnUrl = sbn || ''; NL.saveSettings && NL.saveSettings(); }
 async function keyAct(a, id) {
