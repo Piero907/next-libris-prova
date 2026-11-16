@@ -478,9 +478,10 @@ LETTURA, VOTO E DATA
 --------------------
 Nella scheda aperta di ogni libro (Libreria) c'e' "Lettura": Da leggere,
 In lettura, Letto (toccalo di nuovo per togliere). I libri nuovi entrano
-in Libreria gia' come "Da leggere" (anche quelli spostati dai Desideri); le stelle da 1 a 5 e,
-per i libri letti, la data (si mette da sola: oggi). Nella riga chiusa
-compaiono "In lettura" o "Letto · ★★★★". Nel pannello Filtri c'e'
+in Libreria gia' come "Da leggere" (anche quelli spostati dai Desideri); il voto con
+cinque libricini e la parola (Non mi e' piaciuto, Cosi' cosi', Bello, Bellissimo,
+Capolavoro) e, per i libri letti, la data (si mette da sola: oggi). Nella riga
+chiusa compaiono "In lettura · 34%" o "Letto · Bellissimo". Nel pannello Filtri c'e'
 "Lettura: Da leggere / In lettura / Letti / Non indicato"; si puo'
 ordinare per Voto o Letti di recente. Statistiche: letti, pagine lette,
 voto medio, libri letti per anno. Lettura, voto e data finiscono in Excel.
@@ -775,8 +776,8 @@ TASTO INDIETRO
 PREFERITI E CONDIVISIONE CON GLI AMICI
 --------------------------------------
 - Preferiti: nella scheda aperta di un libro della Libreria tocca
-  "Preferito". Li ritrovi in Filtri > Preferiti; nella vista Copertine
-  hanno un segnalibro giallo in alto a destra.
+  la stella in alto. Li ritrovi in Filtri > Preferiti; nella vista Copertine
+  hanno una stellina gialla in alto a destra.
 - Il tuo nome: te lo chiede il benvenuto alla prima apertura, oppure la
   prima volta che condividi; si cambia in Impostazioni > Condivisione. Chi
   riceve vede "I preferiti di Piero", "Piero ti consiglia un libro".
@@ -956,8 +957,24 @@ GitHub Pages le mette online in un paio di minuti. Sul telefono chiudi
 l'app del tutto e riaprila, oppure usa "Aggiorna adesso". I libri gia'
 inseriti restano.
 
-ATTENZIONE: I DATI STANNO SOLO SUL TELEFONO - IL BACKUP
--------------------------------------------------------
+ACCOUNT E SINCRONIZZAZIONE (FACOLTATIVO)
+----------------------------------------
+Menu > "Account e sincronizzazione": tocca "Accedi con Google" e i tuoi
+libri si salvano anche online (Supabase, server in Europa, a Francoforte).
+Sull'altro telefono o tablet entri con lo stesso account e ritrovi i libri.
+- Il telefono resta la copia principale: senza rete l'app va come sempre,
+  e i cambiamenti partono da soli quando torna la connessione.
+- Prima della prima sincronizzazione l'app salva da sola una copia dei
+  tuoi libri sul telefono: si ripristina da Account > Altre azioni.
+- Le copertine e le foto scattate da te per ora restano sul telefono.
+- Solo tu vedi i tuoi libri. Da Altre azioni puoi uscire, cancellare i
+  libri online o eliminare l'account; sul telefono i libri restano.
+- Informativa sulla privacy: link in fondo alla finestra (privacy.html).
+- La copia di prova ha un account tutto suo, separato da quello vero.
+- L'account non sostituisce il backup: continua a farlo ogni tanto.
+
+ATTENZIONE: I DATI STANNO SUL TELEFONO - IL BACKUP
+--------------------------------------------------
 L'elenco e' salvato nel browser del telefono. Se cancelli i dati di Chrome,
 disinstalli l'app o cambi telefono, si perde. Per questo:
 - Esporta > "Fai il backup e mandalo su Drive, email..." apre il menu di

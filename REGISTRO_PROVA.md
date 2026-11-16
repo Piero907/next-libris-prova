@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.1 · 16/11/2026 12:40
+- **Allineata alla versione 98**, appena pubblicata nella vera: tutto quello provato qui (account con Google, libricini, segnalibro, «In lettura» in cima, stella dei preferiti, tablet e PC) ora c'è anche lì. L'account della prova resta separato da quello della vera.
+
 ## Prova 97.7 · 16/11/2026 12:17
 - **Account e sincronizzazione** (Menu): entra con Google e i tuoi libri si salvano anche online, per ritrovarli su un altro telefono o tablet. Il telefono resta la copia principale; copertine e foto per ora restano sul telefono.
 - La copia social non si usa più: da ora account e amicizie si provano qui.

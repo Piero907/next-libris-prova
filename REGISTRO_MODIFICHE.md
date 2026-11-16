@@ -3,6 +3,20 @@
 Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in fondo al menu.
 L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
 
+## Versione 98 · 16/11/2026
+> **I tuoi libri anche online** Menu › Account e sincronizzazione: entra con Google e ritrovi i libri su un altro telefono o tablet.
+> **Il voto con i libricini** Cinque libri aperti con la parola: da «Non mi è piaciuto» a «Capolavoro».
+> **Segnalibro** Mentre leggi scrivi a che pagina sei: vedi la percentuale, anche nell'elenco e sotto le copertine.
+> **In lettura in cima** I libri che stai leggendo stanno in cima, in una sezione tutta loro.
+> **Preferiti con la stella** Al posto del segnalibro, nella pagina del libro e sulle copertine.
+- **Account e sincronizzazione (facoltativo):** dal Menu, con «Accedi con Google», i libri si salvano anche online (Supabase, server a Francoforte) e si ritrovano su un altro telefono o tablet. Il telefono resta la copia principale; senza rete l'app va come sempre. Prima della prima sincronizzazione l'app salva una copia dei libri sul telefono, ripristinabile. Copertine e foto per ora restano sul telefono. Si può uscire, cancellare i libri online o eliminare l'account; c'è l'informativa sulla privacy.
+- **Voto a libricini:** cinque libri aperti al posto delle stelle, con la parola (Non mi è piaciuto, Così così, Bello, Bellissimo, Capolavoro), su una riga al centro della pagina del libro. La parola compare anche nell'elenco («Letto · Bellissimo»), nelle statistiche e nella stagione in libri.
+- **«Letto il 10 febbraio 2026»** in piccolo sotto casa editrice e anno; toccandolo si apre il calendario.
+- **Segnalibro:** con «In lettura», nella pagina del libro «Sono a pagina 212 di 624» con la barra e la percentuale; nell'elenco «In lettura · 34%» e sulle copertine una barra sottile sotto l'autore.
+- **«In lettura» in cima:** in Libreria (ordine per data, senza ricerca né filtri) i libri che stai leggendo stanno nella sezione «In lettura», sopra «Gli altri libri»; toccando il titolo una sezione si chiude o si riapre.
+- **Preferiti con la stella** nella pagina del libro e una stellina gialla sulle copertine.
+- **Tablet e PC:** la pagina del libro non si schiaccia più; su schermo largo sta su due colonne (descrizione a destra) e la barra in basso resta raccolta al centro. Con il telefono sdraiato la barra in basso è più sottile.
+
 ## Versione 97 · 16/11/2026
 - Correzione interna: ogni copia dell'app (vera, prova e la nuova copia «social») tiene i suoi dati e le sue copie per l'uso senza rete, e aggiornandosi cancella solo le proprie. Per chi usa la versione vera non cambia niente.
 
