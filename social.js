@@ -77,12 +77,16 @@ async function token() {
   setAuth(j);
   return auth.at;
 }
+var authFns = [];                                    // moduli che vogliono sapere quando si entra o si esce (amici.js)
+function authChanged() { authFns.forEach(function (f) { try { f(auth); } catch (e) {} }); }
 function setAuth(j) {
+  var was = auth && auth.uid;
   auth = { at: j.access_token, rt: j.refresh_token, exp: Date.now() + (Number(j.expires_in) || 3600) * 1000,
     uid: (j.user && j.user.id) || (auth && auth.uid), email: (j.user && j.user.email) || (auth && auth.email) || '' };
   wr(K_AUTH, auth);
+  if (was !== auth.uid) setTimeout(authChanged, 0);
 }
-function logoutLocal() { auth = null; wr(K_AUTH, null); paint(); }
+function logoutLocal() { var was = !!auth; auth = null; wr(K_AUTH, null); paint(); if (was) authChanged(); }
 
 /* ---------- copia di sicurezza sul telefono (IndexedDB, prima della prima sincronizzazione) ---------- */
 function idb() {
@@ -413,13 +417,23 @@ function paint() {
   }
   paintSheet();
 }
+/* parte del Menu tutta sua, «Account e amici», sotto «La tua libreria» (16/11/2026): qui anche la voce «Amici» (amici.js) */
+function accMenu() {
+  var m = document.getElementById('accMenu'); if (m) return m;
+  var exp = document.querySelector('#drawerOpts .dopt[data-sec="export"]'); if (!exp) return null;
+  var lib = exp.closest('.dlist') || exp.parentNode;
+  var h = document.createElement('h3'); h.id = 'accMenuH'; h.textContent = 'Account e amici';
+  m = document.createElement('div'); m.className = 'dlist dmenu'; m.id = 'accMenu';
+  lib.parentNode.insertBefore(h, lib.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
+  return m;
+}
 function paintMenu() {
   var b = document.getElementById('goAcc');
   if (!b) {
-    var after = document.querySelector('#drawerOpts .dopt[data-sec="export"]'); if (!after) return;
+    var m = accMenu(); if (!m) return;
     b = document.createElement('button'); b.type = 'button'; b.id = 'goAcc'; b.className = 'dopt dgo';
     b.innerHTML = '<span><b>Account e sincronizzazione</b><small id="goAccTxt"></small></span><span class="n" aria-hidden="true">›</span>';
-    after.parentNode.insertBefore(b, after.nextSibling);
+    m.insertBefore(b, m.firstChild);
     b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(open, 60); });
   }
   paint();
@@ -430,5 +444,6 @@ window.addEventListener('online', function () { schedule(1000); });
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && auth && Date.now() - (sync.when || 0) > 60000) schedule(800); });
 if (/(access_token|error_code)=/.test(location.hash)) fromLink(); else if (auth) schedule(1500);
 window.addEventListener('hashchange', function () { if (/(access_token|error_code)=/.test(location.hash)) fromLink(); });   // link aperto nella stessa scheda dell'app
-window.NLSocial = { run: run, open: open, state: function () { return { auth: auth, sync: sync, busy: !!busy, err: lastErr }; }, hash: hash };   // per le prove
+window.NLSocial = { run: run, open: open, state: function () { return { auth: auth, sync: sync, busy: !!busy, err: lastErr }; }, hash: hash,   // per le prove
+  call: call, auth: function () { return auth; }, onAuth: function (f) { authFns.push(f); }, home: home, menu: accMenu };   // per gli altri moduli (amici.js)
 })();

@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.2 · 16/11/2026 13:13
+- **Amici**: nel Menu c'è una parte nuova, «Account e amici». Scegli il tuo nome utente, cerca gli amici per nome utente (bastano 3 lettere) oppure mandagli il tuo link con «Invita un amico».
+- Chi riceve una richiesta la trova in un avviso in cima all'app e nel Menu (con il numero): Accetta o Rifiuta. Gli amici si possono togliere; le richieste mandate si possono annullare.
+- Chi apre il link d'invito senza account entra con Google, sceglie il nome utente e chiede l'amicizia con un tocco.
+
 ## Prova 98.1 · 16/11/2026 12:40
 - **Allineata alla versione 98**, appena pubblicata nella vera: tutto quello provato qui (account con Google, libricini, segnalibro, «In lettura» in cima, stella dei preferiti, tablet e PC) ora c'è anche lì. L'account della prova resta separato da quello della vera.
 
