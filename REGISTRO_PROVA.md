@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 97.2 · 16/11/2026 10:01
+- **Si vede bene anche su tablet e PC**: la pagina del libro non si schiaccia più; su schermo largo si dispone su due colonne (copertina, dati e lettura a sinistra, descrizione a destra).
+- Su schermo largo la matita apre i campi in colonna, come sul telefono; la barra in basso resta raccolta al centro.
+- Con il telefono sdraiato la barra in basso è più sottile, per lasciare spazio ai libri.
+
 ## Prova 97.1 · 16/11/2026 09:43
 - Allineata alla versione 97 (ogni copia tiene solo le sue copie offline); restano le novità della prova: preferiti con la stella, voto a libricini, «Letto il» sotto casa editrice.
 

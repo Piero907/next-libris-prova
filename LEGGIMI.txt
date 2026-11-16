@@ -682,6 +682,11 @@ Aprendo un libro si vede la sua pagina:
   editore, serie: toccandole si vedono quei libri, dall'inizio
   dell'elenco) e in fondo "Presta, vendi o regala" e "Cerca sul web"
   (anche nei Desideri, dove c'e' anche il preferito).
+Su tablet e PC (schermo largo) la pagina del libro si dispone su due
+colonne: a sinistra copertina, dati, lettura e nota; a destra la
+descrizione. La matita apre gli stessi campi in colonna del telefono.
+La barra in basso resta raccolta al centro; sul telefono sdraiato e'
+piu' sottile, per lasciare spazio ai libri.
 Per chi sviluppa: e' un modulo a parte (schede.js e schede.css); la
 scheda classica resta solo per le prove automatiche.
 
