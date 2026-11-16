@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.3 · 16/11/2026 13:51
+- **Un solo nome**: il nome di «Libreria di …» è anche quello con cui ti trovano gli amici (anche con maiuscole, accenti e spazi, es. «Piero R.»). Se lo cambi nelle Impostazioni cambia anche per gli amici.
+- **Amici più a portata di mano**: icona accanto all'ingranaggio, con il numero delle richieste; nel Menu una parte tutta sua, «Amici», subito sotto Statistiche (con «Invita un amico»).
+- L'avviso di una richiesta di amicizia ora resta in cima, davanti agli altri avvisi (prima spariva dietro «Installa»).
+- Sistemata la finestra Amici: il campo del nome non si sdoppia più e su telefoni stretti la finestra non scorre di lato.
+
 ## Prova 98.2 · 16/11/2026 13:13
 - **Amici**: nel Menu c'è una parte nuova, «Account e amici». Scegli il tuo nome utente, cerca gli amici per nome utente (bastano 3 lettere) oppure mandagli il tuo link con «Invita un amico».
 - Chi riceve una richiesta la trova in un avviso in cima all'app e nel Menu (con il numero): Accetta o Rifiuta. Gli amici si possono togliere; le richieste mandate si possono annullare.

@@ -417,23 +417,13 @@ function paint() {
   }
   paintSheet();
 }
-/* parte del Menu tutta sua, «Account e amici», sotto «La tua libreria» (16/11/2026): qui anche la voce «Amici» (amici.js) */
-function accMenu() {
-  var m = document.getElementById('accMenu'); if (m) return m;
-  var exp = document.querySelector('#drawerOpts .dopt[data-sec="export"]'); if (!exp) return null;
-  var lib = exp.closest('.dlist') || exp.parentNode;
-  var h = document.createElement('h3'); h.id = 'accMenuH'; h.textContent = 'Account e amici';
-  m = document.createElement('div'); m.className = 'dlist dmenu'; m.id = 'accMenu';
-  lib.parentNode.insertBefore(h, lib.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
-  return m;
-}
 function paintMenu() {
   var b = document.getElementById('goAcc');
   if (!b) {
-    var m = accMenu(); if (!m) return;
+    var exp = document.querySelector('#drawerOpts .dopt[data-sec="export"]'); if (!exp) return;   // in «La tua libreria», dopo il backup
     b = document.createElement('button'); b.type = 'button'; b.id = 'goAcc'; b.className = 'dopt dgo';
     b.innerHTML = '<span><b>Account e sincronizzazione</b><small id="goAccTxt"></small></span><span class="n" aria-hidden="true">›</span>';
-    m.insertBefore(b, m.firstChild);
+    exp.parentNode.insertBefore(b, exp.nextSibling);
     b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(open, 60); });
   }
   paint();
@@ -445,5 +435,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 if (/(access_token|error_code)=/.test(location.hash)) fromLink(); else if (auth) schedule(1500);
 window.addEventListener('hashchange', function () { if (/(access_token|error_code)=/.test(location.hash)) fromLink(); });   // link aperto nella stessa scheda dell'app
 window.NLSocial = { run: run, open: open, state: function () { return { auth: auth, sync: sync, busy: !!busy, err: lastErr }; }, hash: hash,   // per le prove
-  call: call, auth: function () { return auth; }, onAuth: function (f) { authFns.push(f); }, home: home, menu: accMenu };   // per gli altri moduli (amici.js)
+  call: call, auth: function () { return auth; }, onAuth: function (f) { authFns.push(f); }, home: home };   // per gli altri moduli (amici.js)
 })();

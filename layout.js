@@ -109,7 +109,9 @@ function paintNav() {
 /* ---------- avvisi in cima: uno alla volta ---------- */
 var NOTES = ['#notice', '#nxBox', '#wrapAsk', '#donAsk', '#instCard', '#donRow'], noteIdx = 0, mo = null;
 function notes() {
-  var all = NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean).concat(Array.prototype.slice.call(document.querySelectorAll('.lay-note')));   // .lay-note: avvisi aggiunti da altri moduli
+  var all = Array.prototype.slice.call(document.querySelectorAll('.lay-note.lay-first'))   // .lay-first: avvisi che vengono prima di tutti (richieste di amicizia, 16/11/2026)
+    .concat(NOTES.map(function (k) { return document.querySelector(k); }).filter(Boolean))
+    .concat(Array.prototype.slice.call(document.querySelectorAll('.lay-note:not(.lay-first)')));   // .lay-note: avvisi aggiunti da altri moduli
   all.forEach(function (x) { x.classList.remove('lay-later', 'lay-has-dots'); x.removeAttribute('data-noswipe'); x.removeAttribute('data-lay-swipe'); x.style.transform = ''; x.style.opacity = ''; x.style.transition = ''; });
   var more = $('#layMore');
   if (cur === 'classico' || !one) { if (more) more.hidden = true; return; }

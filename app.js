@@ -4845,7 +4845,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 13:13", "n": "98.2", "note": "Amici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 13:51", "n": "98.3", "note": "Un solo nome"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -5202,7 +5202,9 @@ function saveName(v) {
   if (v === (settings.name || '')) return;
   settings.name = v; saveSettings();
   $('#optName').value = v;
+  var wn = $('#welcomeName'); if (wn && document.activeElement !== wn) wn.value = v;   // anche nel benvenuto, se e' aperto
   renderOwner();
+  emit('name', v);                           // il modulo «amici» lo usa come nome per gli amici (16/11/2026)
 }
 /* in testata, sotto «Next Libris»: «Libreria di Piero»; senza nome, l'invito a scriverlo */
 function renderOwner() {
@@ -6564,7 +6566,7 @@ window.NL = {
   on: function (name, fn) { (hooks[name] || (hooks[name] = [])).push(fn); },
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA, COPIA: COPIA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,
-  name: function () { return settings.name || ''; }, goal: function () { return settings.goal || 0; },
+  name: function () { return settings.name || ''; }, setName: function (v) { saveName(v); }, goal: function () { return settings.goal || 0; },
   closeDrawer: function () { closeDrawer(); }, refresh: function () { renderList(); updateSummary(); },
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
