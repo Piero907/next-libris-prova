@@ -39,10 +39,6 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .cv-readbox>.seg button{min-height:40px;padding:6px 4px;font-size:14px;white-space:nowrap}
 /* libricini e parola su una riga, al centro della striscia; «Letto il» sotto, al centro anche lui (Piero, 16/11/2026) */
 .cv-readbox .rate{justify-content:center}
-.cv-readbox>.f-rd{justify-content:center}
-.cv-readbox>.f-rd{min-width:0;display:flex;align-items:center;gap:8px;margin:0;padding:0;position:relative}
-.cv-readbox>.f-rd .lbl{display:inline;margin:0;color:var(--muted);font-size:15px;white-space:nowrap}
-.cv-readbox>.f-rd input{min-height:36px;padding:4px 4px;font-size:14.5px;width:auto;max-width:150px;background:transparent}
 /* D: azioni con la scritta sotto la riga delle icone */
 .cv-acts2{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px;padding-top:12px;border-top:1px solid var(--line)}
 .cv-acts2 .ico.act{min-height:40px}
@@ -78,12 +74,13 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .acts-main .cv-editb.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .acts-main .cv-editb.on svg{color:inherit}
 .cv-readbox.cv-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0 6px}
-.cv-readbox>.f-rd input{max-width:140px}
-/* «Letto il 10 febbraio 2026»: una frase con la data in una pillola; sopra c'e' il campo data invisibile che apre il calendario del telefono */
+/* «Letto il 16 novembre 2026»: in piccolo sotto casa editrice e anno, come quella riga; toccando la data si apre il calendario
+   (sopra c'e' il campo data invisibile) */
 .read .rd-show{display:none}
-.cv-readbox .rd-show{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:15px;font-weight:500;color:var(--ink);white-space:nowrap}
-.cv-readbox .rd-show.none{font-weight:400;color:var(--muted);border-style:dashed}
-.cv-readbox .rd-show svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:1.8;stroke-linecap:round}
-.cv-readbox>.f-rd input[data-k="rd"]{position:absolute;inset:0;width:100%;max-width:none;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
-.cv-readbox>.f-rd:focus-within .rd-show{outline:2px solid var(--accent);outline-offset:2px}
-.cv-page .cv-readbox>.f-rd>.lbl{font-size:15px;color:var(--muted);text-transform:none;letter-spacing:0}
+.cv-ht .f-rd.cv-rdmeta{display:flex;align-items:baseline;gap:5px;position:relative;margin:3px 0 0;padding:0;width:max-content;max-width:100%;font-size:14px;line-height:1.4;color:var(--muted)}
+.row.open .cv-page .cv-ht .f-rd.cv-rdmeta>.lbl{display:inline;margin:0;font-size:14px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
+.cv-ht .cv-rdmeta .rd-show{display:inline;font-size:14px;color:var(--muted);border-bottom:1px dotted currentColor;white-space:nowrap}
+.cv-ht .cv-rdmeta .rd-show.none{font-style:italic}
+.cv-ht .cv-rdmeta .rd-show svg{display:none}
+.cv-ht .cv-rdmeta input[data-k="rd"]{position:absolute;inset:0;width:100%;max-width:none;height:100%;min-height:0;opacity:0;cursor:pointer;border:0;padding:0}
+.cv-ht .cv-rdmeta:focus-within .rd-show{outline:2px solid var(--accent);outline-offset:2px}

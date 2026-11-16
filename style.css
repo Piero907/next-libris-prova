@@ -1498,6 +1498,7 @@ body.selecting .don-row,body.selecting .don-ask,body.scanning .don-row{display:n
 .btn.don-opt .don-cup{flex:0 0 36px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--accent)}
 /* copia di prova: etichetta accanto al titolo */
 .prova-tag{display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 9px;border-radius:999px;background:#B4472A;color:#fff;font:700 12px/1.2 var(--font-body);letter-spacing:.06em}
+.copia-social .prova-tag{background:#2E5E8C}   /* copia social: etichetta blu, la prova resta rossa */
 /* Suggerimenti */
 .sg-tabs{margin:4px 0 10px}
 .sg-tabs button[aria-pressed="true"]{background:var(--accent);color:#fff}

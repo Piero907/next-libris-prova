@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 96.4 · 16/11/2026 09:29
+- **«Letto il» in piccolo sotto casa editrice e anno**, nello stesso stile; toccando la data si apre il calendario.
+- Ogni copia (vera, prova, social) cancella solo le sue copie offline: unita la correzione della copia social.
+
 ## Prova 96.3 · 16/11/2026 09:15
 - **Libricini aperti, su una riga al centro**, con la parola a destra; tolta la scelta temporanea.
 - **«Letto il 10 febbraio 2026»**: la data scritta per esteso in una pillola; toccandola si apre il calendario.

@@ -87,7 +87,9 @@ function doD(card, id) {
   /* stato, voto e data: una striscia a tutta larghezza subito sotto copertina e titolo, tra due righe sottili;
      stelle e «Letto il» sulla stessa riga quando c'e' posto (Piero ha scelto la C tra cinque proposte, 16/11/2026) */
   if (rd) {
-    rd.classList.add('cv-strip');                  // stato, poi i libricini con la parola, poi «Letto il»
+    rd.classList.add('cv-strip');                  // stato, poi i libricini con la parola
+    var rdf = q(rd, '.f-rd');                      // «Letto il …» in piccolo sotto casa editrice e anno, nello stesso stile (Piero, 16/11/2026)
+    if (rdf) { rdf.classList.add('cv-rdmeta'); var ht = q(v, '.cv-ht'), mt = q(ht, '.cv-meta'); ht.insertBefore(rdf, mt ? mt.nextSibling : null); }
     var hero = q(v, '.cv-hero'); hero.parentNode.insertBefore(rd, hero.nextSibling);
   }
   /* etichette-filtro: in fondo, prima di Presta e Cerca sul web */
