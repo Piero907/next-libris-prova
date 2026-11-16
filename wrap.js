@@ -1,4 +1,4 @@
-/* Next Libris · modulo «Il tuo trimestre in libri» (wrap ogni tre mesi, stile storie).
+/* Next Libris · modulo «La tua stagione in libri» (wrap di ogni stagione, stile storie; fino al 16/11/2026 era ogni trimestre).
    Modulo a parte: usa solo window.NL (l'attacco dei moduli in app.js). Per toglierlo dall'app bastano:
    cancellare wrap.js e wrap.css, togliere le loro due righe da index.html e i due nomi da SHELL in sw.js
    (lo fa togli_modulo.py, nel ramo prove). I dati suoi stanno in 'catalogo-libri-wrap'. */
@@ -14,19 +14,21 @@ var cfg = { on: true, seen: '' };
 try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); cfg.on = c0.on !== false; cfg.seen = L.str(c0.seen).slice(0, 10); } catch (e) {}
 function save() { NL.ls.set(LS, JSON.stringify(cfg)); }
 
-/* ---------- trimestri ---------- */
+/* ---------- stagioni ---------- */
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-function quarter(y, q) {                      // q = 1..4
+/* le quattro stagioni (meteorologiche, a mesi interi): inverno dicembre-febbraio, primavera marzo-maggio, estate giugno-agosto,
+   autunno settembre-novembre (Piero, 16/11/2026: «in concomitanza con le quattro stagioni»). L'inverno 2026 va da dicembre 2025 a febbraio 2026. */
+function quarter(y, q) {                      // q = 1..4: inverno, primavera, estate, autunno
   while (q < 1) { q += 4; y--; } while (q > 4) { q -= 4; y++; }
-  var s = new Date(y, (q - 1) * 3, 1), e = new Date(y, q * 3, 1);
-  return { y: y, q: q, key: y + '-T' + q, s: s.getTime(), e: e.getTime(), sd: ymd(s), ed: ymd(e),
-    label: MESI[(q - 1) * 3] + ' – ' + MESI[q * 3 - 1] + ' ' + y, title: TITOLO[q - 1] };
+  var s = new Date(y, (q - 1) * 3 - 1, 1), e = new Date(y, q * 3 - 1, 1), last = new Date(y, q * 3 - 2, 1);
+  return { y: y, q: q, key: y + '-S' + q, s: s.getTime(), e: e.getTime(), sd: ymd(s), ed: ymd(e),
+    label: MESI[s.getMonth()] + (s.getFullYear() !== last.getFullYear() ? ' ' + s.getFullYear() : '') + ' – ' + MESI[last.getMonth()] + ' ' + last.getFullYear(), title: TITOLO[q - 1] };
 }
-function quarterOf(t) { var d = new Date(t); return quarter(d.getFullYear(), Math.floor(d.getMonth() / 3) + 1); }
+function quarterOf(t) { var d = new Date(t), m = d.getMonth(); return quarter(d.getFullYear() + (m === 11 ? 1 : 0), Math.floor((m + 1) / 3) % 4 + 1); }
 function prevQ(Q) { return quarter(Q.y, Q.q - 1); }
 
-/* ---------- i numeri di un trimestre ---------- */
+/* ---------- i numeri di una stagione ---------- */
 function pages(b) { var n = parseInt(b.pg, 10); return n > 0 && n < 20000 ? n : 0; }
 function inQ(Q, b) { return b.rd && b.rd >= Q.sd && b.rd < Q.ed; }
 function top(m, n) { return Object.keys(m).map(function (k) { return m[k]; }).sort(function (x, y) { return y.n - x.n || (y.r || 0) - (x.r || 0); }).slice(0, n); }
@@ -72,7 +74,7 @@ function wrapData(books, quotes, Q, now) {
   }
   return d;
 }
-function quarters(now) {                      // i trimestri con qualcosa da raccontare, dal piu' recente
+function quarters(now) {                      // le stagioni con qualcosa da raccontare, dal piu' recente
   now = now || Date.now();
   var books = NL.books(), quotes = NL.quotes(), first = now;
   books.forEach(function (b) { if (b.ts > 946684800000 && b.ts < first) first = b.ts; if (b.rd) { var t = Date.parse(b.rd + 'T12:00:00'); if (t < first) first = t; } });
@@ -91,18 +93,18 @@ function slides(d) {
     (name ? '<p class="w-sub">di ' + esc(name) + '</p>' : '') + '<p class="w-hint">Tocca a destra per andare avanti, a sinistra per tornare indietro.</p>' });
   if (d.n) {
     var delta = d.n - d.prev;
-    out.push({ cls: 'w-c2', html: '<p class="w-kick">In questi tre mesi hai letto</p><p class="w-num">' + d.n + '</p><p class="w-unit">' + (d.n === 1 ? 'libro' : 'libri') + '</p>' +
+    out.push({ cls: 'w-c2', html: '<p class="w-kick">In questa stagione hai letto</p><p class="w-num">' + d.n + '</p><p class="w-unit">' + (d.n === 1 ? 'libro' : 'libri') + '</p>' +
       '<ul class="w-facts">' + (d.pages ? '<li><b>' + nf.format(d.pages) + '</b> pagine' + (d.perDay ? ', circa <b>' + d.perDay + '</b> al giorno' : '') + (d.noPages ? ' <small>(' + d.noPages + ' senza pagine)</small>' : '') + '</li>' : '') +
       (d.month ? '<li>Il mese più letto: <b>' + esc(d.month.name) + '</b>, con ' + d.month.n + ' libri</li>' : '') +
-      (d.prev && !d.ongoing ? '<li>' + (delta > 0 ? '<b>' + delta + ' in più</b> dei tre mesi prima' : delta < 0 ? (-delta) + ' in meno dei tre mesi prima' : 'Quanti i tre mesi prima') + '</li>' : '') +
+      (d.prev && !d.ongoing ? '<li>' + (delta > 0 ? '<b>' + delta + ' in più</b> della stagione prima' : delta < 0 ? (-delta) + ' in meno della stagione prima' : 'Quanti la stagione prima') + '</li>' : '') +
       (d.goal ? '<li>Obiettivo ' + Q.y + ': <b>' + d.goal.done + ' su ' + d.goal.n + '</b>' + (d.goal.done >= d.goal.n ? ' — raggiunto!' : '') + '</li>' : '') + '</ul>' });
   } else {
-    out.push({ cls: 'w-c2', html: '<p class="w-kick">Letture</p><p class="w-mid">Nessun libro segnato «Letto» con la data in questi tre mesi.</p><p class="w-sub">Quando finisci un libro, segnalo «Letto»: la data si mette da sola e il prossimo riepilogo lo conta.</p>' });
+    out.push({ cls: 'w-c2', html: '<p class="w-kick">Letture</p><p class="w-mid">Nessun libro segnato «Letto» con la data in questa stagione.</p><p class="w-sub">Quando finisci un libro, segnalo «Letto»: la data si mette da sola e il prossimo riepilogo lo conta.</p>' });
   }
   if (d.genres.length || d.author) {
     out.push({ cls: 'w-c3', html: (d.genres.length ? '<p class="w-kick">I tuoi generi (' + esc(d.genFrom === 'letti' ? 'tra i libri letti' : 'tra i libri entrati') + ')</p><ol class="w-bars">' +
       d.genres.map(function (g) { return '<li><span class="w-bn">' + esc(g.name) + '</span><span class="w-bar"><i style="width:' + Math.max(6, g.pc) + '%"></i></span><b>' + g.pc + '%</b></li>'; }).join('') + '</ol>' : '') +
-      (d.author ? '<p class="w-kick w-gap">Autore del trimestre</p><p class="w-mid">' + esc(d.author.name) + '</p><p class="w-sub">' + d.author.n + ' libri letti</p>' : '') });
+      (d.author ? '<p class="w-kick w-gap">Autore della stagione</p><p class="w-mid">' + esc(d.author.name) + '</p><p class="w-sub">' + d.author.n + ' libri letti</p>' : '') });
   }
   if (d.longest || d.best) {
     out.push({ cls: 'w-c4', html: (d.longest ? '<p class="w-kick">Il più lungo</p><p class="w-mid">«' + esc(d.longest.t) + '»</p><p class="w-sub">' + esc(d.longest.a) + ' · ' + nf.format(d.longest.pg) + ' pagine</p>' : '') +
@@ -128,7 +130,7 @@ function build() {
   if (W.el) return;
   var el = document.createElement('div');
   el.id = 'wrap'; el.className = 'wrap'; el.hidden = true;
-  el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Il tuo trimestre in libri');
+  el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'La tua stagione in libri');
   el.innerHTML = '<div class="w-prog" id="wProg"></div><button type="button" class="w-x" data-w="close" aria-label="Chiudi">×</button>' +
     '<div class="w-stage" id="wStage" aria-live="polite"></div>';
   document.body.appendChild(el);
@@ -152,8 +154,8 @@ function paint() {
   var s = W.sl[W.i], Q = W.data.Q;
   W.el.className = 'wrap ' + s.cls;
   $('#wProg').innerHTML = W.sl.map(function (x, k) { return '<span class="' + (k < W.i ? 'done' : k === W.i ? 'now' : '') + '"></span>'; }).join('');
-  var nav = s.cover && W.list.length > 1 ? '<div class="w-nav"><button type="button" class="w-btn" data-w="older"' + (W.qi >= W.list.length - 1 ? ' disabled' : '') + ' aria-label="Trimestre prima">‹ Prima</button>' +
-    '<button type="button" class="w-btn" data-w="newer"' + (W.qi <= 0 ? ' disabled' : '') + ' aria-label="Trimestre dopo">Dopo ›</button></div>' : '';
+  var nav = s.cover && W.list.length > 1 ? '<div class="w-nav"><button type="button" class="w-btn" data-w="older"' + (W.qi >= W.list.length - 1 ? ' disabled' : '') + ' aria-label="Stagione prima">‹ Prima</button>' +
+    '<button type="button" class="w-btn" data-w="newer"' + (W.qi <= 0 ? ' disabled' : '') + ' aria-label="Stagione dopo">Dopo ›</button></div>' : '';
   $('#wStage').innerHTML = '<div class="w-slide" data-q="' + Q.key + '">' + s.html + nav + '</div>';
 }
 function go(i) { if (i < 0 || i >= W.sl.length) return; W.i = i; paint(); }
@@ -265,7 +267,7 @@ function paintMenu() {
   if (!b) {
     var st = document.getElementById('goStats'); if (!st) return;
     b = document.createElement('button'); b.type = 'button'; b.id = 'goWrap'; b.className = 'dopt dgo';
-    b.innerHTML = '<span><b>Il tuo trimestre in libri</b><small id="goWrapTxt"></small></span><span class="n" aria-hidden="true">›</span>';
+    b.innerHTML = '<span><b>La tua stagione in libri</b><small id="goWrapTxt"></small></span><span class="n" aria-hidden="true">›</span>';
     st.parentNode.insertBefore(b, st.nextSibling);
     b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(function () { open(); }, 60); });
   }
@@ -273,7 +275,7 @@ function paintMenu() {
   b.hidden = !list.length;
   if (list.length) {
     var last = prevQ(quarterOf(Date.now())).key, d = list.filter(function (x) { return x.Q.key === last; })[0] || list[0];
-    $('#goWrapTxt').textContent = 'Riepilogo ogni tre mesi · ' + d.Q.label + (d.ongoing ? ' (finora)' : '');
+    $('#goWrapTxt').textContent = 'Riepilogo di ogni stagione · ' + d.Q.label + (d.ongoing ? ' (finora)' : '');
   }
 }
 function paintOption(sec) {
@@ -282,7 +284,7 @@ function paintOption(sec) {
   if (!box) {
     var lab = document.querySelector('#optSheet .sum-opts'); if (!lab) return;   // in Aspetto, subito dopo «Riepilogo in alto» (16/11/2026)
     var l = document.createElement('label'); l.className = 'check';
-    l.innerHTML = '<input type="checkbox" id="optWrap"><span>Riepilogo ogni tre mesi<small>«Il tuo trimestre in libri»: cosa hai letto, i generi, gli autori, i libri nuovi. All\'inizio di ogni trimestre compare l\'invito in cima all\'elenco; si apre anche dal menu.</small></span>';
+    l.innerHTML = '<input type="checkbox" id="optWrap"><span>Riepilogo di ogni stagione<small>«La tua estate in libri», «Il tuo autunno in libri»…: cosa hai letto, i generi, gli autori, i libri nuovi. All\'inizio di ogni stagione compare l\'invito in cima all\'elenco; si apre anche dal menu.</small></span>';
     lab.parentNode.insertBefore(l, lab.nextSibling);
     box = l.querySelector('input');
     box.addEventListener('change', function () { cfg.on = box.checked; save(); paintAsk(); paintMenu(); });

@@ -82,7 +82,7 @@ var eurFmt = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR'
 var coll = new Intl.Collator('it', { sensitivity: 'base', numeric: true });
 
 /* ---------- stato ---------- */
-var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set';
+var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 95, date: '2026-11-16', note: 'Nuovo aspetto con la barra in basso, pagina del libro, trimestre in libri, menu riordinato' };
 var state = { books: [], updated: 0 };
@@ -277,7 +277,8 @@ function loadAll() {
     settings.showSync = s.syncOff ? s.showSync === true : false;                     // «Salvato su questo telefono»: spento di predefinito (16/11/2026); gli errori si vedono sempre
     settings.syncOff = 1;
     settings.seenV = Number(s.seenV) || 0;                                         // ultima versione di cui si sono viste le novita'
-    settings.wn2 = s.wn2 ? 1 : 0;                                                   // la pagina delle novita' funziona anche per chi aggiorna (dalla 96)
+    settings.wn2 = s.wn2 ? 1 : 0;
+    oldApp = typeof s.look === 'string';                                             // impostazioni salvate da una versione precedente dell'app (non una prima installazione)                                                   // la pagina delle novita' funziona anche per chi aggiorna (dalla 96)
     settings.seenB = L.str(s.seenB).slice(0, 12);                                   // nella copia di prova: ultima prova vista («94.17»)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
     settings.suggLang = s.suggLang === 'all' ? 'all' : 'it';                        // «Da scoprire»: solo italiano o tutte le lingue
@@ -2490,6 +2491,7 @@ function logHTML(md) {
       out.push('</section><section class="log-v' + (cur ? ' cur' : '') + '"><h3>' + (vm ? 'Versione ' + vm[1] + (vm[2] ? ' <small>' + esc(vm[2]) + '</small>' : '') : pm ? 'Prova ' + pm[1] + (pm[2] ? ' <small>' + esc(pm[2]) + '</small>' : '') : logInline(m[1])) + (cur ? ' <span class="log-now">questa</span>' : '') + '</h3>');
       return;
     }
+    if (/^>/.test(line)) return;                                              // «In breve» per la pagina delle novita': qui ci sono i dettagli
     if ((m = line.match(/^\s*[-*]\s+(.*)$/))) { if (!list) { out.push('<ul>'); list = true; } out.push('<li>' + logInline(m[1]) + '</li>'); return; }
     if (!line.trim()) { if (list) { out.push('</ul>'); list = false; } return; }
     if (list) { out.push('</ul>'); list = false; }
@@ -2539,12 +2541,26 @@ function newsSince(md, test) {                    // le righe puntate delle sezi
   });
   return out;
 }
+function newsBrief(md, test) {                     // per chi usa l'app: per ogni versione le righe «> …» (In breve) o, se mancano, i soli titoli in grassetto
+  var secs = [], cur = null;
+  md.replace(/\r/g, '').split('\n').forEach(function (line) {
+    var m = line.match(/^##\s+(.*)$/);
+    if (m) { cur = test(m[1]) ? { brief: [], items: [] } : null; if (cur) secs.push(cur); return; }
+    if (!cur) return;
+    if ((m = line.match(/^>\s?(.+)$/))) cur.brief.push(m[1].trim());
+    else if ((m = line.match(/^\s*[-*]\s+(.*)$/))) cur.items.push(m[1].trim());
+  });
+  return secs.reduce(function (out, x) { return out.concat(x.brief.length ? x.brief : briefOf(x.items)); }, []);
+}
+function briefOf(items) {                           // i titoli in grassetto, senza la spiegazione lunga
+  return items.filter(function (x) { return /^\*\*/.test(x); }).map(function (x) { var m = /^\*\*([^*]+?)[:.]?\*\*/.exec(x); return m ? '**' + m[1].replace(/[:.]\s*$/, '') + '**' : x; });
+}
 function rankNews(items) {                        // prima le novita' (cominciano in grassetto), poi le correzioni e i ritocchi
   var big = items.filter(function (x) { return /^\*\*/.test(x); }), small = items.filter(function (x) { return !/^\*\*/.test(x); });
   return big.concat(small);
 }
 async function checkWhatsNew() {
-  var curB = PROVA ? BUILD.n : '', used = state.books.length > 0;
+  var curB = PROVA ? BUILD.n : '', used = state.books.length > 0 && oldApp;   // ha i suoi libri e impostazioni di una versione di prima
   /* prima apertura vera (nessun libro): niente da raccontare. Ma chi aggiorna da una versione senza questa pagina ha gia' i suoi libri:
      a lui le novita' si mostrano (nella 95 la pagina non era comparsa a chi aggiornava dalla 94, 16/11/2026) */
   if (!settings.seenV && !used) { settings.seenV = APP_VERSION.v; settings.seenB = curB; settings.wn2 = 1; saveSettings(); return; }
@@ -2555,25 +2571,30 @@ async function checkWhatsNew() {
   var newV = APP_VERSION.v > fromV, newB = PROVA && curB && provaNum(curB) > provaNum(fromB);
   if (!newV && !newB) { saveSettings(); return; }
   settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings();
-  var items = [], title = '';
+  var items = [], title = '', brief = false;
   try {
     if (PROVA && curB && !missed) {
       var rp = await fetch('REGISTRO_PROVA.md', { cache: 'no-cache' }).catch(function () { return null; });
       var pm = rp && rp.ok ? await rp.text() : '';
-      items = newsSince(pm, function (h) { var m = /^Prova\s+([\d.]+)/.exec(h); return !!m && provaNum(m[1]) > provaNum(fromB) && provaNum(m[1]) <= provaNum(curB); });
+      var inB = function (h) { var m = /^Prova\s+([\d.]+)/.exec(h); return !!m && provaNum(m[1]) > provaNum(fromB) && provaNum(m[1]) <= provaNum(curB); };
+      items = newsBrief(pm, inB); brief = items.length > 0;      // anche nella prova, lo stesso stile semplice
+      if (!items.length) items = newsSince(pm, inB);
       title = 'Prova ' + curB;
     }
     if (!items.length) {
       var r = await fetch('REGISTRO_MODIFICHE.md', { cache: 'no-cache' }).catch(function () { return null; });
       if (!r || !r.ok) r = await fetch('REGISTRO_MODIFICHE.md').catch(function () { return null; });
       var md = r && r.ok ? await r.text() : '';
-      items = newsSince(md, function (h) { var m = /^Versione\s+(\d+)/.exec(h); return !!m && +m[1] > fromV && +m[1] <= APP_VERSION.v; });
+      var inV = function (h) { var m = /^Versione\s+(\d+)/.exec(h); return !!m && +m[1] > fromV && +m[1] <= APP_VERSION.v; };
+      items = newsBrief(md, inV);                     // per tutti: poche novita' in parole semplici (Piero, 16/11/2026)
+      brief = true;
       title = 'Versione ' + APP_VERSION.v;
     }
   } catch (e) {}
   if (!items.length) return;
-  $('#wnSub').textContent = title + ' · ' + (items.length === 1 ? '1 novità' : items.length + ' novità');
-  $('#wnList').innerHTML = rankNews(items).map(function (x) { return '<li>' + logInline(x) + '</li>'; }).join('');
+  $('#wnSub').textContent = brief ? title + ': ecco cosa cambia per te.' : title + ' · ' + (items.length === 1 ? '1 novità' : items.length + ' novità');
+  $('#wnList').classList.toggle('wn-brief', brief);
+  $('#wnList').innerHTML = (brief ? items : rankNews(items)).map(function (x) { return '<li>' + logInline(x) + '</li>'; }).join('');
   $('#wnSheet').hidden = false;
 }
 function closeWhatsNew() { $('#wnSheet').hidden = true; }
@@ -4779,7 +4800,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 02:25", "n": "95.2", "note": "La pagina delle novità compare anche a chi aggiorna da una versione che non l'aveva (nella"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 02:42", "n": "95.3", "note": "«Cosa c'è di nuovo» in parole semplici"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
@@ -6399,17 +6420,32 @@ function closedNotices() {
   emit('closed', out);                            // i moduli aggiungono i loro
   return out;
 }
-function alertBtn() {
+/* avvisi aperti in cima (prestiti, backup, «Hai finito…», trimestre, installazione, sostieni, avvisi dei moduli) */
+var OPEN_NOTES = '#notice, #nxBox, #wrapAsk, #donAsk, #instCard, #donRow, .lay-note';
+function openNotices() { return Array.prototype.filter.call(document.querySelectorAll(OPEN_NOTES), function (e) { return !e.hidden && e.isConnected && !e.closest('[hidden]'); }); }
+function alertBtn() {                             // il triangolino c'e' quando ci sono avvisi, aperti o chiusi (Piero, 16/11/2026)
   if (tab !== 'lib') return '';
-  var n = closedNotices().length;
-  return n ? ' <button type="button" class="sum-alert" data-sum="alert" aria-label="' + (n === 1 ? 'Riapri l\'avviso chiuso' : 'Riapri i ' + n + ' avvisi chiusi') + '" title="Riapri gli avvisi">' +
+  var c = closedNotices().length, o = openNotices().length, n = c + o;
+  var lbl = c ? (c === 1 ? 'Riapri l\'avviso chiuso' : 'Riapri i ' + c + ' avvisi chiusi') : (o === 1 ? 'Vai all\'avviso' : 'Vai ai ' + o + ' avvisi');
+  return n ? ' <button type="button" class="sum-alert" data-sum="alert" aria-label="' + lbl + '" title="' + (c ? 'Riapri gli avvisi' : 'Vai agli avvisi') + '">' +
     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5M12 17.2v.01"/></svg></button>' : '';
 }
 function reopenNotices() {
   closedNotices().forEach(function (x) { try { x.reopen(); } catch (e) {} });
   emit('reopen');
   updateSummary(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(function () {                        // l'avviso in vista lampeggia un attimo, per far vedere dove sono
+    var e = openNotices().filter(function (x) { return !x.classList.contains('lay-later'); })[0];
+    if (e) { e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); setTimeout(function () { e.classList.remove('flash'); }, 1400); }
+  }, 350);
 }
+(function () {                                   // un avviso compare o sparisce: il triangolino si aggiorna
+  var t = null, last = -1;
+  new MutationObserver(function () {
+    clearTimeout(t);
+    t = setTimeout(function () { var n = openNotices().length; if (n !== last) { last = n; updateSummary(); } }, 120);
+  }).observe(document.querySelector('main') || document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+})();
 /* riepilogo in alto: cosa mostrare (valore e «non più in libreria» spenti di predefinito) */
 function paintSumOpts() {
   [['#optSumEur', 'sumEur'], ['#optSumLoan', 'sumLoan'], ['#optSumGone', 'sumGone'], ['#optShowSync', 'showSync']].forEach(function (x) { var e = $(x[0]); if (e) e.checked = settings[x[1]] !== false && (x[1] === 'sumLoan' || x[1] === 'showSync' || settings[x[1]] === true); });

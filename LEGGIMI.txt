@@ -102,9 +102,11 @@ COME SI USA
   se hai donato!"; se si e' rimasti su PayPal almeno 20 secondi le
   richieste tacciono 3 mesi, altrimenti 10 giorni. L'app non puo' sapere
   se il pagamento c'e' stato davvero (non ha un server).
-- Dopo un aggiornamento compare una volta "Aggiornato in questa versione"
-  con l'elenco delle novita', dalle piu' importanti ai ritocchi;
-  "Tutte le novita'" apre il registro completo.
+- Dopo un aggiornamento compare una volta "Cosa c'e' di nuovo": poche
+  righe in parole semplici, ognuna con il titolo in evidenza (sono le
+  righe che iniziano con ">" in cima a ogni versione del registro; se
+  mancano, i titoli in grassetto). "Tutti i dettagli" apre il registro
+  completo. Non compare a chi installa l'app da zero.
 - Novita': nel menu, in fondo, "Novita' delle versioni" apre dentro l'app
   il registro delle modifiche, versione per versione, dalla piu' recente
   (quella in uso e' evidenziata). Il testo e' REGISTRO_MODIFICHE.md: l'app
@@ -268,7 +270,7 @@ Il menu laterale si apre da "Menu" nella barra in basso, dall'ingranaggio
 in alto a destra, dalla linguetta ">" a sinistra o trascinando dal bordo
 sinistro. Occupa due terzi dello schermo. Dall'alto:
 - "Filtri e ordine" (con il riassunto dei filtri attivi), "Suggerimenti",
-  "Tutte le citazioni", "Statistiche", "Il tuo trimestre in libri";
+  "Tutte le citazioni", "Statistiche", "La tua stagione in libri";
 - La tua libreria: "Sistema l'elenco" (verifica, case editrici, doppioni,
   copertine...) e "Backup ed esportazione" (backup, Excel, CSV, PDF; la
   voce dice anche la data dell'ultimo backup);
@@ -276,7 +278,7 @@ sinistro. Occupa due terzi dello schermo. Dall'alto:
   quando la tocchi (dal Menu partono chiuse, dall'ingranaggio in alto gia'
   aperte; tornando da una di esse restano aperte):
   - Aspetto: tema, colori, caratteri, all'apertura (Copertine o Elenco),
-    riepilogo in alto, riepilogo ogni tre mesi;
+    riepilogo in alto, riepilogo di ogni stagione;
   - Ricerca dei libri: chiave Google, catalogo SBN, richieste di oggi,
     "Prova la ricerca ISBN";
   - Aggiunta dei libri: chiedi il prezzo dopo ogni libro, suoni,
@@ -652,9 +654,9 @@ la X lo chiude per quel libro.
 BARRA IN BASSO E AVVISI
 -----------------------
 In basso: Libreria, Desideri, + (Scansiona, Foto, Digita, Ce l'ho
-gia'?), Per te (Suggerimenti, trimestre, citazioni, Statistiche, Backup)
+gia'?), Per te (Suggerimenti, stagione, citazioni, Statistiche, Backup)
 e Menu. In alto solo filtri, ricerca e vista (Copertine/Elenco).
-Gli avvisi (prestiti, "Hai finito...", trimestre, installazione,
+Gli avvisi (prestiti, "Hai finito...", stagione, installazione,
 sostieni) stanno sopra la ricerca, uno alla volta: si scorrono col dito
 (verso sinistra il prossimo, verso destra quello prima); i pallini in
 basso dentro l'avviso dicono quanti sono (toccandoli si passa al
@@ -685,10 +687,11 @@ scheda classica resta solo per le prove automatiche.
 
 RIEPILOGO IN ALTO
 -----------------
-Se chiudi con la X un avviso che vale ancora (prestiti da piu' di un
-mese, backup da fare, "Hai finito... E adesso?", il trimestre in libri),
-accanto al riepilogo compare un triangolino arancione: toccandolo gli
-avvisi chiusi tornano in cima.
+Quando ci sono avvisi, accanto al riepilogo c'e' un triangolino
+arancione. Toccandolo la pagina torna in cima e l'avviso lampeggia un
+attimo; se ne avevi chiuso qualcuno con la X che vale ancora (prestiti da
+piu' di un mese, backup da fare, "Hai finito... E adesso?", la stagione
+in libri), torna in cima anche quello.
 
 Impostazioni > Aspetto > "Riepilogo in alto": sotto il nome c'e' sempre il
 numero dei libri. Si possono aggiungere il valore in euro (spento di
@@ -701,25 +704,27 @@ comunque. Nei Desideri il totale da spendere resta sempre.
 Ogni filtro attivo si vede sotto la ricerca con la sua x, anche "In
 prestito" (toccato dal riepilogo) e quelli aperti dalle Statistiche.
 
-IL TUO TRIMESTRE IN LIBRI (riepilogo ogni tre mesi)
----------------------------------------------------
-Nel primo mese di ogni trimestre, in cima all'elenco compare l'invito
+LA TUA STAGIONE IN LIBRI (riepilogo di ogni stagione)
+-----------------------------------------------------
+Le stagioni sono a mesi interi: inverno dicembre-febbraio, primavera
+marzo-maggio, estate giugno-agosto, autunno settembre-novembre.
+Nel primo mese di ogni stagione, in cima all'elenco compare l'invito
 "La tua estate in libri: e' pronto" (inverno, primavera, estate, autunno),
-se nei tre mesi prima hai letto almeno un libro o ne hai aggiunti almeno
-3. "Guarda" apre le schermate a tutto schermo, come le storie: tocca a
-destra per andare avanti, a sinistra per tornare indietro.
+se nella stagione appena finita hai letto almeno un libro o ne hai
+aggiunti almeno 3. "Guarda" apre le schermate a tutto schermo, come le
+storie: tocca a destra per andare avanti, a sinistra per tornare indietro.
 - quanti libri hai letto, le pagine (e quante al giorno), il mese piu'
-  letto, il confronto con i tre mesi prima, l'obiettivo dell'anno;
-- i tuoi generi in percentuale e l'autore del trimestre;
+  letto, il confronto con la stagione prima, l'obiettivo dell'anno;
+- i tuoi generi in percentuale e l'autore della stagione;
 - il libro piu' lungo e quello con il voto piu' alto;
 - i libri nuovi in libreria (con il valore), Desideri, prestiti,
   citazioni (con l'ultima salvata);
 - il riassunto, con "Condividi l'immagine" (un'immagine da mandare o
   salvare).
-Sulla prima schermata "Prima" e "Dopo" passano agli altri trimestri. Si
-apre anche dal menu ("Il tuo trimestre in libri"). Contano come letti
+Sulla prima schermata "Prima" e "Dopo" passano alle altre stagioni. Si
+apre anche dal menu ("La tua stagione in libri"). Contano come letti
 solo i libri segnati "Letto" con la data. Si spegne in Impostazioni >
-Aspetto > "Riepilogo ogni tre mesi" (acceso di predefinito).
+Aspetto > "Riepilogo di ogni stagione" (acceso di predefinito).
 Per chi sviluppa: e' un modulo a parte (wrap.js e wrap.css).
 
 SELEZIONARE PIU' LIBRI

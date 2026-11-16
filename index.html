@@ -39,7 +39,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 @media (prefers-reduced-motion:reduce){html[data-splash] #splash{transition:none}}
 </style>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="wrap.css"><!-- modulo: riepilogo ogni tre mesi -->
+<link rel="stylesheet" href="wrap.css"><!-- modulo: riepilogo di ogni stagione -->
 <link rel="stylesheet" href="layout.css"><!-- modulo: disposizione dello schermo -->
 <link rel="stylesheet" href="schede.css"><!-- modulo: aspetto della scheda aperta -->
 </head>
@@ -395,11 +395,11 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 
 <div class="sheet" id="wnSheet" hidden>
   <div class="sheet-in wide" role="dialog" aria-modal="true" aria-labelledby="wnH">
-    <h2 id="wnH">Aggiornato in questa versione</h2>
+    <h2 id="wnH">Cosa c'è di nuovo</h2>
     <p class="hint" id="wnSub"></p>
     <ul class="wn-list" id="wnList"></ul>
     <div class="row-btns">
-      <button class="btn" type="button" id="wnAll">Tutte le novità</button>
+      <button class="btn" type="button" id="wnAll">Tutti i dettagli</button>
       <button class="btn primary" type="button" id="wnClose">Ho capito</button>
     </div>
   </div>
@@ -969,7 +969,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 <script src="vendor/tesseract.min.js" defer></script>
 <script src="lib.js" defer></script>
 <script src="app.js" defer></script>
-<script src="wrap.js" defer></script><!-- modulo: riepilogo ogni tre mesi -->
+<script src="wrap.js" defer></script><!-- modulo: riepilogo di ogni stagione -->
 <script src="layout.js" defer></script><!-- modulo: disposizione dello schermo -->
 <script src="schede.js" defer></script><!-- modulo: aspetto della scheda aperta -->
 <div id="printView" aria-hidden="true"></div>

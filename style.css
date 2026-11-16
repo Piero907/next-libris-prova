@@ -1571,3 +1571,10 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .au-pic:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .au-head:has(.au-pic.big){flex-direction:column;align-items:flex-start}
 .au-pic.big{flex-basis:auto;width:min(220px,60vw);height:auto;aspect-ratio:4/5;cursor:zoom-out}
+/* triangolino toccato: l'avviso in cima lampeggia un attimo */
+#notice.flash,#nxBox.flash,#wrapAsk.flash,#donAsk.flash,#instCard.flash,#donRow.flash,.lay-note.flash{box-shadow:0 0 0 3px var(--warn-line)}
+@media (prefers-reduced-motion:no-preference){#notice,#nxBox,#wrapAsk,#donAsk,#instCard,#donRow,.lay-note{transition:box-shadow .35s}}
+/* «Cosa c'e' di nuovo» per tutti: poche righe, titolo in grassetto e una frase semplice */
+#wnList.wn-brief{list-style:none;padding:0;margin:4px 0 8px;display:grid;gap:14px}
+#wnList.wn-brief li{font-size:16px;line-height:1.45;color:var(--ink);padding-left:14px;border-left:3px solid var(--accent-soft)}
+#wnList.wn-brief li b:first-child{display:block;font-size:16.5px;color:var(--accent);margin-bottom:2px}
