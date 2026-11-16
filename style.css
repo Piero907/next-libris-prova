@@ -1601,8 +1601,10 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 @media (prefers-reduced-motion:reduce){.pp-bar i{transition:none}}
 /* nell'elenco: una linea sottile sotto «In lettura · 34%»; sulle copertine una barretta in fondo */
 .tag.read.has-pp{background-image:linear-gradient(var(--accent),var(--accent));background-repeat:no-repeat;background-size:var(--pp) 3px;background-position:0 100%}
-.cover .pp-cov{position:absolute;left:8px;right:8px;bottom:8px;height:5px;border-radius:3px;background:rgba(255,255,255,.55);overflow:hidden;z-index:2;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
-.cover .pp-cov i{display:block;height:100%;background:var(--accent)}
+.cover .pp-cov{display:flex;align-items:center;gap:8px;margin-top:2px}
+.cover .pp-ln{flex:1 1 auto;height:4px;border-radius:2px;background:color-mix(in srgb,var(--muted) 25%,transparent);overflow:hidden}
+.cover .pp-ln i{display:block;height:100%;border-radius:2px;background:var(--accent)}
+.cover .pp-n{flex:none;font-size:12px;font-weight:600;color:var(--accent)}
 
 /* «In lettura» in cima all'elenco e alle copertine, in sezioni che si aprono e chiudono (Piero, 16/11/2026) */
 .shelf{margin:0 0 14px}
