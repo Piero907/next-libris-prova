@@ -763,10 +763,10 @@ async function applySwaps() {
     if (s.a === me_ && s.stato === 'aperto' && !s.visto) {
       if (!local) {
         var L0 = s.libro || {}, wish = s.tipo === 'regalo' && L0.i ? books.filter(function (b) { return b.w && b.i && b.i === L0.i; })[0] : null;
-        if (wish) { wish.w = false; wish.ts = Date.now(); wish.rs = wish.rs || 'da'; wish.sx = s.id; wish.sk = 'r'; wish.sda = s.nome_da || ''; }
+        if (wish) { wish.w = false; wish.ts = Date.now(); wish.rs = wish.rs || 'da'; wish.sx = s.id; wish.sk = 'r'; wish.sda = s.nome_da || ''; s._lid = wish.id; }
         else {
           var nb = NL.clean(Object.assign({}, L0, { id: NL.newId(), ts: Date.now(), w: false, rs: 'da', sx: s.id, sk: s.tipo === 'prestito' ? 'p' : 'r', sda: s.nome_da || '' }));
-          if (nb) books.unshift(nb);
+          if (nb) { books.unshift(nb); s._lid = nb.id; }
         }
         changed = true; got.push(s);
       }
@@ -784,7 +784,7 @@ async function applySwaps() {
     }
   }
   if (changed) { NL.save(); NL.refresh(); }
-  if (got.length) { var g = (rd(K_GOT) || []).concat(got.map(function (s) { return { id: s.id, t: (s.libro && s.libro.t) || '', da: s.nome_da || '', k: s.tipo }; })).slice(-20); wr(K_GOT, g); }
+  if (got.length) { var g = (rd(K_GOT) || []).concat(got.map(function (s) { return { id: s.id, t: (s.libro && s.libro.t) || '', da: s.nome_da || '', k: s.tipo, lid: s._lid || '' }; })).slice(-20); wr(K_GOT, g); }
   var p = pend(); if (p.length) { setPend([]); p.forEach(function (x) { sendSwap(x.id, x.kind, x.who, null); }); }
   paintGot(); paintRet();
 }
@@ -825,8 +825,13 @@ function paintGot() {
     if (!g.length) return;
     var anchor = document.getElementById('nxBox') || document.getElementById('donAsk') || document.getElementById('list'); if (!anchor) return;
     box = document.createElement('section'); box.id = 'friGot'; box.className = 'fri-note lay-note lay-first'; box.hidden = true;
-    box.innerHTML = '<div class="fn-open"><span class="fn-ico" aria-hidden="true">' + ICON + '</span><span class="fn-t"><b id="friGotT"></b><small id="friGotS"></small></span></div>' +
+    box.innerHTML = '<button type="button" class="fn-open" id="friGotGo"><span class="fn-ico" aria-hidden="true">' + ICON + '</span><span class="fn-t"><b id="friGotT"></b><small id="friGotS"></small></span><span class="fn-go">Apri</span></button>' +
       '<button type="button" class="ico" id="friGotX" aria-label="Ho visto">×</button>';
+    box.querySelector('#friGotGo').addEventListener('click', function () {      // apre la scheda del libro arrivato (Piero, 16/11/2026)
+      var g2 = rd(K_GOT) || [], x = g2.pop(); wr(K_GOT, g2.length ? g2 : null); paintGot();
+      if (x && x.lid && NL.showBook && NL.showBook(x.lid)) return;
+      var b = x && mine().filter(function (y) { return y.sx === x.id; })[0]; if (b && NL.showBook) NL.showBook(b.id);
+    });
     anchor.parentNode.insertBefore(box, anchor);
     box.querySelector('#friGotX').addEventListener('click', function () { wr(K_GOT, null); paintGot(); NL.summary && NL.summary(); });
   }
@@ -834,7 +839,7 @@ function paintGot() {
   if (!g.length) return;
   var x = g[g.length - 1];
   document.getElementById('friGotT').textContent = g.length === 1 ? x.da + (x.k === 'prestito' ? ' ti ha prestato «' : ' ti ha regalato «') + x.t + '»' : g.length + ' libri da amici: prestiti e regali';
-  document.getElementById('friGotS').textContent = g.length === 1 ? 'È nella tua Libreria, con «' + (x.k === 'prestito' ? 'Prestato' : 'Regalato') + ' da ' + x.da + '»' : 'Sono nella tua Libreria, con il nome di chi te li ha dati';
+  document.getElementById('friGotS').textContent = g.length === 1 ? 'Tocca per aprire la sua scheda: è nella tua Libreria' : 'Tocca per aprire l\'ultimo; sono tutti nella tua Libreria';
 }
 
 /* ---------- in «Presta, vendi o regala»: gli amici da scegliere con un tocco ---------- */

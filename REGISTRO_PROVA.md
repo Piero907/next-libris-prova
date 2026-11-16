@@ -2,6 +2,13 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 98.9 · 16/11/2026 18:42
+- Dopo «Completa con l'ISBN» le schede dei libri non trovati **non si aprono più tutte insieme**.
+- **La libreria di un amico non si può modificare**: niente «Completa con l'ISBN», niente «Da verificare»; nella scheda «È a pagina 120» e il voto sono solo da leggere.
+- **Restituzione più chiara**: nella scheda di un libro prestato c'è il pulsante «È tornato: segna restituito»; in quella di un libro avuto in prestito «L'ho restituito».
+- Toccando l'avviso «… ti ha prestato «Libro»» si apre la scheda di quel libro. Un libro prestato o avuto in prestito non viene più proposto come doppione da unire.
+- Database più ordinato: togliendo un amico spariscono anche richieste, consigli, chiavi e prenotazioni tra voi; chiusa una funzione che poteva rivelare chi è amico di chi.
+
 ## Prova 98.8 · 16/11/2026 16:33
 - **Condividi un libro**: prima «Consiglialo a un amico» (lo trova nella sua app), il link per WhatsApp o email in seconda fila.
 - **Tanti amici**: al posto delle pillole un elenco con la ricerca (in Condividi, in «Presta, vendi o regala» e per la chiave).

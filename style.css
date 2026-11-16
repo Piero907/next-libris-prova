@@ -1617,3 +1617,5 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .shelf-h:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
 .shelf-b[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.shelf-h .sh-c{transition:none}}
+/* restituzione: un pulsante chiaro nella scheda aperta di un libro prestato o ricevuto in prestito (16/11/2026) */
+.ret-btn{margin:2px 0 2px 6px;min-height:34px;padding:4px 12px;border-color:var(--info-line,#8DB1D6);color:var(--info,#24527D);background:var(--info-bg,#E2EDF8);font-weight:700}
