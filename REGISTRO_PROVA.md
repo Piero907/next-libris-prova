@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 97.7 · 16/11/2026 12:17
+- **Account e sincronizzazione** (Menu): entra con Google e i tuoi libri si salvano anche online, per ritrovarli su un altro telefono o tablet. Il telefono resta la copia principale; copertine e foto per ora restano sul telefono.
+- La copia social non si usa più: da ora account e amicizie si provano qui.
+
 ## Prova 97.6 · 16/11/2026 11:05
 - Copertine: la copertina resta libera; l'avanzamento sta sotto l'autore, con una barra sottile e la percentuale in piccolo sulla stessa riga.
 
