@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 95.2 · 16/11/2026 02:25
+- **La pagina delle novità compare anche a chi aggiorna** da una versione che non l'aveva (nella 95 vera non era comparsa).
+
 ## Prova 95.1 · 16/11/2026 02:16
 - **Allineata alla versione 95**, appena pubblicata nell'app vera: tutto quello provato qui ora c'è anche lì.
 - Tolti i 4 avvisi di prova.

@@ -277,6 +277,7 @@ function loadAll() {
     settings.showSync = s.syncOff ? s.showSync === true : false;                     // «Salvato su questo telefono»: spento di predefinito (16/11/2026); gli errori si vedono sempre
     settings.syncOff = 1;
     settings.seenV = Number(s.seenV) || 0;                                         // ultima versione di cui si sono viste le novita'
+    settings.wn2 = s.wn2 ? 1 : 0;                                                   // la pagina delle novita' funziona anche per chi aggiorna (dalla 96)
     settings.seenB = L.str(s.seenB).slice(0, 12);                                   // nella copia di prova: ultima prova vista («94.17»)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
     settings.suggLang = s.suggLang === 'all' ? 'all' : 'it';                        // «Da scoprire»: solo italiano o tutte le lingue
@@ -2543,15 +2544,20 @@ function rankNews(items) {                        // prima le novita' (comincian
   return big.concat(small);
 }
 async function checkWhatsNew() {
-  var curB = PROVA ? BUILD.n : '';
-  if (!settings.seenV) { settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings(); return; }   // prima apertura: niente da raccontare
-  var newV = APP_VERSION.v > settings.seenV, newB = PROVA && curB && provaNum(curB) > provaNum(settings.seenB);
-  if (!newV && !newB) return;
-  var fromV = settings.seenV, fromB = settings.seenB;
+  var curB = PROVA ? BUILD.n : '', used = state.books.length > 0;
+  /* prima apertura vera (nessun libro): niente da raccontare. Ma chi aggiorna da una versione senza questa pagina ha gia' i suoi libri:
+     a lui le novita' si mostrano (nella 95 la pagina non era comparsa a chi aggiornava dalla 94, 16/11/2026) */
+  if (!settings.seenV && !used) { settings.seenV = APP_VERSION.v; settings.seenB = curB; settings.wn2 = 1; saveSettings(); return; }
+  var fromV = settings.seenV || APP_VERSION.v - 1, fromB = settings.seenB || '';
+  var missed = !settings.wn2 && used;                  // aggiornati alla 95 senza vedere la pagina: la vedono una volta
+  if (missed) fromV = Math.min(fromV, 94);
+  settings.wn2 = 1;
+  var newV = APP_VERSION.v > fromV, newB = PROVA && curB && provaNum(curB) > provaNum(fromB);
+  if (!newV && !newB) { saveSettings(); return; }
   settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings();
   var items = [], title = '';
   try {
-    if (PROVA && curB) {
+    if (PROVA && curB && !missed) {
       var rp = await fetch('REGISTRO_PROVA.md', { cache: 'no-cache' }).catch(function () { return null; });
       var pm = rp && rp.ok ? await rp.text() : '';
       items = newsSince(pm, function (h) { var m = /^Prova\s+([\d.]+)/.exec(h); return !!m && provaNum(m[1]) > provaNum(fromB) && provaNum(m[1]) <= provaNum(curB); });
@@ -4773,7 +4779,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 02:16", "n": "95.1", "note": "Allineata alla versione 95, appena pubblicata nell'app vera"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 02:25", "n": "95.2", "note": "La pagina delle novità compare anche a chi aggiorna da una versione che non l'aveva (nella"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (PROVA && BUILD.t && j.build && j.build !== BUILD.t))); }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
 function itLongDate(d) { try { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d; } }

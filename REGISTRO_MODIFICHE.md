@@ -3,6 +3,9 @@
 Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in fondo al menu.
 L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
 
+## Versione 96 · 16/11/2026
+- **La pagina «Aggiornato in questa versione» compare anche a chi aggiorna:** nella 95 restava muta per chi arrivava dalla 94 (l'app lo scambiava per una prima installazione). Ora chi ha già i suoi libri la vede, una volta, con le novità della 95 e della 96; solo chi installa l'app da zero non la vede.
+
 ## Versione 95 · 16/11/2026
 - **Nuovo aspetto, con la barra in basso:** Libreria, Desideri, il **+** (Scansiona, Foto, Digita, Ce l'ho già?), **Per te** (Suggerimenti, trimestre, citazioni, Statistiche, Backup) e Menu. In alto restano filtri, ricerca e vista.
 - **Avvisi in cima, uno alla volta:** prestiti, «Hai finito…», trimestre, installazione e sostieni stanno sopra la ricerca e **si scorrono col dito**; i pallini dentro l'avviso dicono quanti sono. Se ne chiudi uno che vale ancora, accanto al riepilogo compare un **triangolino** che li fa tornare.
