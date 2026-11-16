@@ -700,6 +700,12 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       </div>
       <p class="hint">Chi apre il link in Chrome trova in alto il pulsante «Installa». Ognuno ha il proprio catalogo: i tuoi libri restano sul tuo telefono.</p>
     </section>
+    <section class="opt-sec" data-sec="contact" data-title="Contatti">
+      <p class="hint">Domande, problemi o idee per Next Libris? Scrivici: leggiamo tutto.</p>
+      <p class="ct-mail" id="ctMail">nextlibris.app@gmail.com</p>
+      <div class="row-btns"><button class="btn" type="button" id="ctCopy">Copia</button><button class="btn primary" type="button" id="ctWrite">Scrivici</button></div>
+      <p class="hint">«Scrivici» apre la tua email con l'oggetto già scritto e, in fondo, la versione dell'app e il tipo di telefono: aiutano a capire un problema. Puoi cancellarli.</p>
+    </section>
     <section class="opt-sec" data-sec="app" data-title="Installazione sul telefono">
       <p class="hint">Installata, Next Libris ha la sua icona tra le app del telefono, si apre a schermo intero e funziona anche senza rete. I libri restano gli stessi.</p>
       <p class="inst-ok" id="instOkTxt" hidden>✓ Stai usando l'app installata.</p>
@@ -769,13 +775,20 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <button type="button" class="dopt" data-sec="export"><span><b>Backup ed esportazione</b><small>Backup, Excel, PDF</small><small class="dbk" id="optBackupHint"></small></span><span class="n" aria-hidden="true">›</span></button>
       </div>
       <div class="dlist dmenu dset">
-        <button type="button" class="dopt dset-t" id="goSettings" aria-expanded="false" aria-controls="setList"><span class="dset-i" aria-hidden="true"></span><span><b>Impostazioni</b><small>Aspetto, ricerca e aggiunta dei libri, condivisione, installazione</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dset-t" id="goSettings" aria-expanded="false" aria-controls="setList"><span class="dset-i" aria-hidden="true"></span><span><b>Impostazioni</b><small>Account, aspetto, ricerca e aggiunta dei libri, amici</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
         <div class="dsub" id="setList" hidden>
         <button type="button" class="dopt" data-sec="look"><span><b>Aspetto</b><small>Tema, colori e caratteri; riepilogo in alto</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="search"><span><b>Ricerca dei libri</b><small>Chiave Google, catalogo SBN, richieste di oggi</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="cards"><span><b>Aggiunta dei libri</b><small>Prezzo, suoni, fotocamera e luce</small></span><span class="n" aria-hidden="true">›</span></button>
+        </div>
+      </div>
+      <div class="dlist dmenu dset dinfo">
+        <button type="button" class="dopt dset-t" id="goInfo" aria-expanded="false" aria-controls="infoList"><span class="dset-i" aria-hidden="true"></span><span><b>Info e condivisione</b><small>Condividi l'app, installa, privacy, contatti</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
+        <div class="dsub" id="infoList" hidden>
         <button type="button" class="dopt" data-sec="share"><span><b>Condivisione</b><small>Il tuo nome; link e QR code dell'app</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="app"><span><b>Installazione sul telefono</b><small>Next Libris tra le app, a schermo intero e senza rete</small></span><span class="n" aria-hidden="true">›</span></button>
+        <a class="dopt" id="goPrivacy" href="privacy.html" target="_blank" rel="noopener"><span><b>Privacy</b><small>Quali dati usa l'app e dove stanno</small></span><span class="n" aria-hidden="true">↗</span></a>
+        <button type="button" class="dopt" data-sec="contact"><span><b>Contatti</b><small>Domande, problemi o idee: scrivici</small></span><span class="n" aria-hidden="true">›</span></button>
         </div>
       </div>
       <div class="dlist dmenu">

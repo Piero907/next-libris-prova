@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.5 · 16/11/2026 22:13
+- **Chiave e worker prestati nascosti**: chi li riceve li usa ma non li vede, non li salva, non li mette nel backup e non li può mandare ad altri; **Info e condivisione** nel menu: Condivisione, Installazione, Privacy e Contatti (Scrivici, Copia)
+
 ## Prova 99.4 · 16/11/2026 21:46
 - **Presta chiave API e worker**: dalla libreria di un amico si apre una finestra per scegliere se prestare tutte e due o una sola; striscia dell'amico più sobria; finestra Amici con le righe in ordine; amici in comune corretti
 

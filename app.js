@@ -137,8 +137,18 @@ function loadSaved() {
   } catch (e) {}
   if (settings.sbnUrl && saved.sbn.indexOf(settings.sbnUrl) < 0) remember('sbn', settings.sbnUrl);
   if (settings.gbKey && saved.key.indexOf(settings.gbKey) < 0) remember('key', settings.gbKey);
+  var b = lent(), dirty = false;   // tolte dai salvati quelle di un amico finite lì prima del 16/11/2026
+  ['sbn', 'key'].forEach(function (k) { var v = k === 'sbn' ? b.sbn : b.gb; if (v && saved[k].indexOf(v) >= 0) { saved[k] = saved[k].filter(function (x) { return x !== v; }); dirty = true; } });
+  if (dirty) ls.set(LS_SAVED, JSON.stringify(saved));
 }
-function remember(k, v) { if (!v) return; saved[k] = [v].concat(saved[k].filter(function (x) { return x !== v; })).slice(0, 4); ls.set(LS_SAVED, JSON.stringify(saved)); }
+/* chiave e worker prestati da un amico (amici.js li mette nelle impostazioni per usarli): mai mostrati, salvati, esportati o prestati (Piero, 16/11/2026) */
+function lent() { try { return JSON.parse(ls.get('catalogo-libri-amici-chiave-in-uso') || 'null') || {}; } catch (e) { return {}; } }
+function isLent(k, v) { var b = lent(); return !!v && (k === 'sbn' ? b.sbn === v : b.gb === v); }
+function mine(k) {   // il tuo, anche mentre usi quello di un amico (amici.js tiene da parte il tuo)
+  var v = svcVal(k); if (!isLent(k, v)) return v || '';
+  try { var m = JSON.parse(ls.get('catalogo-libri-amici-chiavi-mie') || 'null') || {}; return (k === 'sbn' ? m.sbn : m.gb) || ''; } catch (e) { return ''; }
+}
+function remember(k, v) { if (!v || isLent(k, v)) return; saved[k] = [v].concat(saved[k].filter(function (x) { return x !== v; })).slice(0, 4); ls.set(LS_SAVED, JSON.stringify(saved)); }
 function svcVal(k) { return k === 'sbn' ? settings.sbnUrl : settings.gbKey; }
 function svcShort(k, v) { return k === 'sbn' ? v.replace(/^https:\/\//, '') : (v.length > 14 ? v.slice(0, 6) + '…' + v.slice(-4) : v); }
 function setSvc(k, v) {
@@ -147,23 +157,29 @@ function setSvc(k, v) {
   saveSettings(); remember(k, v); renderSvc();
 }
 function renderSvc() {
-  var sb = settings.sbnUrl, gk = settings.gbKey;
-  if (document.activeElement !== $('#sbnUrl')) $('#sbnUrl').value = sb;
-  if (document.activeElement !== $('#gbKey')) $('#gbKey').value = gk;
-  $('#sbnSt').textContent = sb ? 'In uso' : 'Non impostato'; $('#sbnSt').className = 'svc-st' + (sb ? ' on' : '');
-  $('#gbSt').textContent = gk ? 'In uso' : 'Nessuna chiave'; $('#gbSt').className = 'svc-st' + (gk ? ' on' : '');
-  $('#sbnClear').hidden = !sb; $('#gbClear').hidden = !gk;
+  var sb = settings.sbnUrl, gk = settings.gbKey, ls_ = isLent('sbn', sb), lk = isLent('key', gk), who = lent().nome || 'un amico';
+  if (document.activeElement !== $('#sbnUrl')) $('#sbnUrl').value = ls_ ? '' : sb;
+  if (document.activeElement !== $('#gbKey')) $('#gbKey').value = lk ? '' : gk;
+  $('#sbnSt').textContent = ls_ ? 'Prestato' : sb ? 'In uso' : 'Non impostato'; $('#sbnSt').className = 'svc-st' + (sb ? ' on' : '');
+  $('#gbSt').textContent = lk ? 'Prestata' : gk ? 'In uso' : 'Nessuna chiave'; $('#gbSt').className = 'svc-st' + (gk ? ' on' : '');
+  $('#sbnClear').hidden = !sb || ls_; $('#gbClear').hidden = !gk || lk;
+  [['sbn', ls_, 'il worker SBN di '], ['key', lk, 'la chiave Google di ']].forEach(function (x) {
+    var box = $(x[0] === 'sbn' ? '#svcSbn' : '#svcKey'), row = box.querySelector('.svc-row'), note = box.querySelector('.svc-lent');
+    row.hidden = x[1];
+    if (x[1] && !note) { note = document.createElement('p'); note.className = 'hint svc-lent'; row.parentNode.insertBefore(note, row); }
+    if (note) { note.hidden = !x[1]; if (x[1]) note.textContent = 'Usi ' + x[2] + who + ': non si vede e non si può prestare ad altri. Per smettere: Amici › Impostazioni degli amici › «Non usarla più».'; }
+  });
   ['sbn', 'key'].forEach(function (k) {
     var cur = svcVal(k), box = $(k === 'sbn' ? '#sbnSaved' : '#gbSaved'), html = '';
     saved[k].forEach(function (x, i) {
-      if (x === cur) return;
+      if (x === cur || isLent(k, x)) return;
       html += '<span class="schip"><button type="button" class="schip-use" data-k="' + k + '" data-i="' + i + '" title="Usa ' + esc(svcShort(k, x)) + '">' + esc(svcShort(k, x)) + '</button>' +
         '<button type="button" class="schip-x" data-k="' + k + '" data-forget="' + i + '" aria-label="Togli ' + esc(svcShort(k, x)) + ' dai salvati">×</button></span>';
     });
     box.innerHTML = html ? '<span class="svc-saved-l">' + (k === 'sbn' ? 'Worker salvati:' : 'Chiavi salvate:') + '</span>' + html : '';
     box.hidden = !html;
   });
-  var rs = !sb && saved.sbn.length, rk = !gk && saved.key.length;
+  var rs = !sb && saved.sbn.length, rk = !gk && saved.key.length;   // (con quelli di un amico in uso sb/gk ci sono: niente «Rimetti»)
   $('#svcRestore').hidden = !(rs || rk);
   $('#svcRestore').textContent = rs && rk ? 'Rimetti chiave e worker salvati' : rs ? 'Rimetti il worker salvato' : 'Rimetti la chiave salvata';
   updateQuotaInfo();
@@ -4120,7 +4136,7 @@ function backupName() {
 function coverIds() { return Object.keys(coverURL).filter(function (id) { return !!get(id); }).concat(quotePhKeys().filter(function (k) { return !!qphURL[k]; })); }
 /* Senza foto tue il backup e' pronto subito; con le foto va preparato prima (si leggono dal telefono), cosi' la condivisione parte al tocco. */
 /* nel backup vanno anche worker SBN e chiave Google (in uso e salvati): ripristinando su un altro telefono tornano anche loro */
-function backupCfg() { return { sbnUrl: settings.sbnUrl, gbKey: settings.gbKey, saved: { sbn: saved.sbn.slice(), key: saved.key.slice() } }; }
+function backupCfg() { return { sbnUrl: mine('sbn'), gbKey: mine('key'), saved: { sbn: saved.sbn.slice(), key: saved.key.slice() } }; }
 function backupData() { return coverIds().length ? backupReady : JSON.stringify({ app: 'catalogo-libri', v: 4, books: storable(), cfg: backupCfg() }); }
 async function buildBackup() {
   var o = { app: 'catalogo-libri', v: 4, books: storable(), cfg: backupCfg() }, ids = coverIds();
@@ -4736,7 +4752,7 @@ function openDrawer(t, reuse) {
   if (t === 'opt' || t === 'flt') setDrawerTab(t);
   else if (!drawerOpen) setDrawerTab('opt');          // dal bordo o dalla linguetta: il menu, non direttamente i filtri
   if (reuse) { try { history.replaceState({ drawer: 1 }, ''); drawerPushed = true; } catch (e) {} }
-  if (!drawerOpen && !reuse && typeof setsOpen === 'function') setsOpen(false);   // il Menu si apre con le impostazioni chiuse (tornando da una di esse restano aperte)
+  if (!drawerOpen && !reuse && typeof setsOpen === 'function') { setsOpen(false); if (typeof infoOpen === 'function') infoOpen(false); }   // il Menu si apre con le impostazioni chiuse (tornando da una di esse restano aperte)
   if (!drawerOpen) { renderDrawer(); drawerReturn = document.activeElement; }
   showDrawerEls();
   void drawerEl.offsetWidth;                         // parte dalla posizione attuale
@@ -4778,6 +4794,37 @@ $('#goSettings').querySelector('.dset-i').innerHTML = icon('gear');
 $('#goSettings').addEventListener('click', function () {
   setsOpen(!setsShown);
   if (setsShown) setTimeout(function () { var l = $('#setList'); if (l.scrollIntoView) l.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30);
+});
+/* «Info e condivisione»: condividi l'app, installazione, privacy, contatti (Piero, 16/11/2026); chiusa come «Impostazioni» */
+var infoShown = false;
+function infoOpen(on) {
+  infoShown = !!on;
+  $('#infoList').hidden = !infoShown;
+  $('#goInfo').setAttribute('aria-expanded', infoShown ? 'true' : 'false');
+  $('#goInfo').classList.toggle('on', infoShown);
+}
+$('#goInfo').querySelector('.dset-i').innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg>';
+$('#goInfo').addEventListener('click', function () {
+  infoOpen(!infoShown);
+  if (infoShown) setTimeout(function () { var l = $('#infoList'); if (l.scrollIntoView) l.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30);
+});
+/* Contatti: «Scrivici» con versione e telefono in fondo; «Copia l'indirizzo» */
+var CONTACT = 'nextlibris.app@gmail.com';
+function deviceInfo() {
+  var ua = navigator.userAgent || '', m = /Android [\d.]+(?:; ([^;)]+))?/.exec(ua), ios = /iPhone|iPad/.exec(ua), ch = /Chrome\/(\d+)/.exec(ua), sf = /Version\/(\d+).*Safari/.exec(ua), fx = /Firefox\/(\d+)/.exec(ua);
+  var dev = m ? m[0].replace(/;\s*/, ', ') : ios ? ios[0] : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'altro';
+  var br = ch ? 'Chrome ' + ch[1] : fx ? 'Firefox ' + fx[1] : sf ? 'Safari ' + sf[1] : 'browser';
+  var inst = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone ? 'installata' : 'nel browser';
+  return dev + ' · ' + br + ' · ' + inst;
+}
+function contactURL() {
+  var ver = ($('#verNum').textContent || 'Versione ' + APP_VERSION.v) + (PROVA ? ' (copia di prova)' : '');
+  return 'mailto:' + CONTACT + '?subject=' + encodeURIComponent('Next Libris') + '&body=' + encodeURIComponent('\n\n\n---\n' + ver + '\n' + deviceInfo());
+}
+$('#ctWrite').addEventListener('click', function () { location.href = contactURL(); });
+$('#ctCopy').addEventListener('click', async function () {
+  try { await navigator.clipboard.writeText(CONTACT); toast('Indirizzo copiato.'); }
+  catch (e) { toast('Non riesco a copiarlo: tienilo premuto per selezionarlo.'); }
 });
 $('#goFilters').addEventListener('click', goFilters);
 $('#drawerBack').addEventListener('click', function () { if (drawerSub) history.back(); else setDrawerTab('opt'); });
@@ -4826,7 +4873,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-16 21:46", "n": "99.4", "note": "Presta chiave API e worker"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-16 22:13", "n": "99.5", "note": "Chiave e worker prestati nascosti"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -5324,15 +5371,16 @@ async function shareWish() { shareList(); }
 function cleanKey(v) { v = String(v || '').replace(/\s+/g, ''); return /^[A-Za-z0-9_-]{20,80}$/.test(v) ? v : ''; }
 function okWorker(v) { v = cleanWorker(v); return /^https:\/\/[^\s/]+\.[^\s]+$/.test(v) && v.length <= 200 ? v : ''; }
 function renderSvcShare() {
-  var has = !!(settings.sbnUrl || settings.gbKey);
+  var has = !!(mine('sbn') || mine('key'));
   $('#svcShareBtn').disabled = !has;
   $('#svcShareNone').hidden = has;
 }
 function openSvcShare() {
-  if (!settings.sbnUrl && !settings.gbKey) { toast('Non hai né chiave Google né worker da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
-  $('#svcWhat').textContent = [settings.sbnUrl ? 'Worker SBN: ' + svcShort('sbn', settings.sbnUrl) : '', settings.gbKey ? 'Chiave Google: ' + svcShort('key', settings.gbKey) : ''].filter(Boolean).join(' · ');
-  $('#svcSbnOn').checked = !!settings.sbnUrl; $('#svcSbnOn').disabled = !settings.sbnUrl;
-  $('#svcKeyOn').checked = !!settings.gbKey; $('#svcKeyOn').disabled = !settings.gbKey;
+  var msb = mine('sbn'), mgk = mine('key');
+  if (!msb && !mgk) { toast('Non hai né chiave Google né worker tuoi da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
+  $('#svcWhat').textContent = [msb ? 'Worker SBN: ' + svcShort('sbn', msb) : '', mgk ? 'Chiave Google: ' + svcShort('key', mgk) : ''].filter(Boolean).join(' · ');
+  $('#svcSbnOn').checked = !!msb; $('#svcSbnOn').disabled = !msb;
+  $('#svcKeyOn').checked = !!mgk; $('#svcKeyOn').disabled = !mgk;
   $('#svcSendName').value = settings.name || '';
   closeOptions(); $('#toast').hidden = true;
   $('#svcSheet').hidden = false;
@@ -5340,8 +5388,8 @@ function openSvcShare() {
 function closeSvcShare() { $('#svcSheet').hidden = true; }
 async function sendSvcShare(copyOnly) {
   var o = { v: 1, t: 'svc' };
-  if ($('#svcSbnOn').checked && settings.sbnUrl) o.sb = settings.sbnUrl;
-  if ($('#svcKeyOn').checked && settings.gbKey) o.gk = settings.gbKey;
+  if ($('#svcSbnOn').checked && mine('sbn')) o.sb = mine('sbn');
+  if ($('#svcKeyOn').checked && mine('key')) o.gk = mine('key');
   if (!o.sb && !o.gk) { toast('Scegli almeno uno dei due.'); return; }
   var name = $('#svcSendName').value.replace(/\s+/g, ' ').trim().slice(0, 30);
   if (name) { o.n = name; saveName(name); }
@@ -6562,7 +6610,7 @@ window.NL = {
   rdLong: function (v) { return rdLong(v); }, get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); },
   quota: function () { rollQuota(); return { d: quota.d, ds: quota.ds, g: quota.g, s: quota.s }; },   // contatore condiviso (modulo ricerche.js)
   setShared: function (k, n, day) { if (k === 'g') { shared.g = n; shared.d = day; } else { shared.s = n; shared.ds = day; } if (!$('#optSheet').hidden) updateQuotaInfo(); },
-  svc: function () { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl }; }, openOptions: function (sec) { openOptions(sec); },
+  svc: function () { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl }; }, contactURL: function () { return contactURL(); }, backupCfg: function () { return backupCfg(); }, openOptions: function (sec) { openOptions(sec); },
   fields: FIELDS, clean: function (x) { return cleanBook(x); }, stored: function () { return storable(); }, save: function () { touch(); }   // per la sincronizzazione (modulo social)
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
