@@ -3,7 +3,13 @@
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
 ## Prova 101.3 · 17/11/2026 11:24
-- **Raggruppa per** autore, genere, genere e autore, lettura (copertine ed elenco); **Privacy** dentro l'app; **× e Chiudi** tornano al Menu come Indietro; **boccale** nella testata e Sostieni prima di Amici; la vista a copertine resta dopo aver eliminato o spostato un libro; «In prestito» sulle copertine dei libri ricevuti; corretti il messaggio di rete dopo l'uscita dall'account e «Cosa c'è di nuovo»
+- **Raggruppa per**: autore, genere, genere e poi autore, lettura (in Filtri e ordine), nelle copertine e nell'elenco
+- **Privacy dentro l'app**: si apre in una finestra, × e Indietro tornano al Menu
+- **× e Chiudi** delle finestre aperte dal Menu tornano al Menu, come Indietro
+- **Boccale di birra** nella testata per sostenere l'app; nel Menu Sostieni sta prima di Amici
+- **La vista resta quella scelta**: eliminando o spostando un libro aperto dalle copertine si torna alle copertine
+- **«In prestito»** sulla copertina dei libri che un amico ti ha prestato
+- Corretti: il messaggio «serve la connessione» dopo l'uscita dall'account; «Cosa c'è di nuovo» che a volte non compariva
 
 ## Prova 101.2 · 17/11/2026 10:17
 - **Bonifiche della verifica**: caratteri dentro l'app (niente Google Fonts), protezione CSP, l'app non parte dentro altri siti, ultimi errori nella mail di Contatti; database con limiti (5.000 libri online per account, copertine dell'archivio solo da siti noti, contatore delle ricerche per account, notifiche push solo verso i servizi veri)
