@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 101.1 · 17/11/2026 07:23
+- **Versione 101 nella prova**: trasloco corretto
+
 ## Prova 100.1 · 17/11/2026 06:54
 - **Versione 100 nella prova**: link, testi e QR della Condivisione con il nuovo indirizzo nextlibris.github.io
 
