@@ -2,6 +2,15 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 102.5 · 17/11/2026 15:10
+- Foto dell'autore a tutto schermo; foto degli autori anche quando su Wikipedia non è «libera» (Ennio Flaiano)
+- «Restituiscilo» e «È tornato: segna restituito» sono tasti pieni
+- Libreria di un amico: icone ⇄ (prestiti e regali tra voi), chiave (presta) e togli dagli amici; via «Prestiti, regali e altro»
+- «N in prestito» conta anche i libri ricevuti; toccandolo: Prestati a / Prestati da, per persona
+- Raggruppa Genere › Autore: anche i generi a copertine
+- Copertina grande: mai più la «prima pagina» di Google (zoom=0); dai risultati per titolo resta la copertina scelta
+- Testata su due righe: «Libreria di …» / «Desideri di …» e sotto i numeri
+
 ## Prova 102.4 · 17/11/2026 14:15
 - **Foto degli autori** anche da Wikidata (es. Tabucchi); **generi con le icone**; **autori senza foto con nome e cognome**
 

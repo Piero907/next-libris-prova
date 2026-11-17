@@ -1051,7 +1051,7 @@ html[data-theme="dark"] .ico.act.fav.on svg{color:#F4C430}
 /* testata su due righe (Piero, 17/11/2026): «Next Libris [PROVA]» con le icone centrate sulla stessa linea, sotto una riga grigia con nome e numeri */
 .top-meta{margin:6px 0 0;font-size:15px;line-height:1.35;color:var(--muted)}
 .top-meta .summary{margin:0;display:inline}
-.top-meta .owner:not(:empty)::after{content:" · ";color:var(--muted);font-weight:400}
+.top-meta .owner:not(:empty){display:block}   /* «Libreria di Piero R.» sopra, i numeri sotto (Piero, 17/11/2026) */
 html[data-look="nuovo"] .top{--h1-fs:calc(clamp(24px,6.8vw,38px) * var(--ft-k,1))}
 html[data-look="nuovo"] .top h1{font-size:var(--h1-fs)}
 .top .gear,.top .fri-top,.top .nt-top,.top .beer-top{top:calc(var(--h1-fs,31px) * .52 - 22px)}   /* centrate sulla riga del titolo */
@@ -1163,6 +1163,7 @@ html[data-look="nuovo"] .top h1{font-size:var(--h1-fs)}
 .phview{padding:56px 0 calc(16px + env(safe-area-inset-bottom))}
 .ph-scroll{width:100%;flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;-webkit-overflow-scrolling:touch}
 .phview .ph-scroll img{max-width:94vw;max-height:100%;min-width:0;cursor:zoom-in;border-radius:4px}
+.phview.au .ph-scroll img{width:94vw;height:auto;max-height:100%;object-fit:contain}   /* foto dell'autore: sempre a tutta larghezza (17/11/2026) */
 .phview.zoom .ph-scroll{display:block}
 .phview.zoom .ph-scroll img{max-width:none;max-height:none;width:220vw;cursor:zoom-out}
 .aq-all{display:block;font-size:13.5px;margin:-4px 0 6px}
@@ -1601,8 +1602,6 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .au-pic[hidden]{display:none}
 .au-pic img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block}
 .au-pic:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.au-head:has(.au-pic.big){flex-direction:column;align-items:flex-start}
-.au-pic.big{flex-basis:auto;width:min(220px,60vw);height:auto;aspect-ratio:4/5;cursor:zoom-out}
 /* triangolino toccato: l'avviso in cima lampeggia un attimo */
 #notice.flash,#nxBox.flash,#wrapAsk.flash,#donAsk.flash,#instCard.flash,#donRow.flash,.lay-note.flash{box-shadow:0 0 0 3px var(--warn-line)}
 @media (prefers-reduced-motion:no-preference){#notice,#nxBox,#wrapAsk,#donAsk,#instCard,#donRow,.lay-note{transition:box-shadow .35s}}
@@ -1649,7 +1648,7 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .shelf-b[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.shelf-h .sh-c{transition:none}}
 /* restituzione: un pulsante chiaro nella scheda aperta di un libro prestato o ricevuto in prestito (16/11/2026) */
-.ret-btn{margin:2px 0 2px 6px;min-height:34px;padding:4px 12px;border-color:var(--info-line,#8DB1D6);color:var(--info,#24527D);background:var(--info-bg,#E2EDF8);font-weight:700}
+.ret-btn{margin:2px 0 2px 6px;min-height:34px;padding:4px 14px;border-color:var(--accent);color:var(--accent-ink);background:var(--accent);font-weight:700;box-shadow:0 1px 3px #0002}   /* pieno, colore dell'app: un tasto, non un'etichetta (17/11/2026) */
 /* menu: «Info e condivisione» sotto «Impostazioni» (16/11/2026) */
 .dmenu.dset.dinfo{margin-top:4px}
 a.dopt{color:inherit;text-decoration:none}

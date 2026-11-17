@@ -637,6 +637,9 @@
   }
   /* Versioni piu' grandi di una copertina su Open Library (grande dello stesso id, oppure per ISBN).
      Nessuna e' garantita: l'app le prova e tiene solo quelle che arrivano davvero e hanno le proporzioni di una copertina. */
+  /* Google Libri con zoom=0 non da' la copertina grande ma spesso la prima pagina del libro (o un'immagine grigia):
+     copertina sbagliata di «Latinoamericana», Piero 17/11/2026. Queste non si usano mai come copertina grande. */
+  function badBigCover(u) { return /^https?:\/\/books\.google(?:usercontent)?\.[a-z.]+\/books\/(?:publisher\/)?content\?/i.test(str(u)) && /[?&]zoom=0(?:&|$)/.test(str(u)); }
   function coverCandidates(img, isbn) {
     var out = [], u = str(img);
     var ol = u.match(/^(https:\/\/covers\.openlibrary\.org\/b\/(?:id|isbn|olid)\/[^\/?]+?)-[SM]\.jpg/i);
@@ -1193,7 +1196,7 @@
     scoreCandidate: scoreCandidate, rankCandidates: rankCandidates, strongMatch: strongMatch, extractPrice: extractPrice, findPrice: findPrice, buildShare: buildShare, parseShare: parseShare, shareHeading: shareHeading, shareLabel: shareLabel, shareText: shareText, SHARE_MAX: SHARE_MAX,
     csvCell: csvCell, buildCSV: buildCSV, buildTSV: buildTSV, rowsFor: rowsFor, colsFor: colsFor, itDate: itDate,
     genreIt: genreIt, crc32: crc32, zipStore: zipStore, buildXLSX: buildXLSX, publisherGroups: publisherGroups, pubTokens: pubTokens,
-    computeStats: computeStats, agoText: agoText, coverCandidates: coverCandidates, googleVolumeId: googleVolumeId, bestGoogleImage: bestGoogleImage, getJson: getJson,
+    computeStats: computeStats, agoText: agoText, coverCandidates: coverCandidates, badBigCover: badBigCover, googleVolumeId: googleVolumeId, bestGoogleImage: bestGoogleImage, getJson: getJson,
     parseSbn: parseSbn, sbnUrl: sbnUrl, deweyGenre: deweyGenre, dupGroups: dupGroups, analyzeDups: analyzeDups, mergeBooks: mergeBooks, serKey: serKey, seriesInfo: seriesInfo, titleKey: titleKey, pickNews: pickNews, nextReads: nextReads, genreSubject: genreSubject, authorList: authorList, ocrParagraph: ocrParagraph, cleanDesc: cleanDesc, guessLang: guessLang, pickDesc: pickDesc, olDesc: olDesc, DESC_MAX: DESC_MAX, READ_LABEL: READ_LABEL, GONE_LABEL: GONE_LABEL, RATE_WORDS: RATE_WORDS, rateWord: rateWord
   };
 });
