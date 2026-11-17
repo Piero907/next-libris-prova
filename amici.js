@@ -53,8 +53,11 @@ async function load(force) {
   loading = (async function () {
     try {
       var p;
-      try { p = await S.call('/rest/v1/profili?select=utente,nome,desideri,libreria,amici&id=eq.' + encodeURIComponent(uid()), { user: true }); }
-      catch (e0) { if (e0 && e0.code === 'net') throw e0; p = await S.call('/rest/v1/profili?select=utente,nome,desideri,libreria&id=eq.' + encodeURIComponent(uid()), { user: true }); }   // database senza 015
+      var cols = ['utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
+      for (var ci = 0; ci < cols.length; ci++) {
+        try { p = await S.call('/rest/v1/profili?select=' + cols[ci] + '&id=eq.' + encodeURIComponent(uid()), { user: true }); break; }
+        catch (e0) { if ((e0 && e0.code === 'net') || ci === cols.length - 1) throw e0; }
+      }
       me = (p && p[0]) || { utente: null, nome: '', desideri: false };
       list = (await rpc('miei_amici')) || [];
       try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) {}
@@ -103,11 +106,11 @@ function sheet() {
   el.addEventListener('submit', onSubmit);
   el.addEventListener('input', function (e) { if (e.target.id === 'friLibQ') { libsQ = e.target.value; libsShow = 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); } });
   el.addEventListener('change', async function (e) {
-    var k = e.target.id === 'friWish' ? 'desideri' : e.target.id === 'friLib' ? 'libreria' : e.target.id === 'friAmici' ? 'amici' : ''; if (!k) return;
+    var k = e.target.id === 'friWish' ? 'desideri' : e.target.id === 'friLib' ? 'libreria' : e.target.id === 'friAmici' ? 'amici' : e.target.id === 'friRegali' ? 'regali' : ''; if (!k) return;
     var on = e.target.checked, body = { id: uid() }; body[k] = on; e.target.disabled = true;
     try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: body });
       me[k] = on;
-      NL.toast(k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
+      NL.toast(k === 'regali' ? (on ? 'Gli amici ora vedono i regali che prenoti.' : 'Gli amici ora vedono solo «Regalo prenotato».') : k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
       if (on) S.run && S.run(false); }
     catch (x) { e.target.checked = !on; NL.toast(nice(x)); }
     e.target.disabled = false;
@@ -387,7 +390,7 @@ async function openGuest(id) {
   gMeta = {}; gId = id;
   var books = [];
   (lb.libri || []).forEach(function (x) { gMeta[x.id] = { fuori: !!x.fuori, w: false }; books.push(Object.assign(snapG(x), { id: x.id, rs: x.rs || '', rt: x.rt || 0, rd: x.rd || '', pp: x.pp || '', ts: Number(x.ts) || 0, w: false })); });
-  (ws.libri || []).forEach(function (x) { gMeta[x.id] = { w: true, prenotato: x.prenotato || '' }; books.push(Object.assign(snapG(x), { id: x.id, ts: Number(x.ts) || 0, w: true })); });
+  (ws.libri || []).forEach(function (x) { gMeta[x.id] = { w: true, prenotato: x.prenotato || '', preso: !!(x.preso || x.prenotato) }; books.push(Object.assign(snapG(x), { id: x.id, ts: Number(x.ts) || 0, w: true })); });
   var info = { id: id, comuni: lb.comuni, libVis: !!lb.visibili, wishVis: !!ws.visibili, totale: lb.totale || 0,
     empty: { lib: lb.visibili ? name + ' non ha ancora libri nella sua libreria.' : name + ' non mostra la sua libreria agli amici.', wish: ws.visibili ? 'La sua lista dei desideri è vuota.' : name + ' non mostra i suoi desideri agli amici.' } };
   entering = true;   // passando da un amico all'altro l'uscita dal primo non deve azzerare gId e gMeta del secondo (17/11/2026)
@@ -442,14 +445,24 @@ function guestActs(el) {
   cards.forEach(function (card) {
     var id = card.dataset.id, b = NL.get(id), m = gMeta[id] || {}; if (!b) return;
     var old = card.querySelector('.cv-guest'); if (old) old.remove();
+    var oldW = card.querySelector('.g-wish'); if (oldW) oldW.remove();
     card.classList.toggle('g-noread', !b.rs && !b.rt);   // non l'ha segnato: la striscia della lettura non serve
     var have = NL.isMine(b), inWish = mine().some(function (x) { return x.w && ((x.i && x.i === b.i) || (x.t && x.t === b.t)); });
     var ask = asks.filter(function (r) { return r.da === uid() && r.a === gId && r.libro_id === id && r.stato === 'attesa'; })[0];
-    var h = '<p class="cvg-h">Di ' + esc(NL.guest()) + '</p><div class="cvg-row">';
-    h += have ? '<span class="fr-tag fr-mine">Ce l\'hai anche tu</span>' : inWish ? '<span class="fr-tag">È nei tuoi desideri</span>' : '<button type="button" class="btn" data-g="addwish">Aggiungi ai miei desideri</button>';
+    /* «Aggiungi ai miei desideri»: icona in alto, dove nei tuoi Desideri c'è «Libreria» (Piero, 17/11/2026); accesa se ce l'hai già, tocco = la togli */
+    var top = card.querySelector('.acts-main');
+    if (top && !have) {
+      var wb = document.createElement('button'); wb.type = 'button'; wb.className = 'ico act move g-wish' + (inWish ? ' on' : ''); wb.dataset.g = inWish ? 'unwish' : 'addwish';
+      wb.title = inWish ? 'È nei tuoi desideri: tocca per toglierlo' : 'Aggiungi ai miei desideri'; wb.setAttribute('aria-label', wb.title); wb.setAttribute('aria-pressed', inWish ? 'true' : 'false');
+      wb.innerHTML = NL.icon('towish') + '<span class="al" aria-hidden="true">' + (inWish ? 'Nei desideri' : 'Desideri') + '</span>';
+      wb.addEventListener('click', function (e) { e.stopPropagation(); guestAct(wb, id); });
+      top.insertBefore(wb, top.firstChild);
+    }
+    var h = '<p class="cvg-h">' + (m.w ? 'Desiderio di ' : 'Di ') + esc(NL.guest()) + '</p><div class="cvg-row">';
+    if (have) h += '<span class="fr-tag fr-mine">Ce l\'hai anche tu</span>';
     if (!m.w) h += m.fuori ? '<span class="fr-tag">Adesso è in prestito</span>' : ask ? '<span class="fr-tag">Richiesta mandata</span><button type="button" class="link" data-g="unask" data-r="' + esc(ask.id) + '">Annulla</button>' : '<button type="button" class="btn primary" data-g="ask">Me lo presti?</button>';
-    if (m.w) h += m.prenotato === 'io' ? '<span class="fr-tag fr-mine">Lo regali tu</span><button type="button" class="link" data-g="ungift">Annulla</button>' : m.prenotato ? '<span class="fr-tag">Lo regala ' + esc(m.prenotato) + '</span>' : '<button type="button" class="btn primary" data-g="gift">Te lo regalo io</button>';
-    h += '</div>' + (m.w ? '<p class="fr-small">' + esc(NL.guest()) + ' non vede chi gli farà un regalo; gli altri amici sì.</p>' : '');
+    if (m.w) h += m.prenotato === 'io' ? '<span class="fr-tag fr-mine">Lo regali tu</span><button type="button" class="link" data-g="ungift">Annulla</button>' : m.prenotato ? '<span class="fr-tag">Lo regala ' + esc(m.prenotato) + '</span>' : m.preso ? '<span class="fr-tag">Regalo prenotato</span>' : '<button type="button" class="btn primary" data-g="gift">Te lo regalo io</button>';
+    h += '</div>' + (m.w && (m.prenotato === 'io' || !m.preso) ? '<p class="fr-small">' + esc(NL.guest()) + ' non vede chi gli farà un regalo; ' + (me && me.regali === false ? 'gli altri amici vedono solo «Regalo prenotato».' : 'gli altri amici vedono il tuo nome.') + '</p>' : '');
     var box = document.createElement('div'); box.className = 'cv-guest'; box.innerHTML = h;
     box.addEventListener('click', function (e) { e.stopPropagation(); var x = e.target.closest('[data-g]'); if (x) guestAct(x, id); });
     card.appendChild(box);
@@ -460,9 +473,14 @@ async function guestAct(x, id) {
   x.disabled = true;
   try {
     if (a === 'addwish') { NL.addMine(Object.assign(snapG(b), { w: true, fr: name })); NL.toast('Aggiunto ai tuoi desideri.'); }
+    else if (a === 'unwish') {
+      var gone = mine().filter(function (y) { return y.w && ((y.i && y.i === b.i) || (y.t && y.t === b.t)); });
+      gone.forEach(function (y) { NL.removeMine(y.id); });
+      NL.toast('Tolto dai tuoi desideri.', { label: 'Annulla', fn: function () { gone.forEach(function (y) { NL.restoreMine(y); }); NL.refreshRow(id); } });
+    }
     else if (a === 'ask') { await rpc('chiedi_prestito', { amico: gId, libro_id: id }); asks = (await rpc('mie_richieste')) || []; NL.toast('Richiesta mandata a ' + name + '.'); }
     else if (a === 'unask') { await rpc('annulla_richiesta', { id: x.dataset.r }); asks = (await rpc('mie_richieste')) || []; NL.toast('Richiesta annullata.'); }
-    else if (a === 'gift' || a === 'ungift') { await rpc('prenota_regalo', { amico: gId, libro: id, si: a === 'gift' }); m.prenotato = a === 'gift' ? 'io' : ''; NL.toast(a === 'gift' ? 'Segnato: lo regali tu. ' + name + ' non lo vede.' : 'Non lo regali più.'); }
+    else if (a === 'gift' || a === 'ungift') { await rpc('prenota_regalo', { amico: gId, libro: id, si: a === 'gift' }); m.prenotato = a === 'gift' ? 'io' : ''; m.preso = a === 'gift'; NL.toast(a === 'gift' ? 'Segnato: lo regali tu. ' + name + ' non lo vede.' : 'Non lo regali più.'); }
   } catch (e) { NL.toast(/già prenotato/.test(e.message) ? 'L\'ha già prenotato un altro amico.' : nice(e)); }
   NL.refreshRow(id); guestBar();
 }
@@ -582,6 +600,7 @@ function optsView() {
   h += '<div class="fr-me"><span class="fr-me-n"><small>Il tuo nome</small><b>' + esc(me.utente) + '</b></span><button class="link" type="button" data-f="name">Cambia</button></div>';
   h += '<section class="fr-sec"><h3 class="fr-h">Chi vede cosa</h3><div class="fr-share"><label class="check fr-wish"><input type="checkbox" id="friLib"' + (me.libreria ? ' checked' : '') + '><span>Gli amici vedono la mia libreria<small>Titolo, autore, copertina, genere, editore, anno, pagine, serie, lettura e voto. Note, citazioni, appunti, prezzi, scaffali e prestiti restano tuoi.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friRegali"' + (me.regali !== false ? ' checked' : '') + '><span>Gli amici vedono i regali che prenoto<small>Quando dici «Te lo regalo io», gli altri amici vedono il tuo nome. Se la togli vedono solo «Regalo prenotato». Il festeggiato non lo vede mai.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friAmici"' + (me.amici !== false ? ' checked' : '') + '><span>Gli amici vedono i miei amici<small>Solo i nomi, così trovate altri amici e possono chiedervi l\'amicizia. Se la togli, vedono solo gli amici che avete in comune.</small></span></label></div></section>';
   h += keysHTML(true);
   h += '<p class="fr-small">Gli altri vedono solo il tuo nome. Il resto, solo se lo scegli qui.</p>';

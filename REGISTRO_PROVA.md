@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.9 · 17/11/2026 01:02
+- **Desideri di un amico**: «Aggiungi ai miei desideri» è un'icona in alto nella scheda (anche nella sua libreria), accesa se è già nei tuoi desideri; sotto «Desiderio di …»
+- **Gli amici vedono i regali che prenoto**: nuova voce in Amici e privacy, accesa di partenza; spenta, gli altri vedono solo «Regalo prenotato»
+
 ## Prova 99.8 · 17/11/2026 00:31
 - **Amici dell'amico**: nella libreria di un amico «N amici in comune» si tocca e mostra i suoi amici, quelli in comune in cima; gli altri con «Chiedi l'amicizia», se lui lo permette
 - **Gli amici vedono i miei amici**: nuova voce in Amici e privacy, accesa di partenza; spenta, gli amici vedono solo quelli in comune
