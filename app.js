@@ -2581,6 +2581,9 @@ document.addEventListener('focusout', function (e) {               // finito di 
   if (!id || !auEditing[id]) return;
   setTimeout(function () { if (document.activeElement === t) return; delete auEditing[id]; var b = get(id); if (b && b.a.trim()) refreshRow(id); }, 120);
 });
+/* indirizzo di una foto di Wikimedia, senza il pezzo dopo «?»: dal 17/11/2026 le miniature arrivano da thumb.wikimedia.org
+   (prima upload.wikimedia.org), con «?utm_…» in fondo; le altre si scartano (Flaiano senza foto, 17/11/2026) */
+function auImgOk(u) { u = typeof u === 'string' ? u.split(/[?#]/)[0] : ''; return /^https:\/\/(upload|thumb)\.wikimedia\.org\/[^\s"'<>]+$/.test(u) ? u : ''; }
 function auWikiUrl(t) { return 'https://it.wikipedia.org/wiki/' + encodeURIComponent(String(t).replace(/ /g, '_')); }
 /* chi ha scritto un libro puo' fare qualsiasi mestiere: fotografi, cuochi, musicisti… (Sebastiao Salgado non veniva trovato: «fotografo», 16/11/2026) */
 var AU_WRITE = /scritt|autor|romanz|poet|saggist|giornalist|drammaturg|filosof|storic|letterat|narrat|fumett|sceneggiat|critic|traduttor|accademic|docent|scienziat|teolog|biograf|novellier/i;
@@ -2590,7 +2593,7 @@ async function auLookup(name) {
   async function summary(title) {
     var j = await L.getJson(fetch, 'https://it.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title.replace(/ /g, '_')) + '?redirect=true', { waits: [], timeout: 8000 });
     return j && j.type !== 'disambiguation' && j.extract ? { title: j.title, desc: L.str(j.description), text: L.str(j.extract), url: (j.content_urls && j.content_urls.mobile && j.content_urls.mobile.page) || auWikiUrl(j.title),
-      img: j.thumbnail && /^https:\/\/upload\.wikimedia\.org\//.test(j.thumbnail.source || '') ? j.thumbnail.source : '',   // foto dell'autore, se Wikipedia ce l'ha
+      img: auImgOk(j.thumbnail && j.thumbnail.source),   // foto dell'autore, se Wikipedia ce l'ha
       qid: /^Q\d{1,12}$/.test(j.wikibase_item || '') ? j.wikibase_item : '' } : null;
   }
   var r = null;
@@ -2629,7 +2632,7 @@ async function auPageImg(title) {
   if (!title) return '';
   var j = await L.getJson(fetch, 'https://it.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=330&pilicense=any&titles=' + encodeURIComponent(title), { waits: [], timeout: 8000 });
   var pg = (j && j.query && j.query.pages) || {}, u = '';
-  Object.keys(pg).forEach(function (k) { var t = pg[k] && pg[k].thumbnail && pg[k].thumbnail.source; if (!u && typeof t === 'string' && /^https:\/\/upload\.wikimedia\.org\//.test(t)) u = t; });
+  Object.keys(pg).forEach(function (k) { var t = pg[k] && pg[k].thumbnail && pg[k].thumbnail.source; if (!u) u = auImgOk(t); });
   return u;
 }
 /* foto della persona su Wikidata (proprieta' P18) e la sua miniatura su Commons: 2 richieste, solo per chi non ha la foto su it.wikipedia */
@@ -2643,7 +2646,7 @@ async function auWdImg(qid) {
   var c = await L.getJson(fetch, 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=url&iiurlwidth=330&titles=' + encodeURIComponent('File:' + file), o);
   var pg = c && c.query && c.query.pages, u = '';
   if (pg) Object.keys(pg).forEach(function (k) { var ii = pg[k] && pg[k].imageinfo && pg[k].imageinfo[0]; if (!u && ii && typeof ii.thumburl === 'string') u = ii.thumburl; });
-  return /^https:\/\/upload\.wikimedia\.org\//.test(u) ? u : '';
+  return auImgOk(u);
 }
 async function openAuthor(id, name) {
   auNow = { id: id, name: name };
@@ -2710,7 +2713,7 @@ document.addEventListener('click', function (e) {
 function closeAuthor() { $('#auSheet').hidden = true; auNow = null; }
 $('#auClose').addEventListener('click', closeAuthor);
 /* tocco sulla foto dell'autore: a tutto schermo nel visore delle foto, piu' nitida (Piero, 17/11/2026); se la grande non c'e', la piccola */
-function auBig(src) { return /^https:\/\/upload\.wikimedia\.org\/.+\/thumb\//.test(src) ? src.replace(/\/\d+px-([^\/]+)$/, '/960px-$1') : src; }
+function auBig(src) { return /^https:\/\/(upload|thumb)\.wikimedia\.org\/.+\/thumb\//.test(src) ? src.replace(/\/\d+px-([^\/]+)$/, '/960px-$1') : src; }
 $('#auPic').addEventListener('click', function () {
   var im = $('#auPic img'), src = im.getAttribute('src'); if (!src || !auNow) return;
   var big = auBig(src), ph = $('#phImg');
@@ -4013,9 +4016,9 @@ function aufMap() {
   if (!aufo) {
     try { aufo = JSON.parse(ls.get(AUF_LS) || '{}'); } catch (e) { nlErr(e); }
     if (!aufo || typeof aufo !== 'object') aufo = {};
-    if (aufo['~v'] !== 3) {                              // 17/11/2026: i vecchi «senza foto» si ricercano (v2: anche Wikidata; v3: anche le foto non libere di it.wikipedia, Flaiano)
+    if (aufo['~v'] !== 4) {                              // 17/11/2026: i vecchi «senza foto» si ricercano (v2: anche Wikidata; v3: anche le foto non libere di it.wikipedia; v4: miniature da thumb.wikimedia.org, Flaiano)
       Object.keys(aufo).forEach(function (k) { if (!Array.isArray(aufo[k]) || !aufo[k][0]) delete aufo[k]; });
-      aufo['~v'] = 3;
+      aufo['~v'] = 4;
       try { ls.set(AUF_LS, JSON.stringify(aufo)); } catch (e) { nlErr(e); }
     }
   }
@@ -4025,7 +4028,7 @@ function aufGet(name) {                                  // indirizzo della foto
   var x = aufMap()[L.norm(name)];
   if (!Array.isArray(x)) return null;
   if (!x[0] && Date.now() - (Number(x[1]) || 0) > AUF_RETRY) return null;
-  return /^https:\/\/upload\.wikimedia\.org\//.test(x[0] || '') ? x[0] : '';
+  return auImgOk(x[0]);
 }
 function aufSave(name, url) {
   var m = aufMap(), ks = Object.keys(m).filter(function (k) { return k.charAt(0) !== '~'; });
@@ -5362,7 +5365,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-17 15:11", "n": "103.1", "note": "Uguale alla versione vera 103"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 15:38", "n": "103.2", "note": "Foto degli autori"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }

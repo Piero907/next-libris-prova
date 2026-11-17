@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 103.2 · 17/11/2026 15:38
+- **Foto degli autori**: Wikipedia ora manda le foto da un indirizzo nuovo (thumb.wikimedia.org), che l'app scartava; ora le accetta e ricerca una volta le foto mancanti (Flaiano)
+- Privacy: titolare «Piero R., l'ideatore di Next Libris»
+
 ## Prova 103.1 · 17/11/2026 15:11
 - Uguale alla versione vera 103
 
