@@ -411,7 +411,7 @@ async function onClick(e) {
 function paint() {
   var b = document.getElementById('goAcc');
   if (b) {
-    var t = !auth ? 'Salva i libri online e ritrovali su un altro telefono' : busy ? 'Sincronizzo…' : lastErr ? lastErr :
+    var t = !auth ? 'Libri online, su ogni telefono' : busy ? 'Sincronizzo…' : lastErr ? lastErr :
       sync.when && sync.uid === auth.uid ? 'Sincronizzato ' + when(sync.when) : 'Entrato come ' + (auth.email || '');
     document.getElementById('goAccTxt').textContent = t;
     b.classList.toggle('acc-on', !!auth);
@@ -425,7 +425,7 @@ function paintMenu() {
     b = document.createElement('button'); b.type = 'button'; b.id = 'goAcc'; b.className = 'dopt dgo';
     b.innerHTML = '<span><b>Account e sincronizzazione</b><small id="goAccTxt"></small></span><span class="n" aria-hidden="true">›</span>';
     set.insertBefore(b, set.firstChild);
-    b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(open, 60); });
+    b.addEventListener('click', function () { NL.fromMenu(open); });
   }
   paint();
 }

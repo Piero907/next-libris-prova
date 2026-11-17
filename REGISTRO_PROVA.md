@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.10 · 17/11/2026 01:46
+- **Menu riordinato**: Sostieni a metà schermo sopra Impostazioni, Impostazioni in ordine d'uso, «Info e aiuto», sottotitoli su una riga; tolto «Invita un amico» (è nella finestra Amici)
+- **Indietro** da una finestra aperta dal Menu riapre il Menu nello stesso punto; «Chiudi» chiude tutto
+- **Testata su due righe**: titolo e icone sulla stessa linea, sotto nome e numeri
+- **Ricerca dei libri**: «Con gli amici» (chiave e worker) spostato qui; con chiave o worker di un amico, «Usa la tua» / «Inserisci la tua»; **guida del worker** nell'app con «Copia il codice del worker»
+
 ## Prova 99.9 · 17/11/2026 01:02
 - **Desideri di un amico**: «Aggiungi ai miei desideri» è un'icona in alto nella scheda (anche nella sua libreria), accesa se è già nei tuoi desideri; sotto «Desiderio di …»
 - **Gli amici vedono i regali che prenoto**: nuova voce in Amici e privacy, accesa di partenza; spenta, gli altri vedono solo «Regalo prenotato»

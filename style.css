@@ -623,7 +623,7 @@ html[data-look="nuovo"][data-theme="dark"]{
 
 /* caratteri: Literata (nata per leggere libri) per l'intestazione e i titoli; Plex per il resto */
 html[data-look="nuovo"] body{-webkit-font-smoothing:antialiased}
-html[data-look="nuovo"] h1{font:600 clamp(31px,7.6vw,42px)/1.04 var(--font-display);letter-spacing:-.012em}
+html[data-look="nuovo"] h1{font:600 clamp(24px,6.8vw,38px)/1.04 var(--font-display);letter-spacing:-.012em}
 html[data-look="nuovo"] h2{font-weight:600;letter-spacing:-.005em}
 html[data-look="nuovo"] .sum-t{font:600 17px/1.28 var(--font-display);letter-spacing:-.003em}
 html[data-look="nuovo"] .f-t textarea{font:600 19px/1.25 var(--font-display)}
@@ -748,7 +748,7 @@ html[data-look="nuovo"][data-fb="lora"]{--font-body:"Lora",Georgia,serif}
 .fs.fb-lora{font-family:"Lora",Georgia,serif;font-size:16px}
 html[data-look="nuovo"] .sum-t{font-size:calc(17px * var(--ft-k,1))}
 html[data-look="nuovo"] .f-t textarea{font-size:calc(19px * var(--ft-k,1))}
-html[data-look="nuovo"] h1{font-size:calc(clamp(31px,7.6vw,42px) * var(--ft-k,1))}
+html[data-look="nuovo"] h1{font-size:calc(clamp(24px,6.8vw,38px) * var(--ft-k,1))}
 html[data-look="nuovo"][data-ft="montserrat"] h1,html[data-look="nuovo"][data-ft="roboto"] h1{letter-spacing:-.025em}
 
 /* ---- palette: Bordeaux (rosso vino) e Bosco (verde bottiglia), come le tele delle rilegature ---- */
@@ -1037,7 +1037,21 @@ body.welcome-on .tip{display:none}
 html[data-theme="dark"] .ico.act.fav.on svg{color:#F4C430}
 
 
-.owner{margin:4px 0 0;font-size:16px;color:var(--ink)}
+.owner{color:var(--ink)}
+/* testata su due righe (Piero, 17/11/2026): «Next Libris [PROVA]» con le icone centrate sulla stessa linea, sotto una riga grigia con nome e numeri */
+.top-meta{margin:6px 0 0;font-size:15px;line-height:1.35;color:var(--muted)}
+.top-meta .summary{margin:0;display:inline}
+.top-meta .owner:not(:empty)::after{content:" · ";color:var(--muted);font-weight:400}
+html[data-look="nuovo"] .top{--h1-fs:calc(clamp(24px,6.8vw,38px) * var(--ft-k,1))}
+html[data-look="nuovo"] .top h1{font-size:var(--h1-fs)}
+.top .gear,.top .fri-top,.top .nt-top{top:calc(var(--h1-fs,31px) * .52 - 22px)}   /* centrate sulla riga del titolo */
+.top h1{white-space:nowrap}
+.top h1 .prova-tag{margin-left:6px;padding:2px 7px;font-size:11px}
+@media (max-width:380px){                 /* telefoni stretti con tre icone: titolo e PROVA non toccano la campanella */
+  html.has-bell .top{padding-right:120px;--h1-fs:calc(23px * var(--ft-k,1))}
+  html.has-bell .top .fri-top{right:32px}
+  html.has-bell .top .nt-top{right:68px}
+}
 .owner b{font-weight:600}
 .owner .link{padding:2px 0;font-size:15px}
 
@@ -1560,7 +1574,11 @@ body.selecting .nx-box,body.scanning .nx-box{display:none}
 .dmenu .dset-t[aria-expanded="true"] b{color:var(--accent)}
 .dsub{margin:2px 0 6px 18px;padding-left:12px;border-left:2px solid var(--accent-soft)}
 .dsub[hidden]{display:none}
-.dmenu .dopt small.dbk{margin-top:3px;color:var(--ink);opacity:.7}
+.dmenu .dopt small.dbk.dbk-no{color:var(--warn)}
+/* Menu: sottotitoli su una riga, mai a capo (Piero, 17/11/2026) */
+#drawerOpts .dmenu .dopt small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#drawerOpts .dlist,#drawerOpts .dsub,#drawerOpts .dopt{min-width:0;max-width:100%}
+#drawerOpts .dmenu .dopt > span:not(.n):not(.dset-i):not(.don-cup):not(.dbadge){flex:1 1 auto;min-width:0}
 @media (prefers-reduced-motion:reduce){.dmenu .dset-c{transition:none}}
 /* scheda dell'autore: foto da Wikipedia accanto al nome (16/11/2026) */
 .au-head{display:flex;gap:14px;align-items:center}
@@ -1629,3 +1647,5 @@ a.dopt{color:inherit;text-decoration:none}
 .svc-box .svc-go{border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;color:var(--ink)}
 .svc-box .svc-go > span:first-child{flex:1 1 auto;min-width:0}
 .svc-box .hint{margin:0}
+.svc-lent .svc-own{display:block;margin-top:6px;padding:4px 0;text-align:left}   /* «Usa la tua» su una riga sua (17/11/2026) */
+.keysteps .sbn-copy{display:flex;margin:8px 0 2px;min-height:40px;font-size:14px}   /* guida del worker (17/11/2026) */

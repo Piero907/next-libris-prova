@@ -54,8 +54,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   <header class="top">
     <div>
       <h1>Next Libris</h1>
-      <p class="owner" id="owner"></p>
-      <p class="summary" id="summary" aria-live="polite"></p>
+      <p class="top-meta"><span class="owner" id="owner"></span><span class="summary" id="summary" aria-live="polite"></span></p>
     </div>
     <div class="sync" id="sync" role="status"><span class="dot"></span><span id="syncTxt">Salvato su questo telefono</span></div>
     <button class="ico gear" id="btnOpts" aria-label="Opzioni" title="Opzioni"></button>
@@ -612,7 +611,18 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
           <button class="btn svc-clear" id="sbnClear" type="button" hidden>Cancella</button>
           <div class="svc-saved" id="sbnSaved" hidden></div>
         </div>
-        <p class="hint">Il catalogo delle biblioteche italiane ha i dati più precisi su editore, anno e pagine. Il worker è un piccolo intermediario gratuito su Cloudflare: le istruzioni sono nel LEGGIMI, sezione «Catalogo SBN».</p>
+        <p class="hint">Il catalogo delle biblioteche italiane ha i dati più precisi su editore, anno e pagine. Il worker è un piccolo intermediario gratuito su Cloudflare (100.000 richieste al giorno).</p>
+        <details class="svc-how" id="sbnHow">
+          <summary>Come si crea il worker (gratis, una volta sola)</summary>
+          <ol class="hint keysteps">
+          <li>Meglio da computer o tablet: apri <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">dash.cloudflare.com</a> e crea un account gratuito.</li>
+          <li>A sinistra «Workers &amp; Pages» › «Create» › «Start with Hello World!». Come nome scrivi <b>sbn-libri</b> e premi «Deploy».</li>
+          <li>Premi «Edit code», cancella tutto il codice di esempio e incolla il codice del worker, poi premi «Deploy».
+            <button class="btn sbn-copy" id="sbnCopy" type="button">Copia il codice del worker</button></li>
+          <li>Copia l'indirizzo del worker (tipo <b>sbn-libri.tuonome.workers.dev</b>) e incollalo qui sopra.</li>
+          <li>Tocca «Prova la ricerca ISBN» qui sotto: deve comparire «✓ Catalogo SBN».</li>
+          </ol>
+        </details>
       </div>
 
       <div class="svc" id="svcKey">
@@ -639,6 +649,9 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
         </ol>
         </details>
       </div>
+
+      <h3 class="opt-h3">Con gli amici</h3>
+      <div class="svc-box dmenu" id="svcBox"></div>
 
       <div class="opts-row"><button class="btn" id="btnDiag">Prova la ricerca ISBN</button></div>
       <div class="diag" id="diagOut" hidden aria-live="polite"></div>
@@ -685,8 +698,6 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <label class="field"><span>Il tuo nome</span>
         <input type="text" id="optName" enterkeyhint="done" maxlength="30" autocomplete="given-name" autocapitalize="words" placeholder="es. Piero"></label>
       <p class="hint" id="optNameHint">Compare quando condividi un libro o una lista: «I preferiti di Piero», «Piero ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l'elenco, oppure Esporta.</p>
-      <h3 class="opt-h3">Chiave Google e worker</h3>
-      <div class="svc-box dmenu" id="svcBox"></div>
       <h3 class="opt-h3">Fai conoscere l'app</h3>
       <p class="share-lead">Fai inquadrare il codice con la fotocamera del telefono, oppure manda il link.</p>
       <figure class="qr-box">
@@ -764,34 +775,34 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
     <div id="drawerOpts" hidden>
       <div class="dlist dmenu dmain">
         <button type="button" class="dopt dgo" id="goFilters"><span><b>Filtri e ordine</b><small id="goFltTxt">Tutti i libri, dai più recenti</small></span><span class="dbadge" id="goFltN" hidden></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt dgo" id="goSugg"><span><b>Suggerimenti</b><small>Cosa leggere dopo e libri da scoprire</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dgo" id="goSugg"><span><b>Suggerimenti</b><small>Cosa leggere dopo, da scoprire</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo dq-all" id="goQuotes" hidden><span><b>Tutte le citazioni</b><small id="goQTxt"></small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, valore, pagine e letture</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, valore, pagine, letture</small></span><span class="n" aria-hidden="true">›</span></button>
       </div>
       <h3>La tua libreria</h3>
       <div class="dlist dmenu">
-      <button type="button" class="dopt" data-sec="fix"><span><b>Sistema l'elenco</b><small>Doppioni, case editrici, copertine</small></span><span class="n" aria-hidden="true">›</span></button>
-      <button type="button" class="dopt" data-sec="export"><span><b>Backup ed esportazione</b><small>Backup, Excel, PDF</small><small class="dbk" id="optBackupHint"></small></span><span class="n" aria-hidden="true">›</span></button>
+      <button type="button" class="dopt" data-sec="fix"><span><b>Sistema l'elenco</b><small>Doppioni, editori, copertine</small></span><span class="n" aria-hidden="true">›</span></button>
+      <button type="button" class="dopt" data-sec="export"><span><b>Backup ed esportazione</b><small class="dbk" id="optBackupHint"></small></span><span class="n" aria-hidden="true">›</span></button>
+      </div>
+      <div class="dlist dmenu ddon">
+        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Se ti piace, offrimi una birra!</small></span><span class="n" aria-hidden="true">♥</span></button>
       </div>
       <div class="dlist dmenu dset">
-        <button type="button" class="dopt dset-t" id="goSettings" aria-expanded="false" aria-controls="setList"><span class="dset-i" aria-hidden="true"></span><span><b>Impostazioni</b><small>Account, aspetto, ricerca e aggiunta dei libri, amici</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dset-t" id="goSettings" aria-expanded="false" aria-controls="setList"><span class="dset-i" aria-hidden="true"></span><span><b>Impostazioni</b><small>Account, amici, ricerca, aspetto</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
         <div class="dsub" id="setList" hidden>
-        <button type="button" class="dopt" data-sec="look"><span><b>Aspetto</b><small>Tema, colori e caratteri; riepilogo in alto</small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt" data-sec="search"><span><b>Ricerca dei libri</b><small>Chiave Google, catalogo SBN, richieste di oggi</small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt" data-sec="cards"><span><b>Aggiunta dei libri</b><small>Prezzo, suoni, fotocamera e luce</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt" data-sec="search"><span><b>Ricerca dei libri</b><small>Chiave Google, worker, SBN</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt" data-sec="cards"><span><b>Aggiunta dei libri</b><small>Prezzo, suoni, fotocamera</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt" data-sec="look"><span><b>Aspetto</b><small>Tema, colori, caratteri</small></span><span class="n" aria-hidden="true">›</span></button>
         </div>
       </div>
       <div class="dlist dmenu dset dinfo">
-        <button type="button" class="dopt dset-t" id="goInfo" aria-expanded="false" aria-controls="infoList"><span class="dset-i" aria-hidden="true"></span><span><b>Info e condivisione</b><small>Condividi l'app, installa, privacy, contatti</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dset-t" id="goInfo" aria-expanded="false" aria-controls="infoList"><span class="dset-i" aria-hidden="true"></span><span><b>Info e aiuto</b><small>Condividi, installa, contatti</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
         <div class="dsub" id="infoList" hidden>
-        <button type="button" class="dopt" data-sec="share"><span><b>Condivisione</b><small>Il tuo nome; link e QR code dell'app</small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt" data-sec="app"><span><b>Installazione sul telefono</b><small>Next Libris tra le app, a schermo intero e senza rete</small></span><span class="n" aria-hidden="true">›</span></button>
-        <a class="dopt" id="goPrivacy" href="privacy.html" target="_blank" rel="noopener"><span><b>Privacy</b><small>Quali dati usa l'app e dove stanno</small></span><span class="n" aria-hidden="true">↗</span></a>
-        <button type="button" class="dopt" data-sec="contact"><span><b>Contatti</b><small>Domande, problemi o idee: scrivici</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt" data-sec="share"><span><b>Condivisione</b><small>Il tuo nome, link e QR code</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt" data-sec="app"><span><b>Installazione sul telefono</b><small>Tra le app, anche senza rete</small></span><span class="n" aria-hidden="true">›</span></button>
+        <a class="dopt" id="goPrivacy" href="privacy.html" target="_blank" rel="noopener"><span><b>Privacy</b><small>Quali dati usa e dove stanno</small></span><span class="n" aria-hidden="true">↗</span></a>
+        <button type="button" class="dopt" data-sec="contact"><span><b>Contatti</b><small>Domande, problemi o idee</small></span><span class="n" aria-hidden="true">›</span></button>
         </div>
-      </div>
-      <div class="dlist dmenu">
-        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Niente pubblicità, niente abbonamenti. Se ti piace, offrimi una birra!</small></span><span class="n" aria-hidden="true">♥</span></button>
       </div>
       <div class="ver" id="verBox">
         <p class="ver-h"><b id="verNum"></b> <span id="verDate"></span></p>

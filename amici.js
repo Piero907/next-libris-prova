@@ -293,16 +293,14 @@ function paintMenu() {
     var top = document.querySelector('#drawerOpts .dmain'); if (!top) return;
     var h = document.createElement('h3'); h.id = 'friMenuH'; h.textContent = 'Amici';
     m = document.createElement('div'); m.className = 'dlist dmenu'; m.id = 'friMenu';
-    m.innerHTML = '<button type="button" class="dopt dgo" id="goFri"><span><b>I tuoi amici</b><small id="goFriTxt"></small></span><span class="n" aria-hidden="true">›</span></button>' +
-      '<button type="button" class="dopt dgo" id="goInv"><span><b>Invita un amico</b><small>Manda il tuo link: con un tocco ti chiede l\'amicizia</small></span><span class="n" aria-hidden="true">›</span></button>';
+    m.innerHTML = '<button type="button" class="dopt dgo" id="goFri"><span><b>I tuoi amici</b><small id="goFriTxt"></small></span><span class="n" aria-hidden="true">›</span></button>';   // «Invita» sta nella finestra Amici (17/11/2026)
     top.parentNode.insertBefore(h, top.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
-    m.querySelector('#goFri').addEventListener('click', function () { NL.closeDrawer(); setTimeout(open, 60); });
-    m.querySelector('#goInv').addEventListener('click', function () { NL.closeDrawer(); setTimeout(shareInvite, 60); });
+    m.querySelector('#goFri').addEventListener('click', function () { NL.fromMenu(open); });
   }
   var t, rec = received().length, fr = friends().length;
-  if (!uid()) t = 'Entra con il tuo account per trovare gli amici';
+  if (!uid()) t = 'Entra per trovare gli amici';
   else if (!me || !list) t = 'Richieste e amici';
-  else if (!me.utente) t = 'Scegli il nome con cui ti trovano';
+  else if (!me.utente) t = 'Scegli il tuo nome';
   else t = (rec ? rec + (rec === 1 ? ' richiesta per te' : ' richieste per te') + ' · ' : '') + (fr ? fr + (fr === 1 ? ' amico' : ' amici') : 'Ancora nessun amico');
   document.getElementById('goFriTxt').textContent = t;
 }
@@ -311,11 +309,11 @@ function paintSet() {
   var set = document.getElementById('setList'); if (!set) return;
   var b = document.getElementById('goFriOpt');
   if (!b) {
-    var after = set.querySelector('.dopt[data-sec="share"]');
+    var before = document.getElementById('goPush') || set.querySelector('.dopt[data-sec="search"]');   // dopo Account, prima di Notifiche (17/11/2026)
     b = document.createElement('button'); b.type = 'button'; b.id = 'goFriOpt'; b.className = 'dopt dgo';
-    b.innerHTML = '<span><b>Amici e privacy</b><small>Il tuo nome, chi vede libreria e desideri, chiave e worker con gli amici</small></span><span class="n" aria-hidden="true">›</span>';
-    set.insertBefore(b, after ? after.nextSibling : null);
-    b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(function () { open(true); }, 60); });
+    b.innerHTML = '<span><b>Amici e privacy</b><small>Nome, chi vede i tuoi libri</small></span><span class="n" aria-hidden="true">›</span>';
+    set.insertBefore(b, before);
+    b.addEventListener('click', function () { NL.fromMenu(function () { open(true); }); });
   }
 }
 
@@ -793,7 +791,7 @@ async function keyAct(a, id) {
     } else if (a === 'keyuse') {
       var k = keys.filter(function (x) { return x.a === uid() && x.da === id; })[0]; if (!k) return;
       var b = borrowed(), st = NL.settings || {};
-      if (!b) wr('catalogo-libri-amici-chiavi-mie', { gb: st.gbKey || '', sbn: st.sbnUrl || '' });   // le tue, da rimettere quando smetti
+      wr('catalogo-libri-amici-chiavi-mie', ownKeys());   // le tue, da rimettere quando smetti (anche se ne usavi gia' una parte)
       setKeys(k.gb_key || st.gbKey, k.sbn || st.sbnUrl);
       wr(K_KEY, { da: k.da, nome: k.nome, gb: k.gb_key || '', sbn: k.sbn || '' });
       NL.toast('Ora usi ' + (k.gb_key ? 'la chiave' : 'il worker') + ' di ' + k.nome + '.');
@@ -810,12 +808,27 @@ function stopBorrow(msg) {
   NL.toast(msg || 'Non usi più quelli di ' + b.nome + '.');
   paintKw(); NL.emit && NL.emit('keys');
 }
+/* «Usa la tua» in Ricerca dei libri (Piero, 17/11/2026): smetti di usare solo la chiave (p = 'gb') o solo il worker ('sbn') dell'amico
+   e rimetti il tuo; se non ne avevi uno, il campo torna vuoto per incollarlo. Ognuno deve poter usare i suoi. */
+function ownPart(p) {
+  var b = borrowed(); if (!b) return '';
+  var st = NL.settings || {}, m = rd('catalogo-libri-amici-chiavi-mie') || {}, mine = m[p] || '';
+  if (p === 'gb') setKeys(mine, st.sbnUrl); else setKeys(st.gbKey, mine);
+  b[p] = ''; b['no' + p] = true; m[p] = '';
+  if (!b.gb && !b.sbn) { wr(K_KEY, null); wr('catalogo-libri-amici-chiavi-mie', null); } else { wr(K_KEY, b); wr('catalogo-libri-amici-chiavi-mie', m); }
+  NL.toast(mine ? (p === 'gb' ? 'Ora usi la tua chiave Google.' : 'Ora usi il tuo worker.') : (p === 'gb' ? 'Incolla la tua chiave Google.' : 'Incolla l\'indirizzo del tuo worker.'));
+  paintKw(); NL.emit && NL.emit('keys');
+  return mine;
+}
 function checkKeys() {
   var b = borrowed(), inn = keys.filter(function (k) { return k.a === uid(); });
   if (b) {
     var k = inn.filter(function (x) { return x.da === b.da; })[0];
     if (!k) stopBorrow(b.nome + ' non condivide più la sua chiave: torni alle tue impostazioni.');
-    else if ((k.gb_key || '') !== b.gb || (k.sbn || '') !== b.sbn) { var st = NL.settings || {}; setKeys(k.gb_key || st.gbKey, k.sbn || st.sbnUrl); wr(K_KEY, { da: k.da, nome: k.nome, gb: k.gb_key || '', sbn: k.sbn || '' }); }
+    else {
+      var gb = b.nogb ? '' : (k.gb_key || ''), sb = b.nosbn ? '' : (k.sbn || '');   // la parte che hai sostituito con la tua resta tua
+      if (gb !== b.gb || sb !== b.sbn) { var st = NL.settings || {}; setKeys(b.nogb ? st.gbKey : (gb || st.gbKey), b.nosbn ? st.sbnUrl : (sb || st.sbnUrl)); wr(K_KEY, { da: k.da, nome: k.nome, gb: gb, sbn: sb, nogb: b.nogb, nosbn: b.nosbn }); }
+    }
   }
 }
 
@@ -984,5 +997,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();

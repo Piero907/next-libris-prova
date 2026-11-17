@@ -269,13 +269,13 @@ function paintMenu() {
     b = document.createElement('button'); b.type = 'button'; b.id = 'goWrap'; b.className = 'dopt dgo';
     b.innerHTML = '<span><b>La tua stagione in libri</b><small id="goWrapTxt"></small></span><span class="n" aria-hidden="true">›</span>';
     st.parentNode.insertBefore(b, st.nextSibling);
-    b.addEventListener('click', function () { NL.closeDrawer(); setTimeout(function () { open(); }, 60); });
+    b.addEventListener('click', function () { NL.fromMenu ? NL.fromMenu(function () { open(); }) : (NL.closeDrawer(), setTimeout(function () { open(); }, 60)); });
   }
   var list = cfg.on ? quarters() : [];
   b.hidden = !list.length;
   if (list.length) {
     var last = prevQ(quarterOf(Date.now())).key, d = list.filter(function (x) { return x.Q.key === last; })[0] || list[0];
-    $('#goWrapTxt').textContent = 'Riepilogo di ogni stagione · ' + d.Q.label + (d.ongoing ? ' (finora)' : '');
+    $('#goWrapTxt').textContent = 'Riepilogo · ' + d.Q.label + (d.ongoing ? ' (finora)' : '');
   }
 }
 function paintOption(sec) {

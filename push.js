@@ -172,8 +172,9 @@ function paintMenu() {
     b = document.createElement('button'); b.type = 'button'; b.id = 'goPush'; b.className = 'dopt'; b.dataset.sec = 'push';
     b.innerHTML = '<span><b>Notifiche</b><small id="goPushTxt"></small></span><span class="n" aria-hidden="true">›</span>';
   }
-  set.appendChild(b);                                     // sempre ultima (dopo «Amici e privacy»)
-  $('goPushTxt').textContent = !uid() ? 'Avvisi degli amici anche con l\'app chiusa' : subOk && st.on ? 'Attive · ' + quietTxt() : 'Avvisi degli amici anche con l\'app chiusa';
+  var fo = $('goFriOpt'), nx = fo ? fo.nextSibling : set.querySelector('.dopt[data-sec="search"]');
+  if (b !== nx) set.insertBefore(b, nx);                 // dopo «Amici e privacy», prima di Ricerca (17/11/2026)
+  $('goPushTxt').textContent = subOk && st.on && uid() ? 'Attive · ' + quietTxt() : 'Avvisi anche ad app chiusa';
 }
 function quietTxt() { return prefs.silenzio_da === prefs.silenzio_a ? 'sempre' : 'silenzio ' + prefs.silenzio_da + '-' + prefs.silenzio_a; }
 

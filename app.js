@@ -4,6 +4,9 @@ var L = window.Lib;
 
 /* ---------- utilità ---------- */
 var $ = function (s) { return document.querySelector(s); };
+/* Indietro da una finestra aperta dal Menu: la voce del Menu resta nella cronologia sotto la finestra; qui si guarda se la finestra
+   era ancora aperta (gesto Indietro: si torna al Menu) o se l'ha gia' chiusa il suo «Chiudi» (si chiude tutto). Deve essere il primo «popstate». */
+window.addEventListener('popstate', function (e) { menuPop(e); });
 var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
 /* Copie parallele (piero907.github.io/next-libris-prova/, …/next-libris-social/, …): stesso codice, ma dati tutti loro. Stanno allo
    stesso indirizzo di base della versione vera, quindi sul telefono condividerebbero lo stesso spazio: ogni nome di dato ha il
@@ -156,6 +159,20 @@ function setSvc(k, v) {
   backupReady = null;
   saveSettings(); remember(k, v); renderSvc();
 }
+/* guida del worker nell'app, non nel LEGGIMI (Piero, 17/11/2026): «Copia il codice del worker» */
+$('#sbnCopy').addEventListener('click', async function () {
+  try {
+    var r = await fetch('cloudflare-sbn-worker.js', { cache: 'no-cache' }); if (!r.ok) throw new Error('file');
+    await navigator.clipboard.writeText(await r.text());
+    toast('Codice copiato: incollalo in «Edit code» su Cloudflare.');
+  } catch (e) { window.open('cloudflare-sbn-worker.js', '_blank', 'noopener'); toast('Non riesco a copiarlo: si apre il codice, selezionalo tutto e copialo.'); }
+});
+$('#optSheet').addEventListener('click', function (e) {
+  var b = e.target.closest('.svc-own'); if (!b || !window.NLAmici || !window.NLAmici.ownPart) return;
+  var p = b.dataset.own, had = window.NLAmici.ownPart(p);
+  renderSvc();
+  if (!had) setTimeout(function () { try { $(p === 'sbn' ? '#sbnUrl' : '#gbKey').focus(); } catch (x) {} }, 50);
+});
 function renderSvc() {
   var sb = settings.sbnUrl, gk = settings.gbKey, ls_ = isLent('sbn', sb), lk = isLent('key', gk), who = lent().nome || 'un amico';
   if (document.activeElement !== $('#sbnUrl')) $('#sbnUrl').value = ls_ ? '' : sb;
@@ -167,7 +184,9 @@ function renderSvc() {
     var box = $(x[0] === 'sbn' ? '#svcSbn' : '#svcKey'), row = box.querySelector('.svc-row'), note = box.querySelector('.svc-lent');
     row.hidden = x[1];
     if (x[1] && !note) { note = document.createElement('p'); note.className = 'hint svc-lent'; row.parentNode.insertBefore(note, row); }
-    if (note) { note.hidden = !x[1]; if (x[1]) note.textContent = 'Usi ' + x[2] + who + ': non si vede e non si può prestare ad altri. Per smettere: Amici › Impostazioni degli amici › «Non usarla più».'; }
+    if (note) { note.hidden = !x[1]; if (x[1]) { var my = mine(x[0]);   // «Usa la tua»: ognuno deve poter usare i suoi (Piero, 17/11/2026)
+      note.innerHTML = 'Usi ' + esc(x[2] + who) + ': non si vede e non si può prestare ad altri. <button type="button" class="link svc-own" data-own="' + (x[0] === 'sbn' ? 'sbn' : 'gb') + '">' +
+        (my ? (x[0] === 'sbn' ? 'Usa il tuo worker' : 'Usa la tua chiave') + ' (' + esc(svcShort(x[0], my)) + ')' : (x[0] === 'sbn' ? 'Inserisci il tuo worker' : 'Inserisci la tua chiave')) + '</button>'; } }
   });
   ['sbn', 'key'].forEach(function (k) {
     var cur = svcVal(k), box = $(k === 'sbn' ? '#sbnSaved' : '#gbSaved'), html = '';
@@ -2806,7 +2825,7 @@ $('#donAskNever').addEventListener('click', function () {
   settings.donNever = true; settings.donMs = Math.floor(donCount() / DON_STEP) * DON_STEP; saveSettings(); donPaint();
   toast('Non te lo chiederò più a ogni traguardo. Resta «Sostieni Next Libris» nel menu.');
 });
-$('#donMenu').addEventListener('click', function () { var had = drawerPushed; drawerPushed = false; closeDrawer(true); openDon(had); });
+$('#donMenu').addEventListener('click', function () { fromMenu(function () { openDon(); }); });
 $('#donOpt').addEventListener('click', function () { openDon(); });
 $('#donSheet').addEventListener('click', function (e) {
   if (e.target === e.currentTarget) { closeDon(); return; }
@@ -3378,7 +3397,7 @@ function openSugg(t) {
   setSgTab(t || 'next');
 }
 function closeSugg() { $('#suggSheet').hidden = true; }
-$('#goSugg').addEventListener('click', function () { closeDrawer(); openSugg('next'); });
+$('#goSugg').addEventListener('click', function () { fromMenu(function () { openSugg('next'); }); });
 $('#sgTabNext').addEventListener('click', function () { setSgTab('next'); });
 $('#sgTabDisc').addEventListener('click', function () { setSgTab('disc'); });
 $('#sgClose').addEventListener('click', closeSugg);
@@ -4740,7 +4759,7 @@ function setDrawerTab(t) {
   $('#drawerFilters').hidden = drawerTab !== 'flt';
   $('#drawerOpts').hidden = drawerTab !== 'opt';
   $('#drawerFoot').hidden = drawerTab !== 'flt';
-  if (drawerTab === 'opt') { $('#optBackupHint').textContent = backupHint(); renderVersion(); checkVersion(); paintMenuHome(); }
+  if (drawerTab === 'opt') { $('#optBackupHint').textContent = backupHint(); $('#optBackupHint').classList.toggle('dbk-no', !settings.lastBackup); renderVersion(); checkVersion(); paintMenuHome(); }
   $('#drawerBody').scrollTop = 0;
 }
 var SORT_TXT = { recent: 'dai più recenti', titolo: 'per titolo', autore: 'per autore', editore: 'per casa editrice', anno: 'per anno', scaffale: 'per scaffale', voto: 'per voto', letti: 'letti di recente' };
@@ -4760,7 +4779,7 @@ function goFilters() {
 }
 function backupHint() {
   var last = settings.lastBackup;
-  return last ? 'Ultimo backup: ' + new Date(last).toLocaleDateString('it-IT') + '.' : 'Non hai ancora fatto un backup: i libri sono solo su questo telefono.';
+  return last ? 'Ultimo backup: ' + new Date(last).toLocaleDateString('it-IT') : 'Nessun backup: fanne uno';   // una riga nel Menu (17/11/2026)
 }
 function openDrawer(t, reuse) {
   if (t === 'opt' || t === 'flt') setDrawerTab(t);
@@ -4840,18 +4859,51 @@ $('#ctCopy').addEventListener('click', async function () {
   try { await navigator.clipboard.writeText(CONTACT); toast('Indirizzo copiato.'); }
   catch (e) { toast('Non riesco a copiarlo: tienilo premuto per selezionarlo.'); }
 });
+/* ---- Indietro dalle finestre del Menu (Piero, 17/11/2026): il Menu si riapre nello stesso punto e con gli stessi gruppi aperti;
+   «Chiudi» o × chiudono tutto, come prima. ---- */
+var WIN_SEL = '.sheet:not([hidden]), #wrap:not([hidden])';
+var menuRet = null, menuChk = null;
+function winOpen() { return !!document.querySelector(WIN_SEL); }
+function fromMenu(fn) {
+  menuRet = { top: $('#drawerBody').scrollTop, sets: setsShown, info: infoShown, back: false };
+  drawerPushed = false; closeDrawer(true);             // la voce {drawer} resta nella cronologia, sotto la finestra
+  fn();
+  if (history.state && history.state.drawer) { try { history.pushState({ mwin: 1 }, ''); } catch (e) {} }   // finestra senza cronologia sua: un posto sopra il Menu
+  menuLater();
+}
+function menuLater() { clearTimeout(menuChk); menuChk = setTimeout(menuCheck, 400); }
+function menuCheck() {                                  // finestra chiusa con «Chiudi» senza cronologia (o mai aperta): via anche la voce del Menu
+  var h = history.state || {};
+  if (!menuRet || menuRet.back || drawerOpen || winOpen() || !(h.drawer || h.mwin)) return;
+  menuRet = null;
+  try { if (h.mwin) history.go(-2); else history.back(); } catch (e) {}
+}
+function menuPop(e) {
+  if (!menuRet || drawerOpen || !(e.state && e.state.drawer)) return;
+  if (winOpen()) { menuRet.back = true; setTimeout(menuReopen, 0); }   // gesto Indietro con la finestra aperta
+  else { menuRet = null; try { history.back(); } catch (x) {} }           // la finestra si e' chiusa da sola («Chiudi»): chiude anche il Menu
+}
+function menuReopen() {
+  var r = menuRet; menuRet = null;
+  if (!r) return;
+  for (var i = 0; i < 6 && winOpen(); i++) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));   // finestre senza cronologia
+  Array.prototype.forEach.call(document.querySelectorAll(WIN_SEL), function (x) { x.hidden = true; });
+  openDrawer('opt', true);
+  setsOpen(r.sets); infoOpen(r.info);
+  $('#drawerBody').scrollTop = r.top;
+}
+if (window.MutationObserver) new MutationObserver(function () { if (menuRet && !menuRet.back) menuLater(); })
+  .observe(document.body, { attributes: true, attributeFilter: ['hidden'], subtree: true });
 $('#goFilters').addEventListener('click', goFilters);
 $('#drawerBack').addEventListener('click', function () { if (drawerSub) history.back(); else setDrawerTab('opt'); });
-$('#goQuotes').addEventListener('click', function () { closeDrawer(); openAllQuotes(); });
-$('#goStats').addEventListener('click', function () { closeDrawer(); openStats(); });
+$('#goQuotes').addEventListener('click', function () { fromMenu(openAllQuotes); });
+$('#goStats').addEventListener('click', function () { fromMenu(openStats); });
 window.addEventListener('popstate', function (e) { if (drawerOpen && drawerSub && e.state && e.state.drawer && !e.state.sub) { drawerSub = false; setDrawerTab('opt'); } });
 $('#drawerOpts').addEventListener('click', function (e) {
   var x = e.target.closest('[data-sec]');
   if (!x) return;
-  if (x.dataset.sec === 'export') { closeDrawer(); openExport(); return; }
-  var had = drawerPushed; drawerPushed = false;
-  closeDrawer(true);
-  openOptions(x.dataset.sec, had);
+  var sec = x.dataset.sec;
+  fromMenu(function () { if (sec === 'export') openExport(); else openOptions(sec); });
 });
 
 /* ---------- Aspetto: tema automatico / chiaro / scuro, colori e caratteri ---------- */
@@ -4887,7 +4939,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-17 01:02", "n": "99.9", "note": "Desideri di un amico"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 01:46", "n": "99.10", "note": "Menu riordinato"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -4948,8 +5000,7 @@ function openOptions(sec, reuse) {
   $('#optSheet .sheet-in').scrollTop = 0;
   if (reuse) { try { history.replaceState({ opt: 1 }, ''); optPushed = true; } catch (e) {} }
   else if (!optPushed) { try { history.pushState({ opt: 1 }, ''); optPushed = true; } catch (e) {} }
-  if (sec === 'search') renderSvc();
-  if (sec === 'share') { renderSvcShare(); if (window.NLAmici && window.NLAmici.load) window.NLAmici.load().catch(function () {}); }
+  if (sec === 'search') { renderSvc(); renderSvcShare(); if (window.NLAmici && window.NLAmici.load) window.NLAmici.load().catch(function () {}); }   // «Con gli amici»: chiave e worker (da Condivisione, 17/11/2026)
   if (sec === 'app') { renderVersion(); checkVersion(); updateInstallUi(); }
 }
 function closeOptions(fromPop) {
@@ -4960,6 +5011,7 @@ function closeOptions(fromPop) {
 }
 $('#optClose').addEventListener('click', function () { closeOptions(); });
 $('#optBack').addEventListener('click', function () {
+  if (menuRet && optPushed) { try { history.back(); } catch (e) {} return; }   // aperta dal Menu: come Indietro
   var had = optPushed; optPushed = false;
   $('#optSheet').hidden = true; optOpen = false;
   openDrawer('opt', had);
@@ -5253,7 +5305,7 @@ function saveName(v) {
 function renderOwner() {
   var el = $('#owner');
   if (guest) { el.innerHTML = 'Libreria di <b>' + esc(guest.name) + '</b>'; return; }
-  el.innerHTML = settings.name ? 'Libreria di <b>' + esc(settings.name) + '</b>'
+  el.innerHTML = settings.name ? '<b>' + esc(settings.name) + '</b>'   // una riga sola con i numeri: «Piero R. · 120 libri» (17/11/2026)
     : '<button type="button" class="link" id="ownerSet">Scrivi il tuo nome</button>';
 }
 $('#owner').addEventListener('click', function (e) { if (e.target.closest('#ownerSet')) { openOptions('share'); setTimeout(function () { try { $('#optName').focus(); } catch (x) {} }, 80); } });
@@ -5407,7 +5459,7 @@ $('#svcBox').addEventListener('click', function (e) {
   if (k === 'guide') { if (R && R.guide) R.guide(true); else openOptions('search', true); return; }
   if (A && A.keys) A.keys(); else if (k === 'lend') openSvcShare();
 });
-(hooks.keys || (hooks.keys = [])).push(function () { if (optOpen && !$('#optSheet .opt-sec[data-sec="share"]').hidden) renderSvcShare(); });
+(hooks.keys || (hooks.keys = [])).push(function () { if (optOpen && !$('#optSheet .opt-sec[data-sec="search"]').hidden) { renderSvc(); renderSvcShare(); } });   // «Con gli amici» sta in Ricerca dei libri (17/11/2026)
 function openSvcShare() {
   var msb = mine('sbn'), mgk = mine('key');
   if (!msb && !mgk) { toast('Non hai né chiave Google né worker tuoi da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
@@ -6414,7 +6466,7 @@ var INST_STEPS = {
     note: 'In alternativa apri il link in Chrome: lì basta premere «Installa».', copy: true },
   desktop: { lead: 'Sul computer si installa da Chrome o Edge.',
     steps: ['Nella barra dell\'indirizzo, a destra, clicca l\'icona <b>Installa</b>.', 'Se non c\'è: menu <b>⋮</b> › <b>Trasmetti, salva e condividi</b> › <b>Installa pagina come app</b>.', 'Conferma con <b>Installa</b>.'],
-    note: 'Sul telefono è più comoda: apri Menu › Impostazioni › Condivisione e inquadra il QR code.' }
+    note: 'Sul telefono è più comoda: apri Menu › Info e aiuto › Condivisione e inquadra il QR code.' }
 };
 var instPushed = false;
 function openInstallHelp() {
@@ -6636,7 +6688,7 @@ window.NL = {
   name: function () { return settings.name || ''; }, setName: function (v) { saveName(v); }, newId: newId, today: today,
   guest: function () { return guest ? guest.name : null; }, showBook: showBook, guestEnter: guestEnter, guestExit: function () { guestExit(); }, myBooks: myBooks, addMine: addMine, removeMine: removeMine, restoreMine: restoreMine, isMine: isMine,
   setFlt: function (v) { flt = v; collapseCards(); renderList(); updateSummary(); if (typeof updateActiveFilters === 'function') updateActiveFilters(); }, flt: function () { return flt; }, goal: function () { return settings.goal || 0; },
-  closeDrawer: function () { closeDrawer(); }, refresh: function () { renderList(); updateSummary(); },
+  closeDrawer: function () { closeDrawer(); }, fromMenu: fromMenu, refresh: function () { renderList(); updateSummary(); },
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
   updateStick: function () { updateStick(); }, summary: function () { updateSummary(); }, autosize: function (el) { autosizeAll(el); },
