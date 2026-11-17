@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 102.4 · 17/11/2026 14:15
+- **Foto degli autori** anche da Wikidata (es. Tabucchi); **generi con le icone**; **autori senza foto con nome e cognome**
+
 ## Prova 102.3 · 17/11/2026 13:48
 - **Libreria di un amico** riordinata: in testata solo «Libreria di …», poi amici in comune, Sta leggendo, Letti di recente, «Prestiti, regali e altro» e i tasti; via «‹ La tua libreria»; icona della chiave solo se prestata; niente «Novità dei tuoi autori»; **Ordina e Raggruppa** in una riga sotto la ricerca; **Espandi/Comprimi tutto** anche con filtri e ricerca; **autori per cognome** nei gruppi, «Neruda, Pablo» (scelta in Aspetto), cognome correggibile in «Chi è»
 

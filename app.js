@@ -2589,7 +2589,8 @@ async function auLookup(name) {
   async function summary(title) {
     var j = await L.getJson(fetch, 'https://it.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title.replace(/ /g, '_')) + '?redirect=true', { waits: [], timeout: 8000 });
     return j && j.type !== 'disambiguation' && j.extract ? { title: j.title, desc: L.str(j.description), text: L.str(j.extract), url: (j.content_urls && j.content_urls.mobile && j.content_urls.mobile.page) || auWikiUrl(j.title),
-      img: j.thumbnail && /^https:\/\/upload\.wikimedia\.org\//.test(j.thumbnail.source || '') ? j.thumbnail.source : '' } : null;   // foto dell'autore, se Wikipedia ce l'ha
+      img: j.thumbnail && /^https:\/\/upload\.wikimedia\.org\//.test(j.thumbnail.source || '') ? j.thumbnail.source : '',   // foto dell'autore, se Wikipedia ce l'ha
+      qid: /^Q\d{1,12}$/.test(j.wikibase_item || '') ? j.wikibase_item : '' } : null;
   }
   var r = null;
   try { r = await summary(name); } catch (e) { if (!(e && e.status === 404)) throw e; }
@@ -2612,8 +2613,25 @@ async function auLookup(name) {
     }
     if (!r) r = direct || other;                        // nessuno scrittore: la voce col suo nome (fotografo, cuoco…) o il primo trovato
   }
+  if (r && !r.img && r.qid) {                           // la voce italiana senza foto (Antonio Tabucchi, 17/11/2026): la foto di Wikidata
+    try { r.img = await auWdImg(r.qid); } catch (e) { r.retry = true; }   // senza rete: non si salva «senza foto», si riprova
+  }
+  if (r && r.retry) return r;
   auCache[name] = r || { none: true };
   return auCache[name];
+}
+/* foto della persona su Wikidata (proprieta' P18) e la sua miniatura su Commons: 2 richieste, solo per chi non ha la foto su it.wikipedia */
+async function auWdImg(qid) {
+  var o = { waits: [], timeout: 8000 }, file = '';
+  var j = await L.getJson(fetch, 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&origin=*&property=P18&entity=' + encodeURIComponent(qid), o);
+  var cl = (j && j.claims && j.claims.P18) || [];
+  cl = cl.filter(function (c) { return c && c.rank !== 'deprecated'; }).sort(function (a, b) { return (b.rank === 'preferred') - (a.rank === 'preferred'); });
+  for (var i = 0; i < cl.length && !file; i++) { var v = cl[i].mainsnak && cl[i].mainsnak.datavalue && cl[i].mainsnak.datavalue.value; if (typeof v === 'string' && v.length < 250) file = v; }
+  if (!file) return '';
+  var c = await L.getJson(fetch, 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=url&iiurlwidth=330&titles=' + encodeURIComponent('File:' + file), o);
+  var pg = c && c.query && c.query.pages, u = '';
+  if (pg) Object.keys(pg).forEach(function (k) { var ii = pg[k] && pg[k].imageinfo && pg[k].imageinfo[0]; if (!u && ii && typeof ii.thumburl === 'string') u = ii.thumburl; });
+  return /^https:\/\/upload\.wikimedia\.org\//.test(u) ? u : '';
 }
 async function openAuthor(id, name) {
   auNow = { id: id, name: name };
@@ -2631,6 +2649,7 @@ async function openAuthor(id, name) {
     if (r.none) { $('#auTxt').innerHTML = '<p class="desc-none">Non ho trovato una voce di Wikipedia su questo autore. Prova «Cerca sul web».</p>'; return; }
     $('#auDesc').textContent = r.desc ? r.desc.charAt(0).toUpperCase() + r.desc.slice(1) : '';
     auPic(r.img || '', name);
+    if (r.img && aufGet(name) !== r.img) { aufSave(name, r.img); aufPaint(name, r.img); }   // la stessa foto anche sulla copertina dell'autore
     $('#auTxt').innerHTML = r.text.split(/\n+/).map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
     $('#auSrc').hidden = false;
     var w = $('#auWiki'); w.href = r.url; w.hidden = false;
@@ -3951,7 +3970,15 @@ function grpParts(vis, g) {
 /* foto degli autori: Wikipedia (auLookup), cercate una alla volta e solo per i gruppi che si vedono; salvate sul telefono */
 var AUF_LS = 'catalogo-libri-aufoto', AUF_RETRY = 30 * 864e5, aufo = null, aufQ = [], aufBusy = false, aufIO = null;
 function aufMap() {
-  if (!aufo) { try { aufo = JSON.parse(ls.get(AUF_LS) || '{}'); } catch (e) { nlErr(e); } if (!aufo || typeof aufo !== 'object') aufo = {}; }
+  if (!aufo) {
+    try { aufo = JSON.parse(ls.get(AUF_LS) || '{}'); } catch (e) { nlErr(e); }
+    if (!aufo || typeof aufo !== 'object') aufo = {};
+    if (aufo['~v'] !== 2) {                              // 17/11/2026: prima si guardava solo it.wikipedia, i vecchi «senza foto» si ricercano (anche Wikidata)
+      Object.keys(aufo).forEach(function (k) { if (!Array.isArray(aufo[k]) || !aufo[k][0]) delete aufo[k]; });
+      aufo['~v'] = 2;
+      try { ls.set(AUF_LS, JSON.stringify(aufo)); } catch (e) { nlErr(e); }
+    }
+  }
   return aufo;
 }
 function aufGet(name) {                                  // indirizzo della foto; '' = cercata, non c'e'; null = da cercare
@@ -3961,31 +3988,45 @@ function aufGet(name) {                                  // indirizzo della foto
   return /^https:\/\/upload\.wikimedia\.org\//.test(x[0] || '') ? x[0] : '';
 }
 function aufSave(name, url) {
-  var m = aufMap(), ks = Object.keys(m);
+  var m = aufMap(), ks = Object.keys(m).filter(function (k) { return k.charAt(0) !== '~'; });
   if (ks.length >= 2000) ks.sort(function (a, b) { return (m[a][1] || 0) - (m[b][1] || 0); }).slice(0, 200).forEach(function (k) { delete m[k]; });
   m[L.norm(name)] = [url || '', Date.now()];
   try { ls.set(AUF_LS, JSON.stringify(m)); } catch (e) { nlErr(e); }
 }
 function aufImg(url) { return '<img class="gc-img" src="' + esc(url) + '" alt="" loading="lazy" referrerpolicy="no-referrer" data-rm>'; }
 function aufPaint(name, url) {
-  Array.prototype.forEach.call(document.querySelectorAll('[data-auf]'), function (el) {
-    if (el.dataset.auf !== L.norm(name)) return;
+  var k = L.norm(name);
+  Array.prototype.forEach.call(document.querySelectorAll('.gc-face[data-aun]'), function (el) {
+    if (L.norm(el.dataset.aun) !== k) return;
     el.removeAttribute('data-auf');
-    if (url && !el.querySelector('.gc-img')) el.insertAdjacentHTML('beforeend', aufImg(url));
+    var im = el.querySelector('.gc-img');
+    if (im && url && im.getAttribute('src') !== url) { im.remove(); im = null; }
+    if (url && !im) el.insertAdjacentHTML('beforeend', aufImg(url));
   });
 }
+var aufFails = 0, aufLater = 0;
 async function aufRun() {
   if (aufBusy) return; aufBusy = true;
   try {
     while (aufQ.length) {
-      if (navigator.onLine === false) { aufQ = []; break; }
+      if (navigator.onLine === false) { aufQ = []; aufAgain(); break; }
       var name = aufQ.shift();
       if (aufGet(name) !== null) { aufPaint(name, aufGet(name)); continue; }
-      try { var r = await auLookup(name); aufSave(name, (r && r.img) || ''); aufPaint(name, (r && r.img) || ''); }
-      catch (e) { aufQ = []; break; }                   // senza rete o errore: si riprova la prossima volta
+      try {
+        var r = await auLookup(name);
+        if (r && r.retry) throw r;
+        aufFails = 0; aufSave(name, (r && r.img) || ''); aufPaint(name, (r && r.img) || '');
+      } catch (e) {                                     // errore: si salta solo questo autore (17/11/2026; prima si buttava via tutta la coda)
+        if (++aufFails >= 3) { aufQ = []; aufFails = 0; aufAgain(); break; }   // tre di fila: rete assente o lenta, si riprova tra un minuto
+      }
     }
   } finally { aufBusy = false; }
 }
+function aufAgain() {                                    // si riguardano le copertine ancora senza foto che si vedono
+  clearTimeout(aufLater);
+  aufLater = setTimeout(function () { if (aufIO) Array.prototype.forEach.call(document.querySelectorAll('#list [data-auf]'), function (el) { aufIO.unobserve(el); aufIO.observe(el); }); }, 60000);
+}
+window.addEventListener('online', function () { if (aufIO) Array.prototype.forEach.call(document.querySelectorAll('#list [data-auf]'), function (el) { aufIO.unobserve(el); aufIO.observe(el); }); });
 function aufWant(name) { if (aufQ.indexOf(name) < 0) aufQ.push(name); aufRun(); }
 function aufWatch(root) {                                // si cercano solo le foto dei gruppi che si vedono
   var els = root.querySelectorAll('[data-auf]'); if (!els.length) return;
@@ -3996,13 +4037,77 @@ function aufWatch(root) {                                // si cercano solo le f
   Array.prototype.forEach.call(els, function (el) { aufIO.observe(el); });
 }
 function grpInitials(name) { return name.split(/\s+/).filter(function (w) { return /^[\p{L}\d]/u.test(w); }).map(function (w) { return w.charAt(0); }).slice(-2).join('').toUpperCase() || '?'; }
-/* figura del gruppo: foto (o iniziali) per l'autore, iniziale per il genere */
+/* icone a linee dei generi (24×24, tratto) e regole per riconoscerle dal nome del genere (Piero, 17/11/2026: al posto dell'iniziale);
+   generi non riconosciuti: un libro chiuso */
+var GEN_ICO = {
+  lente: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/>',
+  fantasma: '<path d="M6 20.5V10a6 6 0 0 1 12 0v10.5l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5z"/><circle cx="10" cy="10.5" r=".6"/><circle cx="14" cy="10.5" r=".6"/>',
+  razzo: '<path d="M12 2.5c3 2.5 4.5 6 4.5 10l-1.5 3.5h-6L7.5 12.5c0-4 1.5-7.5 4.5-10z"/><circle cx="12" cy="9.5" r="1.8"/><path d="M7.6 12.8L5 16.5h3.6M16.4 12.8L19 16.5h-3.6M10.5 19l1.5 2.5 1.5-2.5"/>',
+  bacchetta: '<path d="M4 20L15 9"/><path d="M17 3v4M15 5h4M20 10v2M19 11h2M10.5 3v2M9.5 4h2"/>',
+  cuore: '<path d="M12 20s-7.5-4.6-7.5-10A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7.5 3c0 5.4-7.5 10-7.5 10z"/>',
+  bussola: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  globo: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/>',
+  colonna: '<path d="M4 9h16L12 4zM6 9v8M10 9v8M14 9v8M18 9v8M5 17h14M4 20h16"/>',
+  persona: '<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/>',
+  piuma: '<path d="M20 4C12 4 7 9 6 17l-2 3"/><path d="M20 4c0 7-4 12-12.5 13"/><path d="M9 13h5"/>',
+  maschera: '<path d="M5 4h14v7a7 7 0 0 1-14 0z"/><path d="M8.5 9h2M13.5 9h2M9 14c1.8 1.5 4.2 1.5 6 0"/>',
+  palloncino: '<path d="M12 3c3.3 0 5.5 2.6 5.5 5.8 0 3.6-2.8 6.7-5.5 6.7S6.5 12.4 6.5 8.8C6.5 5.6 8.7 3 12 3z"/><path d="M12 15.5l-1 1.5h2zM12 17c0 2-2 2.5-1 4.5"/>',
+  fumetto: '<path d="M4 5h16v11H10l-4 4v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  atomo: '<circle cx="12" cy="12" r="1.4"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(-60 12 12)"/>',
+  bilancia: '<path d="M12 4v16M8 20h8M5 7h14M5 7l-2.5 6a2.5 2.5 0 0 0 5 0zM19 7l-2.5 6a2.5 2.5 0 0 0 5 0z"/>',
+  grafico: '<path d="M4 4v16h16"/><path d="M7.5 15l3.5-4 3 3 5-6.5"/>',
+  lampadina: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1v.5h5V16c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  candela: '<path d="M9 21h6V10.5H9zM12 10.5V8.5"/><path d="M12 3c1.2 1.5 1.5 2.6 0 4.2-1.5-1.6-1.2-2.7 0-4.2z"/>',
+  fotocamera: '<path d="M4 7.5h3l2-2.5h6l2 2.5h3V19H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  tavolozza: '<path d="M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/>',
+  nota: '<path d="M9 18V5.5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16.5" r="2.5"/>',
+  forchetta: '<path d="M7 3v6a2 2 0 0 0 4 0V3M9 11v10M17 21V3c-2 1-3 4-3 8h3"/>',
+  foglia: '<path d="M5 19C5 10 10 5 20 4c-1 10-6 15-15 15z"/><path d="M5 19l8-8"/>',
+  pallone: '<circle cx="12" cy="12" r="9"/><path d="M12 8l3.8 2.8-1.5 4.4H9.7l-1.5-4.4zM12 3v5M15.8 10.8l4.6-1.6M14.3 15.2l2.7 4M9.7 15.2L7 19.2M8.2 10.8L3.6 9.2"/>',
+  battito: '<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+  faccina: '<circle cx="12" cy="12" r="9"/><path d="M8 14c2 2.5 6 2.5 8 0"/><circle cx="9" cy="9.5" r=".6"/><circle cx="15" cy="9.5" r=".6"/>',
+  computer: '<path d="M4 5h16v10H4zM2 19h20"/>',
+  casa: '<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
+  dialogo: '<path d="M3 4h11v7H7.5L4.5 14v-3H3z"/><path d="M10 14h6.5l3 3v-3H21V8h-4"/>',
+  libroAperto: '<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5c-3.5-.5-6.5 0-8.5 1.5zM12 6.5v13"/>',
+  libro: '<path d="M5 19.5V4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5 1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/>'
+};
+var GEN_RULES = [
+  ['fumetto', /fumett|graphic|manga|comics/], ['lente', /giall|thriller|noir|polizi|mystery|investig|spionag|crime/],
+  ['fantasma', /horror|orror|paura|gotic/], ['razzo', /fantascien|science fiction|sci-fi|distop|cyberpunk/],
+  ['bacchetta', /fantasy|fantastic|magia|fiab|favol|mitolog/], ['cuore', /\brosa\b|romance|amor|sentimental|erotic/],
+  ['bussola', /avventur|western|pirat/], ['globo', /viagg|geograf|turism/], ['persona', /biograf|memori|diari|autobiograf/],
+  ['colonna', /storia|storic|archeolog|classic/], ['piuma', /poesi|poet|versi/], ['maschera', /teatr|dramm|spettacol|cinema/],
+  ['palloncino', /ragazz|bambin|infanzia|young|junior|scolast/], ['bilancia', /politic|diritto|giurid|social|sociolog|attualit|cronaca/],
+  ['grafico', /econom|finanz|business|management|marketing/], ['atomo', /scienz|fisic|chimic|biolog|matemat|astronom/],
+  ['candela', /religi|spiritual|teolog|bibbi/], ['lampadina', /saggi|filosof|psicolog|crescita|self|manual|divulgaz|pensiero/],
+  ['fotocamera', /fotograf/], ['tavolozza', /\barte\b|\barti\b|pittur|design|architett/], ['nota', /music|canzon|lirica/],
+  ['forchetta', /cucin|ricett|gastronom|enolog|\bvin/], ['foglia', /natur|animal|giardin|ambient|ecolog|botanic/],
+  ['pallone', /sport|calcio|montagn|alpinism/], ['battito', /medicin|salute|benessere|fitness/],
+  ['faccina', /umoris|comic|satir|ironi/], ['computer', /informat|tecnolog|computer|programmaz|ingegner/],
+  ['casa', /famigl|\bcasa\b|genitor|hobby|bricol/], ['dialogo', /lingu|dizionar|consultaz|studio|grammatic/],
+  ['libroAperto', /romanz|narrativ|raccont|fiction|letteratur|novell|antolog/]
+];
+function genIco(name) {
+  var k = String(name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''), ico = 'libro';
+  for (var i = 0; i < GEN_RULES.length; i++) if (GEN_RULES[i][1].test(k)) { ico = GEN_RULES[i][0]; break; }
+  return '<svg class="gc-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + GEN_ICO[ico] + '</svg>';
+}
+/* figura del gruppo (17/11/2026): genere = icona e nome al centro; autore = foto, senza foto nome piccolo e COGNOME grande al centro;
+   nel tondo piccolo (elenco, sezioni aperte) icona del genere e iniziali dell'autore */
 function grpFace(kind, name, none, small) {
   var url = kind === 'aut' && !none ? aufGet(name) : '';
-  var txt = none ? '?' : kind === 'aut' ? grpInitials(name) : name.charAt(0).toUpperCase();
-  var wait = kind === 'aut' && !none && url === null;
-  return '<span class="gc-face' + (small ? ' sm' : '') + '"' + (wait ? ' data-auf="' + esc(L.norm(name)) + '" data-aun="' + esc(name) + '"' : '') + '>' +
-    '<span class="ph gc-ph' + (kind === 'aut' ? ' gc-au' : '') + '" style="--h:' + (none ? 200 : hue(name)) + '"><b>' + esc(txt) + '</b></span>' + (url ? aufImg(url) : '') + '</span>';
+  var wait = kind === 'aut' && !none && url === null, inner;
+  if (none) inner = '<b>?</b>';
+  else if (kind === 'gen') inner = small ? genIco(name) : genIco(name) + '<b class="gc-gn">' + esc(name) + '</b>';
+  else if (small) inner = '<b>' + esc(grpInitials(name)) + '</b>';
+  else {
+    var pp = L.authorParts(name, settings.auCut[L.norm(name)]), sur = pp.sur || pp.name, giv = pp.sur ? pp.given : '';
+    var lw = Math.max.apply(null, sur.split(/\s+/).map(function (w) { return w.length; }));   // la parola piu' lunga del cognome deve stare in una riga
+    inner = (giv ? '<small class="gc-nm">' + esc(giv) + '</small>' : '') + '<b class="gc-sur" style="--fs:' + Math.max(12, Math.min(20, Math.floor(94 / (0.8 * Math.max(lw, 4))))) + 'px">' + esc(sur) + '</b>';
+  }
+  return '<span class="gc-face' + (small ? ' sm' : '') + (kind === 'gen' ? ' gc-gen' : '') + '"' + (kind === 'aut' && !none ? ' data-aun="' + esc(name) + '"' : '') + (wait ? ' data-auf="' + esc(L.norm(name)) + '"' : '') + '>' +
+    '<span class="ph gc-ph' + (kind === 'aut' ? ' gc-au' : '') + (!small && !none ? ' gc-big' : '') + '" style="--h:' + (none ? 200 : hue(name)) + '">' + inner + '</span>' + (url ? aufImg(url) : '') + '</span>';
 }
 function grpLibri(n) { return n + (n === 1 ? ' libro' : ' libri'); }
 function renderGroups(list, vis, g) {
@@ -5214,7 +5319,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-17 13:48", "n": "102.3", "note": "Libreria di un amico riordinata"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 14:15", "n": "102.4", "note": "Foto degli autori anche da Wikidata (es. Tabucchi); generi con le icone; autori senza foto"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
