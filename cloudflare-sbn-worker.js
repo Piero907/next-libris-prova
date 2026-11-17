@@ -7,8 +7,9 @@
  *
  * Come si installa: vedi LEGGIMI.txt, sezione «CATALOGO SBN».
  * Se pubblichi l'app a un indirizzo diverso, aggiungilo in ORIGINI_AMMESSE.
+ * Next Libris sta su nextlibris.github.io (prima su piero907.github.io, dove resta la copia di prova).
  */
-const ORIGINI_AMMESSE = ['https://piero907.github.io'];
+const ORIGINI_AMMESSE = ['https://nextlibris.github.io', 'https://piero907.github.io'];
 const SBN = 'https://opac.sbn.it/opacmobilegw/';
 
 export default {

@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 99.11 · 17/11/2026 03:29
+- **Trasloco a nextlibris.github.io**: pagina trasloco.html (manda al vecchio indirizzo, riceve al nuovo), worker con i due indirizzi
+
 ## Prova 99.10 · 17/11/2026 01:46
 - **Menu riordinato**: Sostieni a metà schermo sopra Impostazioni, Impostazioni in ordine d'uso, «Info e aiuto», sottotitoli su una riga; tolto «Invita un amico» (è nella finestra Amici)
 - **Indietro** da una finestra aperta dal Menu riapre il Menu nello stesso punto; «Chiudi» chiude tutto

@@ -4,7 +4,7 @@
 const COPIA = (self.registration.scope.match(/\/next-libris-([a-z]+)\//) || [])[1] || '';
 const CACHE = (COPIA ? COPIA + '-' : '') + 'catalogo-libri-v99';
 const MINE = (k) => (COPIA ? k.startsWith(COPIA + '-') : !/^[a-z]+-catalogo-libri-/.test(k));
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'lib.js', 'manifest.json',
+const SHELL = ['./', 'index.html', 'indirizzo.js', 'style.css', 'app.js', 'lib.js', 'manifest.json',
   'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md',
   'wrap.js', 'wrap.css',   // modulo: riepilogo ogni tre mesi
   'layout.js', 'layout.css',   // modulo: disposizione dello schermo
