@@ -118,6 +118,7 @@ var hooks = {};                              // moduli aggiuntivi (vedi window.N
 function emit(name, arg) { (hooks[name] || []).forEach(function (fn) { try { fn(arg); } catch (e) { if (window.console) console.warn('modulo', name, e); } }); }
 var S = {};                                  // stato di sessione per riga: st, msg, thumb, err, cands, lines, price, retry
 var settings = { gbKey: '', price: true, extra: true, lastBackup: 0, snooze: 0, view: 'grid', viewDef: 'grid', openAll: false, sbnUrl: '', loanSnooze: 0, look: 'nuovo', theme: 'light', pal: 'bosco', ft: 'literata', fb: 'plex' };
+var GRP_TXT = { aut: 'per autore', gen: 'per genere', genaut: 'per genere e autore', read: 'per lettura' };   // «Raggruppa per» (17/11/2026)
 var PALS = { inchiostro: ['#EDF0F5', '#10141D'], bordeaux: ['#F2EFEE', '#161112'], bosco: ['#EEF1EE', '#0F1513'] };
 var FONTS_T = ['literata', 'garamond', 'playfair', 'lora', 'merriweather', 'montserrat', 'roboto'], FONTS_B = ['plex', 'roboto', 'lato', 'atkinson', 'lora'];
 var openState = {}, autoOpened = {};
@@ -428,6 +429,9 @@ function loadAll() {
     settings.seenV = Number(s.seenV) || 0;                                         // ultima versione di cui si sono viste le novita'
     settings.wn2 = s.wn2 ? 1 : 0;
     settings.shelfShut = s.shelfShut && typeof s.shelfShut === 'object' ? { now: s.shelfShut.now ? 1 : 0, all: s.shelfShut.all ? 1 : 0 } : {};   // sezioni dell'elenco chiuse
+    settings.grp = GRP_TXT[s.grp] ? s.grp : '';                                        // raggruppa per (copertine ed elenco, 17/11/2026)
+    settings.grpOpen = {};                                                            // gruppi aperti (chiusi di partenza)
+    if (s.grpOpen && typeof s.grpOpen === 'object') Object.keys(s.grpOpen).slice(0, 400).forEach(function (k) { if (typeof k === 'string' && k.length < 200) settings.grpOpen[k] = 1; });
     oldApp = typeof s.look === 'string';                                             // impostazioni salvate da una versione precedente dell'app (non una prima installazione)                                                   // la pagina delle novita' funziona anche per chi aggiorna (dalla 96)
     settings.seenB = L.str(s.seenB).slice(0, 12);                                   // nella copia di prova: ultima prova vista («94.17»)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
@@ -2744,12 +2748,15 @@ async function checkWhatsNew() {
   settings.wn2 = 1;
   var newV = APP_VERSION.v > fromV, newB = PROVA && curB && provaNum(curB) > provaNum(fromB);
   if (!newV && !newB) { saveSettings(); return; }
-  settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings();
-  var items = [], title = '', brief = false;
+  /* la versione si segna come vista solo quando la finestra compare: se il registro non arriva (rete, ricarica dell'aggiornamento)
+     la finestra si riprova alla prossima apertura (101.2 non era comparsa, Piero 17/11/2026) */
+  var seen = function () { settings.seenV = APP_VERSION.v; settings.seenB = curB; saveSettings(); };
+  var items = [], title = '', brief = false, got = false;
   try {
     if (PROVA && curB && !missed) {
       var rp = await fetch('REGISTRO_PROVA.md', { cache: 'no-cache' }).catch(function () { return null; });
       var pm = rp && rp.ok ? await rp.text() : '';
+      if (pm && /^#/.test(pm)) got = true;
       var inB = function (h) { var m = /^Prova\s+([\d.]+)/.exec(h); return !!m && provaNum(m[1]) > provaNum(fromB) && provaNum(m[1]) <= provaNum(curB); };
       items = newsBrief(pm, inB); brief = items.length > 0;      // anche nella prova, lo stesso stile semplice
       if (!items.length) items = newsSince(pm, inB);
@@ -2759,13 +2766,15 @@ async function checkWhatsNew() {
       var r = await fetch('REGISTRO_MODIFICHE.md', { cache: 'no-cache' }).catch(function () { return null; });
       if (!r || !r.ok) r = await fetch('REGISTRO_MODIFICHE.md').catch(function () { return null; });
       var md = r && r.ok ? await r.text() : '';
+      if (md && /^#/.test(md)) got = true;
       var inV = function (h) { var m = /^Versione\s+(\d+)/.exec(h); return !!m && +m[1] > fromV && +m[1] <= APP_VERSION.v; };
       items = newsBrief(md, inV);                     // per tutti: poche novita' in parole semplici (Piero, 16/11/2026)
       brief = true;
       title = 'Versione ' + APP_VERSION.v;
     }
   } catch (e) { nlErr(e); }
-  if (!items.length) return;
+  if (!items.length) { if (got) seen(); return; }      // registro letto ma niente da dire: vista; non letto: si riprova
+  seen();
   $('#wnSub').textContent = brief ? title + ': ecco cosa cambia per te.' : title + ' · ' + (items.length === 1 ? '1 novità' : items.length + ' novità');
   $('#wnList').classList.toggle('wn-brief', brief);
   $('#wnList').innerHTML = (brief ? items : rankNews(items)).map(function (x) { return '<li>' + logInline(x) + '</li>'; }).join('');
@@ -2850,6 +2859,7 @@ $('#donAskNever').addEventListener('click', function () {
 });
 $('#donMenu').addEventListener('click', function () { fromMenu(function () { openDon(); }); });
 $('#donOpt').addEventListener('click', function () { openDon(); });
+$('#btnBeer').addEventListener('click', function () { openDon(); });   // boccale nella testata (Piero, 17/11/2026)
 $('#donSheet').addEventListener('click', function (e) {
   if (e.target === e.currentTarget) { closeDon(); return; }
   var x = e.target.closest('.don-amt'); if (x) { donAmt = x.dataset.amt; paintDonAmt(); }
@@ -3506,7 +3516,7 @@ function goToQuotes(id) {
   flt = ''; readFlt = ''; shFlt = ''; genFlt = ''; autFlt = ''; autName = ''; edFlt = ''; frFlt = '';
   q = ''; $('#q').value = '';
   collapseCards(); openState = {}; openState[id] = true; quoteOpen[id] = true;
-  if (settings.view === 'grid') setView('list');
+  if (settings.view === 'grid') { gridRet = { id: id, y: 0 }; setView('list'); }   // le citazioni si vedono nella scheda: chiudendola si torna alle copertine
   renderList(); updateSummary();
   var el = rowEl(id), d = el && el.querySelector('details.quotes');
   if (el) { (d || el).scrollIntoView({ block: 'start' }); window.scrollBy(0, -80); el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 1600); }
@@ -3759,7 +3769,7 @@ function ppCov(b) {                               // sotto l'autore: barra sotti
 }
 function coverHTML(b) {
   var s = S[b.id] || {}, img = bigImg(b);
-  var badge = isBusy(b) ? '<span class="badge">…</span>' : b.p ? '<span class="badge loan">Prestato</span>' : b.g.length ? '<span class="badge warn">Da verificare</span>' : '';
+  var badge = isBusy(b) ? '<span class="badge">…</span>' : b.p ? '<span class="badge loan">Prestato</span>' : (b.sk === 'p' || b.sk === 'q') && b.sda && !b.xs ? '<span class="badge loan">In prestito</span>' : b.g.length ? '<span class="badge warn">Da verificare</span>' : '';
   var fav = b.fav && !b.w ? '<span class="ribbon fav-star" title="Preferito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/></svg></span>' : '';   // stellina sulla copertina
   return '<button class="cover' + (fav ? ' is-fav' : '') + '" data-id="' + b.id + '" aria-label="' + esc([b.t || 'Senza titolo', b.a, fav ? 'preferito' : ''].filter(Boolean).join(', ')) + '">' +
     '<span class="art">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' :
@@ -3810,6 +3820,7 @@ function renderList() {
   clearTimeout(tGrid);
   setTimeout(updateStick, 0);
   if (scanning) return;
+  if (gridGone()) { dropCard(); backToGrid(); return; }   // la vista resta quella scelta dopo ogni azione sul libro (Piero, 17/11/2026)
   donPaint(); nxBoxPaint();
   var list = $('#list');
   syncThumbs();
@@ -3829,6 +3840,8 @@ function renderList() {
       : '<p class="none">Nessun libro corrisponde ' + (activeCount() ? (q ? 'alla ricerca e ai filtri.' : 'ai filtri.') : 'alla ricerca.') + '</p><p><button class="btn" data-act="clearflt">' + (activeCount() ? (q ? 'Azzera ricerca e filtri' : 'Azzera i filtri') : 'Cancella la ricerca') + '</button></p>';
     return;
   }
+  var g = grpMode();
+  if (g) { renderGroups(list, vis, g); return; }
   /* i libri «In lettura» in cima, in una sezione che si apre e chiude; sotto gli altri (solo Libreria, ordine «Più recenti», senza ricerca ne' filtri) */
   var now = tab === 'lib' && !q && !activeCount() && sortBy === 'recent' ? vis.filter(function (b) { return b.rs === 'in'; }) : [];   // con un altro ordine (voto, titolo…) vale l'ordine scelto
   var parts = now.length ? [['now', 'In lettura', now], ['all', now.length < vis.length ? 'Gli altri libri' : '', vis.filter(function (b) { return b.rs !== 'in'; })]] : null;
@@ -3851,6 +3864,51 @@ function renderList() {
   list.innerHTML = parts ? parts.map(function (x) { return shelf(x[0], x[1], x[2], rowsOf); }).join('') : rowsOf(vis);
   emit('rows', list);                              // i moduli possono sistemare le schede appena disegnate
   autosizeAll(list);
+  paintSel();
+}
+/* ---- Raggruppa per (Piero, 17/11/2026): autore, genere, genere e poi autore, lettura; nelle copertine e nell'elenco.
+   Gruppi chiusi di partenza (si aprono con un tocco e se lo ricorda); aperti tutti con una ricerca, e sempre quello del libro aperto.
+   Dentro un gruppo vale l'ordine scelto. Un libro con piu' autori sta nel gruppo del primo. ---- */
+var READ_GRP = [['in', 'In lettura'], ['da', 'Da leggere'], ['ok', 'Letti']];
+function grpMode() {
+  var g = settings.grp || '';
+  if (g === 'read' && tab === 'wish') return '';           // nei Desideri la lettura non c'e'
+  return g;
+}
+function groupBy(books, keyOf, none) {                     // [[chiave, nome, libri]] in ordine alfabetico, «senza» in fondo
+  var m = {}, order = [];
+  books.forEach(function (b) {
+    var name = keyOf(b), k = name ? L.norm(name) : '';
+    if (!m[k]) { m[k] = { name: name || none, books: [] }; order.push(k); }
+    m[k].books.push(b);
+  });
+  order.sort(function (a, b) { return !a ? 1 : !b ? -1 : coll.compare(m[a].name, m[b].name); });
+  return order.map(function (k) { return [k || '~', m[k].name, m[k].books]; });
+}
+function grpParts(vis, g) {
+  if (g === 'read') return READ_GRP.map(function (r) { return [r[0], r[1], vis.filter(function (b) { return (b.rs === 'in' || b.rs === 'ok' ? b.rs : 'da') === r[0]; })]; }).filter(function (x) { return x[2].length; });
+  var aut = function (b) { return authorsOf(b)[0] || ''; }, gen = function (b) { return L.str(b.gen).trim(); };
+  if (g === 'aut') return groupBy(vis, aut, 'Senza autore');
+  var gs = groupBy(vis, gen, 'Senza genere');
+  if (g === 'genaut') gs.forEach(function (x) { x[3] = groupBy(x[2], aut, 'Senza autore'); });
+  return gs;
+}
+function renderGroups(list, vis, g) {
+  var all = !!(q || activeCount()), dups = settings.view === 'grid' ? null : computeDups(), n = 0;
+  var inner = function (a) { return settings.view === 'grid' ? '<div class="grid">' + a.map(coverHTML).join('') + '</div>' : a.map(function (b) { return rowHTML(b, dups); }).join(''); };
+  var hasOpen = function (a) { return a.some(function (b) { return openState[b.id] && b.t; }); };
+  var sec = function (key, title, books, body, sub) {
+    var id = 'grp-' + (n++), open = all || !!settings.grpOpen[key] || hasOpen(books);
+    return '<section class="shelf grp' + (sub ? ' grp-sub' : '') + '"><button type="button" class="shelf-h" data-gk="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
+      '<span class="sh-t">' + esc(title) + '</span><span class="sh-n">' + books.length + '</span><svg class="sh-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+      '<div class="shelf-b" id="' + id + '"' + (open ? '' : ' hidden') + '>' + body + '</div></section>';
+  };
+  list.innerHTML = grpParts(vis, g).map(function (x) {
+    var key = g + ':' + tab + ':' + x[0];
+    var body = x[3] ? x[3].map(function (y) { return sec(key + '/' + y[0], y[1], y[2], inner(y[2]), true); }).join('') : inner(x[2]);
+    return sec(key, x[1], x[2], body, false);
+  }).join('');
+  if (settings.view !== 'grid') { emit('rows', list); autosizeAll(list); }
   paintSel();
 }
 function rowEl(id) { return $('#list').querySelector('[data-id="' + id + '"]'); }
@@ -3914,7 +3972,7 @@ function delBook(id) {
   delete S[id];
   var el = rowEl(id);
   if (el) el.remove();
-  if (!tabBooks().length || settings.view === 'grid') renderList();
+  if (!tabBooks().length || settings.view === 'grid' || gridGone()) renderList();
   touch(); updateSummary();
   if (active || !hasData(b)) { toast('Libro eliminato'); return; }
   toast('Libro eliminato', { label: 'Annulla', fn: function () {
@@ -4728,6 +4786,7 @@ function renderDrawer() {
   $('#drawerFlt').innerHTML = o;
   body.scrollTop = st;
   $('#sort').value = sortBy;
+  $('#grp').value = settings.grp || '';
   paintMenuHome();
   $('#drawerHint').hidden = !!settings.swiped;
   updateDrawerFoot();
@@ -4789,7 +4848,7 @@ var SORT_TXT = { recent: 'dai più recenti', titolo: 'per titolo', autore: 'per 
 function paintMenuHome() {                        // la pagina principale riassume filtri e ordine, senza mostrarli
   var n = activeCount(), lib = tab === 'lib';
   var what = n ? (n === 1 ? '1 filtro attivo' : n + ' filtri attivi') : (lib ? 'Tutti i libri' : 'Tutti i desideri');
-  $('#goFltTxt').textContent = what + (q ? ', con ricerca' : '') + ', ' + (SORT_TXT[sortBy] || 'dai più recenti');
+  $('#goFltTxt').textContent = what + (q ? ', con ricerca' : '') + ', ' + (SORT_TXT[sortBy] || 'dai più recenti') + (grpMode() ? ', ' + GRP_TXT[grpMode()] : '');
   $('#goFltN').hidden = !n; $('#goFltN').textContent = n;
   $('#goFilters').classList.toggle('on', !!(n || q));
   var nq = allQuotes().length;
@@ -4882,8 +4941,9 @@ $('#ctCopy').addEventListener('click', async function () {
   try { await navigator.clipboard.writeText(CONTACT); toast('Indirizzo copiato.'); }
   catch (e) { toast('Non riesco a copiarlo: tienilo premuto per selezionarlo.'); }
 });
-/* ---- Indietro dalle finestre del Menu (Piero, 17/11/2026): il Menu si riapre nello stesso punto e con gli stessi gruppi aperti;
-   «Chiudi» o × chiudono tutto, come prima. ---- */
+/* ---- Indietro dalle finestre del Menu (Piero, 17/11/2026): il Menu si riapre nello stesso punto e con gli stessi gruppi aperti.
+   Anche × e «Chiudi» (e il tocco fuori dalla finestra) fanno come Indietro (Piero, 17/11/2026 pomeriggio: prima chiudevano tutto).
+   Una finestra che si chiude da sola per un'azione (vai al libro, apri la libreria di un amico…) chiude anche il Menu, come prima. ---- */
 var WIN_SEL = '.sheet:not([hidden]), #wrap:not([hidden])';
 var menuRet = null, menuChk = null;
 function winOpen() { return !!document.querySelector(WIN_SEL); }
@@ -4895,17 +4955,34 @@ function fromMenu(fn) {
   menuLater();
 }
 function menuLater() { clearTimeout(menuChk); menuChk = setTimeout(menuCheck, 400); }
-function menuCheck() {                                  // finestra chiusa con «Chiudi» senza cronologia (o mai aperta): via anche la voce del Menu
+function menuCheck() {                                  // finestra chiusa senza cronologia (o mai aperta)
   var h = history.state || {};
+  if (menuRet && !menuRet.back && winOpen()) menuRet.x = false;   // × di una finestra sopra un'altra: conta solo per l'ultima
   if (!menuRet || menuRet.back || drawerOpen || winOpen() || !(h.drawer || h.mwin)) return;
-  menuRet = null;
+  if (menuRet.x) {                                      // × o «Chiudi»: come Indietro, si torna al Menu
+    menuRet.back = true;
+    if (h.mwin) { try { history.back(); } catch (e) { nlErr(e); } }   // menuPop riapre il Menu
+    else menuReopen();
+    return;
+  }
+  menuRet = null;                                       // chiusa da un'azione: via anche la voce del Menu
   try { if (h.mwin) history.go(-2); else history.back(); } catch (e) { nlErr(e); }
 }
 function menuPop(e) {
   if (!menuRet || drawerOpen || !(e.state && e.state.drawer)) return;
-  if (winOpen()) { menuRet.back = true; setTimeout(menuReopen, 0); }   // gesto Indietro con la finestra aperta
-  else { menuRet = null; try { history.back(); } catch (x) {} }           // la finestra si e' chiusa da sola («Chiudi»): chiude anche il Menu
+  if (winOpen() || menuRet.x || menuRet.back) { menuRet.back = true; setTimeout(menuReopen, 0); }   // gesto Indietro, × o «Chiudi»
+  else { menuRet = null; try { history.back(); } catch (x) {} }           // la finestra si e' chiusa per un'azione: chiude anche il Menu
 }
+/* × e «Chiudi»: un tocco su un pulsante di chiusura della finestra in primo piano, o fuori dalla finestra */
+function isCloseTap(t) {
+  if (!t || !t.closest) return false;
+  if (t.matches && t.matches('.sheet:not([hidden])')) return true;                       // tocco fuori (sullo sfondo)
+  var b = t.closest('button'), w = b && b.closest('.sheet, #wrap');
+  if (!w) return false;
+  var lb = (b.getAttribute('aria-label') || '') + ' ' + b.textContent;
+  return /(Close|X)$/.test(b.id || '') || /^\s*(×\s*)?Chiudi\s*$/.test(b.textContent) || /^Chiudi$/.test(b.getAttribute('aria-label') || '') || /^×/.test(lb.trim());
+}
+document.addEventListener('click', function (e) { if (menuRet && !menuRet.back && !drawerOpen && isCloseTap(e.target)) menuRet.x = true; }, true);
 function menuReopen() {
   var r = menuRet; menuRet = null;
   if (!r) return;
@@ -4962,7 +5039,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-17 10:17", "n": "101.2", "note": "Bonifiche della verifica"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 11:24", "n": "101.3", "note": "Raggruppa per autore, genere, genere e autore, lettura (copertine ed elenco); Privacy dent"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -5025,6 +5102,27 @@ function openOptions(sec, reuse) {
   else if (!optPushed) { try { history.pushState({ opt: 1 }, ''); optPushed = true; } catch (e) { nlErr(e); } }
   if (sec === 'search') { renderSvc(); renderSvcShare(); if (window.NLAmici && window.NLAmici.load) window.NLAmici.load().catch(function () {}); }   // «Con gli amici»: chiave e worker (da Condivisione, 17/11/2026)
   if (sec === 'app') { renderVersion(); checkVersion(); updateInstallUi(); }
+  if (sec === 'privacy') loadPrivacy();
+}
+/* Privacy dentro l'app (Piero, 17/11/2026): dalla pagina privacy.html (che resta per Google) solo il testo, senza titolo né piede;
+   × e Indietro tornano al Menu. Il testo è nostro (stesso sito): si legge e si mostra cosi' com'e'. */
+var pvDone = false;
+async function loadPrivacy() {
+  var box = $('#pvBody');
+  if (pvDone) return;
+  box.innerHTML = '<p class="desc-wait"><span class="spin" aria-hidden="true"></span>Carico l\'informativa…</p>';
+  try {
+    var r = await fetch('privacy.html', { cache: 'no-cache' }).catch(function () { return null; });
+    if (!r || !r.ok) r = await fetch('privacy.html');
+    var d = new DOMParser().parseFromString(await r.text(), 'text/html'), m = d.querySelector('main');
+    if (!m) throw new Error('privacy senza testo');
+    ['h1', 'footer', 'script', 'style'].forEach(function (t) { Array.prototype.forEach.call(m.querySelectorAll(t), function (x) { x.remove(); }); });
+    Array.prototype.forEach.call(m.querySelectorAll('a[href^="http"]'), function (a) { a.target = '_blank'; a.rel = 'noopener'; });
+    box.innerHTML = m.innerHTML; pvDone = true;
+  } catch (e) {
+    nlErr(e);
+    box.innerHTML = '<p class="desc-none">Non riesco a caricare l\'informativa' + (navigator.onLine === false ? ' senza connessione' : '') + '. Riprova più tardi.</p>';
+  }
 }
 function closeOptions(fromPop) {
   if (!optOpen) return;
@@ -5724,6 +5822,7 @@ function moveToWish(id) {
   toast('Spostato nei Desideri: ' + (b.t || b.i), { label: 'Annulla', fn: function () { var x = get(id); if (x) { Object.assign(x, before); openState[id] = oldOpen; touch(); renderList(); updateSummary(); } } });
 }
 function setTab(t) {
+  if (gridRet && settings.view !== 'grid') setView('grid');   // aperta dalle copertine: nell'altra scheda si resta in copertine
   gridRet = null;
   if (selOn) endSel(false);
   tab = t === 'wish' ? 'wish' : 'lib';
@@ -5765,6 +5864,12 @@ function backToGrid() {                          // chiamata quando l'ultima sch
   });
   return true;
 }
+function gridGone() {                            // aperta dalle copertine, ma il libro non e' piu' in questa scheda
+  if (!gridRet || settings.view === 'grid' || guest) return false;
+  var b = get(gridRet.id);
+  return !b || !!b.w !== (tab === 'wish');
+}
+function dropCard() { if (cardPushed) { cardPushed = null; try { history.back(); } catch (e) { nlErr(e); } } }   // la voce «scheda aperta» nella cronologia
 function anyOpen() { return !settings.openAll && Object.keys(openState).some(function (k) { var x = get(k); return openState[k] && x && x.t; }); }
 /* ---------- statistiche ---------- */
 function barsHTML(title, items, filterable) {
@@ -5961,6 +6066,11 @@ list.addEventListener('click', function (e) {          // sezioni «In lettura»
   e.stopImmediatePropagation();
   var k = sh.dataset.shelf, open = sh.getAttribute('aria-expanded') !== 'true';
   sh.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (sh.dataset.gk) {                                   // gruppo di «Raggruppa per»
+    var gb = document.getElementById(sh.getAttribute('aria-controls')); if (gb) gb.hidden = !open;
+    if (open) settings.grpOpen[sh.dataset.gk] = 1; else delete settings.grpOpen[sh.dataset.gk];
+    saveSettings(); return;
+  }
   var body = document.getElementById('shelf-' + k); if (body) body.hidden = !open;
   settings.shelfShut = settings.shelfShut || {}; if (open) delete settings.shelfShut[k]; else settings.shelfShut[k] = 1; saveSettings();
 }, true);
@@ -6196,6 +6306,7 @@ document.addEventListener('touchend', endSheetDrag);
 document.addEventListener('touchcancel', endSheetDrag);
 $('#q').addEventListener('input', function (e) { q = e.target.value; collapseCards(); renderList(); });
 $('#sort').addEventListener('change', function (e) { sortBy = e.target.value; renderList(); });
+$('#grp').addEventListener('change', function (e) { settings.grp = GRP_TXT[e.target.value] ? e.target.value : ''; saveSettings(); renderList(); if (drawerOpen) { updateDrawerFoot(); renderDrawer(); } });
 $('#fltGuess').addEventListener('click', function () { flt = flt === 'guess' ? '' : 'guess'; collapseCards(); updateSummary(); renderList(); });
 $('#fltLoan').addEventListener('click', function () {
   collapseCards();

@@ -186,11 +186,16 @@ async function doSync() {
 }
 
 /* ---------- accesso ---------- */
-var prov = null;                                       // provider attivi in Supabase (/auth/v1/settings): il pulsante Google compare solo se Google e' acceso
+var prov = null, provFail = false, provLoading = null;                                       // provider attivi in Supabase (/auth/v1/settings): il pulsante Google compare solo se Google e' acceso
 async function providers() {
   if (prov) return prov;
-  try { var j = await call('/auth/v1/settings'); prov = { google: !!(j && j.external && j.external.google) }; } catch (e) { return { google: false }; }
-  return prov;
+  if (provLoading) return provLoading;
+  provLoading = (async function () {
+    try { var j = await call('/auth/v1/settings'); prov = { google: !!(j && j.external && j.external.google) }; provFail = false; return prov; }
+    catch (e) { provFail = true; return { google: false }; }
+    finally { provLoading = null; }
+  })();
+  return provLoading;
 }
 function google() { location.href = CFG.url + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(home()); }   // riserva: passa da supabase.co
 /* Pulsante ufficiale di Google (Google Identity Services, 16/11/2026): Google consegna il token direttamente a questa pagina,
@@ -299,9 +304,10 @@ function sheet() {
   el.addEventListener('click', onClick);
   return el;
 }
+window.addEventListener('online', function () { if (!auth && !prov) { provFail = false; paintSheet(); } });   // torna la rete: si riprova
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var el = document.getElementById('accSheet'); if (el && !el.hidden) close(); } });
 async function open() {
-  var el = sheet(); confirmAct = ''; el.hidden = false; copyInfo = await getCopy(); paintSheet();
+  var el = sheet(); confirmAct = ''; el.hidden = false; provFail = false;   // a ogni apertura si riprova copyInfo = await getCopy(); paintSheet();
   if (!auth && !prov) { await providers(); paintSheet(); }
   var f = el.querySelector('input'); if (f) setTimeout(function () { f.focus(); }, 60);
 }
@@ -317,7 +323,10 @@ function paintSheet() {
     if (step === 'email' && gOn) h += '<div class="acc-g" id="accG"></div>' +
       '<p class="msg bad" id="accErr" hidden></p>' + (EMAIL ? '<p class="acc-or">oppure con la tua email</p>' : '');
     if (!EMAIL) {
-      if (!gOn) h += '<p class="msg' + (prov ? '' : ' bad') + '" id="accOff">' + (prov ? 'L\'accesso per ora non è attivo. Riprova più tardi.' : 'Per entrare serve la connessione a internet.') + '</p>';
+      /* dopo l'uscita dall'account i servizi di accesso non erano mai stati letti: prima si leggono, poi si decide il messaggio
+         (prima compariva «serve la connessione» anche con la rete, Piero 17/11/2026) */
+      if (!prov && !provFail) { h += '<p class="msg" id="accOff">Un attimo…</p>'; providers().then(function () { paintSheet(); }); }
+      else if (!gOn) h += '<p class="msg' + (prov ? '' : ' bad') + '" id="accOff">' + (prov ? 'L\'accesso per ora non è attivo. Riprova più tardi.' : navigator.onLine === false ? 'Per entrare serve la connessione a internet.' : 'Non riesco a raggiungere il servizio di accesso. Riprova tra poco.') + '</p>';
     } else if (step === 'email') {
       h += '<form id="accFormE"><label class="field"><span>La tua email</span><input type="email" id="accMail" autocomplete="email" inputmode="email" enterkeyhint="send" required value="' + esc(mail) + '"></label>' +
         '<p class="msg bad" id="accErr" hidden></p><button class="btn' + (prov && prov.google ? '' : ' primary') + '" type="submit" id="accSend">Mandami l\'email</button></form>';

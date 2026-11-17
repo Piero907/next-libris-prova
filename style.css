@@ -1054,13 +1054,15 @@ html[data-theme="dark"] .ico.act.fav.on svg{color:#F4C430}
 .top-meta .owner:not(:empty)::after{content:" · ";color:var(--muted);font-weight:400}
 html[data-look="nuovo"] .top{--h1-fs:calc(clamp(24px,6.8vw,38px) * var(--ft-k,1))}
 html[data-look="nuovo"] .top h1{font-size:var(--h1-fs)}
-.top .gear,.top .fri-top,.top .nt-top{top:calc(var(--h1-fs,31px) * .52 - 22px)}   /* centrate sulla riga del titolo */
+.top .gear,.top .fri-top,.top .nt-top,.top .beer-top{top:calc(var(--h1-fs,31px) * .52 - 22px)}   /* centrate sulla riga del titolo */
 .top h1{white-space:nowrap}
 .top h1 .prova-tag{margin-left:6px;padding:2px 7px;font-size:11px}
 @media (max-width:380px){                 /* telefoni stretti con tre icone: titolo e PROVA non toccano la campanella */
   html.has-bell .top{padding-right:120px;--h1-fs:calc(23px * var(--ft-k,1))}
   html.has-bell .top .fri-top{right:32px}
   html.has-bell .top .nt-top{right:68px}
+  html.has-bell body header.top{padding-right:150px;--h1-fs:calc(21px * var(--ft-k,1))}
+  html.has-bell body header.top .beer-top{right:104px}
 }
 .owner b{font-weight:600}
 .owner .link{padding:2px 0;font-size:15px}
@@ -1658,3 +1660,27 @@ a.dopt{color:inherit;text-decoration:none}
 .svc-box .hint{margin:0}
 .svc-lent .svc-own{display:block;margin-top:6px;padding:4px 0;text-align:left}   /* «Usa la tua» su una riga sua (17/11/2026) */
 .keysteps .sbn-copy{display:flex;margin:8px 0 2px;min-height:40px;font-size:14px}   /* guida del worker (17/11/2026) */
+/* Privacy dentro l'app (17/11/2026): il testo di privacy.html con i componenti dell'app */
+.pv-body{font-size:15px;line-height:1.55;overflow-wrap:anywhere}
+.pv-body h2{font-size:16px;margin:20px 0 6px;color:var(--accent)}
+.pv-body p,.pv-body li{margin:0 0 9px}
+.pv-body ul{padding-left:20px;margin:0 0 9px}
+.pv-body .sub{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+.pv-body .box{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0 0 14px}
+.pv-body a{color:var(--accent)}
+/* boccale di birra nella testata (Piero, 17/11/2026): apre Sostieni; a sinistra delle altre icone, colore dell'app */
+.beer-top{position:absolute;top:0;right:38px;color:var(--accent)}
+.beer-top svg{width:24px;height:24px}
+header.top{padding-right:90px}
+html.has-fri header.top{padding-right:134px}
+html.has-fri header.top .beer-top{right:76px}
+html.has-bell header.top{padding-right:172px}
+html.has-bell header.top .beer-top{right:114px}
+/* «Raggruppa per» (17/11/2026): gruppi come «In lettura», i sottogruppi (genere › autore) più piccoli e rientrati */
+.shelf.grp{margin:0 0 4px}
+.shelf.grp>.shelf-b{padding-top:8px}
+.shelf.grp .sh-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shelf.grp .shelf-h{margin-bottom:0}
+.shelf.grp-sub{margin:0 0 2px 12px}
+.shelf.grp-sub>.shelf-h{min-height:40px;font-size:15px;font-weight:500;border-bottom-style:dashed}
+.shelf.grp-sub>.shelf-h .sh-n{background:none;color:var(--muted);padding:0;min-width:0}
