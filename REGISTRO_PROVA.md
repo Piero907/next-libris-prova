@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 103.1 · 17/11/2026 15:11
+- Uguale alla versione vera 103
+
 ## Prova 102.5 · 17/11/2026 15:10
 - Foto dell'autore a tutto schermo; foto degli autori anche quando su Wikipedia non è «libera» (Ennio Flaiano)
 - «Restituiscilo» e «È tornato: segna restituito» sono tasti pieni
