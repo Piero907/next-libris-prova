@@ -432,7 +432,11 @@ function loadAll() {
     settings.grp = GRP_TXT[s.grp] ? s.grp : '';                                        // raggruppa per (copertine ed elenco, 17/11/2026)
     settings.grpOpen = {};                                                            // gruppi aperti (chiusi di partenza)
     if (s.grpOpen && typeof s.grpOpen === 'object') Object.keys(s.grpOpen).slice(0, 400).forEach(function (k) { if (typeof k === 'string' && k.length < 200) settings.grpOpen[k] = 1; });
-    settings.grpExp = s.grpExp ? 1 : 0;                                              // «Espandi tutto» dei gruppi (17/11/2026 sera)
+    settings.grpExp = s.grpExp ? 1 : 0; 
+    settings.auInv = s.auInv === 0 ? 0 : 1;                                          // autori nei gruppi «Neruda, Pablo» (1, predefinito) o come sono scritti (0) (17/11/2026 notte)
+    settings.auCut = {};                                                             // cognome corretto a mano: parole del cognome (0 = com'è scritto)
+    if (s.auCut && typeof s.auCut === 'object') Object.keys(s.auCut).slice(0, 500).forEach(function (k) { var v = Number(s.auCut[k]); if (k.length < 200 && v >= 0 && v < 10) settings.auCut[k] = Math.floor(v); });
+                                             // «Espandi tutto» dei gruppi (17/11/2026 sera)
     oldApp = typeof s.look === 'string';                                             // impostazioni salvate da una versione precedente dell'app (non una prima installazione)                                                   // la pagina delle novita' funziona anche per chi aggiorna (dalla 96)
     settings.seenB = L.str(s.seenB).slice(0, 12);                                   // nella copia di prova: ultima prova vista («94.17»)
     settings.suggAuto = s.suggAuto !== false;                                       // «Da scoprire»: cerca da solo una volta a settimana
@@ -1554,7 +1558,7 @@ function visible() {
 }
 function cmpFor(k) {
   var byTitle = function (x, y) { return coll.compare(L.sortKeyTitle(x.t) || '~', L.sortKeyTitle(y.t) || '~'); };
-  var byAuthor = function (x, y) { return coll.compare(L.sortKeyAuthor(x.a) || '~', L.sortKeyAuthor(y.a) || '~'); };
+  var byAuthor = function (x, y) { return coll.compare(L.sortKeyAuthor(x.a, settings.auCut) || '~', L.sortKeyAuthor(y.a, settings.auCut) || '~'); };
   if (k === 'titolo') return byTitle;
   if (k === 'autore') return function (x, y) { return byAuthor(x, y) || byTitle(x, y); };
   if (k === 'editore') return function (x, y) { return coll.compare(x.e || '~', y.e || '~') || byAuthor(x, y) || byTitle(x, y); };
@@ -2617,6 +2621,7 @@ async function openAuthor(id, name) {
   $('#auH').textContent = name; $('#auDesc').textContent = ''; $('#auSrc').hidden = true; $('#auWiki').hidden = true; auPic('');
   $('#auMine').textContent = mine > 1 ? 'I suoi libri nella tua libreria (' + mine + ')' : 'Il suo libro nella tua libreria';
   $('#auMine').hidden = mine < 2;
+  auCutPaint(name);
   $('#auTxt').innerHTML = '<p class="desc-wait"><span class="spin" aria-hidden="true"></span>Cerco chi è…</p>';
   $('#auSheet').hidden = false;
   if (navigator.onLine === false) { $('#auTxt').innerHTML = '<p class="desc-none">Senza connessione: le informazioni sull\'autore si cercano online.</p>'; return; }
@@ -2641,6 +2646,36 @@ function auPic(src, name) {                        // foto dell'autore da Wikipe
   im.onerror = function () { f.hidden = true; };
   im.alt = 'Foto di ' + name; im.src = src;
 }
+/* cognome dell'autore, corretto a mano (Piero, 17/11/2026 notte): «In ordine come: Márquez, Gabriel García · Correggi» */
+function auCutPaint(name, open) {
+  var box = $('#auCut'), k = L.norm(name), w = String(name || '').trim().split(/\s+/);
+  if (!box) return;
+  box.hidden = w.length < 2;
+  if (w.length < 2) return;
+  var cur = settings.auCut[k];
+  var h = '<p class="auc-now">In ordine come <b>' + esc(L.authorInv(name, settings.auCut)) + '</b>' + (cur != null ? ' <small>(corretto)</small>' : '') +
+    ' <button type="button" class="link" data-auc="open" aria-expanded="' + !!open + '">' + (open ? 'Chiudi' : 'Correggi') + '</button></p>';
+  if (open) {
+    var opts = [];
+    for (var n = 1; n < w.length; n++) opts.push([n, w.slice(w.length - n).join(' ') + ', ' + w.slice(0, w.length - n).join(' ')]);
+    opts.push([0, name + ' (com\'è scritto)']);
+    var sel = cur != null ? cur : -1, auto = L.authorInv(name);
+    h += '<div class="auc-opts" role="radiogroup" aria-label="Cognome">' + opts.map(function (o) {
+      var on = sel === -1 ? o[0] !== 0 && o[1] === auto : sel === o[0];   // senza correzione: acceso quello della regola, se c'è tra i tagli
+      return '<button type="button" class="pk-o" role="radio" data-auc="' + o[0] + '" aria-checked="' + on + '" aria-selected="' + on + '"><span class="pk-dot" aria-hidden="true"></span><span>' + esc(o[1]) + '</span></button>';
+    }).join('') + (cur != null ? '<button type="button" class="link auc-auto" data-auc="auto">Torna alla regola automatica (' + esc(L.authorInv(name)) + ')</button>' : '') + '</div>';
+  }
+  box.innerHTML = h;
+}
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('#auCut [data-auc]'); if (!b || !auNow) return;
+  var v = b.dataset.auc, k = L.norm(auNow.name);
+  if (v === 'open') { auCutPaint(auNow.name, b.getAttribute('aria-expanded') !== 'true'); return; }
+  if (v === 'auto') delete settings.auCut[k]; else settings.auCut[k] = Number(v) || 0;
+  saveSettings(); auCutPaint(auNow.name, false);
+  if (grpMode() || sortBy === 'autore') renderList();
+  toast('Ora in ordine come ' + L.authorInv(auNow.name, settings.auCut) + '.');
+});
 function closeAuthor() { $('#auSheet').hidden = true; auNow = null; }
 $('#auClose').addEventListener('click', closeAuthor);
 $('#auPic').addEventListener('click', function () { var f = $('#auPic'), on = !f.classList.contains('big'); f.classList.toggle('big', on); f.setAttribute('aria-label', on ? 'Rimpicciolisci la foto' : 'Ingrandisci la foto'); });
@@ -3885,28 +3920,32 @@ function renderList() {
    In cima «Espandi tutto» (ogni gruppo come sezione aperta) e «Comprimi tutto». Con una ricerca o dei filtri: tutto espanso.
    Dentro un gruppo vale l'ordine scelto. Un libro con piu' autori sta nel gruppo del primo. ---- */
 var READ_GRP = [['da', 'Da leggere'], ['ok', 'Letti']];   // «In lettura» sta sempre a parte, in cima
+var grpFltShut = '';                                     // «Comprimi tutto» con filtri o ricerca: vale finché non cambiano (17/11/2026 notte)
+function fltSig() { return [tab, q, flt, frFlt, readFlt, shFlt, genFlt, autFlt, edFlt].join('|'); }
 var grpShutX = {};                                       // sezioni chiuse a mano quando e' tutto espanso (solo finche' l'app e' aperta)
 function grpMode() {
   var g = settings.grp || '';
   if (g === 'read' && tab === 'wish') return '';           // nei Desideri la lettura non c'e'
   return g;
 }
-function groupBy(books, keyOf, none) {                     // [[chiave, nome, libri]] in ordine alfabetico, «senza» in fondo
+function auShow(name) { return settings.auInv && name ? L.authorInv(name, settings.auCut) : name; }   // «Neruda, Pablo» nei gruppi e nei filtri
+function groupBy(books, keyOf, none, sk) {                 // [[chiave, nome, libri]] in ordine alfabetico (sk: chiave d'ordine), «senza» in fondo
   var m = {}, order = [];
   books.forEach(function (b) {
     var name = keyOf(b), k = name ? L.norm(name) : '';
     if (!m[k]) { m[k] = { name: name || none, books: [] }; order.push(k); }
     m[k].books.push(b);
   });
-  order.sort(function (a, b) { return !a ? 1 : !b ? -1 : coll.compare(m[a].name, m[b].name); });
+  order.sort(function (a, b) { return !a ? 1 : !b ? -1 : sk ? coll.compare(sk(m[a].name), sk(m[b].name)) : coll.compare(m[a].name, m[b].name); });
   return order.map(function (k) { return [k || '~', m[k].name, m[k].books]; });
 }
 function grpParts(vis, g) {
   if (g === 'read') return READ_GRP.map(function (r) { return [r[0], r[1], vis.filter(function (b) { return (b.rs === 'ok' ? 'ok' : 'da') === r[0]; })]; }).filter(function (x) { return x[2].length; });
   var aut = function (b) { return authorsOf(b)[0] || ''; }, gen = function (b) { return L.str(b.gen).trim(); };
-  if (g === 'aut') return groupBy(vis, aut, 'Senza autore');
+  var ak = function (n) { return L.sortKeyAuthor(n, settings.auCut); };   // autori per cognome anche nei gruppi (prima per nome intero)
+  if (g === 'aut') return groupBy(vis, aut, 'Senza autore', ak);
   var gs = groupBy(vis, gen, 'Senza genere');
-  if (g === 'genaut') gs.forEach(function (x) { x[3] = groupBy(x[2], aut, 'Senza autore'); });
+  if (g === 'genaut') gs.forEach(function (x) { x[3] = groupBy(x[2], aut, 'Senza autore', ak); });
   return gs;
 }
 /* foto degli autori: Wikipedia (auLookup), cercate una alla volta e solo per i gruppi che si vedono; salvate sul telefono */
@@ -3968,33 +4007,34 @@ function grpFace(kind, name, none, small) {
 function grpLibri(n) { return n + (n === 1 ? ' libro' : ' libri'); }
 function renderGroups(list, vis, g) {
   var isGrid = settings.view === 'grid', dups = isGrid ? null : computeDups(), n = 0, forced = !!(q || activeCount());
-  var exp = forced || !!settings.grpExp;
+  var exp = forced ? grpFltShut !== fltSig() : !!settings.grpExp;   // con filtri o ricerca si parte tutto aperto, ma si può comprimere
   var inner = function (a) { return isGrid ? '<div class="grid">' + a.map(coverHTML).join('') + '</div>' : a.map(function (b) { return rowHTML(b, dups); }).join(''); };
   var hasOpen = function (a) { return a.some(function (b) { return openState[b.id] && b.t; }); };
   var isOpen = function (key, books) { return exp ? !grpShutX[key] : (!!settings.grpOpen[key] || hasOpen(books)); };
   var kindOf = function (lvl) { return g === 'aut' || (g === 'genaut' && lvl === 2) ? 'aut' : 'gen'; };
+  var lab = function (x, kind) { return kind === 'aut' && x[0] !== '~' ? auShow(x[1]) : x[1]; };   // nome mostrato; x[1] resta il nome vero (foto, «Chi è»)
   /* sezione apribile (gruppi espansi, lettura, generi di Genere › Autore) */
   var sec = function (key, x, body, sub, kind) {
     var id = 'grp-' + (n++), open = isOpen(key, x[2]);
     return '<section class="shelf grp' + (sub ? ' grp-sub' : '') + '"><button type="button" class="shelf-h" data-gk="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
       (kind ? grpFace(kind, x[1], x[0] === '~', true) : '') +
-      '<span class="sh-t">' + esc(x[1]) + '</span><span class="sh-n">' + x[2].length + '</span><svg class="sh-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+      '<span class="sh-t">' + esc(lab(x, kind)) + '</span><span class="sh-n">' + x[2].length + '</span><svg class="sh-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
       '<div class="shelf-b" id="' + id + '"' + (open ? '' : ' hidden') + '>' + body + '</div></section>';
   };
   /* gruppi come copertine (o righe nell'elenco); il riquadro con i libri si apre sotto */
   var panel = function (key, x, kind, i, open, id) {
-    return '<div class="gpanel" id="' + id + '" data-gi="' + i + '"' + (open ? '' : ' hidden') + '><div class="gp-h"><b>' + esc(x[1]) + '</b><small>' + grpLibri(x[2].length) + '</small><span class="gp-sp"></span>' +
+    return '<div class="gpanel" id="' + id + '" data-gi="' + i + '"' + (open ? '' : ' hidden') + '><div class="gp-h"><b>' + esc(lab(x, kind)) + '</b><small>' + grpLibri(x[2].length) + '</small><span class="gp-sp"></span>' +
       (kind === 'aut' && x[0] !== '~' ? '<button type="button" class="link gp-who" data-gau="' + esc(x[1]) + '" data-gid="' + esc(x[2][0].id) + '">Chi è ›</button>' : '') +
       '<button type="button" class="ico gp-x" data-gk="' + esc(key) + '" aria-label="Chiudi">×</button></div>' + inner(x[2]) + '</div>';
   };
   var cards = function (groups, kind, base) {
     var h = groups.map(function (x, i) {
       var key = base + '/' + x[0], open = isOpen(key, x[2]), id = 'grp-' + (n++), none = x[0] === '~';
-      var aria = ' data-gk="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '" aria-label="' + esc(x[1] + ', ' + grpLibri(x[2].length)) + '"';
+      var aria = ' data-gk="' + esc(key) + '" aria-expanded="' + open + '" aria-controls="' + id + '" aria-label="' + esc(lab(x, kind) + ', ' + grpLibri(x[2].length)) + '"';
       var card = isGrid
         ? '<button type="button" class="cover gcard' + (open ? ' on' : '') + '" style="order:' + (2 * i) + '"' + aria + '><span class="art">' + grpFace(kind, x[1], none) + '<span class="gc-n">' + x[2].length + '</span></span>' +
-            '<span class="cap">' + esc(x[1]) + '</span><span class="cap2">' + grpLibri(x[2].length) + '</span></button>'
-        : '<button type="button" class="grow' + (open ? ' on' : '') + '"' + aria + '>' + grpFace(kind, x[1], none, true) + '<span class="gr-t"><b>' + esc(x[1]) + '</b><small>' +
+            '<span class="cap">' + esc(lab(x, kind)) + '</span><span class="cap2">' + grpLibri(x[2].length) + '</span></button>'
+        : '<button type="button" class="grow' + (open ? ' on' : '') + '"' + aria + '>' + grpFace(kind, x[1], none, true) + '<span class="gr-t"><b>' + esc(lab(x, kind)) + '</b><small>' +
             esc(x[2].slice(0, 2).map(function (b) { return '«' + (b.t || 'senza titolo') + '»'; }).join(', ') + (x[2].length > 2 ? '…' : '')) + '</small></span><span class="sh-n">' + x[2].length + '</span><svg class="sh-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>';
       return card + panel(key, x, kind, i, open, id);
     }).join('');
@@ -4011,7 +4051,7 @@ function renderGroups(list, vis, g) {
     if (g === 'genaut') return parts.map(function (x) { var key = base + ':' + x[0]; return sec(key, x, cards(x[3], 'aut', key), false); }).join('');
     return cards(parts, kindOf(1), base);
   };
-  var tools = forced ? '' : '<div class="grp-tools"><button type="button" class="gx" data-gx="1"' + (exp ? ' disabled' : '') + '>Espandi tutto</button><button type="button" class="gx" data-gx="0">Comprimi tutto</button></div>';
+  var tools = '<div class="grp-tools"><button type="button" class="gx" data-gx="1"' + (exp ? ' disabled' : '') + '>Espandi tutto</button><button type="button" class="gx" data-gx="0">Comprimi tutto</button></div>';
   var now = tab === 'lib' ? vis.filter(function (b) { return b.rs === 'in'; }) : [], rest = now.length ? vis.filter(function (b) { return b.rs !== 'in'; }) : vis;
   var html = body(grpParts(rest, g));
   if (now.length) {
@@ -4076,6 +4116,7 @@ function updateSummary() {
   $('#cntLib').textContent = nl; $('#cntWish').textContent = nw;
   $('#tabLib').setAttribute('aria-selected', tab === 'lib' ? 'true' : 'false');
   $('#tabWish').setAttribute('aria-selected', tab === 'wish' ? 'true' : 'false');
+  $('#sort').value = sortBy; $('#grp').value = settings.grp || ''; pickSync();   // riga «Ordina · Raggruppa» sempre in vista
   nxBoxPaint(); emit('list');
   $('#btnNews').hidden = tab !== 'wish' || !state.books.some(function (b) { return !b.w && b.a; });
   $('#btnShareWish').hidden = !shareable().length || !(tab === 'wish' || activeCount() || q);     // Desideri, oppure una selezione (preferiti, genere, ricerca...)
@@ -4852,7 +4893,7 @@ function updateActiveFilters() {
   if (readFlt && tab === 'lib') chip('read', READ_TXT[readFlt]);
   if (shFlt) chip('sh', shFlt === NONE ? 'Senza scaffale' : 'Scaffale: ' + facetName('sh', shFlt));
   if (genFlt) chip('gen', genFlt === NONE ? 'Senza genere' : 'Genere: ' + facetName('gen', genFlt));
-  if (autFlt) chip('aut', 'Autore: ' + autName);
+  if (autFlt) chip('aut', 'Autore: ' + auShow(autName));
   if (edFlt) chip('ed', 'Casa editrice: ' + facetName('e', edFlt));
   $('#activeFlt').innerHTML = o;
   var n = activeCount(), bd = $('#fltBadge');
@@ -4860,7 +4901,7 @@ function updateActiveFilters() {
   $('#btnFilters').setAttribute('aria-pressed', n ? 'true' : 'false');
   $('#edgeTab').classList.toggle('on', !!n);
   $('#edgeTab').setAttribute('aria-label', 'Apri il menu' + (n ? ' (' + n + (n === 1 ? ' attivo)' : ' attivi)') : ''));
-  $('#btnFilters').setAttribute('aria-label', 'Filtri e ordine' + (n ? ' (' + n + (n === 1 ? ' filtro attivo)' : ' filtri attivi)') : ''));
+  $('#btnFilters').setAttribute('aria-label', 'Filtri' + (n ? ' (' + n + (n === 1 ? ' filtro attivo)' : ' filtri attivi)') : ''));
 }
 $('#activeFlt').addEventListener('click', function (e) {
   var x = e.target.closest('[data-clear]');
@@ -4910,7 +4951,7 @@ function renderDrawer() {
   var fix = ['guess', 'dup'].filter(function (k) { return cnt[k] || flt === k; });
   if (fix.length) o += '<h3>Da sistemare</h3><div class="dpills">' + fix.map(function (k) { return pill('flt', k, FLT_TXT[k], cnt[k], flt, ' fix'); }).join('') + '</div>';
   var pre = '';
-  if (autFlt) pre += '<p class="dq"><span>Autore: ' + esc(autName) + '</span><button type="button" class="ico" data-g="aut" data-v="" aria-label="Togli il filtro autore">×</button></p>';
+  if (autFlt) pre += '<p class="dq"><span>Autore: ' + esc(auShow(autName)) + '</span><button type="button" class="ico" data-g="aut" data-v="" aria-label="Togli il filtro autore">×</button></p>';
   if (edFlt) pre += '<p class="dq"><span>Casa editrice: ' + esc(facetName('e', edFlt)) + '</span><button type="button" class="ico" data-g="ed" data-v="" aria-label="Togli il filtro casa editrice">×</button></p>';
   o = pre + o;
   var body = $('#drawerBody'), st = body.scrollTop;
@@ -4968,7 +5009,7 @@ function releaseDrawerStyles() {
 var drawerTab = 'opt', drawerSub = false;      // 'opt' = pagina principale del menu, 'flt' = filtri e ordine
 function setDrawerTab(t) {
   drawerTab = t === 'flt' ? 'flt' : 'opt';
-  $('#drawerH').textContent = drawerTab === 'flt' ? 'Filtri e ordine' : 'Menu';
+  $('#drawerH').textContent = drawerTab === 'flt' ? 'Filtri' : 'Menu';
   $('#drawerBack').hidden = drawerTab !== 'flt';
   $('#drawerFilters').hidden = drawerTab !== 'flt';
   $('#drawerOpts').hidden = drawerTab !== 'opt';
@@ -4980,7 +5021,7 @@ var SORT_TXT = { recent: 'dai più recenti', titolo: 'per titolo', autore: 'per 
 function paintMenuHome() {                        // la pagina principale riassume filtri e ordine, senza mostrarli
   var n = activeCount(), lib = tab === 'lib';
   var what = n ? (n === 1 ? '1 filtro attivo' : n + ' filtri attivi') : (lib ? 'Tutti i libri' : 'Tutti i desideri');
-  $('#goFltTxt').textContent = what + (q ? ', con ricerca' : '') + ', ' + (SORT_TXT[sortBy] || 'dai più recenti') + (grpMode() ? ', ' + GRP_TXT[grpMode()] : '');
+  $('#goFltTxt').textContent = what + (q ? ', con ricerca' : '');   // ordine e gruppi stanno nella riga sotto la ricerca (17/11/2026 notte)
   $('#goFltN').hidden = !n; $('#goFltN').textContent = n;
   $('#goFilters').classList.toggle('on', !!(n || q));
   var nq = allQuotes().length;
@@ -5151,6 +5192,7 @@ function applyLook(rerender) {
   ['theme', 'pal', 'ft', 'fb', 'viewDef'].forEach(function (k) {
     Array.prototype.forEach.call(document.querySelectorAll('input[name="' + k + '"]'), function (r) { r.checked = r.value === settings[k]; });
   });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="auInv"]'), function (r) { r.checked = Number(r.value) === settings.auInv; });
   $('#icoLoan').innerHTML = icon('loan');
   if (rerender) { renderList(); updateSummary(); }
 }
@@ -5161,6 +5203,7 @@ document.addEventListener('change', function (e) {
   else if (t.name === 'pal' && PALS[t.value]) { settings.pal = t.value; saveSettings(); applyLook(false); }
   else if (t.name === 'ft' && FONTS_T.indexOf(t.value) >= 0) { settings.ft = t.value; saveSettings(); applyLook(false); }
   else if (t.name === 'fb' && FONTS_B.indexOf(t.value) >= 0) { settings.fb = t.value; saveSettings(); applyLook(false); }
+  else if (t.name === 'auInv') { settings.auInv = t.value === '0' ? 0 : 1; saveSettings(); renderList(); updateActiveFilters(); }
   else if (t.name === 'viewDef') { settings.viewDef = t.value === 'list' ? 'list' : 'grid'; setView(settings.viewDef); collapseCards(); renderList(); toast(settings.viewDef === 'grid' ? 'All\'apertura: copertine.' : 'All\'apertura: elenco.'); }
 });
 $('#lookReset').addEventListener('click', function () {
@@ -5171,7 +5214,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-17 13:08", "n": "102.2", "note": "Raggruppa per a copertine"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 13:48", "n": "102.3", "note": "Libreria di un amico riordinata"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -6205,7 +6248,13 @@ function grpToggle(h, open) {                          // apre o chiude un grupp
 list.addEventListener('click', function (e) {          // gruppi a copertine o a righe, riquadro dei libri, Espandi / Comprimi tutto
   var x = e.target.closest('.gcard, .grow, .gp-x, [data-gx], .gp-who'); if (!x || selOn) return;
   e.stopImmediatePropagation();
-  if (x.dataset.gx) { settings.grpExp = x.dataset.gx === '1' ? 1 : 0; grpShutX = {}; if (!settings.grpExp) settings.grpOpen = {}; saveSettings(); renderList(); return; }
+  if (x.dataset.gx) {
+    var on = x.dataset.gx === '1'; grpShutX = {};
+    if (q || activeCount()) grpFltShut = on ? '' : fltSig();   // con filtri o ricerca non cambia la scelta di sempre
+    else { settings.grpExp = on ? 1 : 0; grpFltShut = ''; }
+    if (!on) settings.grpOpen = {};
+    saveSettings(); renderList(); return;
+  }
   if (x.classList.contains('gp-who')) { openAuthor(x.dataset.gid, x.dataset.gau); return; }
   if (x.classList.contains('gp-x')) { var c = $('#list').querySelector('.gcard[data-gk="' + CSS.escape(x.dataset.gk) + '"], .grow[data-gk="' + CSS.escape(x.dataset.gk) + '"]'); if (c) { grpToggle(c, false); try { c.focus({ preventScroll: true }); } catch (er) { nlErr(er); } } return; }
   grpToggle(x, x.getAttribute('aria-expanded') !== 'true');
@@ -6478,7 +6527,9 @@ var pickOpen = null;
 function pickSync() {
   Array.prototype.forEach.call(document.querySelectorAll('select.dsel'), function (s) {
     var b = s.nextElementSibling; if (!b || !b.classList.contains('dpick')) return;
-    var o = s.options[s.selectedIndex]; b.querySelector('.dp-t').textContent = o ? o.textContent : '';
+    var o = s.options[s.selectedIndex], pre = s.dataset.pre || '';   // nella riga sotto la ricerca: «Raggruppa: Autore», senza gruppo solo «Raggruppa»
+    b.querySelector('.dp-t').textContent = !o ? '' : !o.value && s.dataset.none ? s.dataset.none : pre + (o.dataset.s || o.textContent);
+    b.classList.toggle('sb-on', !!(o && o.value && s.dataset.none));
   });
 }
 function pickClose(focus) {
@@ -6497,7 +6548,8 @@ function pickShow(s, btn) {
       pickSync();
     });
   }
-  btn.parentNode.insertBefore(m, btn.nextSibling);
+  var bar = btn.closest('.sortbar');                       // nella riga «Ordina · Raggruppa» l'elenco va sotto la riga intera
+  if (bar) bar.appendChild(m); else btn.parentNode.insertBefore(m, btn.nextSibling);
   var lab = document.getElementById(s.getAttribute('aria-labelledby'));
   m.setAttribute('aria-label', lab ? lab.textContent : '');
   m.innerHTML = Array.prototype.map.call(s.options, function (o) {
@@ -6511,7 +6563,9 @@ function pickShow(s, btn) {
 Array.prototype.forEach.call(document.querySelectorAll('select.dsel'), function (s) {
   var b = document.createElement('button'); b.type = 'button'; b.className = 'dpick'; b.setAttribute('aria-haspopup', 'listbox'); b.setAttribute('aria-expanded', 'false');
   if (s.getAttribute('aria-labelledby')) b.setAttribute('aria-labelledby', s.getAttribute('aria-labelledby') + ' ' + (s.id + 'Pick'));
-  b.innerHTML = '<span class="dp-t" id="' + s.id + 'Pick"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  var ic = s.id === 'sort' ? '<svg class="sb-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>'
+    : s.id === 'grp' ? '<svg class="sb-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>' : '';
+  b.innerHTML = ic + '<span class="dp-t" id="' + s.id + 'Pick"></span><svg class="dp-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   s.hidden = true; s.tabIndex = -1; s.parentNode.insertBefore(b, s.nextSibling);
   b.addEventListener('click', function () { if (pickOpen && pickOpen.btn === b) pickClose(); else { pickClose(); pickShow(s, b); } });
   s.addEventListener('change', pickSync);

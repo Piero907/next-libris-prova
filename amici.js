@@ -372,6 +372,10 @@ function friendView() {
     return '<li class="fr-row"><span class="fr-who fr-swap">' + txt + '<small>' + esc(L_date(s.creato)) + '</small></span></li>';
   }).join('') + '</ul>' : '<p class="fr-small">Nessun prestito o regalo in corso.</p>';
   h += '<p class="fr-small">Per prestargli o regalargli un libro: apri il libro › «Presta, vendi o regala» › scegli ' + n + '. Lo vedrà subito nella sua Libreria.</p></section>';
+  /* chiave Google e worker: si prestano da qui (l'icona nella sua libreria compare solo quando sono prestati; Piero, 17/11/2026 notte) */
+  var own = ownKeys(), ok = outKey(view);
+  if (own.gb || own.sbn) h += '<section class="fr-sec"><h3 class="fr-h">Chiave Google e worker</h3><div class="fr-row"><span class="fr-who">' + (ok ? esc(lentLabel(ok)) : 'Non gli presti niente') + '</span>' +
+    '<span class="fr-act"><button class="btn" type="button" data-f="keyshare" data-id="' + esc(view) + '">' + (ok ? 'Cambia' : 'Presta') + '</button></span></div></section>';
   h += '<button class="btn" type="button" data-f="friend" data-id="' + esc(view) + '">Guarda la sua libreria</button>';
   h += confirmId === view ? '<div class="fr-conf"><p>Togli <b>' + n + '</b> dagli amici?</p><div class="row-btns"><button class="btn" type="button" data-f="cancel">Annulla</button><button class="btn primary" type="button" data-f="drop" data-id="' + esc(view) + '">Togli</button></div></div>'
     : '<button class="link fr-drop" type="button" data-f="ask-drop" data-id="' + esc(view) + '">Togli dagli amici</button>';
@@ -421,12 +425,10 @@ function guestBar() {
   var now = lib.filter(function (b) { return b.rs === 'in'; }).slice(0, 3);
   var last = lib.filter(function (b) { return b.rs === 'ok'; }).sort(function (a, b) { return (b.rd || '') > (a.rd || '') ? 1 : (b.rd || '') < (a.rd || '') ? -1 : (b.ts || 0) - (a.ts || 0); }).slice(0, 5);   // prima chi ha la data di lettura
   var info = (window.__guestInfo || {}), comuni = info.comuni != null ? info.comuni : ((nums[gId] || {}).comuni || 0);
-  var h = '<div class="gb-top"><button type="button" class="link gb-back" data-g="back">‹ La tua libreria</button><button type="button" class="link gb-more" data-g="more">Prestiti, regali e altro</button></div>';
-  /* libreria e desideri dell'amico: due tasti qui; quelli in basso portano sempre ai tuoi (Piero, 17/11/2026 sera) */
+  /* ordine (Piero, 17/11/2026 notte): amici e libri in comune, Sta leggendo, Letti di recente, «Prestiti, regali e altro», poi i due tasti.
+     Via «‹ La tua libreria»: si esce con Libreria/Desideri in basso o con Indietro */
   var t = NL.tab(), nW = all.length - lib.length, gn = esc(NL.guest());
-  h += '<div class="tabs gb-tabs" role="tablist" aria-label="Libri di ' + gn + '"><button type="button" role="tab" data-g="tab" data-t="lib" aria-selected="' + (t !== 'wish') + '">Libreria <span class="cnt">' + lib.length + '</span></button>' +
-    '<button type="button" role="tab" data-g="tab" data-t="wish" aria-selected="' + (t === 'wish') + '">Desideri <span class="cnt">' + nW + '</span></button></div>';
-  h += '<p class="gb-num"><button type="button" class="link gb-ff" data-g="ff">' + comuni + (comuni === 1 ? ' amico' : ' amici') + ' in comune</button> · ' + inComune + (inComune === 1 ? ' libro' : ' libri') + ' in comune</p>';
+  var h = '<p class="gb-num"><button type="button" class="link gb-ff" data-g="ff">' + comuni + (comuni === 1 ? ' amico' : ' amici') + ' in comune</button> · ' + inComune + (inComune === 1 ? ' libro' : ' libri') + ' in comune</p>';
   if (now.length) h += '<p class="gb-line"><b>Sta leggendo</b> ' + now.map(function (b) {
     var tot = Number(b.pg) || 0, pp = Number(b.pp) || 0;
     return '«' + esc(b.t || 'senza titolo') + '»' + (pp ? ' <small>pagina ' + pp + (tot ? ' di ' + tot : '') + '</small>' : '');
@@ -434,18 +436,21 @@ function guestBar() {
   if (last.length) h += '<p class="gb-line"><b>Letti di recente</b> ' + last.map(function (b) {
     var w = NL.L.rateWord ? NL.L.rateWord(b.rt) : ''; return '«' + esc(b.t || 'senza titolo') + '»' + (w ? ' <small>' + esc(w) + '</small>' : '');
   }).join(', ') + '</p>';
+  h += '<p class="gb-top"><button type="button" class="link gb-more" data-g="more">Prestiti, regali e altro<span aria-hidden="true"> ›</span></button></p>';
+  h += '<div class="tabs gb-tabs" role="tablist" aria-label="Libri di ' + gn + '"><button type="button" role="tab" data-g="tab" data-t="lib" aria-selected="' + (t !== 'wish') + '">Libreria <span class="cnt">' + lib.length + '</span></button>' +
+    '<button type="button" role="tab" data-g="tab" data-t="wish" aria-selected="' + (t === 'wish') + '">Desideri <span class="cnt">' + nW + '</span></button></div>';
   var own = ownKeys(), out = outKey(gId), fromHim = keys.filter(function (k) { return k.a === uid() && k.da === gId; })[0], b0 = borrowed();
   h += '<div class="chips gb-chips">' + (lib.length && t !== 'wish' ? '<button type="button" class="chip todo" data-g="notmine" aria-pressed="' + (NL.flt() === 'notmine') + '">Solo quelli che non hai</button>' : '') +
     (fromHim && !(b0 && b0.da === gId) ? '<button type="button" class="chip todo" data-g="usekey">Usa la sua chiave</button>' : '') + '</div>';
   bar.innerHTML = h;
   /* chiave Google e worker: una piccola icona in alto a destra, sulla riga «Libreria di … · N libri» (Piero, 17/11/2026 sera) */
   var meta = document.querySelector('header.top .top-meta'), kb = document.getElementById('guestKey');
-  if (own.gb || own.sbn) {
+  if (out) {   // solo se chiave o worker sono prestati a questo amico; per prestarli: «Prestiti, regali e altro» (Piero, 17/11/2026 notte)
     if (!kb && meta) { kb = document.createElement('button'); kb.type = 'button'; kb.id = 'guestKey'; kb.className = 'ico gb-key'; meta.appendChild(kb); kb.addEventListener('click', function () { keySheet(gId); }); }
     if (kb) {
-      var tl = out ? lentLabel(out) + ' a ' + NL.guest() : 'Presta ' + whatOf(!!own.gb, !!own.sbn) + ' a ' + NL.guest();
-      kb.hidden = false; kb.classList.toggle('on', !!out); kb.title = tl; kb.setAttribute('aria-label', tl); kb.setAttribute('aria-pressed', out ? 'true' : 'false');
-      kb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></svg>' + (out ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '');
+      var tl = lentLabel(out) + ' a ' + NL.guest();
+      kb.hidden = false; kb.classList.add('on'); kb.title = tl; kb.setAttribute('aria-label', tl);
+      kb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></svg><span class="gk-ok" aria-hidden="true">✓</span>';
     }
   } else if (kb) kb.hidden = true;
 }

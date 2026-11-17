@@ -1732,13 +1732,31 @@ html[data-look="nuovo"] .gc-face.sm .gc-ph::before,html[data-look="nuovo"] .gc-f
 .dpick .dp-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dpick svg{flex:none;width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:2;transition:transform .15s}
 .dpick[aria-expanded="true"]{border-color:var(--accent)}
-.dpick[aria-expanded="true"] svg{transform:rotate(180deg)}
+.dpick[aria-expanded="true"] .dp-c{transform:rotate(180deg)}
 .pick-pop{margin:6px 0 4px;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}
 .pk-o{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:8px 10px;border:0;border-radius:8px;background:none;color:var(--ink);font:500 15px var(--font-body);text-align:left;cursor:pointer}
 .pk-o:hover,.pk-o:focus-visible{background:var(--surface2)}
 .pk-o[aria-selected="true"]{font-weight:600;color:var(--accent)}
 .pk-dot{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);box-sizing:border-box}
+/* riga «Ordina · Raggruppa» sotto la ricerca, in tutte le schermate (Piero, 17/11/2026 notte) */
+.sortbar{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;margin:-4px 0 8px}
+.sortbar .dpick{width:auto;max-width:100%;min-height:36px;padding:4px 2px;gap:6px;border:0;background:none;font:500 14.5px var(--font-body);color:var(--ink)}
+.sortbar .dpick svg{width:16px;height:16px}
+.sortbar .dpick .sb-ic{stroke:var(--muted);stroke-linecap:round;stroke-linejoin:round}
+.sortbar .dpick.sb-on .sb-ic{stroke:var(--accent)}
+.sortbar .dpick[aria-expanded="true"]{color:var(--accent)}
+.sortbar .sb-dot{color:var(--muted)}
+.sortbar .pick-pop{flex:1 0 100%;margin:2px 0 4px}
+.stick.stuck .sortbar{margin:-6px 0 4px}
+.stick.stuck .sortbar .dpick{min-height:32px}
 .pk-o[aria-selected="true"] .pk-dot{border-color:var(--accent);box-shadow:inset 0 0 0 3px var(--surface);background:var(--accent)}
 /* × in alto a destra delle finestre (17/11/2026 sera): resta visibile scorrendo, non occupa spazio */
 .sheet-in>.sh-x{position:sticky;top:0;justify-self:end;z-index:3;width:40px;height:40px;min-width:40px;margin:-8px -8px -48px 0;padding:0;border-radius:50%;background:var(--surface);color:var(--muted);font-size:28px;line-height:1}
 .sheet-in.has-x>h2:first-of-type{padding-right:36px}
+/* cognome dell'autore nella finestra «Chi è» (17/11/2026 notte) */
+.au-cut{margin:10px 0 0;font-size:14px;color:var(--muted)}
+.au-cut .auc-now{margin:0;line-height:1.5}
+.au-cut .auc-now b{color:var(--ink);font-weight:600}
+.au-cut .link{font-size:14px;padding:0 0 0 4px;min-height:0}
+.au-cut .auc-opts{margin:6px 0 0;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.au-cut .auc-auto{display:block;margin:4px 10px 6px;padding:0}

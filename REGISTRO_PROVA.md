@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 102.3 · 17/11/2026 13:48
+- **Libreria di un amico** riordinata: in testata solo «Libreria di …», poi amici in comune, Sta leggendo, Letti di recente, «Prestiti, regali e altro» e i tasti; via «‹ La tua libreria»; icona della chiave solo se prestata; niente «Novità dei tuoi autori»; **Ordina e Raggruppa** in una riga sotto la ricerca; **Espandi/Comprimi tutto** anche con filtri e ricerca; **autori per cognome** nei gruppi, «Neruda, Pablo» (scelta in Aspetto), cognome correggibile in «Chi è»
+
 ## Prova 102.2 · 17/11/2026 13:08
 - **Raggruppa per a copertine**: «In lettura» a parte; autori con la foto (da Wikipedia) e generi con l'iniziale, il numero di libri, i libri si aprono sotto; Espandi tutto / Comprimi tutto; nell'elenco righe con la foto
 - **Ordina per e Raggruppa per** con una finestrella dell'app al posto della tendina del telefono
