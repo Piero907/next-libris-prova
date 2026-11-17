@@ -2,6 +2,13 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 102.2 · 17/11/2026 13:08
+- **Raggruppa per a copertine**: «In lettura» a parte; autori con la foto (da Wikipedia) e generi con l'iniziale, il numero di libri, i libri si aprono sotto; Espandi tutto / Comprimi tutto; nell'elenco righe con la foto
+- **Ordina per e Raggruppa per** con una finestrella dell'app al posto della tendina del telefono
+- **× in alto a destra** in tutte le finestre con «Chiudi»
+- **Libreria di un amico**: Libreria/Desideri dell'amico con due tasti in cima; Libreria, Desideri e Per te in basso tornano ai tuoi; «Anna l'ha letto» al posto dei tasti di lettura; chiave e worker con un'icona sulla riga del nome
+- **Amici in ordine alfabetico**; **testi della birra** (Piccola, Media, Grande)
+
 ## Prova 102.1 · 17/11/2026 11:45
 - Allineata alla **versione vera 102**
 

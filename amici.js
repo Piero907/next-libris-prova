@@ -59,7 +59,7 @@ async function load(force) {
         catch (e0) { if ((e0 && e0.code === 'net') || ci === cols.length - 1) throw e0; }
       }
       me = (p && p[0]) || { utente: null, nome: '', desideri: false };
-      list = (await rpc('miei_amici')) || [];
+      list = abc(await rpc('miei_amici'));
       try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) { if (window.nlErr) nlErr(e); }
       try { swaps = (await rpc('miei_scambi')) || []; await applySwaps(); } catch (e) { if (window.console) console.warn('scambi', e); }
       try { asks = (await rpc('mie_richieste')) || []; tips = (await rpc('miei_consigli')) || []; await loadWho(); seenAnswers(); } catch (e) { if (window.console) console.warn('richieste', e); }
@@ -73,6 +73,8 @@ async function load(force) {
   return loading;
 }
 var loaded = [];
+/* amici sempre in ordine alfabetico, in tutte le finestre (Piero, 17/11/2026 sera) */
+function abc(a) { return (a || []).slice().sort(function (x, y) { return String(x.utente || x.nome || '').localeCompare(String(y.utente || y.nome || ''), 'it', { sensitivity: 'base' }); }); }
 function friends() { return (list || []).filter(function (x) { return x.stato === 'amici'; }); }
 function received() { return (list || []).filter(function (x) { return x.stato === 'attesa' && x.verso === 'ricevuta'; }); }
 function sent() { return (list || []).filter(function (x) { return x.stato === 'attesa' && x.verso === 'inviata'; }); }
@@ -212,7 +214,7 @@ async function onSubmit(e) {
     var q = tidy(document.getElementById('friQ').value);
     if (q.length < 3) { found = null; foundQ = ''; err = 'Scrivi almeno 3 lettere del nome.'; paint(); return; }
     err = '';
-    try { found = (await rpc('cerca_utenti', { q: q })) || []; foundQ = q; } catch (x) { err = nice(x); }
+    try { found = abc(await rpc('cerca_utenti', { q: q })); foundQ = q; } catch (x) { err = nice(x); }
     paint();
   }
 }
@@ -398,7 +400,7 @@ async function openGuest(id) {
 var entering = false;
 function guestBar() {
   var g = NL.guest && NL.guest(), bar = document.getElementById('guestBar');
-  if (!g) { if (bar) bar.hidden = true; return; }
+  if (!g) { if (bar) bar.hidden = true; var k0 = document.getElementById('guestKey'); if (k0) k0.hidden = true; return; }
   if (!bar) {
     var top = document.querySelector('header.top'); if (!top) return;
     bar = document.createElement('section'); bar.id = 'guestBar'; bar.className = 'guest-bar';
@@ -411,6 +413,7 @@ function guestBar() {
       else if (b.dataset.g === 'ff') openFF(gId);
       else if (b.dataset.g === 'key') keySheet(gId);
       else if (b.dataset.g === 'usekey') keyAct('keyuse', gId).then(guestBar);
+      else if (b.dataset.g === 'tab') { if (NL.tab() !== b.dataset.t) { NL.setTab(b.dataset.t); window.scrollTo({ top: 0 }); } guestBar(); }
     });
   }
   bar.hidden = false;
@@ -419,6 +422,10 @@ function guestBar() {
   var last = lib.filter(function (b) { return b.rs === 'ok'; }).sort(function (a, b) { return (b.rd || '') > (a.rd || '') ? 1 : (b.rd || '') < (a.rd || '') ? -1 : (b.ts || 0) - (a.ts || 0); }).slice(0, 5);   // prima chi ha la data di lettura
   var info = (window.__guestInfo || {}), comuni = info.comuni != null ? info.comuni : ((nums[gId] || {}).comuni || 0);
   var h = '<div class="gb-top"><button type="button" class="link gb-back" data-g="back">‹ La tua libreria</button><button type="button" class="link gb-more" data-g="more">Prestiti, regali e altro</button></div>';
+  /* libreria e desideri dell'amico: due tasti qui; quelli in basso portano sempre ai tuoi (Piero, 17/11/2026 sera) */
+  var t = NL.tab(), nW = all.length - lib.length, gn = esc(NL.guest());
+  h += '<div class="tabs gb-tabs" role="tablist" aria-label="Libri di ' + gn + '"><button type="button" role="tab" data-g="tab" data-t="lib" aria-selected="' + (t !== 'wish') + '">Libreria <span class="cnt">' + lib.length + '</span></button>' +
+    '<button type="button" role="tab" data-g="tab" data-t="wish" aria-selected="' + (t === 'wish') + '">Desideri <span class="cnt">' + nW + '</span></button></div>';
   h += '<p class="gb-num"><button type="button" class="link gb-ff" data-g="ff">' + comuni + (comuni === 1 ? ' amico' : ' amici') + ' in comune</button> · ' + inComune + (inComune === 1 ? ' libro' : ' libri') + ' in comune</p>';
   if (now.length) h += '<p class="gb-line"><b>Sta leggendo</b> ' + now.map(function (b) {
     var tot = Number(b.pg) || 0, pp = Number(b.pp) || 0;
@@ -428,10 +435,19 @@ function guestBar() {
     var w = NL.L.rateWord ? NL.L.rateWord(b.rt) : ''; return '«' + esc(b.t || 'senza titolo') + '»' + (w ? ' <small>' + esc(w) + '</small>' : '');
   }).join(', ') + '</p>';
   var own = ownKeys(), out = outKey(gId), fromHim = keys.filter(function (k) { return k.a === uid() && k.da === gId; })[0], b0 = borrowed();
-  h += '<div class="chips gb-chips">' + (lib.length ? '<button type="button" class="chip todo" data-g="notmine" aria-pressed="' + (NL.flt() === 'notmine') + '">Solo quelli che non hai</button>' : '') +
-    (own.gb || own.sbn ? '<button type="button" class="chip todo" data-g="key" aria-pressed="' + !!out + '">' + (out ? '✓ ' + lentLabel(out) : 'Presta ' + whatOf(!!own.gb, !!own.sbn)) + '</button>' : '') +
+  h += '<div class="chips gb-chips">' + (lib.length && t !== 'wish' ? '<button type="button" class="chip todo" data-g="notmine" aria-pressed="' + (NL.flt() === 'notmine') + '">Solo quelli che non hai</button>' : '') +
     (fromHim && !(b0 && b0.da === gId) ? '<button type="button" class="chip todo" data-g="usekey">Usa la sua chiave</button>' : '') + '</div>';
   bar.innerHTML = h;
+  /* chiave Google e worker: una piccola icona in alto a destra, sulla riga «Libreria di … · N libri» (Piero, 17/11/2026 sera) */
+  var meta = document.querySelector('header.top .top-meta'), kb = document.getElementById('guestKey');
+  if (own.gb || own.sbn) {
+    if (!kb && meta) { kb = document.createElement('button'); kb.type = 'button'; kb.id = 'guestKey'; kb.className = 'ico gb-key'; meta.appendChild(kb); kb.addEventListener('click', function () { keySheet(gId); }); }
+    if (kb) {
+      var tl = out ? lentLabel(out) + ' a ' + NL.guest() : 'Presta ' + whatOf(!!own.gb, !!own.sbn) + ' a ' + NL.guest();
+      kb.hidden = false; kb.classList.toggle('on', !!out); kb.title = tl; kb.setAttribute('aria-label', tl); kb.setAttribute('aria-pressed', out ? 'true' : 'false');
+      kb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></svg>' + (out ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '');
+    }
+  } else if (kb) kb.hidden = true;
 }
 NL.on('guest', function (name) { if (!name && entering) return; if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
 /* le info della libreria aperta (amici in comune): le passa openGuest prima di entrare */
@@ -615,7 +631,7 @@ async function openFF(id) {
 async function loadFF() {
   var id = ffOf; if (!id) return;
   try {
-    var r = await rpc('amici_di', { amico: id }); if (ffOf === id) ff = r || { visibili: false, amici: [] };
+    var r = await rpc('amici_di', { amico: id }); if (ffOf === id) ff = r ? Object.assign({}, r, { amici: abc(r.amici) }) : { visibili: false, amici: [] };
     var nc = ((r && r.amici) || []).filter(function (x) { return x.comune; }).length, gi = window.__guestInfo;   // stesso numero nella striscia e nell'elenco
     if (gi && gi.id === id && gi.comuni !== nc) { gi.comuni = nc; guestBar(); }
   }
