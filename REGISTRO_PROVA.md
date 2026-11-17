@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 101.2 · 17/11/2026 10:17
+- **Bonifiche della verifica**: caratteri dentro l'app (niente Google Fonts), protezione CSP, l'app non parte dentro altri siti, ultimi errori nella mail di Contatti; database con limiti (5.000 libri online per account, copertine dell'archivio solo da siti noti, contatore delle ricerche per account, notifiche push solo verso i servizi veri)
+
 ## Prova 101.1 · 17/11/2026 07:23
 - **Versione 101 nella prova**: trasloco corretto
 

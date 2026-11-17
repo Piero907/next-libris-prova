@@ -7,10 +7,33 @@ var $ = function (s) { return document.querySelector(s); };
 /* Indietro da una finestra aperta dal Menu: la voce del Menu resta nella cronologia sotto la finestra; qui si guarda se la finestra
    era ancora aperta (gesto Indietro: si torna al Menu) o se l'ha gia' chiusa il suo «Chiudi» (si chiude tutto). Deve essere il primo «popstate». */
 window.addEventListener('popstate', function (e) { menuPop(e); });
+/* Registro degli errori (17/11/2026, dalla verifica): prima ~100 «catch (e) { nlErr(e); }» facevano sparire gli errori senza traccia.
+   Ora nlErr() tiene in memoria gli ultimi 20 (con file e riga; mai salvati, mai mandati da soli) e la mail di Menu › Info e aiuto ›
+   Contatti li aggiunge in fondo, così chi scrive ci dice anche cosa è andato storto. Lo usano anche i moduli. */
+var ERRS = [];
+function nlErr(e) {
+  try {
+    var m = String((e && (e.message || e.name)) || e || '?').replace(/\s+/g, ' ').slice(0, 140);
+    var w = ((e && e.stack) || '').match(/\/([\w.-]+\.js):(\d+)/);
+    var k = (w ? w[1] + ':' + w[2] + ' ' : '') + m, last = ERRS[ERRS.length - 1];
+    if (last && last.k === k) { last.n++; return; }
+    ERRS.push({ k: k, n: 1, t: new Date().toTimeString().slice(0, 5) });
+    if (ERRS.length > 20) ERRS.shift();
+  } catch (x) {}
+}
+window.nlErr = nlErr;
+window.addEventListener('error', function (e) { nlErr(e.error || e.message); });
+window.addEventListener('unhandledrejection', function (e) { nlErr(e.reason); });
+function errText() {
+  return ERRS.length ? '\nUltimi errori:\n' + ERRS.slice(-5).map(function (x) { return x.t + ' ' + x.k + (x.n > 1 ? ' (×' + x.n + ')' : ''); }).join('\n') : '';
+}
+/* immagini con data-rm: se non si caricano spariscono (prima era onerror="this.remove()" scritto nell'HTML, che la
+   Content-Security-Policy non ammette: 17/11/2026) */
+document.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'IMG' && t.hasAttribute('data-rm')) t.remove(); }, true);
 var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-/* Copie parallele (piero907.github.io/next-libris-prova/, …/next-libris-social/, …): stesso codice, ma dati tutti loro. Stanno allo
-   stesso indirizzo di base della versione vera, quindi sul telefono condividerebbero lo stesso spazio: ogni nome di dato ha il
-   prefisso della copia («prova:», «social:»…). COPIA e' il nome della copia ('' per la versione vera); PROVA vale solo per la prova. */
+/* Copie parallele (piero907.github.io/next-libris-prova/, in generale …/next-libris-NOME/): stesso codice, ma dati tutti loro.
+   Stanno allo stesso indirizzo di base, quindi sul telefono condividerebbero lo stesso spazio: ogni nome di dato ha il prefisso
+   della copia («prova:»). COPIA e' il nome della copia ('' per la versione vera, oggi su nextlibris.github.io); PROVA vale solo per la prova. */
 var COPIA = (location.pathname.match(/\/next-libris-([a-z]+)(\/|$)/) || [])[1] || '';
 var PROVA = COPIA === 'prova';
 function lsKey(k) { return COPIA ? COPIA + ':' + k : k; }
@@ -98,7 +121,7 @@ var settings = { gbKey: '', price: true, extra: true, lastBackup: 0, snooze: 0, 
 var PALS = { inchiostro: ['#EDF0F5', '#10141D'], bordeaux: ['#F2EFEE', '#161112'], bosco: ['#EEF1EE', '#0F1513'] };
 var FONTS_T = ['literata', 'garamond', 'playfair', 'lora', 'merriweather', 'montserrat', 'roboto'], FONTS_B = ['plex', 'roboto', 'lato', 'atkinson', 'lora'];
 var openState = {}, autoOpened = {};
-function collapseCards() { if (!settings.openAll) openState = {}; if (cardPushed) { cardPushed = null; try { history.back(); } catch (e) {} } }   // quando si filtra l'elenco torna compatto   // schede aperte/chiuse in questa sessione (true/false); se manca vale la regola di isOpen
+function collapseCards() { if (!settings.openAll) openState = {}; if (cardPushed) { cardPushed = null; try { history.back(); } catch (e) { nlErr(e); } } }   // quando si filtra l'elenco torna compatto   // schede aperte/chiuse in questa sessione (true/false); se manca vale la regola di isOpen
 var q = '', sortBy = 'recent', flt = '', tab = 'lib', readFlt = '', shFlt = '', genFlt = '', autFlt = '', autName = '', edFlt = '';   // shFlt, genFlt: chiave normalizzata, NONE = senza   // flt: '' | 'guess' | 'loan'; tab: 'lib' (Libreria) | 'wish' (Desideri)
 var tSave = null, toastTimer = null, scanning = false, offlineNoted = false;
 
@@ -113,7 +136,7 @@ var quota = { d: '', g: 0, ds: '', s: 0 };
 var shared = { g: 0, d: '', s: 0, ds: '' };   // totale di oggi di chi usa la stessa chiave o lo stesso worker (modulo ricerche.js, Supabase)
 function pacificDay() { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } }
 function utcDay() { return new Date().toISOString().slice(0, 10); }
-function loadQuota() { try { var q = JSON.parse(ls.get('catalogo-libri-quota') || '{}'); if (q && q.d) quota = { d: q.d, g: q.g | 0, ds: q.ds || q.d, s: q.s | 0 }; } catch (e) {} }
+function loadQuota() { try { var q = JSON.parse(ls.get('catalogo-libri-quota') || '{}'); if (q && q.d) quota = { d: q.d, g: q.g | 0, ds: q.ds || q.d, s: q.s | 0 }; } catch (e) { nlErr(e); } }
 function rollQuota() {
   var d = pacificDay(), ds = utcDay();
   if (quota.d !== d) { quota.d = d; quota.g = 0; }
@@ -137,7 +160,7 @@ function loadSaved() {
   try {
     var o = JSON.parse(ls.get(LS_SAVED) || '{}');
     ['sbn', 'key'].forEach(function (k) { saved[k] = Array.isArray(o[k]) ? o[k].filter(function (x) { return typeof x === 'string' && x; }).slice(0, 4) : []; });
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   if (settings.sbnUrl && saved.sbn.indexOf(settings.sbnUrl) < 0) remember('sbn', settings.sbnUrl);
   if (settings.gbKey && saved.key.indexOf(settings.gbKey) < 0) remember('key', settings.gbKey);
   var b = lent(), dirty = false;   // tolte dai salvati quelle di un amico finite lì prima del 16/11/2026
@@ -217,9 +240,9 @@ function lookupOpts() { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl 
 /* ricerca per ISBN: prima l'archivio comune (modulo ricerche.js: libri gia' cercati da altri, senza Google), poi le banche dati; il risultato va nell'archivio */
 async function findIsbn(code) {
   var A = window.NL && window.NL.archive;
-  if (A && A.get) { try { var hit = await A.get(code); if (hit) return hit; } catch (e) {} }
+  if (A && A.get) { try { var hit = await A.get(code); if (hit) return hit; } catch (e) { nlErr(e); } }
   var res = await L.lookupIsbn(code, lookupOpts());
-  if (res && A && A.put) { try { A.put(code, res); } catch (e) {} }
+  if (res && A && A.put) { try { A.put(code, res); } catch (e) { nlErr(e); } }
   return res;
 }
 function hasData(b) { return !!(b.t || b.a || b.e || b.y || b.i || b.c != null || b.n); }
@@ -284,7 +307,7 @@ function persist() {
   el.classList.toggle('off', !ok || navigator.onLine === false);
   el.classList.toggle('quiet-ok', ok && navigator.onLine !== false && settings.showSync === false);
   checkBackupNag();
-  if (ok) emit('saved');                                // i moduli (es. la sincronizzazione della copia social) sanno che i libri sono cambiati
+  if (ok) emit('saved');                                // i moduli (es. la sincronizzazione dell'account) sanno che i libri sono cambiati
 }
 function touch() {
   if (guest) { clearTimeout(tSave); tSave = setTimeout(persist, 350); return; }   // nella libreria di un amico: si salvano solo i tuoi (storable usa myBooks), i suoi mai
@@ -371,7 +394,7 @@ function loadAll() {
     var d = JSON.parse(ls.get(LS_KEY) || '{}');
     state.books = (d.books || []).map(cleanBook).filter(Boolean);
     state.updated = Number(d.updated) || 0;
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   try {
     var s = JSON.parse(ls.get(LS_SET) || '{}');
     settings.gbKey = L.str(s.gbKey); settings.price = s.price !== false; settings.extra = true;   // scaffale, genere, pagine e note sempre visibili (opzione tolta il 16/11/2026)
@@ -422,7 +445,7 @@ function loadAll() {
     settings.donGo = Number(s.donGo) || 0;                                          // quando e' stato aperto PayPal (0 = no)
     settings.donHid = s.donHid === true;                                            // l'app e' passata in secondo piano dopo
     settings.donOpens = Math.max(0, parseInt(s.donOpens, 10) || 0);                  // aperture dell'app (la riga compare dalla sesta)
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
 }
 function saveSettings() { ls.set(LS_SET, JSON.stringify(settings)); }
 
@@ -460,7 +483,7 @@ function beep(ok) {
     o.connect(g); g.connect(beep.ctx.destination);
     o.start(); o.stop(beep.ctx.currentTime + 0.09);
     beep.n = (beep.n || 0) + 1;
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
 }
 // suono di «fatto» (prezzo salvato): due note che salgono, piu' morbide del bip della scansione
 function chime() {
@@ -475,7 +498,7 @@ function chime() {
       o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.34);
     });
     chime.n = (chime.n || 0) + 1;
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
 }
 // suono di «non trovato»: due note basse che scendono, un po' ruvide. Si sente quando il codice e' stato letto ma
 // le banche dati non danno titolo e autore (o la foto non porta a nessun libro), solo per i libri appena aggiunti a mano.
@@ -492,7 +515,7 @@ function failSound() {
       o.connect(g); g.connect(f); o.start(t); o.stop(t + 0.22);
     });
     failSound.n = (failSound.n || 0) + 1;
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
 }
 function heardFail(id) {                           // il libro appena aggiunto (scansione, ISBN scritto, foto) non e' stato trovato
   var s = S[id];
@@ -510,7 +533,7 @@ function setSound(on, say) {
   if (say) { if (scanning) scanMsg(on ? 'Suoni accesi.' : 'Suoni spenti.'); else toast(on ? 'Suoni accesi.' : 'Suoni spenti.'); }
   if (on) beep(true);                              // si sente subito che sono tornati
 }
-function vibrate(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+function vibrate(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { nlErr(e); } }
 
 /* ---------- lettura di codici a barre ---------- */
 var detector = null;
@@ -520,7 +543,7 @@ var detector = null;
       var f = await window.BarcodeDetector.getSupportedFormats();
       if (f.indexOf('ean_13') >= 0) detector = new window.BarcodeDetector({ formats: ['ean_13'] });
     }
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
 })();
 var zx = null;
 function zxReader() {
@@ -552,7 +575,7 @@ async function decodeCanvasBarcode(canvas) {
     try {
       var r = await detector.detect(canvas);
       for (var i = 0; i < r.length; i++) { var v = L.toIsbn13(r[i].rawValue); if (v) return v; }
-    } catch (e) {}
+    } catch (e) { nlErr(e); }
   }
   var sizes = [2000, 1400, 900];
   for (var j = 0; j < sizes.length; j++) {
@@ -743,7 +766,7 @@ function getOcr() {
       workerPath: abs('vendor/worker.min.js'),
       corePath: abs('vendor/core'),
       langPath: abs('vendor/lang'),
-      logger: function (m) { if (ocrMsg && m) { try { ocrMsg(m); } catch (e) {} } }
+      logger: function (m) { if (ocrMsg && m) { try { ocrMsg(m); } catch (e) { nlErr(e); } } }
     });
     await w.setParameters({ tessedit_pageseg_mode: String(window.Tesseract.PSM.SPARSE_TEXT), preserve_interword_spaces: '1' });
     return w;
@@ -1033,11 +1056,11 @@ function askPrice(id) {
   askBookTxt();
   $('#priceAsk').hidden = false;
   clearInterval(askTick); askTick = setInterval(function () { if ($('#priceAsk').hidden) { clearInterval(askTick); return; } askBookTxt(); }, 600);
-  setTimeout(function () { try { $('#priceAskIn').focus(); } catch (e) {} }, 60);
+  setTimeout(function () { try { $('#priceAskIn').focus(); } catch (e) { nlErr(e); } }, 60);
 }
 function closePriceAsk() {
   var id = askId;
-  $('#priceAsk').hidden = true; askId = null; clearInterval(askTick); try { $('#priceAskIn').blur(); } catch (e) {}
+  $('#priceAsk').hidden = true; askId = null; clearInterval(askTick); try { $('#priceAskIn').blur(); } catch (e) { nlErr(e); }
   // la foto non ha trovato il libro mentre si scriveva il prezzo: subito titolo e autore a mano
   setTimeout(function () { var t = id && S[id] && S[id].st; if (t === 'nf' || t === 'error') autoManual(id); }, 80);
 }
@@ -1119,7 +1142,7 @@ function closePriceType() {
   if (priceTxtBefore) $('#scanPriceTxt').textContent = priceTxtBefore;
   $('#scanPrice').classList.remove('typing');
   var inp = $('#scanPriceIn'); inp.value = ''; inp.placeholder = 'Prezzo (facoltativo)'; inp.classList.remove('bad');
-  try { inp.blur(); } catch (e) {}
+  try { inp.blur(); } catch (e) { nlErr(e); }
 }
 function savePriceType(e) {
   if (e) e.preventDefault();
@@ -1237,7 +1260,7 @@ async function shootCover() {
   sc.classList.add('flash'); setTimeout(function () { sc.classList.remove('flash'); }, 140);
   beep(true); vibrate(40);
   var blob = null;
-  try { blob = await new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.9); }); } catch (e) {}
+  try { blob = await new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.9); }); } catch (e) { nlErr(e); }
   shootBusy = false; $('#scanShoot').disabled = false;
   if (!blob || !scanning) return;
   var id = newId();
@@ -1256,7 +1279,7 @@ $('#scanKinds').addEventListener('click', function (e) { var b = e.target.closes
 $('#scanShoot').addEventListener('click', shootCover);
 async function startScan(mode) {
   scanMode = mode === 'check' ? 'check' : 'add';
-  try { beep.ctx = beep.ctx || new (window.AudioContext || window.webkitAudioContext)(); if (beep.ctx.resume) beep.ctx.resume(); } catch (e) {}
+  try { beep.ctx = beep.ctx || new (window.AudioContext || window.webkitAudioContext)(); if (beep.ctx.resume) beep.ctx.resume(); } catch (e) { nlErr(e); }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     notice('La fotocamera non è disponibile in questo browser. Usa Foto o Digita.');
     return;
@@ -1270,12 +1293,12 @@ async function startScan(mode) {
   }
   var v = $('#scanVideo');
   v.srcObject = stream;
-  try { await v.play(); } catch (e) {}
+  try { await v.play(); } catch (e) { nlErr(e); }
   var track = stream.getVideoTracks()[0];
   try {
     var caps = track.getCapabilities ? track.getCapabilities() : {};
     if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(function () {});
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   scanLight.can = false; torchOn = false; paintScanLight();
   scanLightCaps(track); setTimeout(function () { if (scanning && stream) scanLightCaps(stream.getVideoTracks()[0]); }, 700);   // su alcuni telefoni la luce risulta solo dopo un attimo
   scanCtx = { count: 0, added: 0, last: '', lastAt: 0 };
@@ -1286,7 +1309,7 @@ async function startScan(mode) {
   $('#scan').hidden = false;
   scanning = true;
   setScanKind(scanKind);
-  try { history.pushState({ scan: 1 }, ''); pushed = true; } catch (e) {}
+  try { history.pushState({ scan: 1 }, ''); pushed = true; } catch (e) { nlErr(e); }
   scanTick();
 }
 function stopScan(fromPop) {
@@ -1298,7 +1321,7 @@ function stopScan(fromPop) {
   $('#scanVideo').srcObject = null;
   $('#scan').hidden = true;
   torchOn = false;
-  if (pushed && !fromPop) { try { history.back(); } catch (e) {} }
+  if (pushed && !fromPop) { try { history.back(); } catch (e) { nlErr(e); } }
   pushed = false;
   renderList(); updateSummary();
   if (scanCtx.added) toast(scanCtx.added === 1 ? 'Aggiunto 1 libro.' : 'Aggiunti ' + scanCtx.added + ' libri.');
@@ -1324,7 +1347,7 @@ async function scanTick() {
       }
       if (code && scanning) onScanned(code);
     }
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   if (scanning) scanTimer = setTimeout(scanTick, 130);
 }
 function onScanned(code) {
@@ -1469,7 +1492,7 @@ $('#scanRes').addEventListener('click', function (e) {
 var scanLight = { can: false, flash: false };
 async function scanLightCaps(track) {
   var can = false;
-  try { var c = track && track.getCapabilities ? track.getCapabilities() : {}; can = !!c.torch && settings.torchCam !== 'none'; } catch (e) {}
+  try { var c = track && track.getCapabilities ? track.getCapabilities() : {}; can = !!c.torch && settings.torchCam !== 'none'; } catch (e) { nlErr(e); }
   if (can) scanLight.can = true;                    // solo se l'obiettivo dichiara la torcia: altrimenti niente pulsanti della luce
   paintScanLight();
 }
@@ -1483,7 +1506,7 @@ async function setTorch(on) {
   var tr = stream && stream.getVideoTracks()[0];
   if (!tr) return false;
   if (!(await torchOnTrack(tr, on))) return false;
-  if (on) { try { var se = tr.getSettings ? tr.getSettings() : {}; if (se.torch === false) return false; } catch (e) {} }   // accettato ma rimasto spento
+  if (on) { try { var se = tr.getSettings ? tr.getSettings() : {}; if (se.torch === false) return false; } catch (e) { nlErr(e); } }   // accettato ma rimasto spento
   return true;
 }
 function noLight() {                                 // la luce non si accende: tolgo i pulsanti e me lo ricordo
@@ -1639,8 +1662,8 @@ function toggleRow(id, fromPop) {
   var open = !isOpen(b);
   if (open && !settings.openAll) {
     Object.keys(openState).forEach(function (k) { var x = get(k); if (k !== id && openState[k] && x && x.t) { openState[k] = false; refreshRow(k); } });   // una scheda alla volta
-    try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) {}
-  } else if (!open && cardPushed && !fromPop) { cardPushed = null; try { history.back(); } catch (e) {} }
+    try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) { nlErr(e); }
+  } else if (!open && cardPushed && !fromPop) { cardPushed = null; try { history.back(); } catch (e) { nlErr(e); } }
   openState[id] = open;
   if (!open && gridRet && (gridRet.id === id || !anyOpen()) && backToGrid()) { updateStick(); return; }   // aperta dalle copertine: si torna li'
   refreshRow(id);
@@ -1661,11 +1684,11 @@ window.addEventListener('popstate', function (e) {
 });
 /* ---- uscire dall'app: serve premere Indietro due volte ---- */
 var exitArmed = 0;
-try { history.scrollRestoration = 'manual'; } catch (e) {}   // le schede usano la cronologia: il browser non deve riportare la pagina dove era (filtro da un'etichetta finiva a meta' elenco, 16/11/2026)
+try { history.scrollRestoration = 'manual'; } catch (e) { nlErr(e); }   // le schede usano la cronologia: il browser non deve riportare la pagina dove era (filtro da un'etichetta finiva a meta' elenco, 16/11/2026)
 (function () {
   var push = history.pushState.bind(history);
   history.pushState = function (st, t, u) { if (history.state && history.state.root) push({ guard: 1 }, ''); return push(st, t, u); };   // sotto ogni finestra c'e' sempre la «guardia»
-  try { history.replaceState({ root: 1 }, ''); push({ guard: 1 }, ''); } catch (e) {}
+  try { history.replaceState({ root: 1 }, ''); push({ guard: 1 }, ''); } catch (e) { nlErr(e); }
   window.addEventListener('popstate', function (e) {
     if (!(e.state && e.state.root)) return;
     if (document.querySelector('.sheet:not([hidden]), .lightbox:not([hidden])')) {        // finestre senza cronologia: Indietro le chiude
@@ -1711,12 +1734,12 @@ function startSel(id) {
   if (!selOn) {
     selOn = true; sel = {};
     collapseCards(); openState = {};
-    try { history.pushState({ sel: 1 }, ''); selPushed = true; } catch (e) {}
+    try { history.pushState({ sel: 1 }, ''); selPushed = true; } catch (e) { nlErr(e); }
     renderList();
     if (!settings.selTip) { settings.selTip = 1; saveSettings(); toast('Tocca altri libri per aggiungerli. Poi Elimina o Modifica qui sotto.', null, 4500); }
   }
   if (id) { sel[id] = ++selSeq; paintSel(); }
-  try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
+  try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { nlErr(e); }
 }
 function toggleSel(id) { if (sel[id]) delete sel[id]; else sel[id] = ++selSeq; paintSel(); }
 function selOrdered() { return selIds().sort(function (a, b) { return sel[a] - sel[b]; }).map(get); }
@@ -1727,7 +1750,7 @@ function endSel(fromPop) {
   Array.prototype.forEach.call($('#list').querySelectorAll('.sel'), function (el) { el.classList.remove('sel'); el.removeAttribute('aria-selected'); });
   paintSel();
   ['#bulkSheet', '#confirmSheet'].forEach(function (k) { $(k).hidden = true; });
-  if (selPushed && !fromPop) { selPushed = false; try { history.back(); } catch (e) {} }
+  if (selPushed && !fromPop) { selPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
 }
 window.addEventListener('popstate', function (e) { if (selOn && !(e.state && e.state.sel)) { selPushed = false; endSel(true); } });
 /* pressione lunga sulla riga chiusa o sulla copertina */
@@ -1880,7 +1903,7 @@ var confirmFn = null;
 function askConfirm(title, msg, okLabel, fn) {
   $('#confirmH').textContent = title; $('#confirmMsg').textContent = msg; $('#confirmOk').textContent = okLabel;
   confirmFn = fn; $('#confirmSheet').hidden = false;
-  setTimeout(function () { try { $('#confirmNo').focus(); } catch (e) {} }, 50);
+  setTimeout(function () { try { $('#confirmNo').focus(); } catch (e) { nlErr(e); } }, 50);
 }
 $('#confirmOk').addEventListener('click', function () { var f = confirmFn; confirmFn = null; $('#confirmSheet').hidden = true; if (f) f(); });
 $('#confirmNo').addEventListener('click', function () { confirmFn = null; $('#confirmSheet').hidden = true; });
@@ -1963,8 +1986,8 @@ var snap = { stream: null, done: null, pushed: false, track: null, torch: false 
    deviceId, oppure 'none' se nessuno ce l'ha: allora i pulsanti della luce non compaiono). ---- */
 async function torchOnTrack(tr, on) {
   var ok = false;
-  try { await tr.applyConstraints({ advanced: [{ torch: !!on }] }); ok = true; } catch (e) {}
-  try { await tr.applyConstraints({ torch: !!on }); ok = true; } catch (e) {}
+  try { await tr.applyConstraints({ advanced: [{ torch: !!on }] }); ok = true; } catch (e) { nlErr(e); }
+  try { await tr.applyConstraints({ torch: !!on }); ok = true; } catch (e) { nlErr(e); }
   return ok;
 }
 function trackTorch(st) { try { var t = st && st.getVideoTracks()[0], c = t && t.getCapabilities ? t.getCapabilities() : {}; return !!c.torch; } catch (e) { return false; } }
@@ -1992,7 +2015,7 @@ async function runLightTest() {
     if (settings.torchCam === 'none') settings.torchCam = '';          // riprova da capo
     var st = await rearStream({ width: { ideal: 1920 }, height: { ideal: 1080 } }), tr = st.getVideoTracks()[0];
     lightTest = st;
-    var v = document.createElement('video'); v.muted = true; v.playsInline = true; v.srcObject = st; try { await v.play(); } catch (e) {}   // su alcuni telefoni la luce va solo con l'immagine attiva
+    var v = document.createElement('video'); v.muted = true; v.playsInline = true; v.srcObject = st; try { await v.play(); } catch (e) { nlErr(e); }   // su alcuni telefoni la luce va solo con l'immagine attiva
     if (!trackTorch(st)) { stopLightTest(); $('#lensMsg').textContent = 'Nessun obiettivo dichiara la luce a Chrome: i pulsanti della luce non compaiono. Per il flash usa la fotocamera del telefono.'; settings.torchCam = 'none'; saveSettings(); paintLensState(); b.disabled = false; return; }
     await torchOnTrack(tr, true);
     await new Promise(function (r) { setTimeout(r, 2500); });
@@ -2034,7 +2057,7 @@ async function probeLenses(onStep) {
       r.back = fm ? fm === 'environment' : /back|rear|posterior|environment/i.test(r.label) ? true : /front|user|anterior|frontale/i.test(r.label) ? false : null;
       st.getTracks().forEach(function (x) { x.stop(); });
       await new Promise(function (ok) { setTimeout(ok, 150); });   // alcuni telefoni non riaprono subito un'altra fotocamera
-    } catch (e) {}
+    } catch (e) { nlErr(e); }
     out.push(r);
     if (onStep) onStep(r, i, devs.length);
   }
@@ -2054,13 +2077,13 @@ async function rearStream(res) {
   }
   var st = await rearStreamBase(hi);
   if (settings.torchCam) return st;                                // 'none': gia' provati tutti, nessuno ha la luce
-  if (trackTorch(st)) { try { settings.torchCam = st.getVideoTracks()[0].getSettings().deviceId || ''; saveSettings(); } catch (e) {} return st; }
+  if (trackTorch(st)) { try { settings.torchCam = st.getVideoTracks()[0].getSettings().deviceId || ''; saveSettings(); } catch (e) { nlErr(e); } return st; }
   try {                                                            // prima volta e senza luce: provo gli altri obiettivi
     st.getTracks().forEach(function (t) { t.stop(); });
     lensMsg('Cerco l\'obiettivo con il flash (solo la prima volta)…');
     var found = await chooseLightLens();
-    if (found.pick) { try { return await md.getUserMedia({ video: Object.assign({ deviceId: { exact: found.pick.id } }, hi), audio: false }); } catch (e) {} }
-  } catch (e) {}
+    if (found.pick) { try { return await md.getUserMedia({ video: Object.assign({ deviceId: { exact: found.pick.id } }, hi), audio: false }); } catch (e) { nlErr(e); } }
+  } catch (e) { nlErr(e); }
   return await rearStreamBase(hi);
 }
 async function rearStreamBase(hi) {
@@ -2103,15 +2126,15 @@ function snapPhoto(title, fallbackInput) {
     try {
       snap.stream = await rearStream();
       if ($('#snap').hidden) { stopSnapStream(); return; }
-      try { history.pushState({ snap: 1 }, ''); snap.pushed = true; } catch (e) {}       // solo a fotocamera aperta: Indietro la chiude
-      var v = $('#snapVideo'); v.srcObject = snap.stream; try { await v.play(); } catch (e) {}
+      try { history.pushState({ snap: 1 }, ''); snap.pushed = true; } catch (e) { nlErr(e); }       // solo a fotocamera aperta: Indietro la chiude
+      var v = $('#snapVideo'); v.srcObject = snap.stream; try { await v.play(); } catch (e) { nlErr(e); }
       snap.track = snap.stream.getVideoTracks()[0];
       var caps = {};
       try {
         caps = snap.track.getCapabilities ? snap.track.getCapabilities() : {};
         $('#snapTorch').hidden = !caps.torch || settings.torchCam === 'none';     // 'none': nessuna luce, o non si accende davvero
         if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) snap.track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(function () {});
-      } catch (e) {}
+      } catch (e) { nlErr(e); }
       snap.caps = caps || {};
       $('#snapMsg').textContent = 'Tocca il libro sullo schermo per mettere a fuoco.';
       clearInterval(snap.lt); snap.lt = setInterval(snapLight, 700);
@@ -2147,7 +2170,7 @@ function snapLight() {
     m.classList.toggle('dark', dark);
     m.textContent = dark ? (torch ? 'Poca luce: accendi «Luce», la foto viene più nitida.' : 'Poca luce: avvicinati a una lampada, la foto verrebbe sfocata.') : 'Tocca il libro sullo schermo per mettere a fuoco.';
     $('#snapTorch').classList.toggle('hint', dark && torch);
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
 }
 /* tocco sull'inquadratura: mette a fuoco li' (dove il telefono lo permette), poi torna alla messa a fuoco continua */
 function snapFocusAt(e) {
@@ -2176,7 +2199,7 @@ function closeSnap(result, fromPop) {
   stopSnapStream();
   $('#snap').hidden = true; document.body.classList.remove('snapping'); $('#snapVideo').srcObject = null;
   var done = snap.done; snap.done = null;
-  if (snap.pushed && !fromPop) { snap.pushed = false; try { history.back(); } catch (e) {} }
+  if (snap.pushed && !fromPop) { snap.pushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   if (done) done(result || null);
 }
 async function snapShoot() {
@@ -2194,7 +2217,7 @@ async function snapShoot() {
   }
   btn.disabled = false;
   if (!blob) { $('#snapMsg').textContent = 'Scatto non riuscito: riprova.'; return; }
-  try { vibrate(30); } catch (e) {}
+  try { vibrate(30); } catch (e) { nlErr(e); }
   closeSnap(new File([blob], 'foto.jpg', { type: blob.type || 'image/jpeg' }));
 }
 $('#snapShoot').addEventListener('click', snapShoot);
@@ -2214,7 +2237,7 @@ $('#snapTorch').addEventListener('click', async function () {
   if (!snap.track) return;
   var tr = snap.track, want = !snap.torch, ok = true;
   ok = await torchOnTrack(tr, want);
-  if (ok && want) { try { var se = tr.getSettings ? tr.getSettings() : {}; if (se.torch === false) ok = false; } catch (e) {} }
+  if (ok && want) { try { var se = tr.getSettings ? tr.getSettings() : {}; if (se.torch === false) ok = false; } catch (e) { nlErr(e); } }
   if (!ok && want) {                                 // la luce non si accende da qui: tolgo il pulsante e lo ricordo
     snap.torch = false; snap.caps = Object.assign({}, snap.caps, { torch: false }); $('#snapTorch').hidden = true;
     settings.torchCam = 'none'; saveSettings();
@@ -2400,7 +2423,7 @@ function editPhoto(src) {
     } catch (e) { resolve(null); return; }
     ped.items = []; ped.cur = null; ped.done = resolve; ped.ptr = {}; ped.pinch = null; ped.drawId = null; ped.drag = null; ped.sel = null;
     $('#ped').hidden = false; document.body.classList.add('snapping');
-    try { history.pushState({ ped: 1 }, ''); ped.pushed = true; } catch (e) {}
+    try { history.pushState({ ped: 1 }, ''); ped.pushed = true; } catch (e) { nlErr(e); }
     requestAnimationFrame(pedFit);
   });
 }
@@ -2408,7 +2431,7 @@ function closePed(result, fromPop) {
   if ($('#ped').hidden) return;
   $('#ped').hidden = true; if ($('#snap').hidden) document.body.classList.remove('snapping');
   var done = ped.done; ped.done = null; ped.img = null; ped.items = []; ped.cur = null; ped.ptr = {}; ped.pinch = null; ped.drag = null; ped.mk = null;
-  if (ped.pushed && !fromPop) { ped.pushed = false; try { history.back(); } catch (e) {} }
+  if (ped.pushed && !fromPop) { ped.pushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   if (done) done(result || null);
 }
 async function pedFinish() {
@@ -2655,7 +2678,7 @@ var logPushed = false;
 async function openLog() {
   $('#logBody').innerHTML = '<p class="desc-wait"><span class="spin" aria-hidden="true"></span>Carico le novità…</p>';
   $('#logSheet').hidden = false;
-  if (!logPushed) { try { history.pushState({ log: 1 }, ''); logPushed = true; } catch (e) {} }   // Indietro chiude il registro e lascia aperte le Opzioni
+  if (!logPushed) { try { history.pushState({ log: 1 }, ''); logPushed = true; } catch (e) { nlErr(e); } }   // Indietro chiude il registro e lascia aperte le Opzioni
   try {
     // prima la versione aggiornata; senza rete (o se il sito risponde con un errore) la copia salvata sul telefono
     var r = await fetch('REGISTRO_MODIFICHE.md', { cache: 'no-cache' }).catch(function () { return null; });
@@ -2678,7 +2701,7 @@ async function openLog() {
 function closeLog(fromPop) {
   if ($('#logSheet').hidden) return;
   $('#logSheet').hidden = true;
-  if (logPushed && !fromPop) { logPushed = false; try { history.back(); } catch (e) {} }
+  if (logPushed && !fromPop) { logPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   else logPushed = false;
 }
 /* ---- Dopo un aggiornamento: «Aggiornato in questa versione», con le novita' dalla piu' importante (quelle in grassetto) alle altre ---- */
@@ -2741,7 +2764,7 @@ async function checkWhatsNew() {
       brief = true;
       title = 'Versione ' + APP_VERSION.v;
     }
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   if (!items.length) return;
   $('#wnSub').textContent = brief ? title + ': ecco cosa cambia per te.' : title + ' · ' + (items.length === 1 ? '1 novità' : items.length + ' novità');
   $('#wnList').classList.toggle('wn-brief', brief);
@@ -2782,13 +2805,13 @@ function paintDonAmt() {
 function openDon(reuse) {
   paintDonAmt();
   $('#donSheet').hidden = false;
-  if (reuse) { try { history.replaceState({ don: 1 }, ''); donPushed = true; } catch (e) {} }
-  else if (!donPushed) { try { history.pushState({ don: 1 }, ''); donPushed = true; } catch (e) {} }
+  if (reuse) { try { history.replaceState({ don: 1 }, ''); donPushed = true; } catch (e) { nlErr(e); } }
+  else if (!donPushed) { try { history.pushState({ don: 1 }, ''); donPushed = true; } catch (e) { nlErr(e); } }
 }
 function closeDon(fromPop) {
   if ($('#donSheet').hidden) return;
   $('#donSheet').hidden = true;
-  if (donPushed && !fromPop) { donPushed = false; try { history.back(); } catch (e) {} }
+  if (donPushed && !fromPop) { donPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   else donPushed = false;
 }
 function donGo() {
@@ -2956,12 +2979,12 @@ function openPh(src, cap, many) {
   if (!many) phList = [src], phAt = 0;
   phShow(); $('#phCap').textContent = cap || '';
   $('#phView').classList.remove('zoom'); $('#phView').hidden = false;
-  if (!phPushed) { try { history.pushState({ ph: 1 }, ''); phPushed = true; } catch (e) {} }
+  if (!phPushed) { try { history.pushState({ ph: 1 }, ''); phPushed = true; } catch (e) { nlErr(e); } }
 }
 function closePh(fromPop) {
   if ($('#phView').hidden) return;
   $('#phView').hidden = true; $('#phImg').removeAttribute('src');
-  if (phPushed && !fromPop) { phPushed = false; try { history.back(); } catch (e) {} }
+  if (phPushed && !fromPop) { phPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
 }
 $('#phClose').addEventListener('click', function () { closePh(false); });
 $('#phView').addEventListener('click', function (e) {
@@ -3005,7 +3028,7 @@ function openQuote(id, i) {
   ocrIdle();
   paintQuotePh();
   $('#quoteSheet').hidden = false;
-  if (!c) setTimeout(function () { try { $('#quoteText').focus(); } catch (e) {} }, 60);
+  if (!c) setTimeout(function () { try { $('#quoteText').focus(); } catch (e) { nlErr(e); } }, 60);
 }
 function closeQuote() { if (quoteEdit) quoteEdit.phs.forEach(function (p) { if (p.blob && p.url) URL.revokeObjectURL(p.url); }); $('#quoteSheet').hidden = true; quoteEdit = null; }
 function paintQuotePh() {
@@ -3150,7 +3173,7 @@ $('#quoteSheet').addEventListener('click', function (e) { if (e.target === e.cur
 /* ---- novità dei tuoi autori: libri recenti che non hai, da mettere nei Desideri ---- */
 var LS_NEWS = 'catalogo-libri-news', NEWS_EVERY = 14 * 86400000;
 var news = { at: 0, items: [], hide: [], busy: false };
-function loadNews() { try { var n = JSON.parse(ls.get(LS_NEWS) || '{}'); news.at = Number(n.at) || 0; news.items = Array.isArray(n.items) ? n.items.filter(function (x) { return x && x.t && x.k; }).slice(0, 80) : []; news.hide = Array.isArray(n.hide) ? n.hide.map(L.str).slice(-400) : []; } catch (e) {} }
+function loadNews() { try { var n = JSON.parse(ls.get(LS_NEWS) || '{}'); news.at = Number(n.at) || 0; news.items = Array.isArray(n.items) ? n.items.filter(function (x) { return x && x.t && x.k; }).slice(0, 80) : []; news.hide = Array.isArray(n.hide) ? n.hide.map(L.str).slice(-400) : []; } catch (e) { nlErr(e); } }
 function saveNews() { ls.set(LS_NEWS, JSON.stringify({ at: news.at, items: news.items, hide: news.hide })); }
 function newsAuthors() {
   var m = {};
@@ -3235,7 +3258,7 @@ function autoNews() {
    altri dei tuoi autori, novità dei tuoi generi, volumi che mancano alle tue serie). Da scoprire cerca da solo una volta a settimana. ---- */
 var LS_SUGG = 'catalogo-libri-sugg', SUGG_EVERY = 7 * 864e5, SUGG_RETRY = 864e5;
 var sugg = { at: 0, tried: 0, items: [], hide: [], busy: false }, sgTab = 'next', nxIdx = 0, nxBoxIdx = 0;
-function loadSugg() { try { var n = JSON.parse(ls.get(LS_SUGG) || '{}'); sugg.at = Number(n.at) || 0; sugg.tried = Number(n.tried) || 0; sugg.items = Array.isArray(n.items) ? n.items.filter(function (x) { return x && x.t && x.k; }).slice(0, 60) : []; sugg.hide = Array.isArray(n.hide) ? n.hide.map(L.str).slice(-400) : []; } catch (e) {} }
+function loadSugg() { try { var n = JSON.parse(ls.get(LS_SUGG) || '{}'); sugg.at = Number(n.at) || 0; sugg.tried = Number(n.tried) || 0; sugg.items = Array.isArray(n.items) ? n.items.filter(function (x) { return x && x.t && x.k; }).slice(0, 60) : []; sugg.hide = Array.isArray(n.hide) ? n.hide.map(L.str).slice(-400) : []; } catch (e) { nlErr(e); } }
 function saveSugg() { ls.set(LS_SUGG, JSON.stringify({ at: sugg.at, tried: sugg.tried, items: sugg.items, hide: sugg.hide })); }
 function nextList() { return L.nextReads(state.books, Date.now()); }
 function nxCardHTML(r, small) {
@@ -3959,7 +3982,7 @@ async function searchTitle(text) {
   $('#isbnRes').innerHTML = titleCands.map(function (c, i) {
     var have = (c.isbns || []).map(findByIsbn).filter(Boolean)[0];
     var badge = have ? '<span class="tag ' + (have.w ? 'loan' : 'warn') + '">' + (have.w ? 'Già nei Desideri' : 'Ce l\'hai già') + '</span>' : '';
-    return '<li><button class="cand" data-i="' + i + '"><span class="cimg">' + (c.img ? '<img src="' + esc(c.img) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '</span><span><b>' + esc(c.t) + '</b>' +
+    return '<li><button class="cand" data-i="' + i + '"><span class="cimg">' + (c.img ? '<img src="' + esc(c.img) + '" alt="" referrerpolicy="no-referrer" data-rm>' : '') + '</span><span><b>' + esc(c.t) + '</b>' +
       '<span>' + esc(c.a || 'Autore non indicato') + '</span><span>' + esc([c.e, c.y].filter(Boolean).join(', ') || 'Editore e anno non indicati') + '</span>' + badge + '</span></button></li>';
   }).join('');
   $('#isbnResMsg').textContent = titleCands.length ? 'Tocca il libro giusto per aggiungerlo ' + whereTxt() + ':' : 'Non ho trovato libri per «' + text + '». Prova con meno parole, o aggiungi l\'autore.';
@@ -4044,7 +4067,7 @@ function openPick(id) {
   if (!s || !s.cands) return;
   pickId = id;
   $('#pickList').innerHTML = s.cands.map(function (c, i) {
-    return '<li><button class="cand" data-i="' + i + '"><span class="cimg">' + (c.img ? '<img src="' + esc(c.img) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '</span><span><b>' + esc(c.t) + '</b>' +
+    return '<li><button class="cand" data-i="' + i + '"><span class="cimg">' + (c.img ? '<img src="' + esc(c.img) + '" alt="" referrerpolicy="no-referrer" data-rm>' : '') + '</span><span><b>' + esc(c.t) + '</b>' +
       '<span>' + esc(c.a || 'Autore non indicato') + '</span><span>' + esc([c.e, c.y].filter(Boolean).join(' · ') || 'Editore e anno non indicati') + '</span></span></button></li>';
   }).join('');
   $('#pickSheet').hidden = false;
@@ -4076,9 +4099,9 @@ function openManual(id, withPrice) {
     : 'Lo scrivi tu: smetto di cercarlo.';
   $('#manErr').hidden = true; $('#manErr').textContent = 'Scrivi almeno il titolo.';
   $('#manSheet').hidden = false;
-  setTimeout(function () { try { var i = $('#manT').value ? $('#manA') : $('#manT'); i.focus(); } catch (e) {} }, 60);
+  setTimeout(function () { try { var i = $('#manT').value ? $('#manA') : $('#manT'); i.focus(); } catch (e) { nlErr(e); } }, 60);
 }
-function closeManual() { $('#manSheet').hidden = true; manId = null; try { document.activeElement.blur(); } catch (e) {} }
+function closeManual() { $('#manSheet').hidden = true; manId = null; try { document.activeElement.blur(); } catch (e) { nlErr(e); } }
 function autoManual(id) {                          // si apre da sola se e' l'unica foto in lavorazione e non c'e' altro aperto
   var b = get(id);
   if (!b || b.t || b.i || (S[id] && S[id].later) || flow.id === id || scanning || !$('#manSheet').hidden || document.querySelector('.sheet:not([hidden]), .lightbox:not([hidden])')) return;
@@ -4326,7 +4349,7 @@ function idbAll() {
   });
 }
 function blobToDataURL(blob) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(String(r.result)); }; r.onerror = rej; r.readAsDataURL(blob); }); }
-function askPersist() { try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(function (p) { if (!p) navigator.storage.persist(); }); } catch (e) {} }
+function askPersist() { try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(function (p) { if (!p) navigator.storage.persist(); }); } catch (e) { nlErr(e); } }
 async function loadCovers() {
   try {
     var all = await idbAll(), keep = 0, gone = [];
@@ -4485,7 +4508,7 @@ async function coverTap(id) {
   if (navigator.onLine === false) { askCoverPhoto(id, 'Sei senza rete: non posso cercarla online. Puoi fotografarla tu.'); return; }
   covSearching[id] = true; refreshRow(id);
   var r = null;
-  try { r = await findCover(b, 3500); } catch (e) {}
+  try { r = await findCover(b, 3500); } catch (e) { nlErr(e); }
   delete covSearching[id];
   var x = get(id);
   if (!x) return;
@@ -4542,7 +4565,7 @@ function openCover(id) {
   $('#lbNote').textContent = tryBig ? 'Cerco un\'immagine più grande…'
     : (!coverURL[id] && !b.imgL && (b.img || b.nb) ? 'Non esiste una versione più grande: per una copertina migliore usa una tua foto.' : '');
   $('#lightbox').hidden = false;
-  if (!lbPushed) { try { history.pushState({ lb: 1 }, ''); lbPushed = true; } catch (e) {} }
+  if (!lbPushed) { try { history.pushState({ lb: 1 }, ''); lbPushed = true; } catch (e) { nlErr(e); } }
   $('#lbClose').focus({ preventScroll: true });
   if (tryBig) probeCover(id).then(function (ok) {
     if (tok !== lbToken) return;
@@ -4556,7 +4579,7 @@ function closeCover(fromPop) {
   lbToken++;
   $('#lightbox').hidden = true;
   $('#lbImg').removeAttribute('src');
-  if (lbPushed && !fromPop) { lbPushed = false; try { history.back(); } catch (e) {} }
+  if (lbPushed && !fromPop) { lbPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   lbPushed = false;
 }
 $('#lbClose').addEventListener('click', function () { closeCover(false); });
@@ -4775,7 +4798,7 @@ function paintMenuHome() {                        // la pagina principale riassu
 }
 function goFilters() {
   setDrawerTab('flt'); renderDrawer();
-  if (!drawerSub) { try { history.pushState({ drawer: 1, sub: 1 }, ''); drawerSub = true; } catch (e) {} }   // Indietro torna al menu
+  if (!drawerSub) { try { history.pushState({ drawer: 1, sub: 1 }, ''); drawerSub = true; } catch (e) { nlErr(e); } }   // Indietro torna al menu
 }
 function backupHint() {
   var last = settings.lastBackup;
@@ -4784,7 +4807,7 @@ function backupHint() {
 function openDrawer(t, reuse) {
   if (t === 'opt' || t === 'flt') setDrawerTab(t);
   else if (!drawerOpen) setDrawerTab('opt');          // dal bordo o dalla linguetta: il menu, non direttamente i filtri
-  if (reuse) { try { history.replaceState({ drawer: 1 }, ''); drawerPushed = true; } catch (e) {} }
+  if (reuse) { try { history.replaceState({ drawer: 1 }, ''); drawerPushed = true; } catch (e) { nlErr(e); } }
   if (!drawerOpen && !reuse && typeof setsOpen === 'function') { setsOpen(false); if (typeof infoOpen === 'function') infoOpen(false); }   // il Menu si apre con le impostazioni chiuse (tornando da una di esse restano aperte)
   if (!drawerOpen) { renderDrawer(); drawerReturn = document.activeElement; }
   showDrawerEls();
@@ -4795,8 +4818,8 @@ function openDrawer(t, reuse) {
   $('#btnFilters').setAttribute('aria-expanded', 'true');
   if (!drawerOpen) {
     drawerOpen = true;
-    if (!drawerPushed) { try { history.pushState({ drawer: 1 }, ''); drawerPushed = true; } catch (e) {} }   // il gesto Indietro chiude il pannello
-    setTimeout(function () { try { $('#drawerX').focus({ preventScroll: true }); } catch (e) {} }, 30);
+    if (!drawerPushed) { try { history.pushState({ drawer: 1 }, ''); drawerPushed = true; } catch (e) { nlErr(e); } }   // il gesto Indietro chiude il pannello
+    setTimeout(function () { try { $('#drawerX').focus({ preventScroll: true }); } catch (e) { nlErr(e); } }, 30);
   }
 }
 function closeDrawer(fromPop) {
@@ -4808,9 +4831,9 @@ function closeDrawer(fromPop) {
   $('#btnFilters').setAttribute('aria-expanded', 'false');
   clearTimeout(drawerTimer);
   drawerTimer = setTimeout(function () { if (!drawerOpen) { drawerEl.hidden = true; scrimEl.hidden = true; drawerEl.setAttribute('inert', ''); } }, 280);
-  if (drawerPushed && !fromPop) { drawerPushed = false; try { if (drawerSub) history.go(-2); else history.back(); } catch (e) {} }
+  if (drawerPushed && !fromPop) { drawerPushed = false; try { if (drawerSub) history.go(-2); else history.back(); } catch (e) { nlErr(e); } }
   drawerSub = false;
-  if (was && drawerReturn && drawerReturn.focus && drawerEl.contains(document.activeElement)) { try { drawerReturn.focus({ preventScroll: true }); } catch (e) {} }
+  if (was && drawerReturn && drawerReturn.focus && drawerEl.contains(document.activeElement)) { try { drawerReturn.focus({ preventScroll: true }); } catch (e) { nlErr(e); } }
 }
 $('#btnFilters').addEventListener('click', function () { drawerOpen ? closeDrawer() : openDrawer('flt'); });
 $('#edgeTab').addEventListener('click', function () { openDrawer('opt'); });
@@ -4852,7 +4875,7 @@ function deviceInfo() {
 }
 function contactURL() {
   var ver = ($('#verNum').textContent || 'Versione ' + APP_VERSION.v) + (PROVA ? ' (copia di prova)' : '');
-  return 'mailto:' + CONTACT + '?subject=' + encodeURIComponent('Next Libris') + '&body=' + encodeURIComponent('\n\n\n---\n' + ver + '\n' + deviceInfo());
+  return 'mailto:' + CONTACT + '?subject=' + encodeURIComponent('Next Libris') + '&body=' + encodeURIComponent('\n\n\n---\n' + ver + '\n' + deviceInfo() + errText());
 }
 $('#ctWrite').addEventListener('click', function () { location.href = contactURL(); });
 $('#ctCopy').addEventListener('click', async function () {
@@ -4868,7 +4891,7 @@ function fromMenu(fn) {
   menuRet = { top: $('#drawerBody').scrollTop, sets: setsShown, info: infoShown, back: false };
   drawerPushed = false; closeDrawer(true);             // la voce {drawer} resta nella cronologia, sotto la finestra
   fn();
-  if (history.state && history.state.drawer) { try { history.pushState({ mwin: 1 }, ''); } catch (e) {} }   // finestra senza cronologia sua: un posto sopra il Menu
+  if (history.state && history.state.drawer) { try { history.pushState({ mwin: 1 }, ''); } catch (e) { nlErr(e); } }   // finestra senza cronologia sua: un posto sopra il Menu
   menuLater();
 }
 function menuLater() { clearTimeout(menuChk); menuChk = setTimeout(menuCheck, 400); }
@@ -4876,7 +4899,7 @@ function menuCheck() {                                  // finestra chiusa con �
   var h = history.state || {};
   if (!menuRet || menuRet.back || drawerOpen || winOpen() || !(h.drawer || h.mwin)) return;
   menuRet = null;
-  try { if (h.mwin) history.go(-2); else history.back(); } catch (e) {}
+  try { if (h.mwin) history.go(-2); else history.back(); } catch (e) { nlErr(e); }
 }
 function menuPop(e) {
   if (!menuRet || drawerOpen || !(e.state && e.state.drawer)) return;
@@ -4939,7 +4962,7 @@ $('#lookReset').addEventListener('click', function () {
 
 /* ---------- versione: quale stai usando e se ce n'e' una piu' nuova ---------- */
 var latestVer = null, verChecking = null;
-var BUILD = {"t": "2026-11-17 07:23", "n": "101.1", "note": "Versione 101 nella prova"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-17 10:17", "n": "101.2", "note": "Bonifiche della verifica"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -4979,7 +5002,7 @@ async function updateNow() {
       if (u && !/^(https?:)?\/\//.test(u) && files.indexOf(u) < 0) files.push(u);
     });
     await Promise.all(files.map(function (u) { return fetch(u, { cache: 'reload' }).catch(function () {}); }));
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   location.reload();
 }
 $('#verUpdate').addEventListener('click', updateNow);
@@ -4987,7 +5010,7 @@ $('#verUpdate').addEventListener('click', updateNow);
 /* Pagina delle opzioni: una sezione alla volta, con «‹» per tornare al menu e il tasto Indietro del telefono per chiudere */
 var optOpen = false, optPushed = false;
 function openOptions(sec, reuse) {
-  try { paintLensState(); } catch (e) {}                 // stato dell'obiettivo con la luce, sempre aggiornato
+  try { paintLensState(); } catch (e) { nlErr(e); }                 // stato dell'obiettivo con la luce, sempre aggiornato
   emit('options', sec);
   paintSumOpts();
   var found = false;
@@ -4998,20 +5021,20 @@ function openOptions(sec, reuse) {
   if (!found) return;
   $('#optSheet').hidden = false; optOpen = true;
   $('#optSheet .sheet-in').scrollTop = 0;
-  if (reuse) { try { history.replaceState({ opt: 1 }, ''); optPushed = true; } catch (e) {} }
-  else if (!optPushed) { try { history.pushState({ opt: 1 }, ''); optPushed = true; } catch (e) {} }
+  if (reuse) { try { history.replaceState({ opt: 1 }, ''); optPushed = true; } catch (e) { nlErr(e); } }
+  else if (!optPushed) { try { history.pushState({ opt: 1 }, ''); optPushed = true; } catch (e) { nlErr(e); } }
   if (sec === 'search') { renderSvc(); renderSvcShare(); if (window.NLAmici && window.NLAmici.load) window.NLAmici.load().catch(function () {}); }   // «Con gli amici»: chiave e worker (da Condivisione, 17/11/2026)
   if (sec === 'app') { renderVersion(); checkVersion(); updateInstallUi(); }
 }
 function closeOptions(fromPop) {
   if (!optOpen) return;
   $('#optSheet').hidden = true; optOpen = false;
-  if (optPushed && !fromPop) { optPushed = false; try { history.back(); } catch (e) {} }
+  if (optPushed && !fromPop) { optPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   else optPushed = false;
 }
 $('#optClose').addEventListener('click', function () { closeOptions(); });
 $('#optBack').addEventListener('click', function () {
-  if (menuRet && optPushed) { try { history.back(); } catch (e) {} return; }   // aperta dal Menu: come Indietro
+  if (menuRet && optPushed) { try { history.back(); } catch (e) { nlErr(e); } return; }   // aperta dal Menu: come Indietro
   var had = optPushed; optPushed = false;
   $('#optSheet').hidden = true; optOpen = false;
   openDrawer('opt', had);
@@ -5239,7 +5262,7 @@ function unb64url(t) { var bin = atob(t.replace(/-/g, '+').replace(/_/g, '/')), 
 async function pipeBytes(bytes, stream) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
 async function encodeShare(o) {
   var raw = new TextEncoder().encode(JSON.stringify(o));
-  if (window.CompressionStream) { try { return 'z' + b64url(await pipeBytes(raw, new CompressionStream('deflate-raw'))); } catch (e) {} }
+  if (window.CompressionStream) { try { return 'z' + b64url(await pipeBytes(raw, new CompressionStream('deflate-raw'))); } catch (e) { nlErr(e); } }
   return 'j' + b64url(raw);
 }
 async function decodeShare(t) {
@@ -5376,7 +5399,7 @@ function openImport(sh) {
     if (o) have++;
     var ed = [x.e, x.y, x.gen, x.pg ? x.pg + ' pagine' : '', x.c != null ? eur(x.c) : ''].filter(Boolean).join(' · ');
     return '<li><label class="imp-row' + (o ? ' have' : '') + '"><input type="checkbox" data-i="' + i + '"' + (o ? ' disabled' : ' checked') + '>' +
-      '<span class="imp-c">' + (x.img ? '<img src="' + esc(x.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '</span>' +
+      '<span class="imp-c">' + (x.img ? '<img src="' + esc(x.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" data-rm>' : '') + '</span>' +
       '<span class="imp-t"><b>' + esc(x.t || 'ISBN ' + x.i) + '</b>' + (x.a ? '<span>' + esc(x.a) + '</span>' : '') + (ed ? '<small>' + esc(ed) + '</small>' : '') + '</span>' +
       (where ? '<span class="tag">' + where + '</span>' : '') + '</label></li>';
   }).join('');
@@ -5409,7 +5432,7 @@ function doImport(wish) {
     coverPool(async function () {
       var b = get(id);
       if (!b || smallImg(b) || !L.toIsbn13(b.i)) return;
-      try { var r = await findCover(b, 6000, true); b = get(id); if (r && !r.alt && b && !smallImg(b)) { b.img = r.url; if (r.big) b.imgL = r.url; touch(); syncThumbs(); refreshRow(id); } } catch (e) {}
+      try { var r = await findCover(b, 6000, true); b = get(id); if (r && !r.alt && b && !smallImg(b)) { b.img = r.url; if (r.big) b.imgL = r.url; touch(); syncThumbs(); refreshRow(id); } } catch (e) { nlErr(e); }
     });
   });
 }
@@ -5422,7 +5445,7 @@ async function checkIncoming() {
   var m = /^#([lk])=([\w-]+)$/.exec(location.hash || '');
   if (!m || hashBusy) return;
   hashBusy = true;
-  try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {}
+  try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { nlErr(e); }
   try {
     if (m[1] === 'k') { var o = await decodeRaw(m[2]); if (!o || o.v !== 1 || o.t !== 'svc') throw new Error('formato'); openSvcImport(o); }
     else openImport(await decodeShare(m[2]));
@@ -5726,7 +5749,7 @@ function openFromGrid(id) {
   openState[id] = true;
   setView('list');
   renderList();
-  try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) {}   // Indietro chiude la scheda
+  try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) { nlErr(e); }   // Indietro chiude la scheda
   var el = rowEl(id);
   if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 1600); }
 }
@@ -5738,7 +5761,7 @@ function backToGrid() {                          // chiamata quando l'ultima sch
   requestAnimationFrame(function () {
     window.scrollTo(0, r.y);
     var c = document.querySelector('#list .cover[data-id="' + r.id + '"]');
-    if (c) { c.classList.add('flash'); setTimeout(function () { c.classList.remove('flash'); }, 1200); try { c.focus({ preventScroll: true }); } catch (e) {} }
+    if (c) { c.classList.add('flash'); setTimeout(function () { c.classList.remove('flash'); }, 1200); try { c.focus({ preventScroll: true }); } catch (e) { nlErr(e); } }
   });
   return true;
 }
@@ -6132,7 +6155,7 @@ function closeSheetEl(sh) {
     confirmSheet: function () { hide(); confirmFn = null; },
     pickSheet: function () { $('#pickClose').click(); }, isbnSheet: function () { $('#isbnCancel').click(); }, copySheet: function () { $('#copyClose').click(); }
   };
-  try { (map[sh.id] || hide)(); } catch (e) {}
+  try { (map[sh.id] || hide)(); } catch (e) { nlErr(e); }
   if (!sh.hidden) hide();
 }
 function scrolledInside(el, top) { for (; el && el !== top.parentNode; el = el.parentElement) if (el.scrollTop > 0) return true; return false; }
@@ -6340,7 +6363,7 @@ $('#btnInstDiag').addEventListener('click', async function () {
     }
     add(!odd, 'Accesso ai file del sito', res.join(', ') + (odd ? '. Se un file risponde 401 o 403 e gli altri 200, quel file e\' bloccato dal server: manda questo risultato.' : ''));
     if (odd) siteOk = false;
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   var cv = (ua.match(/Chrome\/(\d+)/) || [])[1];
   add(!!deferred, 'Chrome ha offerto l\'installazione', deferred ? 'sì: ora puoi premere «Installa l\'app» qui sopra.'
     : (standalone ? 'non serve, è già installata.' : siteOk
@@ -6423,7 +6446,7 @@ var deferred = null;
 function isStandalone() {
   try {
     if (window.matchMedia && ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some(function (m) { return matchMedia('(display-mode: ' + m + ')').matches; })) return true;
-  } catch (e) {}
+  } catch (e) { nlErr(e); }
   return navigator.standalone === true || /^android-app:\/\//.test(document.referrer || '');
 }
 function browserKind() {
@@ -6481,14 +6504,14 @@ function openInstallHelp() {
   ch.href = 'intent://' + APP_URL.replace(/^https:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(APP_URL) + ';end';
   $('#instWhy').hidden = k !== 'android' && k !== 'desktop';
   $('#instSheet').hidden = false;
-  if (reuse) { try { history.replaceState({ inst: 1 }, ''); instPushed = true; } catch (e) {} }
-  else if (!instPushed) { try { history.pushState({ inst: 1 }, ''); instPushed = true; } catch (e) {} }
+  if (reuse) { try { history.replaceState({ inst: 1 }, ''); instPushed = true; } catch (e) { nlErr(e); } }
+  else if (!instPushed) { try { history.pushState({ inst: 1 }, ''); instPushed = true; } catch (e) { nlErr(e); } }
   $('#instOk').focus({ preventScroll: true });
 }
 function closeInstallHelp(fromPop) {
   if ($('#instSheet').hidden) return;
   $('#instSheet').hidden = true;
-  if (instPushed && !fromPop) { instPushed = false; try { history.back(); } catch (e) {} }
+  if (instPushed && !fromPop) { instPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   else instPushed = false;
 }
 window.addEventListener('popstate', function () { if (!$('#instSheet').hidden) { instPushed = false; closeInstallHelp(true); } });
@@ -6496,7 +6519,7 @@ async function doInstall() {
   if (!deferred) { openInstallHelp(); return; }
   var d = deferred, out = null;
   d.prompt();
-  try { out = await d.userChoice; } catch (e) {}
+  try { out = await d.userChoice; } catch (e) { nlErr(e); }
   deferred = null;
   if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Menu › Impostazioni › Installazione sul telefono.');
   updateInstallUi();
@@ -6521,7 +6544,7 @@ $('#instWhy').addEventListener('click', function () {
   setTimeout(function () { $('#btnInstDiag').click(); }, 60);
 });
 async function copyText(t) {
-  try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) { nlErr(e); }
   try {
     var ta = document.createElement('textarea');
     ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
@@ -6541,7 +6564,7 @@ async function shareApp() {
 }
 $('#shareApp').addEventListener('click', shareApp);
 $('#copyApp').addEventListener('click', copyAppLink);
-if (window.matchMedia) { try { var smq = matchMedia('(display-mode: standalone)'); var onSm = function () { updateInstallUi(); }; if (smq.addEventListener) smq.addEventListener('change', onSm); else if (smq.addListener) smq.addListener(onSm); } catch (e) {} }
+if (window.matchMedia) { try { var smq = matchMedia('(display-mode: standalone)'); var onSm = function () { updateInstallUi(); }; if (smq.addEventListener) smq.addEventListener('change', onSm); else if (smq.addListener) smq.addListener(onSm); } catch (e) { nlErr(e); } }
 function resumeLookups(silent) {
   var waiting = state.books.filter(function (b) { var s = S[b.id]; return s && s.st === 'wait'; });
   waiting.forEach(function (b) { var s = S[b.id]; clearTimeout(s.timer); s.st = 'queued'; refreshRow(b.id); lookupPool(function () { return doLookup(b.id); }); });
@@ -6610,7 +6633,7 @@ function alertBtn() {                             // il triangolino c'e' quando 
     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5M12 17.2v.01"/></svg></button>' : '';
 }
 function reopenNotices() {
-  closedNotices().forEach(function (x) { try { x.reopen(); } catch (e) {} });
+  closedNotices().forEach(function (x) { try { x.reopen(); } catch (e) { nlErr(e); } });
   emit('reopen');
   updateSummary(); window.scrollTo({ top: 0, behavior: 'smooth' });
   setTimeout(function () {                        // l'avviso in vista lampeggia un attimo, per far vedere dove sono
@@ -6657,7 +6680,7 @@ updateBackupInfo();
 loadCovers();
 setTimeout(function () { if (navigator.onLine !== false) { var n = resumeLookups(true); if (n) toast('Cerco ' + n + (n === 1 ? ' libro rimasto in attesa.' : ' libri rimasti in attesa.')); } }, 1200);
 setTimeout(checkLoanNag, 2500);
-try { if (navigator.storage && navigator.storage.persisted) navigator.storage.persisted().then(function (p) { if (!p && state.books.length >= 5) askPersist(); }); } catch (e) {}
+try { if (navigator.storage && navigator.storage.persisted) navigator.storage.persisted().then(function (p) { if (!p && state.books.length >= 5) askPersist(); }); } catch (e) { nlErr(e); }
 updateSummary();
 persist();
 checkIncoming();
@@ -6674,7 +6697,7 @@ loadNews(); loadSugg(); setTimeout(autoNews, 12000); setTimeout(autoSugg, 20000)
     setTimeout(function () { el.remove(); document.documentElement.removeAttribute('data-splash'); document.documentElement.classList.remove('splash-out'); applyLook(false); }, 380);
   }, 600);
 })();
-try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { nlErr(e); }
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(function () {});
 }

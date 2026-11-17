@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<!-- Content-Security-Policy (17/11/2026): script solo dai file dell'app e dall'accesso con Google, niente script scritti nella pagina.
+     connect-src e img-src ammettono https: perché il worker SBN e le copertine possono stare su indirizzi scelti dall'utente. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://accounts.google.com; font-src 'self'; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https:; worker-src 'self' blob:; frame-src https://accounts.google.com; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Next Libris</title>
 <meta name="application-name" content="Next Libris">
 <meta name="apple-mobile-web-app-title" content="Next Libris">
@@ -20,12 +23,8 @@
 <link rel="manifest" href="manifest.json?v=36" crossorigin="use-credentials">
 <link rel="icon" type="image/png" href="icons/next-libris-192.png">
 <link rel="apple-touch-icon" href="icons/next-libris-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
 <script src="indirizzo.js"></script><!-- vecchio indirizzo: solo la pagina del trasloco -->
-<script>/* aspetto e tema prima di disegnare la pagina, senza lampi; app aperta dall'icona: schermata d'apertura con il nome */try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true){document.documentElement.setAttribute('data-splash','');var tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.setAttribute('content','#24563F');}}catch(e){}try{var c0=(location.pathname.match(/\/next-libris-([a-z]+)(\/|$)/)||[])[1];var s0=JSON.parse(localStorage.getItem((c0?c0+':':'')+'catalogo-libri-set')||'{}');document.documentElement.setAttribute('data-look','nuovo');var th0=s0.themeV2?s0.theme:(s0.theme==='dark'?'dark':'light');if(th0==='light'||th0==='dark')document.documentElement.setAttribute('data-theme',th0);document.documentElement.setAttribute('data-pal',s0.palV2&&s0.pal?s0.pal:'bosco');if(s0.ft)document.documentElement.setAttribute('data-ft',s0.ft);if(s0.fb)document.documentElement.setAttribute('data-fb',s0.fb);}catch(e){document.documentElement.setAttribute('data-look','nuovo');document.documentElement.setAttribute('data-theme','light');}</script>
+<script src="avvio.js"></script><!-- aspetto e tema prima di disegnare; mai dentro la cornice di un altro sito -->
 <link rel="preload" href="vendor/fonts/literata-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>/* schermata d'apertura: qui e non nel CSS, cosi' e' la primissima cosa disegnata */
 #splash{display:none}
@@ -715,7 +714,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <p class="hint">Domande, problemi o idee per Next Libris? Scrivici: leggiamo tutto.</p>
       <p class="ct-mail" id="ctMail">nextlibris.app@gmail.com</p>
       <div class="row-btns"><button class="btn" type="button" id="ctCopy">Copia</button><button class="btn primary" type="button" id="ctWrite">Scrivici</button></div>
-      <p class="hint">«Scrivici» apre la tua email con l'oggetto già scritto e, in fondo, la versione dell'app e il tipo di telefono: aiutano a capire un problema. Puoi cancellarli.</p>
+      <p class="hint">«Scrivici» apre la tua email con l'oggetto già scritto e, in fondo, la versione dell'app, il tipo di telefono e gli ultimi errori dell'app (se ce ne sono stati): aiutano a capire un problema. Non parte niente da solo, e puoi cancellarli.</p>
     </section>
     <section class="opt-sec" data-sec="app" data-title="Installazione sul telefono">
       <p class="hint">Installata, Next Libris ha la sua icona tra le app del telefono, si apre a schermo intero e funziona anche senza rete. I libri restano gli stessi.</p>

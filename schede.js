@@ -14,7 +14,7 @@ var STYLES = [
 /* la pagina del libro e' la scheda dell'app (Piero, 16/11/2026); la classica resta solo per le prove automatiche (localhost) */
 var DEF = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'attuale' : 'd';
 var cur = DEF;
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'attuale' && STYLES.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) {}   // fuori dalle prove: sempre la pagina del libro
+try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'attuale' && STYLES.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) { if (window.nlErr) nlErr(e); }   // fuori dalle prove: sempre la pagina del libro
 function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
 var root = document.documentElement;
 var editing = {}, descExp = {};                 // per libro: campi aperti, descrizione aperta

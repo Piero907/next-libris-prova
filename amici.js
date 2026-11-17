@@ -60,7 +60,7 @@ async function load(force) {
       }
       me = (p && p[0]) || { utente: null, nome: '', desideri: false };
       list = (await rpc('miei_amici')) || [];
-      try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) {}
+      try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) { if (window.nlErr) nlErr(e); }
       try { swaps = (await rpc('miei_scambi')) || []; await applySwaps(); } catch (e) { if (window.console) console.warn('scambi', e); }
       try { asks = (await rpc('mie_richieste')) || []; tips = (await rpc('miei_consigli')) || []; await loadWho(); seenAnswers(); } catch (e) { if (window.console) console.warn('richieste', e); }
       try { keys = (await rpc('chiavi_mie')) || []; checkKeys(); } catch (e) { if (window.console) console.warn('chiavi', e); }
@@ -68,7 +68,7 @@ async function load(force) {
       if (me.utente && NL.name() !== me.utente) { syncing = true; NL.setName(me.utente); syncing = false; }   // il nome per gli amici vale anche nell'app
     } catch (e) { err = nice(e); }
     loading = null; paintAll();
-    loaded.forEach(function (fn) { try { fn(); } catch (e) {} });   // la campanella si aggiorna insieme
+    loaded.forEach(function (fn) { try { fn(); } catch (e) { if (window.nlErr) nlErr(e); } });   // la campanella si aggiorna insieme
   })();
   return loading;
 }
@@ -322,7 +322,7 @@ function paintSet() {
   var q = new URLSearchParams(location.search), u = tidy(q.get('amico'));
   if (q.has('amico')) {
     q.delete('amico');
-    try { history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); } catch (e) {}
+    try { history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); } catch (e) { if (window.nlErr) nlErr(e); }
     if (validName(u)) { wr(K_INV, u); setTimeout(open, 700); }
   }
   invite = rd(K_INV);
@@ -521,7 +521,7 @@ function paintAsk() {
 async function tipAct(a, id) {
   var c = tips.filter(function (x) { return x.id === id; })[0]; if (!c) return;
   if (a === 'tipwish') { NL.addMine(Object.assign(snapG(c.libro || {}), { w: true, fr: c.nome_da || '' })); NL.toast('Aggiunto ai tuoi desideri.'); }
-  try { await rpc('togli_consiglio', { id: id }); } catch (e) {}
+  try { await rpc('togli_consiglio', { id: id }); } catch (e) { if (window.nlErr) nlErr(e); }
   tips = tips.filter(function (x) { return x.id !== id; }); paint();
 }
 var shareSel = {};
@@ -760,7 +760,7 @@ function keySheet(id) {
         shut();
       } catch (e) { NL.toast(nice(e)); }
       this.disabled = false;
-      try { keys = (await rpc('chiavi_mie')) || []; } catch (e) {}
+      try { keys = (await rpc('chiavi_mie')) || []; } catch (e) { if (window.nlErr) nlErr(e); }
       paint(); guestBar();
     });
   }
@@ -797,7 +797,7 @@ async function keyAct(a, id) {
       NL.toast('Ora usi ' + (k.gb_key ? 'la chiave' : 'il worker') + ' di ' + k.nome + '.');
     } else if (a === 'keyoff') { stopBorrow(''); }
   } catch (e) { NL.toast(nice(e)); }
-  try { keys = (await rpc('chiavi_mie')) || []; } catch (e) {}
+  try { keys = (await rpc('chiavi_mie')) || []; } catch (e) { if (window.nlErr) nlErr(e); }
   paint();
 }
 function stopBorrow(msg) {
@@ -845,7 +845,7 @@ async function sendSwap(id, kind, who, old) {
   var still = kind === 'p' ? b.p === who && !b.xs : kind === 'r' ? b.xs === 'r' && b.xa === who : false;
   var same = old && ((kind === 'p' && old.p === who && !old.xs) || (kind === 'r' && old.xs === 'r' && old.xa === who));
   if (!still && kind !== 'v' && kind !== 's') return;                      // annullato
-  if (b.sx && !same) { var oldSx = b.sx; b.sx = ''; NL.save(); try { await rpc('chiudi_scambio', { id: oldSx }); } catch (e) {} }
+  if (b.sx && !same) { var oldSx = b.sx; b.sx = ''; NL.save(); try { await rpc('chiudi_scambio', { id: oldSx }); } catch (e) { if (window.nlErr) nlErr(e); } }
   if (!still || b.sx) return;
   var f = friendByName(who); if (!f) return;
   try {
@@ -862,7 +862,7 @@ async function sendSwap(id, kind, who, old) {
 NL.on('loanBack', function (ev) { setTimeout(async function () {
   var b = myGet(ev.id); if (!b || !b.sx || b.p || b.xs) return;
   var x = b.sx; b.sx = ''; NL.save();
-  try { await rpc('chiudi_scambio', { id: x }); } catch (e) {}
+  try { await rpc('chiudi_scambio', { id: x }); } catch (e) { if (window.nlErr) nlErr(e); }
 }, 4500); });
 /* «Prestato da Anna» toccato da chi l'ha ricevuto: l'hai restituito? */
 NL.on('recv', function (id) {
@@ -909,7 +909,7 @@ async function applySwaps() {
         }
         changed = true;
       }
-      try { await rpc('segna_visto', { id: s.id }); } catch (e) {}
+      try { await rpc('segna_visto', { id: s.id }); } catch (e) { if (window.nlErr) nlErr(e); }
     }
     if (s.tipo === 'prestito' && local && s.a === me_ && !local.xs) {           // restituzione: «da confermare» o rifiutata
       if (s.stato === 'reso' && local.sk === 'p') { local.sk = 'q'; changed = true; }

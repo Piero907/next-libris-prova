@@ -1,11 +1,11 @@
 /* Next Libris: funziona anche senza rete. Le ricerche (Google Libri, Open Library) passano sempre dalla rete. */
-// le copie parallele (…/next-libris-prova/, …/next-libris-social/…) stanno allo stesso indirizzo di base: copie offline con un prefisso
+// le copie parallele (…/next-libris-prova/, in generale …/next-libris-NOME/) stanno allo stesso indirizzo di base: copie offline con un prefisso
 // loro, e ognuna cancella solo le proprie (la versione vera non tocca quelle che cominciano con «nome-catalogo-libri-»)
 const COPIA = (self.registration.scope.match(/\/next-libris-([a-z]+)\//) || [])[1] || '';
 const CACHE = (COPIA ? COPIA + '-' : '') + 'catalogo-libri-v101';
 const MINE = (k) => (COPIA ? k.startsWith(COPIA + '-') : !/^[a-z]+-catalogo-libri-/.test(k));
-const SHELL = ['./', 'index.html', 'indirizzo.js', 'style.css', 'app.js', 'lib.js', 'manifest.json',
-  'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md',
+const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app.js', 'lib.js', 'manifest.json',
+  'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/fonts/bricolage-latin.woff2', 'vendor/fonts/plex-latin-400.woff2', 'vendor/fonts/plex-latin-500.woff2', 'vendor/fonts/plex-latin-600.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md',
   'wrap.js', 'wrap.css',   // modulo: riepilogo ogni tre mesi
   'layout.js', 'layout.css',   // modulo: disposizione dello schermo
   'schede.js', 'schede.css',   // modulo: aspetto della scheda aperta

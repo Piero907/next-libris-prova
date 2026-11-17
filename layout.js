@@ -14,7 +14,7 @@ var LAYOUTS = [
   { k: 'a', t: 'A · Barra in basso', d: 'Libreria, Desideri, + per aggiungere, Per te e Menu sempre sotto il pollice.' }
 ];
 var cur = DEF, one = true;   // avvisi in cima sempre uno alla volta (l'opzione e' stata tolta il 16/11/2026)
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'classico' && LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) {}   // fuori dalle prove: sempre la A
+try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'classico' && LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) { if (window.nlErr) nlErr(e); }   // fuori dalle prove: sempre la A
 var root = document.documentElement;
 function svg(p, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
 var I = {
@@ -77,7 +77,7 @@ document.addEventListener('click', function (e) {
   if (NL.tab && NL.tab() !== b.dataset.dest) { NL.setTab(b.dataset.dest); window.scrollTo({ top: 0 }); paintNav(); }
   paintDest();
 });
-function sheetOpen(id) { var s = $(id); s.hidden = false; if (id === '#layYou') paintYou(); if (id === '#layAdd') paintDest(); setTimeout(function () { try { (s.querySelector('.lay-big') || s.querySelector('button')).focus({ preventScroll: true }); } catch (e) {} }, 30); }
+function sheetOpen(id) { var s = $(id); s.hidden = false; if (id === '#layYou') paintYou(); if (id === '#layAdd') paintDest(); setTimeout(function () { try { (s.querySelector('.lay-big') || s.querySelector('button')).focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } }, 30); }
 function sheetsClose() { ['#layAdd', '#layYou'].forEach(function (k) { var s = $(k); if (s) s.hidden = true; }); }
 function act(l) {
   sheetsClose();
@@ -195,7 +195,7 @@ function apply() {
   if (cur !== 'classico') build();
   place(); loans0();
   paintNav(); notes(); sheetsClose();
-  setTimeout(function () { try { NL.updateStick(); } catch (e) {} }, 0);
+  setTimeout(function () { try { NL.updateStick(); } catch (e) { if (window.nlErr) nlErr(e); } }, 0);
 }
 function loans0() {                        // nella A la riga «Prestati» serve solo se il riepilogo non li mostra gia' (toccandoli)
   var c = document.getElementById('cntLoan');

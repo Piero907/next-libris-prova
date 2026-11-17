@@ -73,8 +73,8 @@ async function disable() {
   st.on = false; subOk = false; wr();
   var sub = await currentSub();
   if (sub) {
-    try { if (uid()) await rpc('push_cancella', { endpoint: sub.endpoint }); } catch (e) {}
-    try { await sub.unsubscribe(); } catch (e) {}
+    try { if (uid()) await rpc('push_cancella', { endpoint: sub.endpoint }); } catch (e) { if (window.nlErr) nlErr(e); }
+    try { await sub.unsubscribe(); } catch (e) { if (window.nlErr) nlErr(e); }
   }
   paintAll();
 }
@@ -92,7 +92,7 @@ async function check() {
 /* ---------- preferenze (sul server, uguali su tutti i telefoni) ---------- */
 async function loadPrefs() {
   if (!uid()) return;
-  try { var j = await rpc('push_mie_preferenze'); if (j && j.tipi) { prefs = { tipi: j.tipi.filter(function (t) { return ALL.indexOf(t) >= 0; }), silenzio_da: j.silenzio_da, silenzio_a: j.silenzio_a }; prefsLoaded = true; wr(); } } catch (e) {}
+  try { var j = await rpc('push_mie_preferenze'); if (j && j.tipi) { prefs = { tipi: j.tipi.filter(function (t) { return ALL.indexOf(t) >= 0; }), silenzio_da: j.silenzio_da, silenzio_a: j.silenzio_a }; prefsLoaded = true; wr(); } } catch (e) { if (window.nlErr) nlErr(e); }
 }
 var saveT = 0;
 function savePrefs() {
@@ -205,7 +205,7 @@ function paintAsk() {
 
 /* ---------- numero sull'icona e messaggi dal service worker ---------- */
 function badge(n) {
-  try { if (navigator.setAppBadge) { if (n) navigator.setAppBadge(n); else navigator.clearAppBadge(); } } catch (e) {}
+  try { if (navigator.setAppBadge) { if (n) navigator.setAppBadge(n); else navigator.clearAppBadge(); } } catch (e) { if (window.nlErr) nlErr(e); }
   if (!n && 'serviceWorker' in navigator) {                // campanella letta: tolgo anche le notifiche rimaste sul telefono
     reg().then(function (r) { return r && r.getNotifications ? r.getNotifications() : []; }).then(function (l) { (l || []).forEach(function (x) { if (/^nl-/.test(x.tag || '')) x.close(); }); }).catch(function () {});
   }
@@ -219,7 +219,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('mess
 (function () {                                            // aperta toccando una notifica: …/?nt=1
   var q = new URLSearchParams(location.search); if (q.get('nt') !== '1') return;
   q.delete('nt');
-  try { history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); } catch (e) {}
+  try { history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); } catch (e) { if (window.nlErr) nlErr(e); }
   setTimeout(function () { if (uid()) openBell(); }, 1800);
 })();
 
