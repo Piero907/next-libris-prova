@@ -1,7 +1,14 @@
 # Registro delle modifiche di Next Libris
 
 Le novità di ogni versione, dalla più recente. Il numero di versione dell'app si vede in fondo al menu.
-L'indirizzo dell'app è https://piero907.github.io/next-libris/ (fino alla versione 49 era …/catalogo-libri/).
+L'indirizzo dell'app è https://nextlibris.github.io/ (fino alla versione 99 era https://piero907.github.io/next-libris/, fino alla 49 …/catalogo-libri/).
+
+## Versione 100 · 17/11/2026
+> **Nuovo indirizzo** Next Libris ora sta su nextlibris.github.io: un indirizzo tutto suo.
+> **Trasloco dei libri** Aprendo il vecchio indirizzo, «Porta i miei libri» passa al nuovo libri, foto, impostazioni e account; al vecchio restano come riserva.
+- **Trasloco:** al vecchio indirizzo (piero907.github.io/next-libris/) l'app mostra solo «Next Libris ha un nuovo indirizzo». «Porta i miei libri» apre il nuovo e gli passa tutto quello che c'è su quel telefono, in quel browser; se al nuovo ci sono già dei libri chiede se sostituirli. Se il trasloco non parte, c'è il file del trasloco da scaricare e caricare al nuovo indirizzo. Senza libri, il vecchio indirizzo porta dritto al nuovo (anche i link d'invito).
+- **Da rifare al nuovo indirizzo:** installare di nuovo l'app sul telefono. Chi ha il proprio worker SBN deve aggiungere https://nextlibris.github.io in ORIGINI_AMMESSE; chi ha limitato la sua chiave Google ai siti deve aggiungere https://nextlibris.github.io/*.
+- Il codice del worker SBN accetta tutti e due gli indirizzi.
 
 ## Versione 99 · 16/11/2026
 > **Amici** Con l'account trovi gli amici per nome o con un link di invito: l'amicizia vale quando tutti e due accettano.

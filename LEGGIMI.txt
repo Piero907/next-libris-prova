@@ -516,7 +516,7 @@ pulsante "Copia il codice del worker", e' in Impostazioni > Ricerca dei libri):
    "Prova la ricerca ISBN": deve comparire "✓ Catalogo SBN".
 Prova anche a mano: apri nel browser l'indirizzo con ?isbn=9788806219352
 alla fine; deve comparire un testo con "briefRecords".
-L'intermediario risponde solo alla tua app (https://piero907.github.io):
+L'intermediario risponde solo alla tua app (https://nextlibris.github.io):
 se pubblichi l'app altrove, aggiungi l'indirizzo in ORIGINI_AMMESSE nel
 codice. Nota: il servizio JSON di SBN non e' un'API ufficiale documentata
 e potrebbe cambiare; se smette di rispondere, l'app continua con Google e
@@ -856,7 +856,7 @@ chiave e worker". Parte un link: chi lo apre in Next Libris sceglie "Usali"
 o "Mettili tra i salvati". Mandalo solo a persone di fiducia, in privato:
 chi ha il link usa la tua quota (gratuita). Consigliato: in Google Cloud >
 Credenziali limita la chiave alla "Books API" e al sito
-https://piero907.github.io/*.
+https://nextlibris.github.io/*.
 Worker, chiave e salvati sono anche nel backup:
 ripristinandolo su un altro telefono (o dopo aver reinstallato l'app)
 tornano in uso, se li' non ce ne sono gia'.
@@ -953,8 +953,9 @@ all'apertura dell'app). La versione si vede anche in Impostazioni >
 Installazione sul telefono.
 Ogni modifica pubblicata aumenta il numero (file version.json, app.js e
 sw.js insieme).
-Le modifiche si pubblicano su GitHub (Piero907/next-libris, ramo main) e
-GitHub Pages le mette online in un paio di minuti. Sul telefono chiudi
+Le modifiche si scrivono in Piero907/next-libris (ramo main) e si
+pubblicano copiandole in nextlibris/nextlibris.github.io: GitHub Pages le
+mette online in un paio di minuti (https://nextlibris.github.io/). Sul telefono chiudi
 l'app del tutto e riaprila, oppure usa "Aggiorna adesso". I libri gia'
 inseriti restano.
 
