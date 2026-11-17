@@ -1,4 +1,4 @@
-/* Next Libris · modulo «Notifiche push» (16/11/2026, nella copia di prova). Scelte di Piero del 16/11/2026.
+/* Next Libris · modulo «Notifiche push» (16/11/2026; nella vera dalla versione 102). Scelte di Piero del 16/11/2026.
    Gli avvisi della campanella (tranne «limite» delle ricerche) arrivano anche con l'app chiusa, con lo stesso testo.
    - Impostazioni › Notifiche: interruttore «Notifiche sul telefono» (acceso di partenza: manca solo il permesso del
      telefono, che si chiede con un tocco), scelta dei tipi, orari di silenzio (di partenza 22-8).
@@ -12,10 +12,10 @@
 'use strict';
 var NL = window.NL, S = window.NLSocial; if (!NL || !S || !S.call) return;
 var esc = NL.esc, K = 'catalogo-libri-push';
-// chiave VAPID pubblica di ogni progetto Supabase (quella privata sta nel Vault del progetto); vera: da creare quando si porta
+// chiave VAPID pubblica di ogni progetto Supabase (quella privata sta nel Vault del progetto)
 var VAPID = {
   prova: 'BGUN17qpp1ShPDv2fuxEsHWp5sD4nzeesR_YJSSqbAjF_cWus-SlIoaWzaSXVTMNzRPyn6CcXnL_mDFBFTWSu6M',
-  social: 'BGUN17qpp1ShPDv2fuxEsHWp5sD4nzeesR_YJSSqbAjF_cWus-SlIoaWzaSXVTMNzRPyn6CcXnL_mDFBFTWSu6M'
+  '': 'BAtSWsab23ITzZilyPsJn86L63qSIYK54WgnNbNusBUoY_j4i27xWLUbTDynwB7lUJMW9yadEbiQLrbANS45CHc'   // vera (102)
 };
 var KEY = VAPID[NL.COPIA] || '';
 var TIPI = [

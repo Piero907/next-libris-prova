@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 102.1 · 17/11/2026 11:45
+- Allineata alla **versione vera 102**
+
 ## Prova 101.3 · 17/11/2026 11:24
 - **Raggruppa per**: autore, genere, genere e poi autore, lettura (in Filtri e ordine), nelle copertine e nell'elenco
 - **Privacy dentro l'app**: si apre in una finestra, × e Indietro tornano al Menu
