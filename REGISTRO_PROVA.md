@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.9 · 18/11/2026 14:18
+- **Chiave prestata sul server**: l'amico non riceve mai la chiave, 300 ricerche al giorno; «La mia chiave è finita in giro»; avvisi importanti; via «Manda con un link»
+- Profilo: scheda colorata dell'anno con obiettivo facoltativo, tessere con le icone; foto da toccare; Impostazioni nel profilo; via i Preferiti
+- Barra a 5 tasti (Libreria · Desideri · + · Per te · Profilo); Sostieni al centro del Menu con testo nuovo; guida che torna da sola dopo «Prova adesso»
+
 ## Prova 104.8 · 18/11/2026 13:05
 - **Indirizzo ufficiale**: Next Libris è solo su nextlibris.github.io (Info e aiuto, chiave, privacy); il vecchio indirizzo porta soltanto al nuovo
 - **Chiave**: fuori dalla testata, nel Menu e nel profilo; la guida della chiave ha il campo per incollarla

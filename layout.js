@@ -44,8 +44,7 @@ function build() {
     '<button type="button" data-l="wish">' + svg(I.heart) + '<span>Desideri</span></button>' +
     '<button type="button" class="lay-plus" data-l="add" aria-label="Aggiungi un libro">' + svg(I.plus, 28) + '</button>' +
     '<button type="button" data-l="you">' + svg(I.spark) + '<span>Per te</span></button>' +
-    '<button type="button" data-l="prof">' + svg(I.user) + '<span>Profilo</span></button>' +   // giro 7: profilo più facile da trovare (in prova)
-    '<button type="button" data-l="menu">' + svg(I.menu) + '<span>Menu</span></button></nav>'));
+    '<button type="button" data-l="prof">' + svg(I.user) + '<span>Profilo</span></button></nav>'));   // 5 tasti (Piero, 18/11/2026): il Menu resta sull'ingranaggio in alto e nel profilo
   document.body.appendChild(el('<div class="sheet" id="layAdd" hidden><div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="layAddH">' +
     '<h2 id="layAddH">Aggiungi un libro</h2>' +
     '<div class="tabs lay-dest" role="tablist" aria-label="Dove aggiungerlo"><button type="button" role="tab" data-dest="lib">In Libreria</button><button type="button" role="tab" data-dest="wish">Nei Desideri</button></div>' +

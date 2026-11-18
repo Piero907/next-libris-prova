@@ -126,7 +126,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 104, date: '2026-11-17', note: 'Foto degli autori dal nuovo indirizzo di Wikipedia (Flaiano), titolare della privacy' };
-var BUILD = {"t": "2026-11-18 13:05", "n": "104.8", "note": "Indirizzo ufficiale"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-18 14:18", "n": "104.9", "note": "Chiave prestata sul server"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -178,7 +178,29 @@ function rollQuota() {
 function countCall(k) { rollQuota(); quota[k]++; ls.set('catalogo-libri-quota', JSON.stringify(quota)); emit('apiCall', k); if ($('#optSheet').hidden) return; updateQuotaInfo(); }
 function gUsed() { rollQuota(); return Math.max(quota.g, shared.d === quota.d ? shared.g : 0); }
 function sUsed() { rollQuota(); return Math.max(quota.s, shared.ds === quota.ds ? shared.s : 0); }
-function googleLeft(extra) { return !settings.gbKey || gUsed() < (extra ? G_EXTRA : G_STOP); }
+/* Chiave Google prestata da un amico (giro 8, Piero 18/11/2026): sul telefono c'è solo il segno «prestata:<id di chi presta>»,
+   la chiave vera resta sul server. Le ricerche passano dalla funzione «libri» di Supabase, che conta: 300 al giorno per amico
+   (x-nl-stop: mio), 950 in tutto per la chiave (pieno), prestito tolto (no). */
+var LENT_STOP = 'catalogo-libri-prestata-stop', lentStopD = '';
+try { lentStopD = ls.get(LENT_STOP) || ''; } catch (e) { nlErr(e); }
+function lentOut() { rollQuota(); return !!lentStopD && lentStopD === quota.d && /^prestata:/.test(settings.gbKey || ''); }   // finite le tue ricerche di oggi con la chiave dell'amico
+function googleLeft(extra) { return !settings.gbKey || (!lentOut() && gUsed() < (extra ? G_EXTRA : G_STOP)); }
+function lentFetch(u, da) {
+  var S = window.NLSocial, no = { ok: false, status: 429, local: true, json: function () { return Promise.resolve({}); } };
+  if (!S || !S.raw || !S.auth()) return Promise.resolve(no);
+  var q = u.replace(/^https:\/\/www\.googleapis\.com/, '').replace(/([?&])key=[^&]*(&|$)/, '$1').replace(/[?&]$/, '');
+  return S.raw('/functions/v1/libri?da=' + da + '&u=' + encodeURIComponent(q)).then(function (r) {
+    var tot = Number(r.headers.get('x-nl-tot')) || 0, stop = r.headers.get('x-nl-stop') || '';
+    rollQuota();
+    if (tot > 0) { shared.g = tot; shared.d = quota.d; }
+    if (stop === 'mio' && lentStopD !== quota.d) {
+      lentStopD = quota.d; ls.set(LENT_STOP, lentStopD);
+      toast('Per oggi hai finito le ricerche con la chiave di ' + (lent().nome || 'un amico') + ': fino a domattina cerco in Open Library e nelle biblioteche.');
+    } else if (stop === 'no') emit('lentGone');          // prestito tolto: amici.js rilegge e torna alle tue impostazioni
+    if (!$('#optSheet').hidden) updateQuotaInfo();
+    return r;
+  });
+}
 function updateQuotaInfo() {
   var nf = new Intl.NumberFormat('it-IT'), g = gUsed(), sb = sUsed();
   var withG = g > quota.g ? ' (con chi usa la stessa chiave)' : '', withS = sb > quota.s ? ' (con chi usa lo stesso worker)' : '';
@@ -214,6 +236,7 @@ function setSvc(k, v) {
   if (k === 'sbn') settings.sbnUrl = v; else settings.gbKey = v;
   backupReady = null;
   saveSettings(); remember(k, v); renderSvc();
+  if (k !== 'sbn' && v && !isLent('key', v)) emit('ownkey', v);   // giro 8: chi la presta la aggiorna per tutti gli amici
 }
 /* guida del worker nell'app, non nel LEGGIMI (Piero, 17/11/2026): «Copia il codice del worker» */
 $('#sbnCopy').addEventListener('click', async function () {
@@ -239,6 +262,7 @@ function svcFold(k, open) {
 }
 function gbMask(v) { return v.length > 10 ? v.slice(0, 4) + '…' + v.slice(-3) : '…'; }   // «AIza…7Gt»: la chiave non resta in vista (giro 5)
 $('#optSheet').addEventListener('click', function (e) {
+  if (e.target.closest('#gbLeak')) { window.NLRicerche.leak(); return; }
   var t = e.target.closest('.svc-tog'); if (t) { svcFold(t.closest('.svc').id === 'svcSbn' ? 'sbn' : 'key'); return; }
   var g = e.target.closest('.svc-guide'); if (!g) return;
   var k = g.dataset.guide, R = window.NLRicerche;
@@ -256,6 +280,7 @@ function renderSvc() {
   $('#gbSt').textContent = lk ? 'Prestata da ' + who : gk ? 'In uso' : 'Nessuna chiave'; $('#gbSt').className = 'svc-st' + (gk ? ' on' : '');
   $('#gbGuide').hidden = !!mine('key'); $('#sbnGuide').hidden = !!mine('sbn');
   $('#sbnClear').hidden = !sb || ls_; $('#gbClear').hidden = !gk || lk;
+  $('#gbLeak').hidden = !mine('key') || !(window.NLRicerche && window.NLRicerche.leak);
   [['sbn', ls_, 'il worker SBN di '], ['key', lk, 'la chiave Google di ']].forEach(function (x) {
     var box = $(x[0] === 'sbn' ? '#svcSbn' : '#svcKey'), row = box.querySelector('.svc-row'), note = box.querySelector('.svc-lent');
     row.hidden = x[1];
@@ -286,6 +311,8 @@ function apiFetch(url, init) {
     var extra = /\/volumes\/[^?]/.test(u);                  // scheda del volume = solo per la copertina grande
     if (!googleLeft(extra)) return Promise.resolve({ ok: false, status: 429, local: true, json: function () { return Promise.resolve({}); } });
     countCall('g');
+    var lm = /[?&]key=prestata(?:%3A|:)([0-9a-f-]{36})/i.exec(u);
+    if (lm) return lentFetch(u, lm[1]);
   } else if (settings.sbnUrl && u.indexOf(settings.sbnUrl) === 0) countCall('s');
   return fetch(url, init);
 }

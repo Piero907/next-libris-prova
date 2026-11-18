@@ -214,8 +214,6 @@ document.addEventListener('keydown', function (e) {
   if (!$('#lightbox').hidden) { closeCover(false); return; }
   if (!$('#instSheet').hidden) { closeInstallHelp(); return; }
   if (!$('#covSheet').hidden) { closeCovAsk(); return; }
-  if (!$('#svcSheet').hidden) { closeSvcShare(); return; }
-  if (!$('#svcInSheet').hidden) { closeSvcImport(); return; }
   if (!$('#shareSheet').hidden) { closeShare(); return; }
   if (!$('#importSheet').hidden) { closeImport(); return; }
   if (!$('#quoteSheet').hidden) { closeQuote(); return; }
@@ -247,7 +245,7 @@ var sdrag = null;
 function closeSheetEl(sh) {
   function hide() { sh.hidden = true; }
   var map = {
-    covSheet: closeCovAsk, svcSheet: closeSvcShare, svcInSheet: closeSvcImport, shareSheet: closeShare, importSheet: closeImport,
+    covSheet: closeCovAsk, shareSheet: closeShare, importSheet: closeImport,
     quoteSheet: closeQuote, suggSheet: closeSugg, wnSheet: closeWhatsNew, logSheet: function () { closeLog(); }, auSheet: closeAuthor, donSheet: function () { closeDon(); }, manSheet: closeManual,
     recSheet: flowLater, allqSheet: closeAllQuotes, priceAsk: closePriceAsk, loanSheet: closeLoan, instSheet: closeInstallHelp,
     confirmSheet: function () { hide(); confirmFn = null; },
@@ -893,7 +891,10 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 /* ---- Moduli aggiuntivi: file a parte (per esempio wrap.js) che si agganciano qui. Se il file non c'e', l'app funziona uguale.
    Un modulo si toglie cancellando i suoi file e le sue righe in index.html e sw.js (vedi togli_modulo.py nel ramo prove). ---- */
 window.NL = {
-  svcShare: function () { openSvcShare(); }, setKey: function (v) { setSvc('key', v); }, openDon: function () { openDon(); },   // dalla guida della chiave (18/11/2026) renderOwner: function () { renderOwner(); }, emit: function (n, a) { emit(n, a); },
+  setKey: function (v) { setSvc('key', v); }, openDon: function () { openDon(); },   // dalla guida della chiave (18/11/2026)
+  ownKey: function () { return mine('key'); },
+  qThumb: function (c) { return qThumb(c); },   // miniatura della foto di una citazione (profilo, 18/11/2026)   // la TUA chiave, anche mentre usi quella di un amico (giro 8)
+  renderOwner: function () { renderOwner(); }, emit: function (n, a) { emit(n, a); },   // (nella 104.8 queste due erano finite dentro il commento: rimesse)
   on: function (name, fn) { (hooks[name] || (hooks[name] = [])).push(fn); },
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA, COPIA: COPIA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,

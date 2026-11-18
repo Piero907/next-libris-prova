@@ -429,7 +429,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 <div class="sheet" id="donSheet" hidden>
   <div class="sheet-in don-in" role="dialog" aria-modal="true" aria-labelledby="donH">
     <h2 id="donH">Sostieni Next Libris</h2>
-    <p class="msg">Next Libris è gratis, senza pubblicità e senza abbonamenti. Se ti ha fatto ritrovare almeno un libro prestato e mai tornato, offrimi una birra!</p>
+    <p class="msg">Next Libris è gratis, senza pubblicità e senza abbonamenti: è fatta per far venire voglia di leggere e di scambiarsi i libri con gli amici. Se ti piace, offrimi una birra!</p>
     <div class="don-amts" role="radiogroup" aria-label="Importo">
       <button type="button" class="don-amt" role="radio" aria-checked="false" data-amt="2">Piccola<small>2 €</small></button>
       <button type="button" class="don-amt" role="radio" aria-checked="true" data-amt="3">Media<small>3 €</small></button>
@@ -548,38 +548,6 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   </form>
 </div>
 
-<div class="sheet" id="svcSheet" hidden>
-  <form class="sheet-in" id="svcForm" role="dialog" aria-modal="true" aria-labelledby="svcH">
-    <h2 id="svcH">Condividi chiave e worker</h2>
-    <p class="msg" id="svcWhat"></p>
-    <label class="check"><input type="checkbox" id="svcKeyOn"><span>Chiave Google Libri</span></label>
-    <label class="check"><input type="checkbox" id="svcSbnOn"><span>Worker SBN (catalogo delle biblioteche)</span></label>
-    <label class="field"><span>Il tuo nome</span><input type="text" id="svcSendName" enterkeyhint="done" maxlength="30" autocomplete="given-name" autocapitalize="words" placeholder="es. Piero"></label>
-    <div class="svc-warn">
-      <p><b>Mandalo solo a persone di fiducia, in un messaggio privato.</b> Chi ha il link usa la tua quota: Google 1.000 ricerche al giorno, Cloudflare 100.000, divise tra chi le usa. Non costa nulla, ma se finisce la quota le ricerche rallentano per tutti fino al giorno dopo.</p>
-      <p>Consigliato: in Google Cloud › Credenziali limita la chiave alla sola «Books API» e al sito https://nextlibris.github.io/*. Il worker risponde già solo a Next Libris.</p>
-    </div>
-    <div class="row-btns">
-      <button class="btn primary" type="submit">Manda</button>
-      <button class="btn" type="button" id="svcCopy">Copia</button>
-      <button class="btn" type="button" id="svcClose">Annulla</button>
-    </div>
-  </form>
-</div>
-
-<div class="sheet" id="svcInSheet" hidden>
-  <div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="svcInH">
-    <h2 id="svcInH"></h2>
-    <ul class="svc-in" id="svcInList"></ul>
-    <p class="msg">Servono a rendere la ricerca dei libri più completa. Usali solo se ti fidi di chi te li manda.</p>
-    <div class="row-btns">
-      <button class="btn primary" type="button" id="svcInUse">Usali</button>
-      <button class="btn" type="button" id="svcInLater">Mettili tra i salvati</button>
-      <button class="btn" type="button" id="svcInNo">No, grazie</button>
-    </div>
-  </div>
-</div>
-
 <div class="sheet" id="copySheet" hidden>
   <div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="copyH">
     <h2 id="copyH">Copia l'elenco</h2>
@@ -676,12 +644,14 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
           <button class="btn svc-clear" id="gbClear" type="button" hidden>Cancella</button>
           <div class="svc-saved" id="gbSaved" hidden></div>
         </div>
+        <button class="link svc-leak" id="gbLeak" type="button" hidden>La mia chiave è finita in giro</button>
         <details class="svc-how">
           <summary>Come si crea la chiave (gratis, una volta sola)</summary>
           <ol class="hint keysteps">
           <li>Apri <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com</a> con il tuo account Google e crea un progetto.</li>
           <li>Apri <a href="https://console.cloud.google.com/apis/library/books.googleapis.com" target="_blank" rel="noopener">Books API</a> e premi «Abilita».</li>
           <li>Vai in <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credenziali</a> › «Crea credenziali» › «Chiave API».</li>
+          <li>Limita la chiave: in «Restrizioni API» scegli solo <b>Books API</b>. La fatturazione non va attivata (di partenza è già spenta, non devi fare niente): così non si paga mai niente, qualunque cosa succeda.</li>
           <li>Copia la chiave e incollala qui sopra.</li>
         </ol>
         </details>
@@ -848,14 +818,14 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   </div>
   <div class="drawer-body" id="drawerBody">
     <div id="drawerOpts" hidden>
-      <div class="dlist dmenu ddon">
-        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Next Libris è gratis e senza pubblicità. Se ti piace, offrici una birra.</small></span><span class="n" aria-hidden="true">♥</span></button>
-      </div>
       <div class="dlist dmenu dmain">
         <button type="button" class="dopt dgo" id="goFilters"><span><b>Filtri</b><small id="goFltTxt">Tutti i libri</small></span><span class="dbadge" id="goFltN" hidden></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goSugg"><span><b>Suggerimenti</b><small>Cosa leggere dopo, da scoprire</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo dq-all" id="goQuotes" hidden><span><b>Tutte le citazioni</b><small id="goQTxt"></small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, pagine, letture</small></span><span class="n" aria-hidden="true">›</span></button>
+      </div>
+      <div class="dlist dmenu ddon">
+        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Next Libris è gratis e senza pubblicità. Se ti piace, offrici una birra.</small></span><span class="n" aria-hidden="true">♥</span></button>
       </div>
       <h3>La tua libreria</h3>
       <div class="dlist dmenu">

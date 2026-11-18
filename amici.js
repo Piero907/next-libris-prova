@@ -58,7 +58,7 @@ async function load(force) {
         try { p = await S.call('/rest/v1/profili?select=' + cols[ci] + '&id=eq.' + encodeURIComponent(uid()), { user: true }); break; }
         catch (e0) { if ((e0 && e0.code === 'net') || ci === cols.length - 1) throw e0; }
       }
-      me = (p && p[0]) || { utente: null, nome: '', desideri: false };
+      me = (p && p[0]) || { utente: null, nome: '', desideri: true, libreria: true };   // accese di partenza (022, 18/11/2026)
       list = abc(await rpc('miei_amici'));
       try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) { if (window.nlErr) nlErr(e); }
       try { swaps = (await rpc('miei_scambi')) || []; await applySwaps(); } catch (e) { if (window.console) console.warn('scambi', e); }
@@ -312,7 +312,7 @@ function paintMenu() {
     var h = document.createElement('h3'); h.id = 'friMenuH'; h.textContent = 'Amici';
     m = document.createElement('div'); m.className = 'dlist dmenu'; m.id = 'friMenu';
     m.innerHTML = '<button type="button" class="dopt dgo" id="goFri"><span><b>I tuoi amici</b><small id="goFriTxt"></small></span><span class="n" aria-hidden="true">›</span></button>';   // «Invita» sta nella finestra Amici (17/11/2026)
-    var at = top;   // dopo Sostieni (Piero, 17/11/2026: Sostieni sopra Amici)
+    var at = document.querySelector('#drawerOpts .ddon') || top;   // Sostieni sempre al centro, sopra Amici (Piero, 18/11/2026)
     at.parentNode.insertBefore(h, at.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
     m.querySelector('#goFri').addEventListener('click', function () { NL.fromMenu(open); });
     /* «Il mio profilo» sta in cima al Menu (giro 7, profilo.js) */
@@ -727,9 +727,8 @@ function optsView() {
     '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friRegali"' + (me.regali !== false ? ' checked' : '') + '><span>Gli amici vedono i regali che prenoto<small>Quando dici «Te lo regalo io», gli altri amici vedono il tuo nome. Se la togli vedono solo «Regalo prenotato». Il festeggiato non lo vede mai.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friAmici"' + (me.amici !== false ? ' checked' : '') + '><span>Gli amici vedono i miei amici<small>Solo i nomi, così trovate altri amici e possono chiedervi l\'amicizia. Se la togli, vedono solo gli amici che avete in comune.</small></span></label></div></section>';
-  if ('p_cit' in me) h += '<section class="fr-sec"><h3 class="fr-h">Nel tuo profilo</h3><div class="fr-share"><p class="fr-small">La tua foto la vedono solo gli amici. Il resto, solo se lo scegli qui.</p>' +
+  if ('p_cit' in me) h += '<section class="fr-sec"><h3 class="fr-h">Nel tuo profilo</h3><div class="fr-share"><p class="fr-small">La tua foto la vedono solo gli amici. Il resto è acceso di partenza, tranne tutte le citazioni: togli quello che non vuoi mostrare.</p>' +
     ('p_let' in me ? '<label class="check fr-wish"><input type="checkbox" id="friPLet"' + (me.p_let !== false ? ' checked' : '') + '><span>Gli amici vedono cosa sto leggendo<small>I libri «In lettura». Solo se vedono anche la libreria.</small></span></label>' +
-    '<label class="check fr-wish"><input type="checkbox" id="friPPref"' + (me.p_pref !== false ? ' checked' : '') + '><span>Gli amici vedono i miei preferiti<small>I libri con la stella. Solo se vedono anche la libreria.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friPCons"' + (me.p_cons !== false ? ' checked' : '') + '><span>Gli amici vedono i libri che consiglio<small>Quelli con la coccarda «Lo consiglio». Solo se vedono anche la libreria.</small></span></label>' : '') +
     '<label class="check fr-wish"><input type="checkbox" id="friPCit"' + (me.p_cit ? ' checked' : '') + '><span>Gli amici vedono le mie citazioni in evidenza<small>Quelle con la puntina (fino a 3), con titolo e autore del libro.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friPStat"' + (me.p_stat ? ' checked' : '') + '><span>Gli amici vedono i miei numeri<small>Libri e pagine lette, autore e genere più letti, paesi, libri prestati. Solo se vedono anche la libreria.</small></span></label>' +
@@ -830,7 +829,6 @@ function kwSheet() {
     var b = e.target.closest && e.target.closest('[data-kw]'); if (!b) return;
     var k = b.dataset.kw;
     if (k === 'login') { shut(); S.open(); }
-    else if (k === 'link') { shut(); NL.svcShare && NL.svcShare(); }
     else if (k === 'guide') { var R = window.NLRicerche; if (R && R.guide) R.guide(true); }
     else if (k === 'friends') { shut(); NL.closeDrawer && NL.closeDrawer(); open(); }
   });
@@ -843,15 +841,12 @@ function paintKw() {
   var own = ownKeys(), b = borrowed(), h = '', intro = '<p class="fr-small kw-intro">Una chiave Google Libri fa 1.000 ricerche al giorno. Con un uso normale bastano per te e per decine di amici. Il primo giorno, quando un amico carica la sua libreria, ne consuma di più: puoi aiutare fino a <b>6 amici nuovi al giorno</b> (50 libri ciascuno). Il worker ne regge migliaia.</p>';   // testo approvato (giro 5)
   if (!uid()) {
     h = '<p class="fr-small">Per prestarli agli amici, o per usare quelli che un amico ti presta, serve l\'account.</p><button class="btn primary" type="button" data-kw="login">Entra con il tuo account</button>';
-    if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi usa Next Libris senza account.');
   } else if (!list) {
     h = '<p class="fr-small">' + (err ? esc(err) : 'Un momento…') + '</p>';
-    if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi non è tra i tuoi amici su Next Libris.');
   } else {
     h = keysInner(false);
     if ((own.gb || own.sbn) && !friends().length) h += '<p class="fr-small">Per prestarli serve almeno un amico su Next Libris.</p>' + kwRow('friends', 'Aggiungi un amico', 'Cercalo per nome o mandagli il tuo invito.');
     if (!h) h = '<p class="fr-small">Non hai ancora una chiave Google o un worker SBN tuoi. Se un amico ti presta i suoi, li trovi qui.</p>';
-    if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi non è tra i tuoi amici su Next Libris.');
   }
   if (!own.gb) h += kwRow('guide', 'Crea la tua chiave Google', 'È gratis: 1.000 ricerche al giorno solo per te.');
   body.innerHTML = intro + h;
@@ -973,7 +968,7 @@ function keySheet(id) {
   document.body.appendChild(el);   // sopra la finestra da cui si apre
   document.getElementById('keyH').textContent = 'Presta a ' + friendName(id);
   document.getElementById('keyOpts').innerHTML =
-    opt('keyGb', cur ? cur.gb : true, !!own.gb, 'Chiave API di Google Libri', 'Più libri trovati, con copertina e descrizione.') +
+    opt('keyGb', cur ? cur.gb : true, !!own.gb, 'Chiave API di Google Libri', 'Più libri trovati, con copertina e descrizione. Resta al sicuro: l\'amico non la vede e può fare 300 ricerche al giorno.') +
     opt('keySbn', cur ? cur.sbn : true, !!own.sbn, 'Worker SBN', 'Cerca nel catalogo delle biblioteche italiane.');
   keyBtn();
   el.hidden = false;
@@ -1023,6 +1018,15 @@ function ownPart(p) {
   paintKw(); NL.emit && NL.emit('keys');
   return mine;
 }
+/* giro 8: la chiave prestata resta sul server. Se cambi la tua chiave (anche dopo «La mia chiave è finita in giro»), il server la
+   aggiorna per tutti gli amici a cui la presti; se chi te la prestava ha smesso, il server lo dice (lentGone) e si rileggono le chiavi. */
+NL.on('ownkey', function (v) {
+  if (!uid() || !keys.some(function (k) { return k.da === uid() && k.gb_key; })) return;
+  rpc('chiavi_aggiorna', { gb_key: v }).then(function (n) { if (n) NL.toast('Chiave aggiornata anche per gli amici a cui la presti.'); })
+    .catch(function (e) { NL.toast('Non riesco ad aggiornare la chiave per gli amici: ' + nice(e)); });
+});
+var goneAt = 0;
+NL.on('lentGone', function () { if (Date.now() - goneAt < 60000) return; goneAt = Date.now(); load(true); });
 function checkKeys() {
   var b = borrowed(), inn = keys.filter(function (k) { return k.a === uid(); });
   if (b) {

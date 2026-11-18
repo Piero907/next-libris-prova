@@ -216,7 +216,7 @@ async function checkIncoming() {
   hashBusy = true;
   try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { nlErr(e); }
   try {
-    if (m[1] === 'k') { var o = await decodeRaw(m[2]); if (!o || o.v !== 1 || o.t !== 'svc') throw new Error('formato'); openSvcImport(o); }
+    if (m[1] === 'k') { toast('I link con chiave e worker non si usano più: chiedi all\'amico di prestarteli da Next Libris (Menu › Chiave Google e worker).'); hashBusy = false; return; }   // giro 8: si presta solo dentro l'app
     else openImport(await decodeShare(m[2]));
   }
   catch (e) { toast(e && e.message === 'vecchio' ? 'Questo browser è troppo vecchio per aprire il link: aggiorna Chrome e riprova.' : (m[1] === 'k' ? 'Il link non contiene una chiave o un worker validi' : 'Il link non contiene una lista valida') + ': forse è stato tagliato. Fattelo rimandare.'); }
@@ -224,8 +224,7 @@ async function checkIncoming() {
 }
 window.addEventListener('hashchange', checkIncoming);
 async function shareWish() { shareList(); }
-/* ---------- condividere chiave Google e worker SBN (link «#k=...») ----------
-   Chi riceve vede cosa arriva e da chi, e decide; quelli che aveva gia' restano tra i salvati. */
+/* ---------- chiave Google e worker SBN: si prestano solo dentro l'app (amici.js); il link «#k=...» è stato tolto (giro 8, Piero 18/11/2026) ---------- */
 function cleanKey(v) { v = String(v || '').replace(/\s+/g, ''); return /^[A-Za-z0-9_-]{20,80}$/.test(v) ? v : ''; }
 function okWorker(v) { v = cleanWorker(v); return /^https:\/\/[^\s/]+\.[^\s]+$/.test(v) && v.length <= 200 ? v : ''; }
 /* Condivisione › «Chiave Google e worker», su misura (Piero, 16/11/2026): chi ha i suoi li presta; chi usa quelli di un amico
@@ -250,71 +249,9 @@ $('#svcBox').addEventListener('click', function (e) {
   var r = e.target.closest('[data-svc]'); if (!r) return;
   var k = r.dataset.svc, A = window.NLAmici, R = window.NLRicerche;
   if (k === 'guide') { if (R && R.guide) R.guide(true); else openOptions('search', true); return; }
-  if (A && A.keys) A.keys(); else if (k === 'lend') openSvcShare();
+  if (A && A.keys) A.keys();
 });
 (hooks.keys || (hooks.keys = [])).push(function () { if (optOpen && !$('#optSheet .opt-sec[data-sec="search"]').hidden) { renderSvc(); renderSvcShare(); } });   // «Con gli amici» sta in Ricerca dei libri (17/11/2026)
-function openSvcShare() {
-  var msb = mine('sbn'), mgk = mine('key');
-  if (!msb && !mgk) { toast('Non hai né chiave Google né worker tuoi da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
-  $('#svcWhat').textContent = [mgk ? 'Chiave Google: ' + svcShort('key', mgk) : '', msb ? 'Worker SBN: ' + svcShort('sbn', msb) : ''].filter(Boolean).join(' · ');
-  $('#svcSbnOn').checked = !!msb; $('#svcSbnOn').disabled = !msb;
-  $('#svcKeyOn').checked = !!mgk; $('#svcKeyOn').disabled = !mgk;
-  $('#svcSendName').value = settings.name || '';
-  closeOptions(); $('#toast').hidden = true;
-  $('#svcSheet').hidden = false;
-}
-function closeSvcShare() { $('#svcSheet').hidden = true; }
-async function sendSvcShare(copyOnly) {
-  var o = { v: 1, t: 'svc' };
-  if ($('#svcSbnOn').checked && mine('sbn')) o.sb = mine('sbn');
-  if ($('#svcKeyOn').checked && mine('key')) o.gk = mine('key');
-  if (!o.sb && !o.gk) { toast('Scegli almeno uno dei due.'); return; }
-  var name = $('#svcSendName').value.replace(/\s+/g, ' ').trim().slice(0, 30);
-  if (name) { o.n = name; saveName(name); }
-  var what = o.sb && o.gk ? 'la chiave Google e il worker SBN' : o.gk ? 'la chiave Google' : 'il worker SBN';
-  var text = (name || 'Ti mando') + (name ? ' ti manda ' : ' ') + what + ' per Next Libris: con questi la ricerca dei libri è più completa. Aprilo in Next Libris (non inoltrarlo ad altri):';
-  var url = APP_URL + '#k=' + await encodeShare(o);
-  closeSvcShare();
-  if (!copyOnly && navigator.share) {
-    try { await navigator.share({ title: 'Impostazioni di ricerca per Next Libris', text: text, url: url }); return; }
-    catch (e) { if (e && e.name === 'AbortError') return; }
-  }
-  var all = text + '\n' + url;
-  if (await copyText(all)) toast('Copiato: incollalo in un messaggio privato.');
-  else { $('#copyBox').value = all; $('#copySheet').hidden = false; $('#copyBox').focus(); $('#copyBox').select(); }
-}
-var svcIn = null;
-function openSvcImport(o) {
-  var sb = okWorker(o.sb), gk = cleanKey(o.gk), from = String(o.n || '').replace(/[\u0000-\u001f]+/g, ' ').trim().slice(0, 30);
-  if (!sb && !gk) throw new Error('formato');
-  svcIn = { sb: sb, gk: gk };
-  $('#svcInH').textContent = (from ? from + ' ti manda ' : 'Ti arrivano ') + (sb && gk ? 'chiave Google e worker SBN' : gk ? 'la chiave Google' : 'il worker SBN');
-  var rows = [];
-  if (gk) rows.push('Chiave Google: ' + svcShort('key', gk) + (settings.gbKey && settings.gbKey !== gk ? ' (al posto della tua, che resta tra le salvate)' : settings.gbKey === gk ? ' (la usi già)' : ''));   // Google sempre prima del worker (giro 5)
-  if (sb) rows.push('Worker SBN: ' + svcShort('sbn', sb) + (settings.sbnUrl && settings.sbnUrl !== sb ? ' (al posto del tuo, che resta tra i salvati)' : settings.sbnUrl === sb ? ' (lo usi già)' : ''));
-  $('#svcInList').innerHTML = rows.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('');
-  $('#svcInSheet').hidden = false;
-}
-function closeSvcImport() { $('#svcInSheet').hidden = true; svcIn = null; }
-$('#svcInUse').addEventListener('click', function () {
-  var x = svcIn; if (!x) return;
-  var before = { sbn: settings.sbnUrl, key: settings.gbKey };
-  if (x.sb) setSvc('sbn', x.sb);
-  if (x.gk) setSvc('key', x.gk);
-  closeSvcImport();
-  toast((x.sb && x.gk ? 'Chiave e worker in uso' : x.gk ? 'Chiave in uso' : 'Worker in uso') + '. Li trovi in Menu › Impostazioni › Ricerca dei libri.', { label: 'Annulla', fn: function () { setSvc('sbn', before.sbn); setSvc('key', before.key); } });
-});
-$('#svcInLater').addEventListener('click', function () {
-  var x = svcIn; if (!x) return;
-  if (x.sb) remember('sbn', x.sb); if (x.gk) remember('key', x.gk);
-  renderSvc(); closeSvcImport();
-  toast('Messi tra i salvati: li rimetti quando vuoi da Menu › Impostazioni › Ricerca dei libri.');
-});
-$('#svcInNo').addEventListener('click', closeSvcImport);
-$('#svcForm').addEventListener('submit', function (e) { e.preventDefault(); sendSvcShare(false); });
-$('#svcCopy').addEventListener('click', function () { sendSvcShare(true); });
-$('#svcClose').addEventListener('click', closeSvcShare);
-
 /* ---------- 7) unisci i doppioni ---------- */
 function mergeDups() {
   var all = L.dupGroups(dupPool());

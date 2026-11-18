@@ -12,3 +12,6 @@
 .kg .kg-paste{display:flex;gap:8px;margin:4px 0 2px}
 .kg .kg-paste input{flex:1;min-width:0;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);font:inherit}
 .kg .kg-err{color:var(--bad);margin:0}
+
+/* «La mia chiave è finita in giro» (giro 8) */
+.svc-leak:not([hidden]){display:block;margin-top:4px;font-size:14px;font-weight:500;color:var(--muted)}

@@ -133,7 +133,9 @@ function tryIt(what) {
   close(false, true);
   var real = what === 'add' || what === 'key' || what === 'friends' || what === 'don';
   setTimeout(function () {
-    if (real) pillOn(at);
+    if (what === 'key' || what === 'don' || what === 'friends') enter(at, '');   // dietro c'è l'esempio, non la tua libreria (Piero, 18/11/2026)
+    if (real) pillOn(at); else pillOn(at, true);      // anche nell'esempio Indietro riporta alla guida (posto {gdp} senza pillola: c'è «‹ Guida»)
+    if (real) setTimeout(function () { watch({ add: '#layAdd', key: '#kgSheet', don: '#donSheet', friends: '#friSheet' }[what]); }, 120);
     if (what === 'add') {
       var plus = document.querySelector('#layNav [data-l="add"]');
       if (plus && plus.getClientRects().length) plus.click();
@@ -150,15 +152,30 @@ function tryIt(what) {
     }
   }, 60);
 }
+/* chiusa la finestra aperta da «Prova adesso» (Più tardi, Chiudi, ×), si torna da soli alla guida: se nel frattempo se ne
+   è aperta un'altra (la fotocamera, «Presta a …»), si aspetta quella */
+function watch(sel) {
+  var w = sel && document.querySelector(sel); if (!w || w.hidden) return;
+  var mo = new MutationObserver(function () {
+    if (!w.hidden) return;
+    mo.disconnect();
+    setTimeout(function wait() {
+      if (!pillShown() || P.want) return;
+      if (document.querySelector('.sheet:not([hidden]), .lightbox:not([hidden])') || document.body.classList.contains('scanning')) { setTimeout(wait, 500); return; }
+      back(true);
+    }, 350);
+  });
+  mo.observe(w, { attributes: true, attributeFilter: ['hidden'] });
+}
 
 
 /* ---------- pillola «‹ Torna alla guida · 3/9» (giro 7) ----------
    Dopo «Prova adesso» sulle parti vere (+, chiave, amici) resta in basso a destra. Si torna alla guida con la pillola o con
    Indietro del telefono: sotto la parte aperta c'è un posto nella cronologia ({gdp}); quando Indietro lo toglie, la guida si riapre
    dalla schermata di prima. Se la parte aperta ha una cronologia sua (fotocamera), il primo Indietro chiude quella. */
-var P = { el: null, at: -1, want: false, quiet: false };
-function pillOn(at) {
-  P.at = at;
+var P = { el: null, at: -1, want: false, quiet: false, on: false, silent: false };
+function pillOn(at, silent) {
+  P.at = at; P.on = true; P.silent = !!silent;
   if (!P.el) {
     P.el = document.createElement('div'); P.el.id = 'gdPill'; P.el.className = 'gd-pill';
     P.el.innerHTML = '<button type="button" class="gd-pill-go" data-gp="go"></button><button type="button" class="gd-pill-x" data-gp="x" aria-label="Chiudi: resta qui">' + NL.icon('x') + '</button>';
@@ -169,11 +186,11 @@ function pillOn(at) {
     });
   }
   P.el.querySelector('.gd-pill-go').innerHTML = '‹ Torna alla guida <span>· ' + (at + 1) + '/' + screens().length + '</span>';
-  P.el.hidden = false; document.body.classList.add('gd-pill-on');
+  P.el.hidden = !!silent; document.body.classList.toggle('gd-pill-on', !silent);
   try { history.pushState({ gdp: 1 }, ''); } catch (e) { if (window.nlErr) nlErr(e); }
 }
-function pillOff() { if (P.el) P.el.hidden = true; document.body.classList.remove('gd-pill-on'); P.at = -1; P.want = false; P.quiet = false; }
-function pillShown() { return !!(P.el && !P.el.hidden); }
+function pillOff() { if (P.el) P.el.hidden = true; document.body.classList.remove('gd-pill-on'); P.at = -1; P.want = false; P.quiet = false; P.on = false; P.silent = false; }
+function pillShown() { return P.on; }   // attiva anche senza pillola in vista (nella libreria di esempio)
 /* toglie i posti della cronologia fino a sotto {gdp}; poi riapre la guida (go) o resta dove si è (✕) */
 function back(go) { if (!pillShown()) return; P.want = true; P.quiet = !go; try { history.back(); } catch (e) { if (window.nlErr) nlErr(e); reopen(); } }
 function reopen() {
@@ -191,7 +208,13 @@ window.addEventListener('popstate', function (e) {
     reopen();
   }, 0);
 });
-NL.on('guest', function () { if (pillShown() && NL.guest && NL.guest()) pillOff(); });
+NL.on('guest', function () {
+  if (!pillShown() || P.want) return;
+  var ex = NL.esempio && NL.esempio();
+  if (P.el) { P.el.hidden = P.silent || !!ex; document.body.classList.toggle('gd-pill-on', !P.el.hidden); }   // nell'esempio basta «‹ Guida» nella striscia
+  if (NL.guest && NL.guest() && !ex) pillOff();      // la libreria di un amico vero: niente più ritorno alla guida
+  else if (!ex && P.silent) pillOff();               // «Esci» dall'esempio
+});
 
 /* ---------- la libreria di esempio ---------- */
 var D = '2026-';
@@ -269,7 +292,7 @@ function bar() {
     el.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ex]'); if (!b) return;
       if (b.dataset.ex === 'out') NL.guestExit();
-      else if (b.dataset.ex === 'guide') { var i = fromGuide; NL.guestExit(); open(i < 0 ? 0 : i); }
+      else if (b.dataset.ex === 'guide') { if (pillShown()) back(true); else { var i = fromGuide; NL.guestExit(); open(i < 0 ? 0 : i); } }
       else if (b.dataset.ex === 'tab') { if (NL.tab() !== b.dataset.t) { NL.setTab(b.dataset.t); window.scrollTo({ top: 0 }); } bar(); }
     });
   }

@@ -68,3 +68,41 @@ html.guest .tag.loan.recv{pointer-events:none}
 .pf-menu > span:nth-child(2){flex:1;min-width:0}
 .pf-menu .pf-menu-av{flex:none;display:grid;margin-right:12px}
 .pf-menu .pf-av{width:34px;height:34px;font-size:15px}
+
+/* 18/11/2026 (Piero): la tua foto è un tasto, con la piccola macchina fotografica; citazioni con la foto della pagina */
+.prof .pf-avbtn{all:unset;position:relative;flex:none;cursor:pointer;border-radius:50%}
+.prof .pf-avbtn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.prof .pf-cam{position:absolute;right:-4px;bottom:-4px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);border:2px solid var(--surface)}
+.prof .pf-cam svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.prof .pf-q.has-ph{grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:start}
+.prof .pf-q.has-ph .qimg-w{grid-column:2;grid-row:1 / span 2}
+.prof .pf-q.has-ph .qimg{width:52px;height:70px}
+.prof .pf-q .pf-qph{font:500 14px/1.4 var(--font-body);color:var(--muted)}
+
+/* numeri del profilo (18/11/2026, «misto» scelto da Piero): scheda dell'anno + tessere */
+.prof .pf-year{border-radius:20px;background:linear-gradient(160deg,#1B6A4F,#0F4433);color:#fff;padding:16px 16px 14px;margin-bottom:10px}
+.prof .pf-yl{margin:0;font:600 15px/1.3 var(--font-display);opacity:.9}
+.prof .pf-yn{display:block;font:700 46px/1.05 var(--font-display);margin:2px 0 6px}
+.prof .pf-yt{margin:8px 0 0;font:400 15px/1.45 var(--font-body)}
+.prof .pf-yt b{color:#FFE7A3;font-weight:700}
+.prof .pf-yt .pf-flags img.flag{width:20px;height:15px;vertical-align:-2px}
+.prof .pf-goal{display:grid;gap:5px;margin:4px 0 2px;font:600 14px/1.2 var(--font-body);cursor:default}
+.prof .pf-goal[role="button"]{cursor:pointer}
+.prof .pf-gbar{height:8px;border-radius:4px;background:#ffffff40;overflow:hidden}
+.prof .pf-gbar i{display:block;height:100%;background:#fff;border-radius:4px}
+.prof .pf-gadd{color:#fff;font-size:14px;padding:4px 0;text-decoration-color:#ffffff90}
+.prof .pf-gedit{display:flex;align-items:center;gap:8px;margin:6px 0 2px}
+.prof .pf-gedit input{width:96px;min-height:40px;border-radius:10px;border:0;padding:0 10px;font:600 16px var(--font-body);color:var(--ink);background:#fff}
+.prof .pf-gedit .btn{background:#fff;color:#0F4433;border:0}
+.prof .pf-gedit .link{color:#fff}
+.prof .pf-shelf{display:flex;align-items:flex-end;gap:3px;height:60px;margin:12px 0 2px;padding:0 2px;border-bottom:3px solid #ffffff60;overflow:hidden}
+.prof .pf-shelf i{display:block;flex:0 1 11px;min-width:4px;border-radius:2px 2px 0 0}
+.prof .pf-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.prof .pf-tile{display:grid;align-content:start;gap:2px;border-radius:14px;padding:10px 12px;background:var(--surface2);border:1px solid var(--line);min-width:0}
+.prof .pf-tile.wide{grid-column:1 / -1}
+.prof .pf-ti{font-size:19px;line-height:1.2}
+.prof .pf-tn{font:700 26px/1.1 var(--font-display)}
+.prof .pf-tv{font:600 15px/1.25 var(--font-body);overflow-wrap:anywhere}
+.prof .pf-tt{font-size:13px;line-height:1.3;color:var(--muted);overflow-wrap:anywhere}
+.prof .pf-tt .pf-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.prof .pf-tt .pf-flags img.flag{width:24px;height:18px}

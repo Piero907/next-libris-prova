@@ -44,18 +44,20 @@ function top(map) { var k = '', n = 0; Object.keys(map).forEach(function (x) { i
 function inLib(b) { return !b.w && !b.xs && b.sk !== 'p' && b.sk !== 'q'; }    // come il database: non desiderio, non uscito, non preso in prestito
 function stats() {
   var y = String(new Date().getFullYear()), bs = mine().filter(function (b) { return !b.w; });
-  var read = bs.filter(function (b) { return b.rs === 'ok'; }), au = {}, auy = {}, ge = {}, pa = {}, ul = null, lu = null;
+  var read = bs.filter(function (b) { return b.rs === 'ok'; }), au = {}, auy = {}, ge = {}, pa = {}, pay = {}, ul = null, lu = null;
   var st = { n: bs.filter(function (b) { return !b.xs; }).length, l: read.length, ly: 0, y: Number(y), pg: 0, pgy: 0, pr: bs.filter(function (b) { return b.p && !b.xs; }).length };
   read.forEach(function (b) {
     var pg = Number(b.pg) || 0, thisY = String(b.rd || '').slice(0, 4) === y;
     st.pg += pg; if (thisY) { st.ly++; st.pgy += pg; }
     var a0 = (NL.authorsOf(b) || [])[0]; if (a0) { au[a0] = (au[a0] || 0) + 1; if (thisY) auy[a0] = (auy[a0] || 0) + 1; }
     if (b.gen) ge[b.gen] = (ge[b.gen] || 0) + 1;
-    var c = NL.wdBookCountry ? NL.wdBookCountry(b) : ''; if (c) pa[c] = (pa[c] || 0) + 1;
+    var c = NL.wdBookCountry ? NL.wdBookCountry(b) : ''; if (c) { pa[c] = (pa[c] || 0) + 1; if (thisY) pay[c] = (pay[c] || 0) + 1; }
     if (b.t && b.rd && (!ul || b.rd > ul.rd || (b.rd === ul.rd && (Number(b.ts) || 0) > (Number(ul.ts) || 0)))) ul = b;   // ultimo libro letto
     if (b.t && pg && (!lu || pg > (Number(lu.pg) || 0))) lu = b;                                                        // il più lungo
   });
   var ta = top(au), tg = top(ge), ty = top(auy);
+  st.pay = Object.keys(pay).sort(function (a, b) { return pay[b] - pay[a] || a.localeCompare(b); }).slice(0, 40);   // paesi dell'anno (scheda dell'anno)
+  if (cur !== 'esempio' && my.ob && my.ob.y === st.y && my.ob.n > 0) st.ob = my.ob.n;                              // obiettivo dell'anno (facoltativo)
   if (ta[1]) { st.au = ta[0].slice(0, 60); st.aun = ta[1]; }
   if (ty[1]) { st.auy = ty[0].slice(0, 60); st.auyn = ty[1]; }
   if (tg[1]) { st.ge = tg[0].slice(0, 40); st.gen = tg[1]; }
@@ -66,7 +68,7 @@ function stats() {
 }
 function myQuotes() {
   var out = [];
-  mine().forEach(function (b) { (b.qs || []).forEach(function (c, i) { if (c && c.x) out.push({ x: c.x, pg: c.pg || '', d: c.d || 0, t: b.t || '', a: b.a || '', b: b.id, i: i, pin: !!c.pin }); }); });
+  mine().forEach(function (b) { (b.qs || []).forEach(function (c, i) { if (c && (c.x || (c.phs && c.phs.length))) out.push({ x: c.x || '', pg: c.pg || '', d: c.d || 0, t: b.t || '', a: b.a || '', b: b.id, i: i, pin: !!c.pin, phs: c.phs || [] }); }); });
   return out.sort(function (a, b) { return b.d - a.d; });
 }
 function myPins() { return myQuotes().filter(function (q) { return q.pin; }).slice(0, PINS); }   // le citazioni in evidenza (puntina)
@@ -160,16 +162,16 @@ async function fromGoogle() {
 function sheet() {
   var el = document.getElementById('profSheet'); if (el) return el;
   el = document.createElement('div'); el.className = 'sheet fri prof'; el.id = 'profSheet'; el.hidden = true;
-  el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="profH"><h2 id="profH">Profilo</h2><div id="profBody"></div>' +
-    '<input type="file" id="profFile" accept="image/*" hidden><div class="row-btns"><button class="btn" type="button" id="profClose">Chiudi</button></div></div>';
+  el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="profH"><h2 id="profH" class="sr">Profilo</h2><div id="profBody"></div>' +
+    '<input type="file" id="profFile" accept="image/*" hidden><input type="file" id="profCam" accept="image/*" capture="user" hidden><div class="row-btns"><button class="btn" type="button" id="profClose">Chiudi</button></div></div>';
   document.body.appendChild(el);
   el.addEventListener('click', function (e) { if (e.target === el) close(); else onClick(e); });
-  el.querySelector('#profClose').addEventListener('click', close);
-  el.querySelector('#profFile').addEventListener('change', function (e) { fromFile(e.target.files && e.target.files[0]); e.target.value = ''; });
+  el.querySelector('#profClose').addEventListener('click', function () { if (mode) { mode = ''; paint(); } else close(); });   // da «Scegli le citazioni» si torna al profilo (Piero, 18/11/2026)
+  ['#profFile', '#profCam'].forEach(function (s) { el.querySelector(s).addEventListener('change', function (e) { fromFile(e.target.files && e.target.files[0]); e.target.value = ''; }); });
   return el;
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var el = document.getElementById('profSheet'); if (el && !el.hidden) { if (mode) { mode = ''; paint(); } else close(); } } });
-function close() { var el = document.getElementById('profSheet'); if (el) el.hidden = true; cur = null; data = null; mode = ''; photoOpen = false; }
+function close() { var el = document.getElementById('profSheet'); if (el) el.hidden = true; cur = null; data = null; mode = ''; photoOpen = false; goalOpen = false; }
 async function open(id) {
   var el = sheet(); cur = id || null; data = null; mode = ''; photoOpen = false; el.hidden = false; paint();
   var si = el.querySelector('.sheet-in'); if (si) si.scrollTop = 0;
@@ -185,7 +187,8 @@ async function open(id) {
 }
 function quoteHTML(c) {
   var src = [c.a, c.t].filter(Boolean).join(', ');
-  return '<blockquote class="pf-q"><p>«' + esc(c.x) + '»</p>' + (src || c.pg ? '<footer>' + (src ? '— ' + esc(src) : '') + (c.pg ? (src ? ' · ' : '') + 'pagina ' + esc(c.pg) : '') + '</footer>' : '') + '</blockquote>';
+  var ph = c.phs && c.phs.length && NL.qThumb ? NL.qThumb(c) : '';     // le tue foto della pagina (restano sul telefono: agli amici solo il testo)
+  return '<blockquote class="pf-q' + (ph ? ' has-ph' : '') + '">' + ph + (c.x ? '<p>«' + esc(c.x) + '»</p>' : '<p class="pf-qph">Foto della pagina</p>') + (src || c.pg ? '<footer>' + (src ? '— ' + esc(src) : '') + (c.pg ? (src ? ' · ' : '') + 'pagina ' + esc(c.pg) : '') + '</footer>' : '') + '</blockquote>';
 }
 function numsLine(st) {
   var y = new Date().getFullYear(), p = ['<b>' + nf(st.n) + '</b> ' + (st.n === 1 ? 'libro' : 'libri')];
@@ -193,34 +196,75 @@ function numsLine(st) {
   var np = (st.pa || []).length; if (np) p.push('<b>' + np + '</b> ' + (np === 1 ? 'paese' : 'paesi'));
   return '<p class="pf-nums">' + p.join(' · ') + '</p>';
 }
-/* i numeri: st = quelli scelti da mostrare (o null); rel = quelli tra te e l'amico (libri in comune, prestiti tra voi) */
+/* ---------- i numeri (18/11/2026, scelta di Piero: «misto»): in cima la scheda colorata dell'anno (con l'obiettivo, facoltativo),
+   sotto le tessere con le icone. st = numeri scelti da mostrare (o null); rel = quelli tra te e l'amico ---------- */
+var goalOpen = false;
+function plur(n, a, b) { return nf(n) + ' ' + (n === 1 ? a : b); }
+function flags(list, max) {
+  list = (list || []).filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+  return '<span class="pf-flags">' + list.slice(0, max).map(function (c) { return '<span title="' + esc(NL.wdCName ? NL.wdCName(c) : c) + '">' + (NL.wdFlagImg ? NL.wdFlagImg(c) : NL.wdFlag ? NL.wdFlag(c) : c) + '</span>'; }).join(' ') + (list.length > max ? ' …' : '') + '</span>';
+}
+function pileTxt(pages, books) {   // carta ~0,05 mm a pagina, copertina ~4 mm
+  var cm = Math.round(pages * 0.005 + books * 0.4); if (cm < 5) return '';
+  var cmp = cm >= 170 ? 'più di una persona' : cm >= 75 ? 'come un tavolo' : cm >= 45 ? 'come una sedia' : cm >= 30 ? 'come un righello' : cm >= 10 ? 'come una tazza' : '';
+  return ': impilati sono alti circa <b>' + (cm >= 100 ? (cm / 100).toFixed(1).replace('.', ',') + ' m' : cm + ' cm') + '</b>' + (cmp ? ', ' + cmp : '');
+}
+function yearCard(st, own, name) {
+  var y = new Date().getFullYear(), ly = st.y === y ? st.ly || 0 : 0, pgy = st.y === y ? st.pgy || 0 : 0, h = '';
+  var ed = own && cur !== 'esempio';   // l'obiettivo si cambia solo nel tuo profilo
+  h += '<p class="pf-yl">Nel ' + y + (own ? ' hai letto' : ' ' + esc(name || '') + ' ha letto') + '</p><b class="pf-yn">' + plur(ly, 'libro', 'libri') + '</b>';
+  var ob = Number(st.ob) || 0;
+  if (ob) h += '<div class="pf-goal"' + (ed ? ' role="button" tabindex="0" data-p="goal"' : '') + '><span>Obiettivo ' + nf(ob) + (ly >= ob ? ' · raggiunto! 🎉' : ' · ' + Math.round(ly / ob * 100) + '%') + '</span><span class="pf-gbar"><i style="width:' + Math.min(100, Math.round(ly / ob * 100)) + '%"></i></span></div>';
+  if (ed && goalOpen) h += '<div class="pf-gedit"><label class="sr" for="pfGoal">Obiettivo di libri per il ' + y + '</label><input type="number" id="pfGoal" min="1" max="365" inputmode="numeric" value="' + (ob || '') + '" placeholder="es. 24">' +
+    '<button class="btn sm" type="button" data-p="goalok">Salva</button>' + (ob ? '<button class="link" type="button" data-p="goaloff">Togli</button>' : '') + '</div>';
+  else if (ed && !ob) h += '<button class="link pf-gadd" type="button" data-p="goal">Metti un obiettivo per il ' + y + '</button>';
+  if (pgy) h += '<p class="pf-yt">cioè <b>' + nf(pgy) + ' pagine</b>' + pileTxt(pgy, ly) + '.</p>';
+  if (ly) {
+    var sp = '', n = Math.min(ly, 40), seed = (name || 'me').length;
+    for (var i = 0; i < n; i++) { var hh = (seed * 47 + i * 67) % 360, ht = 55 + ((i * 37 + seed * 13) % 45); sp += '<i style="height:' + ht + '%;background:hsl(' + hh + ' 55% ' + (62 + (i % 3) * 8) + '%)"></i>'; }
+    h += '<div class="pf-shelf" aria-hidden="true">' + sp + '</div>';
+  } else h += '<p class="pf-yt">' + (own ? 'Quando finisci un libro, segnalo «Letto»: lo trovi qui.' : 'Ancora nessun libro finito quest\'anno.') + '</p>';
+  var bits = [];
+  if (st.auy && st.y === y) bits.push((own ? 'Il tuo autore dell\'anno' : 'Il suo autore dell\'anno') + ' è <b>' + esc(st.auy) + '</b> (' + plur(st.auyn, 'libro', 'libri') + ')');
+  var py = (st.pay || []).filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+  if (py.length) bits.push((own ? 'hai viaggiato in ' : 'ha viaggiato in ') + '<b>' + plur(py.length, 'paese', 'paesi') + '</b> ' + flags(py, 6));
+  if (bits.length) h += '<p class="pf-yt">' + bits.join(' e ') + '.</p>';
+  return '<div class="pf-year">' + h + '</div>';
+}
+function tile(ico, big, txt, wide, val) {
+  return '<div class="pf-tile' + (wide ? ' wide' : '') + '"><span class="pf-ti" aria-hidden="true">' + ico + '</span>' + (val ? '<span class="pf-tv">' + big + '</span>' : '<span class="pf-tn">' + big + '</span>') + '<span class="pf-tt">' + txt + '</span></div>';
+}
 function statsHTML(st, own, rel) {
-  var y = new Date().getFullYear(), r = [];
-  function row(k, v, sub, wrap) { r.push('<div class="pf-st"><dt>' + k + '</dt><dd>' + v + (sub ? ' <small' + (wrap ? ' class="w"' : '') + '>' + sub + '</small>' : '') + '</dd></div>'); }
+  var t = [], card = '';
   if (st) {
-    row('Libri letti', nf(st.l), st.pg ? nf(st.pg) + ' pagine' : '');
-    if (st.y === y) row('Nel ' + y, nf(st.ly), st.pgy ? nf(st.pgy) + ' pagine' : '');
-    if (st.au) row('Autore più letto', esc(st.au), st.aun + (st.aun === 1 ? ' libro' : ' libri'));
-    if (st.auy && st.y === y) row('Autore più letto nel ' + y, esc(st.auy), st.auyn + (st.auyn === 1 ? ' libro' : ' libri'));
-    if (st.ge) row('Genere più letto', esc(st.ge), st.gen + (st.gen === 1 ? ' libro' : ' libri'));
-    if (st.ul && st.ul.t) row('Ultimo libro letto', '«' + esc(st.ul.t) + '»', st.ul.a ? esc(st.ul.a) : '', true);
-    if (st.lu && st.lu.t) row('Libro più lungo letto', '«' + esc(st.lu.t) + '»', st.lu.pg ? nf(st.lu.pg) + ' pagine' : '', true);
-    if ((st.pa || []).length && NL.wdFlag) row('Paesi dei libri letti', '<span class="pf-flags">' + st.pa.filter(function (c) { return /^[A-Z]{2}$/.test(c); }).map(function (c) { return '<span title="' + esc(NL.wdCName ? NL.wdCName(c) : c) + '">' + (NL.wdFlagImg ? NL.wdFlagImg(c) : NL.wdFlag(c)) + '</span>'; }).join(' ') + '</span>');
-    row('Libri prestati', nf(st.pr), st.pr ? 'adesso' : '');
+    card = yearCard(st, own, own ? '' : (cur && A() && A().friendName ? A().friendName(cur) : ''));
+    t.push(tile('📚', nf(st.n), st.n === 1 ? 'libro in libreria' : 'libri in libreria'));
+    t.push(tile('📖', nf(st.pg), 'pagine lette' + (st.l ? ' · ' + plur(st.l, 'libro', 'libri') : '')));
+    if (st.au) t.push(tile('✍️', esc(st.au), 'autore più letto · ' + plur(st.aun, 'libro', 'libri'), false, true));
+    if (st.ge) t.push(tile('🏷️', esc(st.ge), 'genere più letto · ' + plur(st.gen, 'libro', 'libri'), false, true));
+    if (st.ul && st.ul.t) t.push(tile('🏁', '«' + esc(st.ul.t) + '»', 'ultimo libro letto' + (st.ul.a ? ' · ' + esc(st.ul.a) : ''), false, true));
+    if (st.lu && st.lu.t) t.push(tile('🐘', '«' + esc(st.lu.t) + '»', 'il più lungo' + (st.lu.pg ? ' · ' + nf(st.lu.pg) + ' pagine' : ''), false, true));
+    var pa = (st.pa || []).filter(function (c) { return /^[A-Z]{2}$/.test(c); });
+    if (pa.length) t.push(tile('🌍', plur(pa.length, 'paese', 'paesi'), flags(pa, 60), true, true));
+    t.push(tile('🤝', nf(st.pr), st.pr === 1 ? 'libro prestato adesso' : 'libri prestati adesso'));
   }
   if (rel) {
     if (rel.comuni != null) {
       var pc = st && st.n ? Math.min(100, Math.round(rel.comuni / st.n * 100)) : 0;
-      row('In comune con te', nf(rel.comuni) + (rel.comuni === 1 ? ' libro' : ' libri'), rel.comuni && pc ? 'il ' + pc + '% dei suoi' : '');
+      t.push(tile('🔗', nf(rel.comuni), (rel.comuni === 1 ? 'libro' : 'libri') + ' in comune con te' + (rel.comuni && pc ? ' · il ' + pc + '% dei suoi' : '')));
     }
     var d = Number(rel.tra && rel.tra.dati) || 0, v = Number(rel.tra && rel.tra.avuti) || 0;
-    if (d + v) row('Prestiti tra voi', nf(d + v), nf(d) + ' da te · ' + nf(v) + ' a te', true);
+    if (d + v) t.push(tile('⇄', nf(d + v), (d + v === 1 ? 'prestito' : 'prestiti') + ' tra voi · ' + nf(d) + ' da te, ' + nf(v) + ' a te'));
   }
-  if (!r.length) return '';
-  return '<section class="fr-sec"><h3 class="fr-h">' + (own ? 'I tuoi numeri' : 'I suoi numeri') + '</h3><dl class="pf-dl">' + r.join('') + '</dl></section>';
+  if (!t.length && !card) return '';
+  if (t.length % 2) { var k = t.length - 1; t[k] = t[k].replace('class="pf-tile"', 'class="pf-tile wide"'); }   // niente buco in fondo
+  return '<section class="fr-sec pf-num"><h3 class="fr-h">' + (own ? 'I tuoi numeri' : 'I suoi numeri') + '</h3>' + card + '<div class="pf-tiles">' + t.join('') + '</div></section>';
 }
 function head(id, name, when) {
-  return '<div class="pf-top">' + avatar(id, name, true) + '<div class="pf-id"><b class="pf-name">' + esc(name || 'Senza nome') + '</b>' + (when ? '<small>Su Next Libris da ' + esc(when) + '</small>' : '') + '</div></div>';
+  var av = avatar(id, name, true);
+  if (!id) av = '<button type="button" class="pf-avbtn" data-p="photo" aria-expanded="' + photoOpen + '" aria-label="' + (my.foto ? 'Cambia la foto' : 'Metti una foto') + '">' + av +
+    '<span class="pf-cam" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span></button>';   // il tocco sulla foto apre la scelta (Piero, 18/11/2026)
+  return '<div class="pf-top">' + av + '<div class="pf-id"><b class="pf-name">' + esc(name || 'Senza nome') + '</b>' + (when ? '<small>Su Next Libris da ' + esc(when) + '</small>' : '') + '</div></div>';
 }
 /* una fila di copertine scorrevole (In lettura, Preferiti, Consigliati): il tocco apre il libro */
 function strip(title, books, hint) {
@@ -245,7 +289,7 @@ function paint() {
     var est = stats(), els = lists(), eq = myPins();
     h = head('esempio', EX_NAME, 'novembre 2026') + numsLine(est) +
       '<div class="pf-go"><button class="btn" type="button" data-p="lib">Libreria</button><button class="btn" type="button" data-p="wish">Desideri</button></div>' +
-      strip('In lettura', els.let) + strip('Preferiti', els.pref) + strip('Consigliati', els.cons);
+      strip('In lettura', els.let) + strip('Consigliati', els.cons);   // via i Preferiti (Piero, 18/11/2026)
     if (eq.length) h += '<section class="fr-sec"><h3 class="fr-h">Citazioni in evidenza</h3><div class="pf-qlist">' + eq.map(quoteHTML).join('') + '</div></section>';
     h += statsHTML(est, true) + '<p class="fr-small">È un profilo inventato: il tuo lo trovi nel Menu, con la tua foto e i tuoi numeri.</p>';
   } else if (cur) {                                     /* ----- il profilo di un amico ----- */
@@ -269,7 +313,7 @@ function paint() {
       if (data.desideri) h += '<section class="fr-sec pf-fol"><button class="btn' + (data.segue ? '' : ' primary') + '" type="button" data-p="segui" aria-pressed="' + !!data.segue + '">' + (data.segue ? 'Stai seguendo i suoi Desideri ✓' : 'Segui i suoi Desideri') + '</button>' +
         '<p class="fr-small">' + (data.segue ? 'Ti scriviamo al massimo una volta al giorno, solo quando c\'è qualcosa di nuovo. ' + esc(name) + ' non lo sa. Tocca per smettere.'
           : esc(name) + ' ti mostra già i suoi Desideri: seguili e scopri cosa sogna di leggere. Magari ci trovi il regalo giusto, o il tuo prossimo libro. Ti scriviamo al massimo una volta al giorno, solo quando c\'è qualcosa di nuovo, e ' + esc(name) + ' non lo saprà.') + '</p></section>';
-      var rows = strip('In lettura', data.let) + strip('Preferiti', data.pref) + strip('Consigliati', data.cons);
+      var rows = strip('In lettura', data.let) + strip('Consigliati', data.cons);
       h += rows;
       if (ev.length) h += '<section class="fr-sec"><h3 class="fr-h">Citazioni in evidenza</h3><div class="pf-qlist">' + ev.slice(0, PINS).map(quoteHTML).join('') + '</div></section>';
       if (data.cits && data.cits.length) h += '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="cits">Tutte le citazioni<small>' + data.cits.length + (data.cits.length === 1 ? ' citazione' : ' citazioni') + '</small></button><span class="n" aria-hidden="true">›</span></li></ul>';
@@ -284,26 +328,48 @@ function paint() {
         qs.slice(0, 300).map(function (q) { return '<button type="button" class="pf-qpick" data-p="pin" data-b="' + esc(q.b) + '" data-i="' + q.i + '" aria-pressed="' + q.pin + '">' + quoteHTML(q) + '</button>'; }).join('') + '</div>';
     } else {
       h = head(null, nm, since((me && me.creato) || firstTs()));
-      h += '<p class="pf-acts"><button class="link" type="button" data-p="photo" aria-expanded="' + photoOpen + '">' + (my.foto ? 'Cambia la foto' : 'Metti una foto') + '</button></p>';
-      if (photoOpen) h += '<div class="pf-photo"><button class="btn" type="button" data-p="file">Scatta o scegli una foto</button>' + (uid() ? '<button class="btn" type="button" data-p="google">Usa quella di Google</button>' : '') +
+      if (photoOpen) h += '<div class="pf-photo"><button class="btn" type="button" data-p="file">Dalla galleria</button><button class="btn" type="button" data-p="cam">Fotocamera</button>' + (uid() ? '<button class="btn" type="button" data-p="google">Usa quella di Google</button>' : '') +
         (my.foto ? '<button class="link" type="button" data-p="nofoto">Togli la foto</button>' : '') + '<p class="fr-small">' + (uid() ? 'La vedono solo i tuoi amici.' : 'Resta su questo telefono: con l\'account la vedono i tuoi amici.') + '</p></div>';
       h += numsLine(st);
-      h += strip('In lettura', ls.let) + strip('Preferiti', ls.pref) + strip('Consigliati', ls.cons, 'Nella pagina di un libro tocca la coccarda accanto alla stella: «Lo consiglio».');
+      h += strip('In lettura', ls.let) + strip('Consigliati', ls.cons, 'Nella pagina di un libro tocca la coccarda accanto alla stella: «Lo consiglio».');
       h += '<section class="fr-sec"><h3 class="fr-h">Citazioni in evidenza' + (pins.length ? ' <span class="fr-n">' + pins.length + '</span>' : '') + '</h3>' +
         (pins.length ? '<div class="pf-qlist">' + pins.map(quoteHTML).join('') + '</div>' : '<p class="fr-small">' + (qs.length ? 'Scegli fino a ' + PINS + ' citazioni da mettere in evidenza con la puntina.' : 'Quando salvi una citazione da un libro, con la puntina puoi metterla in evidenza qui (fino a ' + PINS + ').') + '</p>') +
         (qs.length ? '<p class="pf-acts"><button class="link" type="button" data-p="pick">' + (pins.length ? 'Cambia' : 'Scegli le citazioni') + '</button></p>' : '') + '</section>';
       if (qs.length) h += '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="allq">Tutte le citazioni<small>' + qs.length + (qs.length === 1 ? ' citazione' : ' citazioni') + '</small></button><span class="n" aria-hidden="true">›</span></li></ul>';
       h += statsHTML(st, true);
-      if (A() && A().keys) h += '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="keys">Chiave Google e worker<small>Per trovare più libri, anche agli amici</small></button><span class="n" aria-hidden="true">›</span></li></ul>';   // 18/11/2026
-      if (uid() && has018()) {
-        var vis = [], lib = !!me.libreria;
-        if ('p_let' in me) { if (lib && me.p_let !== false) vis.push('cosa leggi'); if (lib && me.p_pref !== false) vis.push('i preferiti'); if (lib && me.p_cons !== false) vis.push('i consigliati'); }
-        if (me.p_cit) vis.push('le citazioni in evidenza'); if (me.p_stat && lib) vis.push('i numeri'); if (me.p_cits) vis.push('tutte le citazioni');
-        h += '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="privacy">Cosa vedono gli amici<small>' + esc('La foto' + (vis.length ? ', ' + vis.join(', ') : ' e nient\'altro')) + '</small></button><span class="n" aria-hidden="true">›</span></li></ul>';
-      } else if (!uid()) h += '<p class="fr-small">Con l\'account e gli amici puoi mostrare loro la foto e, se vuoi, cosa leggi, citazioni e numeri.</p>';
+      h += setRows(me);   // scorciatoie alle impostazioni personali (Piero, 18/11/2026)
     }
   }
   body.innerHTML = h;
+}
+/* ---------- scorciatoie alle impostazioni personali (Piero, 18/11/2026): Account, Amici e privacy, Notifiche, Chiave Google e worker.
+   La finestra si apre sopra e, quando si chiude, torna il profilo. ---------- */
+function setRow(k, t, sub) { return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="' + k + '">' + t + '<small>' + esc(sub) + '</small></button><span class="n" aria-hidden="true">›</span></li>'; }
+function setRows(me) {
+  var r = '', S = window.NLSocial, au = S && S.auth && S.auth();
+  if (S && S.open) r += setRow('acc', 'Account e sincronizzazione', au ? (au.email || 'Entrato con Google') : 'Entra per salvare i libri online');
+  if (A()) {
+    var vis = [];
+    if (uid() && has018() && me) {
+      var lib = !!me.libreria;
+      if ('p_let' in me) { if (lib && me.p_let !== false) vis.push('cosa leggi'); if (lib && me.p_cons !== false) vis.push('i consigliati'); }
+      if (me.p_cit) vis.push('le citazioni in evidenza'); if (me.p_stat && lib) vis.push('i numeri'); if (me.p_cits) vis.push('tutte le citazioni');
+    }
+    r += setRow('privacy', 'Amici e privacy', uid() ? 'Gli amici vedono la foto' + (vis.length ? ', ' + vis.join(', ') : ' e nient\'altro') : 'Con l\'account scegli cosa vedono gli amici');
+  }
+  if (window.NLPush && document.getElementById('goPush')) r += setRow('push', 'Notifiche', (document.getElementById('goPushTxt') || {}).textContent || 'Avvisi anche ad app chiusa');
+  if (A() && A().keys) r += setRow('keys', 'Chiave Google e worker', 'Per trovare più libri, anche agli amici');
+  r += setRow('menu', 'Menu', 'Le altre impostazioni e le info');
+  return '<section class="fr-sec pf-set"><h3 class="fr-h">Impostazioni</h3><ul class="fr-list fr-box">' + r + '</ul></section>';
+}
+var RET_WIN = { acc: '#accSheet', privacy: '#friSheet', push: '#optSheet', keys: '#kwSheet' };
+function via(k, fn) {          // chiude il profilo, apre la finestra e, quando quella si chiude, riapre il profilo
+  close(); fn();
+  setTimeout(function () {
+    var w = document.querySelector(RET_WIN[k]); if (!w || w.hidden) return;
+    var mo = new MutationObserver(function () { if (!w.hidden) return; mo.disconnect(); setTimeout(function () { if (!document.querySelector('.sheet:not([hidden])') && !(NL.guest && NL.guest())) open(); }, 60); });
+    mo.observe(w, { attributes: true, attributeFilter: ['hidden'] });
+  }, 80);
 }
 /* dal profilo dell'amico alla sua libreria (o ai desideri, o a un libro) */
 function goGuest(id, tab, book) {
@@ -320,14 +386,25 @@ async function onClick(e) {
   var a = b.dataset.p, id = cur;
   if (a === 'back') { mode = ''; paint(); }
   else if (a === 'photo') { photoOpen = !photoOpen; paint(); }
+  else if (a === 'goal') { goalOpen = !goalOpen; paint(); if (goalOpen) setTimeout(function () { var g = document.getElementById('pfGoal'); if (g) g.focus(); }, 30); }
+  else if (a === 'goalok' || a === 'goaloff') {
+    var gv = a === 'goaloff' ? 0 : Math.round(Number((document.getElementById('pfGoal') || {}).value) || 0);
+    if (a === 'goalok' && !(gv >= 1 && gv <= 365)) { NL.toast('Scrivi un numero di libri da 1 a 365.'); return; }
+    my.ob = gv ? { y: new Date().getFullYear(), n: gv } : null; my.t = Date.now(); save(); goalOpen = false; paint(); push();
+    NL.toast(gv ? 'Obiettivo: ' + plur(gv, 'libro', 'libri') + ' nel ' + new Date().getFullYear() + '.' : 'Obiettivo tolto.');
+  }
   else if (a === 'file') document.getElementById('profFile').click();
+  else if (a === 'cam') document.getElementById('profCam').click();
   else if (a === 'google') { b.disabled = true; await fromGoogle(); }
   else if (a === 'nofoto') { setFoto(''); NL.toast('Foto tolta.'); }
   else if (a === 'pick' || a === 'cits') { mode = a; paint(); var si = document.querySelector('#profSheet .sheet-in'); if (si) si.scrollTop = 0; }
   else if (a === 'pin') { if (NL.togglePin) NL.togglePin(b.dataset.b, Number(b.dataset.i)); paint(); }
   else if (a === 'allq') { close(); NL.openQuotes(); }
-  else if (a === 'privacy') { close(); A().open(true); }
-  else if (a === 'keys') { close(); A().keys(); }
+  else if (a === 'privacy') via('privacy', function () { A().open(true); });
+  else if (a === 'keys') via('keys', function () { A().keys(); });
+  else if (a === 'acc') via('acc', function () { window.NLSocial.open(); });
+  else if (a === 'push') via('push', function () { NL.openOptions('push'); });
+  else if (a === 'menu') { close(); NL.openMenu(); }
   else if (a === 'segui' && cur && data) { b.disabled = true; var on = !data.segue; if (await A().follow(cur, on)) data.segue = on; paint(); }
   else if (id === 'esempio' && (a === 'lib' || a === 'wish')) { close(); NL.setTab(a); window.scrollTo({ top: 0 }); NL.emit('guest'); }
   else if (id === 'esempio' && a === 'book') { var eb = b.dataset.id; close(); NL.openCard(eb); }
