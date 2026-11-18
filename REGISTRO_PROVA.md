@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 105.1 · 18/11/2026 19:38
+- **uguale alla vera 105**
+
 ## Prova 104.13 · 18/11/2026 18:19
 - Giro 10: **guida senza parole tecniche** e schermata **Installala sul telefono**; **stella = Lo consiglio** (via i preferiti); **foto dell'amico grande**; **edizioni italiane in cima**; **avviso a persone scelte**
 
