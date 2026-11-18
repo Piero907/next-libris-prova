@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 106.2 · 18/11/2026 22:24
+- **Chiave e worker solo tuoi**: il worker prestato passa dal server come la chiave; chiave e worker di un amico rimasti sul telefono si tolgono da soli; si possono prestare solo i propri
+
 ## Prova 106.1 · 18/11/2026 21:43
 - **Uguale alla vera 106**
 
