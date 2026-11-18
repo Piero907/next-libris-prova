@@ -132,3 +132,29 @@ html.esempio .ch-top{display:none}
 .ch-gact{display:grid;margin-top:14px;border-top:1px solid var(--line)}
 .ch-gact .ch-mi{text-align:left}
 .ch-rep .ch-gname{margin:4px 0 12px}
+
+/* libri (giro 9d): 📚 accanto al campo, scelta del libro, schedina */
+.ch-bkbtn{flex:none;width:40px;height:44px;border:0;background:none;font-size:22px;line-height:1;padding:0;cursor:pointer}
+button.ch-book{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;padding:0;cursor:pointer}
+.ch-btabs{display:flex;gap:8px;margin:2px 0 6px}
+.ch-bt{flex:1;min-height:38px;border:1px solid var(--line);border-radius:19px;background:var(--surface);color:var(--ink);font:600 14.5px/1 var(--font-body);cursor:pointer}
+.ch-bt.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ch-brow2 img,.ch-brow2 .ch-bimg{flex:none;width:34px;height:50px;border-radius:4px;object-fit:cover;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px}
+.ch-brow2 .ch-t b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-brow2 .ch-t small{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-brow2.on{background:var(--surface2)}
+.ch-ok{flex:none;color:var(--accent);font-weight:700;font-size:18px;padding-right:6px}
+.ch-more-n{padding:8px 4px;list-style:none}
+.ch-bhint{margin:6px 4px;text-align:center}
+.ch-btxt{display:block;width:100%;box-sizing:border-box;min-height:56px;margin-bottom:8px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);color:var(--ink);font:16px/1.4 var(--font-body);resize:vertical}
+.ch-bk .sheet-in{padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));gap:6px}
+.ch-bkc{display:flex;gap:14px;align-items:flex-start;padding:4px 2px 8px}
+.ch-bkc img,.ch-bkc .ch-bimg{flex:none;width:72px;height:108px;border-radius:6px;object-fit:cover;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:32px}
+.ch-bkc div{display:grid;gap:3px;min-width:0}
+.ch-bkc b{font:700 18px/1.25 var(--font-display);overflow-wrap:anywhere}
+.ch-bkc span{font-size:15px}
+.ch-bkc small{font-size:13px;color:var(--muted)}
+.ch-bks{margin:4px 2px 8px;font-size:14.5px}
+.ch-bks.ok{color:var(--accent);font-weight:600}
+.ch-bkb{display:flex;gap:8px;flex-wrap:wrap}
+.ch-bkb .btn{flex:1}

@@ -18,7 +18,7 @@ var NAME_RE = /^[0-9A-Za-zÀ-ÖØ-öø-ÿ ._'-]{3,20}$/;
 var K_PEND = 'catalogo-libri-amici-scambi-da-mandare';
 var opts = false, nums = {};
 var ffOf = null, ff = null;   // amici dell'amico: di chi, e cosa è arrivato (17/11/2026)
-var swaps = [], view = null, wishes = null, libs = null, libsShow = 30, libsQ = '', recvId = '', asks = [], tips = [], who = {}, gMeta = {}, gId = null;
+var swaps = [], view = null, wishes = null, libs = null, libsShow = 30, libsQ = '', recvId = '', asks = [], who = {}, gMeta = {}, gId = null;
 var K_KEY = 'catalogo-libri-amici-chiave-in-uso';
 var keys = [];
 var me = null, list = null, loading = null, lastLoad = 0, found = null, foundQ = '', invite = null, confirmId = '', busy = '', err = '', editName = false, syncing = false;
@@ -62,7 +62,7 @@ async function load(force) {
       list = abc(await rpc('miei_amici'));
       try { nums = {}; ((await rpc('amici_numeri')) || []).forEach(function (x) { nums[x.id] = x; }); } catch (e) { if (window.nlErr) nlErr(e); }
       try { swaps = (await rpc('miei_scambi')) || []; await applySwaps(); } catch (e) { if (window.console) console.warn('scambi', e); }
-      try { asks = (await rpc('mie_richieste')) || []; tips = (await rpc('miei_consigli')) || []; await loadWho(); seenAnswers(); } catch (e) { if (window.console) console.warn('richieste', e); }
+      try { asks = (await rpc('mie_richieste')) || []; await loadWho(); seenAnswers(); } catch (e) { if (window.console) console.warn('richieste', e); }
       try { keys = (await rpc('chiavi_mie')) || []; checkKeys(); } catch (e) { if (window.console) console.warn('chiavi', e); }
       lastLoad = Date.now(); err = '';
       if (me.utente && NL.name() !== me.utente) { syncing = true; NL.setName(me.utente); syncing = false; }   // il nome per gli amici vale anche nell'app
@@ -188,12 +188,6 @@ function paint() {
     if (askIn.length) h += '<section class="fr-sec"><h3 class="fr-h">Ti chiedono in prestito <span class="fr-n">' + askIn.length + '</span></h3><ul class="fr-list">' + askIn.map(function (r) {
       return '<li class="fr-row fr-book">' + cover(r.libro || {}) + '<span class="fr-bk"><b>' + esc((r.libro && r.libro.t) || 'un libro') + '</b><small>Lo chiede ' + esc(r.nome_da || 'un amico') + '</small></span><span class="fr-act"><button class="btn" type="button" data-f="askno" data-id="' + esc(r.id) + '">No</button><button class="btn primary" type="button" data-f="askyes" data-id="' + esc(r.id) + '">Presta</button></span></li>';
     }).join('') + '</ul></section>';
-    if (tips.length) h += '<section class="fr-sec"><h3 class="fr-h">Consigliati dagli amici <span class="fr-n">' + tips.length + '</span></h3><ul class="fr-list">' + tips.map(function (c) {
-      var L0 = c.libro || {}, have = NL.isMine && NL.isMine({ t: L0.t || '', a: L0.a || '', i: L0.i || '' });
-      return '<li class="fr-row fr-book">' + cover(L0) + '<span class="fr-bk"><b>' + esc(L0.t || 'un libro') + '</b><small>' + esc(L0.a || '') + (L0.a ? ' · ' : '') + 'da ' + esc(c.nome_da || 'un amico') + '</small></span><span class="fr-act">' +
-        (have ? '<span class="fr-tag">Ce l\'hai già</span>' : '<button class="btn primary" type="button" data-f="tipwish" data-id="' + esc(c.id) + '">Ai desideri</button>') +
-        '<button class="link" type="button" data-f="tipdrop" data-id="' + esc(c.id) + '">Togli</button></span></li>';
-    }).join('') + '</ul></section>';
     h += '<section class="fr-sec"><h3 class="fr-h">I tuoi amici' + (fr.length ? ' <span class="fr-n">' + fr.length + '</span>' : '') + '</h3>';
     if (fr.length > 8) h += '<input type="search" class="fr-libq" data-pick-q placeholder="Cerca tra i tuoi amici" autocomplete="off" enterkeyhint="search">';
     h += fr.length ? '<ul class="fr-list fr-pick-list">' + fr.slice().sort(function (a, b) { return (a.utente || '').localeCompare(b.utente || '', 'it'); }).map(function (x) {
@@ -243,7 +237,6 @@ async function onClick(e) {
   if (a === 'opts') { opts = true; view = null; paint(); var si0 = document.querySelector('#friSheet .sheet-in'); if (si0) si0.scrollTop = 0; return; }
   if (a === 'optsback') { opts = false; paint(); return; }
   if (a === 'friend') { close(); if (window.NLProfilo && window.NLProfilo.open) window.NLProfilo.open(id); else openGuest(id); return; }   // il nome apre il profilo; da lì Libreria e Desideri (giro 6)
-  if (a === 'tipwish' || a === 'tipdrop') { tipAct(a, id); return; }
   if (a === 'chat') { close(); if (window.NLChat) { var cu = b.dataset.u; setTimeout(function () { window.NLChat.to(id, cu); }, 60); } return; }   // Scrivi (giro 9b)
   if (a === 'blocked') { if (window.NLChat) window.NLChat.blocked(); return; }
   if (a === 'keyshare') { keySheet(id); return; }
@@ -616,17 +609,13 @@ function paintAsk() {
   document.getElementById('friAskT').textContent = (r[0].nome_da || 'Un amico') + ': «' + ((r[0].libro && r[0].libro.t) || 'un libro') + '»';
 }
 
-/* ---------- consigli: dalla condivisione di un libro, a un amico dell'app ---------- */
-async function tipAct(a, id) {
-  var c = tips.filter(function (x) { return x.id === id; })[0]; if (!c) return;
-  if (a === 'tipwish') { NL.addMine(Object.assign(snapG(c.libro || {}), { w: true, fr: c.nome_da || '' })); NL.toast('Aggiunto ai tuoi desideri.'); }
-  try { await rpc('togli_consiglio', { id: id }); } catch (e) { if (window.nlErr) nlErr(e); }
-  tips = tips.filter(function (x) { return x.id !== id; }); paint();
-}
-var shareSel = {};
-function paintShareFriends(books) {
+/* ---------- consigli (giro 9d): dalla finestra Condividi, ad amici e gruppi; arrivano solo in chat ---------- */
+var shareSel = {}, shareGrp = {};
+function chatGroups() { var C = window.NLChat; return C && C.state ? (C.state().chats || []).filter(function (c) { return c.tipo === 'gruppo' && c.stato !== 'chiusa'; }) : []; }
+function paintShareFriends(books, again) {
   var sh = document.getElementById('shareSheet'), form = document.getElementById('shareForm'); if (!sh || !form) return;
-  var fr = uid() ? friends() : [], one = books && books.length === 1 ? books[0] : null, app = !!(one && fr.length);
+  var fr = uid() ? friends() : [], grs = uid() ? chatGroups() : [], one = books && books.length === 1 ? books[0] : null, app = !!(one && (fr.length || grs.length));
+  if (!again && one && uid() && window.NLChat && window.NLChat.groups) window.NLChat.groups().then(function (g) { if (g.length !== grs.length && !sh.hidden) paintShareFriends(books, true); });
   var box = document.getElementById('shareFriBox'), ext = document.getElementById('shareExt');
   if (!box) {
     if (!app) return;
@@ -641,24 +630,39 @@ function paintShareFriends(books) {
     cl.addEventListener('click', function () { document.getElementById('shareClose').click(); });
     form.appendChild(cl);
     box.addEventListener('click', async function (e) {
-      var r = e.target.closest('[data-share]');
+      var r = e.target.closest('[data-share]'), g = e.target.closest('[data-shareg]');
       if (r) { var id = r.dataset.share; shareSel[id] = !shareSel[id]; r.setAttribute('aria-pressed', shareSel[id] ? 'true' : 'false'); goBtn(); return; }
-      if (!e.target.closest('#shareAppGo') || !box.__b) return;
-      var ids = Object.keys(shareSel).filter(function (k) { return shareSel[k]; }); if (!ids.length) return;
-      var go = document.getElementById('shareAppGo'); go.disabled = true; go.textContent = 'Mando…';
-      var ok = 0;
-      for (var i = 0; i < ids.length; i++) { try { await rpc('consiglia', { a: ids[i], libro: snap(box.__b) }); ok++; } catch (x) { NL.toast(nice(x)); } }
-      if (ok) { NL.toast(ok === 1 ? 'Consigliato ' + aChi(friendName(ids[0])) + ': lo trova nella sua app.' : 'Consigliato a ' + ok + ' amici: lo trovano nella loro app.'); document.getElementById('shareClose').click(); }
-      else { go.disabled = false; goBtn(); }
+      if (g) { var gid = g.dataset.shareg; shareGrp[gid] = !shareGrp[gid]; g.setAttribute('aria-pressed', shareGrp[gid] ? 'true' : 'false'); goBtn(); return; }
+      if (!e.target.closest('#shareAppGo') || !box.__b || !window.NLChat) return;
+      var ids = picked(shareSel), gids = picked(shareGrp); if (!ids.length && !gids.length) return;
+      var go = document.getElementById('shareAppGo'), t = document.getElementById('shareTipTxt'); go.disabled = true; go.textContent = 'Mando…';
+      var res = await window.NLChat.recommend(box.__b, ids, gids, t ? t.value.trim() : '');
+      if (res.err) NL.toast(res.err);
+      if (res.ok) {
+        var n = ids.length + gids.length;
+        NL.toast(n === 1 ? 'Consigliato ' + (ids.length ? aChi(friendName(ids[0])) : 'nel gruppo') + ': lo trova nella chat.' : 'Consigliato in ' + res.ok + ' chat: lo trovano lì.');
+        document.getElementById('shareClose').click();
+      } else goBtn();
     });
   }
-  function goBtn() { var n = Object.keys(shareSel).filter(function (k) { return shareSel[k]; }).length, g = document.getElementById('shareAppGo'); if (!g) return; g.disabled = !n; g.textContent = n > 1 ? 'Consiglia a ' + n + ' amici' : 'Consiglia'; }
+  function picked(o) { return Object.keys(o).filter(function (k) { return o[k]; }); }
+  function goBtn() { var n = picked(shareSel).length + picked(shareGrp).length, g = document.getElementById('shareAppGo'); if (!g) return; g.disabled = !n; g.textContent = n > 1 ? 'Consiglia (' + n + ')' : 'Consiglia'; }
   box.hidden = !app; document.getElementById('shareAppClose').hidden = !app;
   ext.open = !app; ext.classList.toggle('only', !app);
   if (!app) return;
-  shareSel = {}; box.__b = one;
-  box.innerHTML = '<h3 class="fr-h">Consiglialo a un amico</h3><p class="fr-small">Lo trova nella sua app di Next Libris, tra i consigliati: niente link da mandare.</p>' +
-    pickerHTML(fr, 'data-share', function () { return false; }, null) + '<button class="btn primary" type="button" id="shareAppGo" disabled>Consiglia</button>';
+  var txt = again && document.getElementById('shareTipTxt') ? document.getElementById('shareTipTxt').value : '';
+  if (!again) { shareSel = {}; shareGrp = {}; }
+  box.__b = one;
+  var gAv = window.NLChat && window.NLChat.grpAv;
+  box.innerHTML = '<h3 class="fr-h">Consiglialo</h3><p class="fr-small">Arriva nella chat con l\'amico o nel gruppo che scegli: niente link da mandare.</p>' +
+    (fr.length ? (grs.length ? '<p class="share-sub">Amici</p>' : '') + pickerHTML(fr, 'data-share', function (x) { return !!shareSel[x.id]; }, null) : '') +
+    (grs.length ? '<p class="share-sub">Gruppi</p><div class="fr-pick"><div class="fr-pick-list" role="list">' + grs.slice().sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'it'); }).map(function (c) {
+      return '<button type="button" class="fr-pick-row" data-shareg="' + esc(c.id) + '" aria-pressed="' + (shareGrp[c.id] ? 'true' : 'false') + '">' + (gAv ? gAv(c.nome) : '') + '<span class="fr-pick-n">' + esc(c.nome || 'Gruppo') + (c.membri ? '<small>' + c.membri + ' persone</small>' : '') + '</span><span class="fr-pick-c" aria-hidden="true"></span></button>';
+    }).join('') + '</div></div>' : '') +
+    '<textarea id="shareTipTxt" class="share-tip" rows="2" maxlength="1000" placeholder="Due righe sul perché (facoltativo)" aria-label="Due righe sul perché"></textarea>' +
+    '<button class="btn primary" type="button" id="shareAppGo" disabled>Consiglia</button>';
+  document.getElementById('shareTipTxt').value = txt;
+  goBtn();
 }
 NL.on('share', function (ev) { paintShareFriends(ev && ev.books); });
 
@@ -1230,5 +1234,5 @@ paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
 window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, swapSheet: swapSheet, keySheet: keySheet, dropSheet: dropSheet, nums: function (id) { return nums[id] || null; },
   acts: function (id) { var own = ownKeys(); return { swap: swapsWith(id).length > 0, key: !!(own.gb || own.sbn), lent: outKey(id) ? lentLabel(outKey(id)) : '' }; },   // icone del profilo dell'amico (giro 6)
-  guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+  guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, keys: keys, who: who }; } };   // per le prove
 })();

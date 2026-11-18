@@ -131,6 +131,9 @@ html.guest #list .row.g-noread :is(.cv-strip,.read){display:none}
 .share-app[hidden]{display:none}
 .share-app .fr-h{margin:0;font-size:16px}
 .share-app .fr-small{margin:0;font-size:13px;color:var(--muted);line-height:1.4}
+.share-app .share-sub{margin:4px 0 -2px;font:600 13px/1.2 var(--font-body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.share-app .fr-pick-row .pf-av{flex:none;width:32px;height:32px;font-size:13px}
+.share-tip{display:block;width:100%;box-sizing:border-box;min-height:52px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);color:var(--ink);font:16px/1.4 var(--font-body);resize:vertical}
 .share-ext{display:grid;gap:10px}
 .share-ext>summary{cursor:pointer;color:var(--accent);font-weight:600;padding:8px 2px}
 .share-ext.only>summary{display:none}

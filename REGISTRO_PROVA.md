@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.12 · 18/11/2026 17:16
+- **Chat: libri e consigli**: 📚 accanto al campo per mandare un libro, «Consiglialo» ad amici e gruppi dalla scheda del libro (arriva nella chat), schedina del libro con «Aggiungi ai Desideri»
+- **Amministrazione** (solo per gli amministratori): segnalazioni, sospesi, avviso a tutti con anteprima, numeri dell'app, archivio comune
+
 ## Prova 104.11 · 18/11/2026 16:38
 - Chat: gruppi (Nuovo gruppo da «+ Nuova», Info gruppo, aggiungi e togli persone, nome, esci, iniziali nell'elenco)
 

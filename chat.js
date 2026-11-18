@@ -126,6 +126,8 @@ function sheet() {
   el.addEventListener('input', function (e) {
     if (e.target.id === 'chTxt') grow(e.target);
     if (e.target.id === 'chGName') { gname = e.target.value; gBtn(); }
+    if (e.target.id === 'chBQ') { pickQ = e.target.value; paintBookList(); }
+    if (e.target.id === 'chBTxt') { var bc = $('chBCount'); if (bc) { var bn = e.target.value.length; bc.hidden = bn < MAX - 100; bc.textContent = bn + ' / ' + MAX; } }
     if (e.target.id === 'chNewQ') { var v = e.target.value.toLowerCase(); Array.prototype.forEach.call(document.querySelectorAll('#chNewL li'), function (li) { li.hidden = v && li.textContent.toLowerCase().indexOf(v) < 0; }); }
   });
   el.addEventListener('change', function (e) { var g = e.target.dataset && e.target.dataset.g; if (g) { if (e.target.checked) gsel[g] = 1; else delete gsel[g]; gBtn(); } });
@@ -135,7 +137,7 @@ function sheet() {
   el.addEventListener('pointerdown', function (e) {
     var m = e.target.closest('.ch-msg[data-m]'); if (!m) return;
     px = e.clientX; py = e.clientY; clearTimeout(pt);
-    pt = setTimeout(function () { pt = 0; if (navigator.vibrate) try { navigator.vibrate(15); } catch (x) {} msgMenu(m.dataset.m); }, 500);
+    pt = setTimeout(function () { pt = 0; longAt = Date.now(); if (navigator.vibrate) try { navigator.vibrate(15); } catch (x) {} msgMenu(m.dataset.m); }, 500);
   });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { el.addEventListener(t, function () { clearTimeout(pt); }); });
   el.addEventListener('pointermove', function (e) { if (Math.abs(e.clientX - px) + Math.abs(e.clientY - py) > 10) clearTimeout(pt); });
@@ -152,17 +154,19 @@ async function open() {
 }
 function close(fromBack) {
   var el = $('chSheet'); if (!el || el.hidden) return;
-  el.hidden = true; document.documentElement.classList.remove('ch-open'); stop(); cur = null; draftTo = null; view = 'list'; closeMenu();
+  el.hidden = true; document.documentElement.classList.remove('ch-open'); stop(); cur = null; draftTo = null; view = 'list'; closeMenu(); closeBook();
   if (!fromBack && depth) { var d = depth; depth = 0; try { history.go(-d); } catch (e) {} }
   if (fromBack) depth = 0;
 }
 window.addEventListener('popstate', function (e) {
   var el = $('chSheet'); if (!el || el.hidden) return;
   var st = e.state && e.state.chat;
-  depth = st === 'gadd' ? 4 : st === 'ginfo' ? 3 : st === 'conv' ? 2 : st === 'list' ? 1 : 0;
-  var want = { conv: 'conv', ginfo: 'ginfo', gadd: 'gadd' }[view];
+  depth = st === 'gadd' ? 4 : st === 'ginfo' || st === 'bpick' ? 3 : st === 'conv' ? 2 : st === 'list' ? 1 : 0;
+  var want = { conv: 'conv', ginfo: 'ginfo', gadd: 'gadd', bpick: 'bpick' }[view];
+  if ($('chBk')) { closeBook(); if (want && st !== want) pushBack(want); return; }                  // prima si chiude la schedina del libro
   if ($('chMenu')) { closeMenu(); if (want && st !== want) pushBack(want); else if (!st) pushBack('list'); return; }   // prima si chiude il menu
   if (view === 'gadd' && st === 'ginfo') { view = 'ginfo'; paint(); loadMembers(); return; }          // Aggiungi amici › Info gruppo
+  if (view === 'bpick' && st === 'conv') { view = 'conv'; paintConv('end'); return; }                // Manda un libro › chat
   if ((view === 'ginfo' || view === 'gadd') && st === 'conv') { view = 'conv'; paintConv('end'); read(); return; }   // Info gruppo › chat
   if (view === 'conv' && st === 'list') { toList(true); return; }
   if (!st && (view === 'req' || view === 'new' || view === 'grp')) { view = 'list'; paint(); pushBack('list'); return; }   // dalle richieste si torna all'elenco
@@ -174,7 +178,7 @@ function toList(fromBack) {
   if (!fromBack && depth > 1) { try { history.back(); } catch (e) {} return; }
   paint(); loadList();
 }
-var curWasReq = false;
+var curWasReq = false, longAt = 0;
 
 /* ---------- disegno ---------- */
 function paint() {
@@ -182,6 +186,7 @@ function paint() {
   if (view === 'conv') return paintConv();
   if (view === 'grp' || view === 'gadd') return paintPick();
   if (view === 'ginfo') return paintInfo();
+  if (view === 'bpick') return paintBookPick();
   var head = $('chHead'), body = $('chBody'), foot = $('chFoot'), h = '';
   if (view === 'req') {
     head.innerHTML = '<button class="ico ch-back" type="button" data-c="list" aria-label="Indietro">‹</button><h2 id="chH">Richieste di messaggio</h2><button class="ico ch-x" type="button" data-c="close" aria-label="Chiudi">×</button>';
@@ -352,8 +357,8 @@ function msgHTML(m, c) {
   if (m.el) inner = '<i>Messaggio eliminato</i>';
   else if ((m.tipo === 'libro' || m.tipo === 'consiglio') && m.libro) {
     var L = m.libro, img = /^https:\/\//.test(L.img || '') ? L.img : '';
-    inner = (m.tipo === 'consiglio' ? '<small class="ch-k">Ti consiglia</small>' : '') + '<span class="ch-book">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ch-bimg" aria-hidden="true">📚</span>') +
-      '<span><b>' + esc(L.t || 'Un libro') + '</b>' + (L.a ? '<small>' + esc(L.a) + '</small>' : '') + '</span></span>' + (m.testo ? '<span class="ch-txt">' + esc(m.testo) + '</span>' : '');
+    inner = (m.tipo === 'consiglio' ? '<small class="ch-k">' + (mine ? 'Consigliato da te' : 'Ti consiglia') + '</small>' : '') + '<button type="button" class="ch-book" data-c="bk" data-m="' + esc(String(m.id)) + '">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ch-bimg" aria-hidden="true">📚</span>') +
+      '<span><b>' + esc(L.t || 'Un libro') + '</b>' + (L.a ? '<small>' + esc(L.a) + '</small>' : '') + '</span></button>' + (m.testo ? '<span class="ch-txt">' + esc(m.testo) + '</span>' : '');
   } else inner = '<span class="ch-txt">' + esc(m.testo || '') + '</span>';
   return '<div class="' + cls + '" data-m="' + esc(String(m.id)) + '" tabindex="0">' + who + inner + '<small class="ch-time">' + esc(hm(m.creato)) + '</small></div>';
 }
@@ -376,7 +381,7 @@ function paintFoot(foot, c, name) {
   if (!info || info.err) { foot.innerHTML = ''; return; }
   var old = $('chTxt'), val = old ? old.value : '';
   if (old && foot.contains(old)) return;                    // non si ridisegna mentre si scrive
-  foot.innerHTML = '<form class="ch-form" id="chForm"><textarea id="chTxt" rows="1" maxlength="' + (MAX + 200) + '" placeholder="Scrivi un messaggio…" aria-label="Messaggio" enterkeyhint="send"></textarea>' +
+  foot.innerHTML = '<form class="ch-form" id="chForm"><button class="ch-bkbtn" type="button" data-c="bpick" aria-label="Manda un libro" title="Manda un libro">📚</button><textarea id="chTxt" rows="1" maxlength="' + (MAX + 200) + '" placeholder="Scrivi un messaggio…" aria-label="Messaggio" enterkeyhint="send"></textarea>' +
     '<button class="ch-send" type="submit" aria-label="Manda">' + SEND + '</button><small class="ch-count" id="chCount" hidden></small></form>';
   var t = $('chTxt'); t.value = val; grow(t);
   $('chForm').addEventListener('submit', function (e) { e.preventDefault(); send(); });
@@ -387,8 +392,15 @@ async function send() {
   if (v.length > MAX) { NL.toast(nice({ message: 'messaggio troppo lungo' })); return; }
   sending = true; var btn = document.querySelector('#chForm .ch-send'); if (btn) btn.disabled = true;
   try {
-    var r = cur ? await rpc('chat_scrivi', { chat: cur, testo: v }) : await rpc('chat_scrivi_a', { a: draftTo.id, testo: v });
+    await write({ testo: v });
     t.value = ''; grow(t);
+  } catch (e) { NL.toast(nice(e)); }
+  sending = false; if (btn) btn.disabled = false;
+  var t2 = $('chTxt'); if (t2) t2.focus();
+}
+/* scrive nella chat aperta (o nella chat nuova con draftTo): testo, oppure un libro con due righe facoltative */
+async function write(body) {
+    var r = cur ? await rpc('chat_scrivi', Object.assign({ chat: cur }, body)) : await rpc('chat_scrivi_a', Object.assign({ a: draftTo.id }, body));
     if (!cur && r && r.chat) {
       var d = draftTo; cur = r.chat; draftTo = null;
       chats.unshift({ id: r.chat, tipo: 'due', nome: d.nome, altro: d.id, stato: r.stato || 'attiva', nuovi: 0, ultimo: null });
@@ -397,9 +409,6 @@ async function send() {
     }
     await read();
     lastList = 0;
-  } catch (e) { NL.toast(nice(e)); }
-  sending = false; if (btn) btn.disabled = false;
-  var t2 = $('chTxt'); if (t2) t2.focus();
 }
 
 /* ---------- menu: un messaggio (tenuto premuto) o la chat (⋮) ---------- */
@@ -699,6 +708,97 @@ async function blocked() {
   fill();
 }
 
+/* ---------- libri (giro 9d): 📚 nella chat, schedina del libro, consigli dalla finestra Condividi ---------- */
+var BOOK_K = ['t', 'a', 'i', 'e', 'y', 'pg', 'img', 'gen', 'se', 'sn'];
+var pickTab = 'lib', pickQ = '', pickSel = null;
+function bookSnap(b) {                               // solo i campi che il server tiene (chat_libro); copertine solo da internet
+  var o = {}; BOOK_K.forEach(function (k) { var v = b && b[k]; if (v != null && v !== '') o[k] = String(v); });
+  if (o.img && !/^https:\/\//.test(o.img)) delete o.img;
+  return o;
+}
+function myList() { return ((NL.myBooks && NL.myBooks()) || (NL.books && NL.books()) || []).filter(function (b) { return b && b.t && !b.xs && !!b.w === (pickTab === 'wish'); }); }
+function fold(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+function paintBookPick() {
+  var head = $('chHead'), body = $('chBody');
+  head.innerHTML = '<button class="ico ch-back" type="button" data-c="hist" aria-label="Indietro">‹</button><h2 id="chH">Manda un libro</h2><button class="ico ch-x" type="button" data-c="close" aria-label="Chiudi">×</button>';
+  body.innerHTML = '<input type="search" class="fr-libq ch-q" id="chBQ" placeholder="Cerca titolo o autore" autocomplete="off" value="' + esc(pickQ) + '">' +
+    '<div class="ch-btabs" role="tablist"><button type="button" class="ch-bt' + (pickTab === 'lib' ? ' on' : '') + '" data-c="btab" data-t="lib" role="tab" aria-selected="' + (pickTab === 'lib') + '">Libreria</button>' +
+    '<button type="button" class="ch-bt' + (pickTab === 'wish' ? ' on' : '') + '" data-c="btab" data-t="wish" role="tab" aria-selected="' + (pickTab === 'wish') + '">Desideri</button></div>' +
+    '<ul class="ch-list ch-blist" id="chBL"></ul>';
+  paintBookList(); paintBookFoot();
+}
+function paintBookList() {
+  var ul = $('chBL'); if (!ul) return;
+  var q = fold(pickQ).trim(), all = myList().filter(function (b) { return !q || fold(b.t + ' ' + (b.a || '')).indexOf(q) >= 0; })
+    .sort(function (x, y) { return (x.t || '').localeCompare(y.t || '', 'it'); }), list = all.slice(0, 80);
+  if (!list.length) { ul.innerHTML = '<li class="ch-empty">' + (q ? 'Nessun libro trovato.' : pickTab === 'wish' ? 'Nei Desideri non hai ancora libri.' : 'In Libreria non hai ancora libri.') + '</li>'; return; }
+  ul.innerHTML = list.map(function (b) {
+    var img = /^https:\/\//.test(b.img || '') ? b.img : '', on = pickSel === b.id;
+    return '<li><button type="button" class="ch-row ch-brow2' + (on ? ' on' : '') + '" data-c="bsel" data-id="' + esc(b.id) + '" aria-pressed="' + on + '">' +
+      (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ch-bimg" aria-hidden="true">📚</span>') +
+      '<span class="ch-t"><b>' + esc(b.t) + '</b>' + (b.a ? '<small>' + esc(b.a) + '</small>' : '') + '</span>' + (on ? '<span class="ch-ok" aria-hidden="true">✓</span>' : '') + '</button></li>';
+  }).join('') + (all.length > list.length ? '<li class="fr-small ch-more-n">Altri ' + (all.length - list.length) + ': cerca per trovarli.</li>' : '');
+}
+function paintBookFoot() {
+  var foot = $('chFoot'); if (!foot || view !== 'bpick') return;
+  if (!pickSel) { foot.innerHTML = '<p class="fr-small ch-bhint">Tocca un libro per sceglierlo.</p>'; return; }
+  if ($('chBTxt')) { var g = $('chBGo'); if (g) g.disabled = false; return; }
+  foot.innerHTML = '<textarea id="chBTxt" class="ch-btxt" rows="2" maxlength="' + MAX + '" placeholder="Aggiungi due righe (facoltativo)" aria-label="Due righe sul libro"></textarea><small class="ch-count" id="chBCount" hidden></small>' +
+    '<button class="btn primary ch-gok" type="button" data-c="bsend" id="chBGo">Manda</button>';
+}
+async function sendBook(btn) {
+  var b = myList().filter(function (x) { return x.id === pickSel; })[0]; if (!b || sending) return;
+  var t = $('chBTxt'), v = t ? t.value.trim() : '';
+  sending = true; btn.disabled = true;
+  try {
+    await write({ testo: v, libro: bookSnap(b), tipo: 'libro' });
+    pickSel = null; view = 'conv';
+    try { history.back(); } catch (x) {}
+    paintConv('end');
+  } catch (e) { NL.toast(nice(e)); btn.disabled = false; }
+  sending = false;
+}
+/* schedina: il tocco su un libro dentro la chat */
+function closeBook() { var m = $('chBk'); if (m) m.remove(); }
+function bookCard(id) {
+  var m = msgs.filter(function (x) { return String(x.id) === String(id); })[0]; if (!m || !m.libro) return;
+  var L = m.libro, img = /^https:\/\//.test(L.img || '') ? L.img : '', key = { t: L.t || '', a: L.a || '', i: L.i || '' };
+  var have = !!(NL.isMine && NL.isMine(key)), mineW = ((NL.myBooks && NL.myBooks()) || []).filter(function (x) { return x.w; });
+  var wish = !have && mineW.some(function (x) { return (L.i && x.i === L.i) || (fold(x.t) === fold(L.t) && fold(x.a) === fold(L.a)); });
+  var sub = [L.e, L.y].filter(Boolean).join(', ') + (L.pg ? (L.e || L.y ? ' · ' : '') + L.pg + ' pagine' : '');
+  closeBook();
+  var el = document.createElement('div'); el.className = 'sheet ch-menu ch-bk'; el.id = 'chBk';
+  el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-label="' + esc(L.t || 'Libro') + '"><div class="ch-bkc">' +
+    (img ? '<img src="' + esc(img) + '" alt="" referrerpolicy="no-referrer">' : '<span class="ch-bimg" aria-hidden="true">📚</span>') +
+    '<div><b>' + esc(L.t || 'Un libro') + '</b>' + (L.a ? '<span>' + esc(L.a) + '</span>' : '') + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div></div>' +
+    (have ? '<p class="ch-bks ok">✓ Ce l\'hai già nella Libreria</p>' : wish ? '<p class="ch-bks ok">★ È già nei tuoi Desideri</p>' : '') +
+    '<div class="ch-bkb">' + (have || wish ? '' : '<button type="button" class="btn primary" data-i="wish">Aggiungi ai Desideri</button>') + '<button type="button" class="btn" data-i="x">Chiudi</button></div></div>';
+  document.body.appendChild(el);
+  el.addEventListener('click', function (e) {
+    if (e.target === el) return closeBook();
+    var b = e.target.closest('[data-i]'); if (!b) return;
+    if (b.dataset.i === 'wish' && NL.addMine) {
+      var from = m.da && m.da !== uid() ? (m.nome || convName() || '') : '';
+      NL.addMine(Object.assign(bookSnap(L), { w: true, fr: from }));
+      NL.toast('Aggiunto ai tuoi desideri.');
+    }
+    closeBook();
+  });
+  var f = el.querySelector('.btn'); if (f) f.focus();
+}
+/* dalla finestra Condividi (amici.js): consiglia un libro ad amici e gruppi, con due righe facoltative */
+async function recommend(book, friendIds, groupIds, testo) {
+  var l = bookSnap(book), ok = 0, err = null;
+  for (var i = 0; i < friendIds.length; i++) { try { await rpc('chat_scrivi_a', { a: friendIds[i], testo: testo || '', libro: l, tipo: 'consiglio' }); ok++; } catch (e) { err = e; } }
+  for (var j = 0; j < groupIds.length; j++) { try { await rpc('chat_scrivi', { chat: groupIds[j], testo: testo || '', libro: l, tipo: 'consiglio' }); ok++; } catch (e) { err = e; } }
+  if (ok) lastList = 0;
+  return { ok: ok, err: err ? nice(err) : '' };
+}
+async function groups() {
+  if (!lastList) { try { await loadList(); } catch (e) {} }
+  return chats.filter(function (c) { return c.tipo === 'gruppo' && c.stato !== 'chiusa'; });
+}
+
 /* ---------- tocchi ---------- */
 function onClick(e) {
   var el = $('chSheet');
@@ -706,6 +806,11 @@ function onClick(e) {
   var b = e.target.closest('[data-c]'); if (!b) return;
   var a = b.dataset.c;
   if (a === 'close') return close();
+  if (a === 'bk') { if (Date.now() - longAt > 700) bookCard(b.dataset.m); return; }
+  if (a === 'bpick') { view = 'bpick'; pickSel = null; pickQ = ''; pickTab = 'lib'; pushBack('bpick'); paint(); return; }
+  if (a === 'btab') { pickTab = b.dataset.t; pickSel = null; paint(); return; }
+  if (a === 'bsel') { pickSel = b.dataset.id; paintBookList(); paintBookFoot(); return; }
+  if (a === 'bsend') { sendBook(b); return; }
   if (a === 'new') { newMenu(); return; }
   if (a === 'gmake') { makeGroup(b); return; }
   if (a === 'ginfo') { openInfo(); return; }
@@ -731,11 +836,22 @@ function onClick(e) {
 }
 
 /* ---------- l'avviso «messaggi» nella campanella apre la chat ---------- */
-document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if ($('chMenu')) closeMenu(); else if ($('chSheet') && !$('chSheet').hidden) close(); } });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if ($('chMenu')) closeMenu(); else if ($('chBk')) closeBook(); else if ($('chSheet') && !$('chSheet').hidden) close(); } });
 var A0 = window.NLAmici;
 if (A0 && A0.onLoad) A0.onLoad(loadNums);                                     // insieme agli amici (apertura, ritorno, ogni ~3 min)
 else if (uid()) setTimeout(loadNums, 1500);
 S.onAuth(function () { if (!uid()) { chats = []; nums = { nuovi: 0, richieste: 0 }; wr(K, null); close(); } else loadNums(); paintTop(); });
 if (chats.length) numsFromList(); else paintTop();
-window.NLChat = { open: open, to: to, blocked: blocked, load: loadNums, state: function () { return { chats: chats, nums: nums, view: view, cur: cur, msgs: msgs, info: info, draftTo: draftTo }; } };   // per amici.js, profilo.js, notifiche.js e le prove
+/* ---------- amministrazione (giro 9e): admin.js e admin.css si caricano solo se il server dice che sei amministratore ---------- */
+var adminFor = null;
+async function adminCheck() {
+  var u = uid(); if (!u || adminFor === u) return; adminFor = u;
+  var si = false; try { si = (await rpc('admin_sono')) === true; } catch (e) { adminFor = null; return; }
+  if (!si || window.NLAdmin || $('adminJs')) return;
+  var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'admin.css'; document.head.appendChild(l);
+  var sc = document.createElement('script'); sc.src = 'admin.js'; sc.id = 'adminJs'; sc.defer = true; document.head.appendChild(sc);
+}
+S.onAuth(function () { if (uid()) adminCheck(); else { adminFor = null; var g = $('goAdmin'); if (g) g.remove(); if (window.NLAdmin) window.NLAdmin.close(); } });
+if (uid()) setTimeout(adminCheck, 1200);
+window.NLChat = { menu: menu, open: open, to: to, recommend: recommend, groups: groups, grpAv: grpAv, blocked: blocked, load: loadNums, state: function () { return { chats: chats, nums: nums, view: view, cur: cur, msgs: msgs, info: info, draftTo: draftTo }; } };   // per amici.js, profilo.js, notifiche.js e le prove
 })();
