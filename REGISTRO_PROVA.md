@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 105.2 · 18/11/2026 21:37
+- **Ritocchi grafici**: finestra Account non più vuota, triangolino attaccato, «Permetti le notifiche» al centro, campo Testo dell'Avviso
+- 3 copertine per riga per tutti; da 4 per riga niente scritta sotto le copertine col nome, nomi che entrano; frase nella guida
+- Cerca tra i tuoi amici sempre; riquadri dei film regolari con «Mostra tutti» e «Altri N»; telefoni stretti e scritta grande
+
 ## Prova 105.1 · 18/11/2026 19:38
 - **uguale alla vera 105**
 
