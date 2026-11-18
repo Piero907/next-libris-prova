@@ -59,13 +59,14 @@ function text(x) {
     case 'richiesta_no': return who(x) + ' ora non può prestarti ' + book(x);
     case 'consiglio': return who(x) + ' ti consiglia ' + book(x);
     case 'chiavi': return who(x) + ' condivide con te la sua chiave per cercare i libri';
+    case 'desideri': var nd = Number(x.rif) || 1; return who(x) + (nd === 1 ? ' ha un nuovo desiderio: ' : ' ha ' + nd + ' nuovi desideri: ') + '<b>' + esc(x.titolo || '') + '</b>' + (nd > 3 ? ' e altri' : '');   // riassunto del giorno di un amico che segui (giro 3)
     case 'limite': return x.titolo ? 'La chiave Google di <b>' + esc(x.titolo) + '</b> ha finito le ricerche di oggi: <b>creane una tua, è gratis</b>'
       : 'La tua chiave Google ha finito le ricerche di oggi: torna domattina';
   }
   return who(x);
 }
 var KIND = { amicizia: 'fr', amico: 'fr', prestito: 'bk', regalo: 'gift', reso: 'bk', reso_ok: 'bk', reso_no: 'bk', chiuso: 'bk',
-  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim' };
+  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim', desideri: 'gift' };
 function ago(t) {
   var d = new Date(t), s = (Date.now() - d.getTime()) / 1000;
   if (!(s >= 0)) s = 0;
@@ -144,6 +145,7 @@ function go(id) {
     var b = mine.filter(function (y) { return y.sx === x.rif; })[0];
     if (b && NL.showBook && NL.showBook(b.id)) return;
   }
+  if (x.tipo === 'desideri' && A && A.guest && x.da) { setTimeout(function () { Promise.resolve(A.guest(x.da)).then(function () { if (NL.guest && NL.guest()) NL.setTab('wish'); }); }, 60); return; }   // i suoi desideri
   if (A) setTimeout(function () { A.open(x.tipo === 'chiavi'); }, 60);
 }
 

@@ -11,6 +11,7 @@ const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app
   'layout.js', 'layout.css',   // modulo: disposizione dello schermo
   'schede.js', 'schede.css',   // modulo: aspetto della scheda aperta
   'social.js', 'social.css',   // modulo: account e sincronizzazione
+  'profilo.js', 'profilo.css',   // modulo: profilo
   'amici.js', 'amici.css',   // modulo: amici
   'notifiche.js', 'notifiche.css',   // modulo: notifiche (campanella)
   'ricerche.js', 'ricerche.css',   // modulo: ricerche condivise e archivio comune

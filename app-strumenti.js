@@ -87,11 +87,12 @@ function saveName(v) {
 /* in testata, sotto «Next Libris»: «Libreria di Piero»; senza nome, l'invito a scriverlo */
 function renderOwner() {
   var el = $('#owner');
-  if (guest) { el.innerHTML = 'Libreria di <b>' + esc(guest.name) + '</b>'; return; }
-  el.innerHTML = settings.name ? (tab === 'wish' ? 'Desideri di ' : 'Libreria di ') + '<b>' + esc(settings.name) + '</b>'   // «Libreria di Piero R. · 120 libri», nei Desideri «Desideri di Piero R.» (Piero, 17/11/2026)
+  var pf = window.NLProfilo ? ['<button type="button" class="owner-n" id="ownerProf" title="Apri il profilo">', '</button>'] : ['', ''];   // il nome apre la pagina del profilo (giro 3)
+  if (guest) { el.innerHTML = 'Libreria di ' + pf[0] + '<b>' + esc(guest.name) + '</b>' + pf[1]; return; }
+  el.innerHTML = settings.name ? (tab === 'wish' ? 'Desideri di ' : 'Libreria di ') + pf[0] + '<b>' + esc(settings.name) + '</b>' + pf[1]   // «Libreria di Piero R. · 120 libri», nei Desideri «Desideri di Piero R.» (Piero, 17/11/2026)
     : '<button type="button" class="link" id="ownerSet">Scrivi il tuo nome</button>';
 }
-$('#owner').addEventListener('click', function (e) { if (e.target.closest('#ownerSet')) { openOptions('share'); setTimeout(function () { try { $('#optName').focus(); } catch (x) {} }, 80); } });
+$('#owner').addEventListener('click', function (e) { if (e.target.closest('#ownerProf') && window.NLProfilo) { window.NLProfilo.open(guest && window.NLAmici ? window.NLAmici.guestId() : null); return; } if (e.target.closest('#ownerSet')) { openOptions('share'); setTimeout(function () { try { $('#optName').focus(); } catch (x) {} }, 80); } });
 async function sendShare(copyOnly) {
   if (!shareCtx) return;
   var pack = sharePack(), sh = L.parseShare(pack);

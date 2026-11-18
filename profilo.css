@@ -1,0 +1,41 @@
+/* Next Libris · modulo «Profilo» (giro 3, 18/11/2026): pagina del profilo, foto o iniziale, «Segui» */
+.pf-av{flex:none;width:36px;height:36px;border-radius:50%;display:inline-grid;place-items:center;overflow:hidden;background:hsl(var(--pf-h,150) 32% 42%);color:#fff;font:600 16px/1 var(--font-body);user-select:none}
+.pf-av.big{width:64px;height:64px;font-size:28px}
+.pf-av img{width:100%;height:100%;object-fit:cover;display:block}
+.pf-av.has{background:var(--surface2)}
+.prof #profBody{display:grid;gap:14px}
+.prof .pf-top{display:flex;align-items:center;gap:14px;min-width:0}
+.prof .pf-id{display:grid;gap:2px;min-width:0}
+.prof .pf-name{font:600 20px/1.2 var(--font-display);overflow-wrap:anywhere}
+.prof .pf-id small{font-size:13px;color:var(--muted)}
+.prof .pf-acts{margin:-8px 0 0}
+.prof .pf-acts .link{padding:4px 0;font-size:14px}
+.prof .pf-photo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--surface2)}
+.prof .pf-photo .fr-small{flex:1 1 100%;margin:0}
+.prof .pf-nums{margin:0;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.prof .pf-q{margin:0;padding:2px 0 2px 12px;border-left:3px solid var(--accent);display:grid;gap:4px}
+.prof .pf-q p{margin:0;font:italic 16px/1.45 var(--font-display);overflow-wrap:anywhere;white-space:pre-line}
+.prof .pf-q footer{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.prof .pf-qlist{display:grid;gap:14px}
+.prof .pf-qpick{all:unset;display:block;cursor:pointer;border-radius:10px;padding:8px 10px 8px 0;box-sizing:border-box;width:100%}
+.prof .pf-qpick[aria-current="true"]{background:var(--accent-soft)}
+.prof .pf-qpick:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.prof .pf-dl{margin:0;display:grid;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.prof .pf-st{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line)}
+.prof .pf-st:last-child{border-bottom:0}
+.prof .pf-st dt{font-size:14px;color:var(--muted);flex:none;max-width:50%}
+.prof .pf-st dd{margin:0;font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere}
+.prof .pf-st dd small{font-weight:400;font-size:13px;color:var(--muted);white-space:nowrap}
+.prof .pf-flags{font-size:18px;line-height:1.5;font-weight:400}
+.prof .pf-fol .btn{justify-self:start}
+/* testata: il nome apre il profilo */
+.owner .owner-n{all:unset;cursor:pointer;border-radius:6px}
+.owner .owner-n:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* elenco degli amici: foto e «Segui» */
+.fri .fr-go.fr-av{gap:10px}
+.fri .fr-fol{flex:none;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font:500 13px var(--font-body);cursor:pointer;white-space:nowrap}
+.fri .fr-fol[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+.fri .fr-segui{margin:4px 0 0}
+/* libreria di un amico: nota sui libri in prestito da te; l'etichetta «Prestato da te» è solo da leggere */
+.guest-bar .gb-note{color:var(--muted)}
+html.guest .tag.loan.recv{pointer-events:none}

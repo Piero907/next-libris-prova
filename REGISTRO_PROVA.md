@@ -2,6 +2,13 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.3 · 18/11/2026 09:23
+- **Profilo e amici**: pagina del profilo (tocca il tuo nome in testata o Menu › Il tuo profilo) con foto, citazione preferita e i tuoi numeri; dal nome di un amico si apre il suo profilo
+- Foto del profilo (scattata, scelta o quella di Google): la vedono solo gli amici, anche nell'elenco degli amici
+- «Amici e privacy»: tre scelte nuove, spente di partenza (citazione preferita, numeri, tutte le citazioni)
+- «Segui» i desideri di un amico (nel suo profilo, nell'elenco degli amici, nella richiesta d'amicizia): un avviso al giorno in campanella e come notifica
+- Nella libreria di un amico vedi sempre i libri che ha in prestito da te, anche se la tiene nascosta
+
 ## Prova 104.2 · 18/11/2026 07:46
 - **Da Wikipedia e Wikidata**: paese degli autori (Info Autore con correzione a mano, Raggruppa per Paese con la bandiera, filtro, Statistiche, Stagione in libri), film e serie TV tratti dai libri (riga nella scheda e «Dai tuoi libri al cinema» in Per te), opere di un autore («Le sue opere» in Info Autore e «Per autore» nel +)
 - **Libreria**: serie e copie accorpate in una copertina con il bollino, autori con nomi simili uniti nei gruppi, dimensione delle copertine (due dita o cursore in Aspetto), l'app ricorda l'ultima vista e l'ultimo ordine

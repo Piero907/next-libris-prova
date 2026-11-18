@@ -915,7 +915,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 /* ---- Moduli aggiuntivi: file a parte (per esempio wrap.js) che si agganciano qui. Se il file non c'e', l'app funziona uguale.
    Un modulo si toglie cancellando i suoi file e le sue righe in index.html e sw.js (vedi togli_modulo.py nel ramo prove). ---- */
 window.NL = {
-  svcShare: function () { openSvcShare(); }, emit: function (n, a) { emit(n, a); },
+  svcShare: function () { openSvcShare(); }, renderOwner: function () { renderOwner(); }, emit: function (n, a) { emit(n, a); },
   on: function (name, fn) { (hooks[name] || (hooks[name] = [])).push(fn); },
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA, COPIA: COPIA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,

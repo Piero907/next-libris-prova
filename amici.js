@@ -53,7 +53,7 @@ async function load(force) {
   loading = (async function () {
     try {
       var p;
-      var cols = ['utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
+      var cols = ['utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits', 'utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
       for (var ci = 0; ci < cols.length; ci++) {
         try { p = await S.call('/rest/v1/profili?select=' + cols[ci] + '&id=eq.' + encodeURIComponent(uid()), { user: true }); break; }
         catch (e0) { if ((e0 && e0.code === 'net') || ci === cols.length - 1) throw e0; }
@@ -108,12 +108,12 @@ function sheet() {
   el.addEventListener('submit', onSubmit);
   el.addEventListener('input', function (e) { if (e.target.id === 'friLibQ') { libsQ = e.target.value; libsShow = 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); } });
   el.addEventListener('change', async function (e) {
-    var k = e.target.id === 'friWish' ? 'desideri' : e.target.id === 'friLib' ? 'libreria' : e.target.id === 'friAmici' ? 'amici' : e.target.id === 'friRegali' ? 'regali' : ''; if (!k) return;
+    var k = { friWish: 'desideri', friLib: 'libreria', friAmici: 'amici', friRegali: 'regali', friPCit: 'p_cit', friPStat: 'p_stat', friPCits: 'p_cits' }[e.target.id] || ''; if (!k) return;
     var on = e.target.checked, body = { id: uid() }; body[k] = on; e.target.disabled = true;
     try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: body });
       me[k] = on;
-      NL.toast(k === 'regali' ? (on ? 'Gli amici ora vedono i regali che prenoti.' : 'Gli amici ora vedono solo «Regalo prenotato».') : k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
-      if (on) S.run && S.run(false); }
+      NL.toast(k === 'p_cit' ? (on ? 'Gli amici ora vedono la tua citazione preferita.' : 'La citazione preferita ora è solo tua.') : k === 'p_stat' ? (on ? 'Gli amici ora vedono i tuoi numeri.' : 'I tuoi numeri ora sono solo tuoi.') : k === 'p_cits' ? (on ? 'Gli amici ora vedono le tue citazioni.' : 'Le tue citazioni ora sono solo tue.') : k === 'regali' ? (on ? 'Gli amici ora vedono i regali che prenoti.' : 'Gli amici ora vedono solo «Regalo prenotato».') : k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
+      if (on) S.run && S.run(false); NL.emit && NL.emit('privacy', k); }
     catch (x) { e.target.checked = !on; NL.toast(nice(x)); }
     e.target.disabled = false;
   });
@@ -188,11 +188,13 @@ function paint() {
       var nn = nums[x.id] || {}, info = [];
       if (nn.comuni != null) info.push(nn.comuni + (nn.comuni === 1 ? ' amico' : ' amici') + ' in comune');
       if (nn.libri != null) info.push(nn.libri + (nn.libri === 1 ? ' libro' : ' libri') + ' in comune');
-      return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + esc(info.join(' · ') || 'Guarda la sua libreria') + '</small></button><span class="n" aria-hidden="true">›</span></li>';
-    }).join('') + '</ul>' : '<p class="fr-small">Ancora nessuno: cercalo per nome qui sotto, oppure mandagli il tuo invito.</p>';
+      return '<li class="fr-row fr-go fr-av">' + (window.NLProfilo ? window.NLProfilo.avatar(x.id, x.utente || x.nome) : '') + '<button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + esc(info.join(' · ') || 'Guarda la sua libreria') + '</small></button>' +
+        ('segue' in x ? '<button class="fr-fol" type="button" data-f="segui" data-id="' + esc(x.id) + '" aria-pressed="' + !!x.segue + '" title="' + (x.segue ? 'Segui i suoi desideri: tocca per smettere' : 'Segui i suoi desideri: un riassunto al giorno') + '">' + (x.segue ? 'Segui ✓' : 'Segui') + '</button>' : '') + '<span class="n" aria-hidden="true">›</span></li>';
+    }).join('') + '</ul>' + (fr.some(function (x) { return 'segue' in x; }) ? '<p class="fr-small">«Segui»: un avviso al giorno quando aggiunge dei desideri, se li mostra agli amici. Non viene a saperlo.</p>' : '') : '<p class="fr-small">Ancora nessuno: cercalo per nome qui sotto, oppure mandagli il tuo invito.</p>';
     h += '</section>';
     h += '<section class="fr-sec"><h3 class="fr-h">Aggiungi un amico</h3><form id="friFormQ" class="fr-q"><input type="search" id="friQ" placeholder="Il suo nome" autocomplete="off" spellcheck="false" enterkeyhint="search" value="' + esc(foundQ && foundQ !== invite ? foundQ : '') + '"><button class="btn" type="submit">Cerca</button></form>';
     if (found && foundQ && foundQ !== invite) h += found.length ? '<ul class="fr-list">' + found.map(function (x) { return row(x, relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessuno con un nome così.</p>';
+    if (found && found.some(function (x) { return !x.rel; })) h += '<label class="check fr-wish fr-segui"><input type="checkbox" id="friSegui"' + (askFollow ? ' checked' : '') + '><span>Segui i suoi desideri<small>Quando sarete amici: un avviso al giorno se ne aggiunge e li mostra. Non viene a saperlo.</small></span></label>';
     if (err) h += '<p class="msg bad" id="friErr">' + esc(err) + '</p>';
     h += '<button class="btn fr-invite" type="button" data-f="invite">Invita un amico</button></section>';
     if (se.length) h += '<section class="fr-sec"><h3 class="fr-h">Richieste che hai mandato</h3><ul class="fr-list">' + se.map(function (x) {
@@ -236,11 +238,14 @@ async function onClick(e) {
   if (a === 'back') { view = null; wishes = null; libs = null; confirmId = ''; paint(); return; }
   if (a === 'more') { libsShow += 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); return; }
   if (a === 'cancel') { confirmId = ''; paint(); return; }
+  if (a === 'segui') { follow(id, b.getAttribute('aria-pressed') !== 'true'); return; }
   b.disabled = true; err = '';
   try {
     if (a === 'ask') {
       busy = b.dataset.u;
-      var st = await rpc('chiedi_amicizia', { utente: b.dataset.u });
+      var fs = document.getElementById('friSegui'), st; askFollow = !!(fs && fs.checked);
+      try { st = await rpc('chiedi_amicizia', askFollow ? { utente: b.dataset.u, segui: true } : { utente: b.dataset.u }); }
+      catch (x0) { if (!askFollow || (x0 && x0.code === 'net')) throw x0; st = await rpc('chiedi_amicizia', { utente: b.dataset.u }); }   // database senza la 018
       NL.toast(st === 'amici' ? 'Ora siete amici.' : 'Richiesta mandata a ' + b.dataset.u + '.');
       if (invite && b.dataset.u.toLowerCase() === invite.toLowerCase()) { invite = null; wr(K_INV, null); }
       (found || []).forEach(function (x) { if (x.utente === b.dataset.u) x.rel = st === 'amici' ? 'amici' : 'inviata'; });
@@ -263,6 +268,17 @@ async function onClick(e) {
   } catch (x2) { err = nice(x2); }
   busy = '';
   await load(true);
+}
+/* seguire i desideri di un amico (giro 3): un riassunto al giorno, campanella e push; lui non lo sa */
+var askFollow = false;
+async function follow(id, on) {
+  var x = (list || []).filter(function (y) { return y.id === id; })[0];
+  try { await rpc('segui', { amico: id, si: !!on }); }
+  catch (e) { NL.toast(nice(e)); return false; }
+  if (x) x.segue = !!on;
+  NL.toast(on ? 'Segui i desideri di ' + friendName(id) + ': un avviso al giorno, se ne aggiunge.' : 'Non segui più i desideri di ' + friendName(id) + '.');
+  paint(); NL.emit && NL.emit('segui', id);
+  return true;
 }
 async function shareInvite() {
   if (!uid() || !me || !me.utente) { open(); return; }
@@ -299,6 +315,11 @@ function paintMenu() {
     var at = document.querySelector('#drawerOpts .ddon') || top;   // dopo Sostieni (Piero, 17/11/2026: Sostieni sopra Amici)
     at.parentNode.insertBefore(h, at.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
     m.querySelector('#goFri').addEventListener('click', function () { NL.fromMenu(open); });
+    if (window.NLProfilo) {
+      var gp = document.createElement('button'); gp.type = 'button'; gp.className = 'dopt dgo'; gp.id = 'goProf';
+      gp.innerHTML = '<span><b>Il tuo profilo</b><small>Foto, citazione preferita, i tuoi numeri</small></span><span class="n" aria-hidden="true">›</span>';
+      m.appendChild(gp); gp.addEventListener('click', function () { NL.fromMenu(function () { window.NLProfilo.open(); }); });
+    }
   }
   var t, rec = received().length, fr = friends().length;
   if (!uid()) t = 'Entra per trovare gli amici';
@@ -394,9 +415,10 @@ async function openGuest(id) {
   catch (e) { NL.toast(nice(e)); return; }
   gMeta = {}; gId = id;
   var books = [];
-  (lb.libri || []).forEach(function (x) { gMeta[x.id] = { fuori: !!x.fuori, w: false }; books.push(Object.assign(snapG(x), { id: x.id, rs: x.rs || '', rt: x.rt || 0, rd: x.rd || '', pp: x.pp || '', ts: Number(x.ts) || 0, w: false })); });
+  (lb.libri || []).forEach(function (x) { gMeta[x.id] = { fuori: !!x.fuori, w: false, mio: !!x.mio }; books.push(Object.assign(snapG(x), { id: x.id, rs: x.rs || '', rt: x.rt || 0, rd: x.rd || '', pp: x.pp || '', ts: Number(x.ts) || 0, w: false }, x.mio ? { sk: 'p', sda: 'te' } : {})); });   // mio: glielo hai prestato tu, si vede anche con la libreria nascosta (giro 3)
   (ws.libri || []).forEach(function (x) { gMeta[x.id] = { w: true, prenotato: x.prenotato || '', preso: !!(x.preso || x.prenotato) }; books.push(Object.assign(snapG(x), { id: x.id, ts: Number(x.ts) || 0, w: true })); });
   var info = { id: id, comuni: lb.comuni, libVis: !!lb.visibili, wishVis: !!ws.visibili, totale: lb.totale || 0,
+    nMiei: (lb.libri || []).filter(function (x) { return x.mio; }).length,
     empty: { lib: lb.visibili ? name + ' non ha ancora libri nella sua libreria.' : name + ' non mostra la sua libreria agli amici.', wish: ws.visibili ? 'La sua lista dei desideri è vuota.' : name + ' non mostra i suoi desideri agli amici.' } };
   entering = true;   // passando da un amico all'altro l'uscita dal primo non deve azzerare gId e gMeta del secondo (17/11/2026)
   try { NL.guestEnter(name, books, info); } finally { entering = false; }
@@ -437,6 +459,7 @@ function guestBar() {
   if (last.length) h += '<p class="gb-line"><b>Letti di recente</b> ' + last.map(function (b) {
     var w = NL.L.rateWord ? NL.L.rateWord(b.rt) : ''; return '«' + esc(b.t || 'senza titolo') + '»' + (w ? ' <small>' + esc(w) + '</small>' : '');
   }).join(', ') + '</p>';
+  if (info.libVis === false && info.nMiei && t !== 'wish') h += '<p class="gb-line gb-note">' + gn + ' non mostra la sua libreria: qui vedi solo ' + (info.nMiei === 1 ? 'il libro che ha' : 'i libri che ha') + ' in prestito da te.</p>';
   h += '<div class="tabs gb-tabs" role="tablist" aria-label="Libri di ' + gn + '"><button type="button" role="tab" data-g="tab" data-t="lib" aria-selected="' + (t !== 'wish') + '">Libreria <span class="cnt">' + lib.length + '</span></button>' +
     '<button type="button" role="tab" data-g="tab" data-t="wish" aria-selected="' + (t === 'wish') + '">Desideri <span class="cnt">' + nW + '</span></button></div>';
   var own = ownKeys(), out = outKey(gId), fromHim = keys.filter(function (k) { return k.a === uid() && k.da === gId; })[0], b0 = borrowed();
@@ -519,8 +542,9 @@ function guestActs(el) {
       top.insertBefore(wb, top.firstChild);
     }
     var h = '<p class="cvg-h">' + (m.w ? 'Desiderio di ' : 'Di ') + esc(NL.guest()) + '</p><div class="cvg-row">';
-    if (have) h += '<span class="fr-tag fr-mine">Ce l\'hai anche tu</span>';
-    if (!m.w) h += m.fuori ? '<span class="fr-tag">Adesso è in prestito</span>' : ask ? '<span class="fr-tag">Richiesta mandata</span><button type="button" class="link" data-g="unask" data-r="' + esc(ask.id) + '">Annulla</button>' : '<button type="button" class="btn primary" data-g="ask">Me lo presti?</button>';
+    if (have && !m.mio) h += '<span class="fr-tag fr-mine">Ce l\'hai anche tu</span>';
+    if (m.mio) h += '<span class="fr-tag fr-mine">Glielo hai prestato tu</span>';
+    else if (!m.w) h += m.fuori ? '<span class="fr-tag">Adesso è in prestito</span>' : ask ? '<span class="fr-tag">Richiesta mandata</span><button type="button" class="link" data-g="unask" data-r="' + esc(ask.id) + '">Annulla</button>' : '<button type="button" class="btn primary" data-g="ask">Me lo presti?</button>';
     if (m.w) h += m.prenotato === 'io' ? '<span class="fr-tag fr-mine">Lo regali tu</span><button type="button" class="link" data-g="ungift">Annulla</button>' : m.prenotato ? '<span class="fr-tag">Lo regala ' + esc(m.prenotato) + '</span>' : m.preso ? '<span class="fr-tag">Regalo prenotato</span>' : '<button type="button" class="btn primary" data-g="gift">Te lo regalo io</button>';
     h += '</div>' + (m.w && (m.prenotato === 'io' || !m.preso) ? '<p class="fr-small">' + esc(NL.guest()) + ' non vede chi gli farà un regalo; ' + (me && me.regali === false ? 'gli altri amici vedono solo «Regalo prenotato».' : 'gli altri amici vedono il tuo nome.') + '</p>' : '');
     var box = document.createElement('div'); box.className = 'cv-guest'; box.innerHTML = h;
@@ -662,6 +686,10 @@ function optsView() {
     '<label class="check fr-wish"><input type="checkbox" id="friWish"' + (me.desideri ? ' checked' : '') + '><span>Gli amici vedono i miei desideri<small>Così sanno cosa regalarti; chi ti farà un regalo resta una sorpresa.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friRegali"' + (me.regali !== false ? ' checked' : '') + '><span>Gli amici vedono i regali che prenoto<small>Quando dici «Te lo regalo io», gli altri amici vedono il tuo nome. Se la togli vedono solo «Regalo prenotato». Il festeggiato non lo vede mai.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friAmici"' + (me.amici !== false ? ' checked' : '') + '><span>Gli amici vedono i miei amici<small>Solo i nomi, così trovate altri amici e possono chiedervi l\'amicizia. Se la togli, vedono solo gli amici che avete in comune.</small></span></label></div></section>';
+  if ('p_cit' in me) h += '<section class="fr-sec"><h3 class="fr-h">Nel tuo profilo</h3><div class="fr-share"><p class="fr-small">La tua foto la vedono solo gli amici. Il resto, solo se lo scegli qui.</p>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friPCit"' + (me.p_cit ? ' checked' : '') + '><span>Gli amici vedono la mia citazione preferita<small>Quella che scegli nel tuo profilo, con titolo e autore del libro.</small></span></label>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friPStat"' + (me.p_stat ? ' checked' : '') + '><span>Gli amici vedono i miei numeri<small>Libri e pagine lette, autore e genere più letti, paesi, libri prestati. Solo se vedono anche la libreria.</small></span></label>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friPCits"' + (me.p_cits ? ' checked' : '') + '><span>Gli amici vedono tutte le mie citazioni<small>Il testo, la pagina e il libro. Mai gli appunti né le foto delle pagine.</small></span></label></div></section>';
   h += keysHTML(true);
   h += '<p class="fr-small">Gli altri vedono solo il tuo nome. Il resto, solo se lo scegli qui.</p>';
   return h;
@@ -1124,5 +1152,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();
