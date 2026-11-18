@@ -424,7 +424,7 @@ function openExport() {
 $('#btnExport').addEventListener('click', openExport);
 $('#exportClose').addEventListener('click', function () { $('#exportSheet').hidden = true; });
 $('#btnXlsx').addEventListener('click', saveXLSX);
-$('#btnShareBackup').addEventListener('click', shareBackup);
+$('#btnShareBackup').addEventListener('click', function () { shareBackup(false); });
 $('#loanCancel').addEventListener('click', closeLoan);
 $('#loanSave').addEventListener('click', saveLoan);
 $('#loanBack').addEventListener('click', returnLoan);

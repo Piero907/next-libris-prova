@@ -325,29 +325,39 @@ function backup() {
 /* Condivide il file di backup (Drive, Gmail, WhatsApp…). Chrome condivide solo alcuni tipi di file: se il .json non e' ammesso
    lo mando come .txt (il contenuto e' identico e «Ripristina» lo accetta). Se la condivisione non parte, non scarico in silenzio:
    lo dico, con «Riprova» (un tocco nuovo spesso basta) e «Salvalo nei Download». */
-async function shareBackup() {
+var BK_MAX = 45 * 1048576;   // Chrome su Android manda file fino a circa 50 MB: oltre rifiuta con NotAllowedError (Piero, 18/11/2026)
+function bkMB(n) { return (n / 1048576).toFixed(1).replace('.', ',') + ' MB'; }
+async function shareBackup(lite) {
   if (!storable().length) { toast('L\'elenco è vuoto: non c\'è niente da salvare.'); return; }
-  var data = backupData(), base = backupName(), file = null;
+  var data = lite ? JSON.stringify({ app: 'catalogo-libri', v: 4, books: storable(), cfg: backupCfg() }) : backupData(), base = backupName() + (lite ? ' (senza foto)' : ''), file = null;
   if (!data) { openExport(); toast('Preparo il backup con le tue foto: riprova tra un attimo.'); return; }
+  if (data.length > BK_MAX) {          // troppo grande per la condivisione: lo dico subito, senza far fallire il telefono
+    bkFail('Con le tue foto il backup è di ' + bkMB(data.length) + ': troppo grande per mandarlo da qui (il telefono ne accetta circa 50). Mandalo senza le foto, oppure salvalo intero nei Download e caricalo su Drive dall\'app Drive.', false, true);
+    return;
+  }
   try {
     var cands = [new File([data], base + '.json', { type: 'application/json' }), new File([data], base + '.txt', { type: 'text/plain' })];
     for (var i = 0; i < cands.length && !file; i++) if (navigator.canShare && navigator.canShare({ files: [cands[i]] })) file = cands[i];
   } catch (e) { file = null; }
-  if (!file || !navigator.share) { bkFail('Questo telefono non permette di inviare il file da qui.', false); return; }
+  if (!file || !navigator.share) { bkFail('Questo telefono non permette di inviare il file da qui.', false, false); return; }
   try {
     await navigator.share({ files: [file] });
-    markBackup(); $('#bkFailSheet').hidden = true; toast('Backup inviato.');
+    if (!lite) markBackup(); $('#bkFailSheet').hidden = true;
+    toast(lite ? 'Backup senza foto inviato. Le foto restano solo su questo telefono: salva anche il backup intero nei Download.' : 'Backup inviato.');
   } catch (e) {
     if (e && e.name === 'AbortError') { toast('Invio annullato: il backup non è stato salvato.'); return; }
-    bkFail('Il telefono non ha aperto la condivisione' + (e && e.name ? ' (' + e.name + ')' : '') + '. Di solito riprovando parte.', true);
+    var big = !lite && coverIds().length && data.length > 8 * 1048576;
+    bkFail('Il telefono non ha aperto la condivisione' + (e && e.name ? ' (' + e.name + ')' : '') + '.' + (big ? ' Il backup con le foto è di ' + bkMB(data.length) + ': forse è troppo grande, prova senza le foto.' : ' Di solito riprovando parte.'), true, !lite && coverIds().length > 0);
   }
 }
-function bkFail(msg, retry) {
+function bkFail(msg, retry, lite) {
   $('#bkFailMsg').textContent = msg;
   $('#bkFailRetry').hidden = !retry;
+  $('#bkFailLite').hidden = !lite;
   $('#bkFailSheet').hidden = false;
 }
-$('#bkFailRetry').addEventListener('click', function () { shareBackup(); });
+$('#bkFailLite').addEventListener('click', function () { shareBackup(true); });
+$('#bkFailRetry').addEventListener('click', function () { shareBackup(false); });
 $('#bkFailDl').addEventListener('click', function () { $('#bkFailSheet').hidden = true; backup(); });
 $('#bkFailClose').addEventListener('click', function () { $('#bkFailSheet').hidden = true; });
 $('#bkFailSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) $('#bkFailSheet').hidden = true; });

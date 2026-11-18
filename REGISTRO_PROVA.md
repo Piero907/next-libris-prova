@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 107.2 · 18/11/2026 22:49
+- **Backup con le foto**: se è troppo grande per la condivisione lo dice subito e propone «Invia senza le foto» o i Download
+
 ## Prova 107.1 · 18/11/2026 22:44
 - **Uguale alla vera 107**
 
