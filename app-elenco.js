@@ -151,8 +151,8 @@ function rowHTML(b, dups, ex) {
     var moveBtn = !busy && hasData(b) ? (b.w
       ? act('tolib', 'tolib', 'Libreria', 'Sposta in Libreria (l\'ho comprato)', ' move')
       : act('towish', 'towish', 'Desideri', 'Sposta nei Desideri', ' move')) : '';
-    var favBtn = !busy && hasData(b) ? act('fav', 'fav', 'Preferito', b.fav ? 'È tra i preferiti: tocca per toglierlo' : 'Metti tra i preferiti', b.fav ? ' fav on' : ' fav') : '';
-    var lcBtn = !busy && hasData(b) && !b.w ? act('lc', 'award', 'Lo consiglio', b.lc ? 'Lo consigli: tocca per toglierlo' : 'Lo consiglio: gli amici lo vedono nel tuo profilo', b.lc ? ' lc on' : ' lc') : '';   // giro 6
+    var favBtn = !busy && hasData(b) && !b.w ? act('lc', 'fav', 'Lo consiglio', b.lc ? 'Lo consigli: tocca per toglierlo' : 'Lo consiglio: gli amici lo vedono nel tuo profilo', b.lc ? ' fav on' : ' fav') : '';   // giro 10: la stella è «Lo consiglio», via la coccarda
+    var lcBtn = '';
     var kdp = kdpHint(b, busy);                  // pubblicazione Amazon non trovata: «Cerca sul web» sta nel suo riquadro
     var webBtn = !kdp && !busy && (b.t || b.i) ? act('websearch', 'search', 'Cerca sul web', 'Cerca questo libro su Google: prezzo, recensioni, dove comprarlo') : '';
     var shareBtn = !busy && (b.t || L.toIsbn13(b.i)) ? act('share', 'share', 'Condividi', 'Manda questo libro a un amico') : '';
@@ -209,8 +209,8 @@ function ppCov(b) {                               // sotto l'autore: barra sotti
 function coverHTML(b) {
   var s = S[b.id] || {}, img = bigImg(b);
   var badge = isBusy(b) ? '<span class="badge">…</span>' : b.p ? '<span class="badge loan">Prestato</span>' : (b.sk === 'p' || b.sk === 'q') && b.sda && !b.xs ? '<span class="badge loan">In prestito</span>' : b.g.length ? '<span class="badge warn">Da verificare</span>' : '';
-  var fav = b.fav && !b.w ? '<span class="ribbon fav-star" title="Preferito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/></svg></span>' : '';   // stellina sulla copertina
-  return '<button class="cover' + (fav ? ' is-fav' : '') + '" data-id="' + b.id + '" aria-label="' + esc([b.t || 'Senza titolo', b.a, fav ? 'preferito' : ''].filter(Boolean).join(', ')) + '">' +
+  var fav = b.fav && !b.w ? '<span class="ribbon fav-star" title="Lo consigli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/></svg></span>' : '';   // stellina sulla copertina
+  return '<button class="cover' + (fav ? ' is-fav' : '') + '" data-id="' + b.id + '" aria-label="' + esc([b.t || 'Senza titolo', b.a, fav ? 'lo consigli' : ''].filter(Boolean).join(', ')) + '">' +
     '<span class="art">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' :
       '<span class="ph" style="--h:' + hue(b.t + b.a + b.i) + '"><b>' + esc(b.t || b.i || 'Senza titolo') + '</b><small>' + esc(b.a) + '</small></span>') + badge + fav + '</span>' +
     '<span class="cap">' + esc(b.t || b.i || '…') + '</span><span class="cap2">' + esc(b.a) + '</span>' + ppCov(b) + '</button>';

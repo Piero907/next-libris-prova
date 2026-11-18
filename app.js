@@ -126,7 +126,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 104, date: '2026-11-17', note: 'Foto degli autori dal nuovo indirizzo di Wikipedia (Flaiano), titolare della privacy' };
-var BUILD = {"t": "2026-11-18 17:16", "n": "104.12", "note": "Chat"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-18 18:19", "n": "104.13", "note": "Giro 10: guida senza parole tecniche e schermata Installala sul telefono; stella = Lo cons"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -366,8 +366,8 @@ function cleanBook(x) {
     xa: L.str(x.xa).slice(0, 80),
     sx: /^[0-9a-f-]{36}$/.test(L.str(x.sx)) ? x.sx : '',                 // prestito o regalo tra amici dell'app (modulo amici, 16/11/2026)
     sk: ['p', 'q', 'r'].indexOf(x.sk) >= 0 ? x.sk : '', sda: L.str(x.sda).slice(0, 30),   // q: prestito ricevuto che hai restituito, da confermare da chi l'ha prestato;   // ricevuto: in prestito (p) o in regalo (r), da chi
-    fav: !!x.fav,                                   // preferito
-    lc: !!x.lc && !x.w,                             // «Lo consiglio» (giro 6): gli amici lo vedono nel profilo; solo libri della Libreria
+    fav: (!!x.lc || !!x.fav) && !x.w,              // giro 10 (Piero, 18/11/2026): via i preferiti, la stella vuol dire «Lo consiglio»; fav resta uguale a lc
+    lc: (!!x.lc || !!x.fav) && !x.w,               // «Lo consiglio»: gli amici lo vedono nel profilo; solo libri della Libreria (i vecchi preferiti diventano consigliati)
     fr: L.str(x.fr).slice(0, 30), fl: L.str(x.fl).slice(0, 40),     // ricevuto da (nome) e da quale lista
     ds: L.str(x.ds).slice(0, L.DESC_MAX + 1), dsf: x.dsf === 'g' || x.dsf === 'o' ? x.dsf : '',   // descrizione e fonte (Google, Open Library)
     dsl: /^[a-z]{2}$/.test(L.str(x.dsl)) ? x.dsl : '', dsn: Number(x.dsn) || 0, dsq: x.dsq ? 1 : 0,                     // lingua; quando non e' stata trovata

@@ -117,7 +117,7 @@ function summaryHTML(b, dups, status) {
   if (b.p) tags += '<span class="tag loan tap" data-act="loan" role="button" tabindex="0" title="Tocca per segnarlo come restituito">' + esc(loanText(b)) + '</span>';
   tags += goneTag(b);
   tags += recvTag(b);
-  if (b.fav && !b.w) tags += '<span class="tag fav">Preferito</span>';
+  if (b.fav && !b.w) tags += '<span class="tag fav">Lo consigli</span>';
   tags += fromTag(b);
   /* «Da verificare» nella riga chiusa: un tocco e' verificato, senza aprire la scheda (giro 1, 18/11/2026); da amico solo da leggere */
   if (b.g.length) tags += guest ? '<span class="tag warn">Da verificare</span>' : '<span class="tag warn tap" data-act="verify" role="button" tabindex="0" title="Dati dedotti: toccalo quando hai controllato">Da verificare ✓</span>';
@@ -443,8 +443,8 @@ $('#bulkSheet').addEventListener('click', function (e) {
     books.forEach(function (b) { if (b.w) return; b.rs = v; if (v === 'ok' && !b.rd) b.rd = today(); });
     msg = plural(n, 'libro segnato', 'libri segnati') + ' «' + L.READ_LABEL[v] + '».';
   } else if (k === 'fav') {
-    books.forEach(function (b) { if (!b.w) b.fav = v === '1'; });
-    msg = v === '1' ? plural(n, 'libro aggiunto', 'libri aggiunti') + ' ai preferiti.' : plural(n, 'libro tolto', 'libri tolti') + ' dai preferiti.';
+    books.forEach(function (b) { if (!b.w) b.fav = b.lc = v === '1'; });
+    msg = v === '1' ? plural(n, 'libro aggiunto', 'libri aggiunti') + ' tra i consigliati.' : plural(n, 'libro tolto', 'libri tolti') + ' dai consigliati.';
   } else if (k === 'verify') {
     books.forEach(function (b) { b.g = []; });
     msg = plural(n, 'libro segnato', 'libri segnati') + ' come verificati.';

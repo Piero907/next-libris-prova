@@ -15,7 +15,8 @@
 var NL = window.NL, S = window.NLSocial; if (!NL || !S || !S.call || window.NLAdmin) return;
 var esc = NL.esc;
 var tab = 'seg', closed = false, segs = null, segErr = '', det = null, sosp = null, nums = null, arQ = '', arRes = null, arEd = null, busy = false, depth = 0;
-var av = { t: '', x: '' };
+var av = { t: '', x: '', mode: 'tutti', sel: [], q: '', res: [] };   // giro 10: a tutti o a persone scelte (al massimo 50)
+var avTimer = 0, avSeq = 0;
 
 function rpc(name, body) { return S.call('/rest/v1/rpc/' + name, { method: 'POST', user: true, body: body || {} }); }
 function $(id) { return document.getElementById(id); }
@@ -220,23 +221,45 @@ async function riattiva(id, name) {
 }
 
 /* Avviso */
-function avOk() { var t = av.t.trim(), x = av.x.trim(); return t && x && t.length <= 80 && x.length <= 300 && !busy; }
-function avBtn() { return nums && nums.utenti ? 'Manda a ' + n(nums.utenti) + (Number(nums.utenti) === 1 ? ' persona' : ' persone') : 'Manda a tutti'; }
+function avOk() { var t = av.t.trim(), x = av.x.trim(); return t && x && t.length <= 80 && x.length <= 300 && !busy && (av.mode === 'tutti' || av.sel.length > 0); }
+function avBtn() { if (av.mode === 'scelte') return 'Manda a ' + av.sel.length + (av.sel.length === 1 ? ' persona' : ' persone'); return nums && nums.utenti ? 'Manda a ' + n(nums.utenti) + (Number(nums.utenti) === 1 ? ' persona' : ' persone') : 'Manda a tutti'; }
 function avHTML() {
-  return '<p class="ad-sub">Arriva nella campanella e con una notifica push a tutti quelli che hanno l\'account (anche a chi ha spento gli altri avvisi; rispetta le ore di silenzio).</p>' +
+  return '<p class="ad-sub">Arriva nella campanella e con una notifica push (anche a chi ha spento gli altri avvisi; rispetta le ore di silenzio).</p>' +
+    '<p class="ad-lab">A chi</p><div class="ad-who"><button type="button" class="ad-opt" data-a="avmode" data-m="tutti" aria-pressed="' + (av.mode === 'tutti') + '">Tutti</button>' +
+    '<button type="button" class="ad-opt" data-a="avmode" data-m="scelte" aria-pressed="' + (av.mode === 'scelte') + '">Persone scelte</button></div>' +
+    (av.mode === 'scelte' ? '<input id="adAvQ" type="search" maxlength="40" value="' + esc(av.q) + '" placeholder="Cerca per nome…" autocomplete="off">' +
+      '<div class="ad-sel ad-res" id="adAvR">' + avResHTML() + '</div><div class="ad-sel" id="adAvS">' + avSelHTML() + '</div>' : '') +
     '<label class="ad-lab" for="adAvT">Titolo <small id="adAvTn">' + av.t.length + ' / 80</small></label><input id="adAvT" type="text" maxlength="80" value="' + esc(av.t) + '" placeholder="Es. Novità: la chat!" autocomplete="off">' +
     '<label class="ad-lab" for="adAvX">Testo <small id="adAvXn">' + av.x.length + ' / 300</small></label><textarea id="adAvX" rows="4" maxlength="300" placeholder="Es. Da oggi puoi scrivere ai tuoi amici…">' + esc(av.x) + '</textarea>' +
     '<p class="ad-sub">Così lo vedranno:</p><div class="ad-prev" id="adAvP">' + prevHTML() + '</div>';
+}
+function avResHTML() {
+  return av.res.filter(function (r) { return !av.sel.some(function (s) { return s.id === r.id; }); }).map(function (r) {
+    return '<button type="button" class="ad-chip ad-add" data-a="avadd" data-id="' + esc(r.id) + '" data-n="' + esc(r.utente || '') + '">+ ' + esc(r.utente || 'Senza nome') + '</button>';
+  }).join('') || (av.q.trim().length >= 2 ? '<p class="ad-sub">Nessuno con questo nome.</p>' : '');
+}
+function avSelHTML() {
+  if (!av.sel.length) return '<p class="ad-sub">Nessuna persona scelta (al massimo 50).</p>';
+  return av.sel.map(function (s) { return '<button type="button" class="ad-chip" data-a="avdel" data-id="' + esc(s.id) + '" aria-label="Togli ' + esc(s.n) + '">✓ ' + esc(s.n) + '</button>'; }).join('');
+}
+function avRefresh() { var r = $('adAvR'), s = $('adAvS'), g = $('adAvGo'); if (r) r.innerHTML = avResHTML(); if (s) s.innerHTML = avSelHTML(); if (g) { g.disabled = !avOk(); g.textContent = avBtn(); } }
+function avSearch() {
+  clearTimeout(avTimer); var my = ++avSeq, q = av.q.trim();
+  if (q.length < 2) { av.res = []; avRefresh(); return; }
+  avTimer = setTimeout(async function () {
+    try { var r = await rpc('admin_cerca', { q: q }); if (my !== avSeq) return; av.res = Array.isArray(r) ? r : []; avRefresh(); }
+    catch (e) { if (!denied(e)) NL.toast(nice(e)); }
+  }, 350);
 }
 function prevHTML() {
   return '<span class="nt-ico nt-av" aria-hidden="true">NL</span><span class="ad-pt"><b>' + (av.t.trim() ? esc(av.t.trim()) : '<i>Titolo</i>') + '</b><span>' + (av.x.trim() ? esc(av.x.trim()) : '<i>Testo dell\'avviso</i>') + '</span></span>';
 }
 function avSend() {
   if (!avOk()) return;
-  var who = nums && nums.utenti ? n(nums.utenti) + (Number(nums.utenti) === 1 ? ' persona' : ' persone') : 'tutti';
+  var who = av.mode === 'scelte' ? (av.sel.length === 1 ? av.sel[0].n : av.sel.length + ' persone') : nums && nums.utenti ? n(nums.utenti) + (Number(nums.utenti) === 1 ? ' persona' : ' persone') : 'tutti';
   confirm('Lo mando a ' + esc(who) + '?', 'Non si può ritirare.', 'Manda l\'avviso', async function () {
     busy = true; var bt = $('adAvGo'); if (bt) bt.disabled = true;
-    try { var k = await rpc('admin_avviso', { titolo: av.t.trim(), testo: av.x.trim() }); NL.toast('Avviso mandato a ' + n(k) + (Number(k) === 1 ? ' persona.' : ' persone.')); av = { t: '', x: '' }; }
+    try { var k = await rpc('admin_avviso', { titolo: av.t.trim(), testo: av.x.trim(), persone: av.mode === 'scelte' ? av.sel.map(function (s) { return s.id; }) : null }); NL.toast('Avviso mandato a ' + n(k) + (Number(k) === 1 ? ' persona.' : ' persone.')); av = { t: '', x: '', mode: 'tutti', sel: [], q: '', res: [] }; }
     catch (e) { if (!denied(e)) NL.toast(nice(e)); }
     busy = false; paint();
   });
@@ -316,6 +339,7 @@ function onInput(e) {
     if (a) a.textContent = av.t.length + ' / 80'; if (b) b.textContent = av.x.length + ' / 300';
     if (p) p.innerHTML = prevHTML(); if (g) g.disabled = !avOk();
   }
+  if (id === 'adAvQ') { av.q = e.target.value; avSearch(); }
   if (id === 'adArQ') arQ = e.target.value;
   if (id === 'adAr_img') { var im = $('adArImg'), v = e.target.value.trim(); if (im && /^https:\/\//.test(v)) im.src = v; }
 }
@@ -333,6 +357,9 @@ function onClick(e) {
   if (a === 'sospendi') { var nm = esc(det && det.su_nome || 'Questa persona'); confirm('Sospendere ' + nm + '?', nm + ' non potrà più scrivere a nessuno. Puoi riattivarla da Sospesi.', 'Sospendi', function () { decide('sospendi'); }); return; }
   if (a === 'riattiva') { riattiva(b.dataset.id, b.dataset.n); return; }
   if (a === 'avmanda') { avSend(); return; }
+  if (a === 'avmode') { av.mode = b.dataset.m; paint(); if (av.mode === 'scelte') { var qi = $('adAvQ'); if (qi) qi.focus(); } return; }
+  if (a === 'avadd') { if (av.sel.length >= 50) { NL.toast('Al massimo 50 persone per volta.'); return; } av.sel.push({ id: b.dataset.id, n: b.dataset.n || 'Senza nome' }); avRefresh(); return; }
+  if (a === 'avdel') { av.sel = av.sel.filter(function (s) { return s.id !== b.dataset.id; }); avRefresh(); return; }
   if (a === 'numagg') { nums = null; paint(); loadNums(); return; }
   if (a === 'ared') { var r = Array.isArray(arRes) && arRes[+b.dataset.i]; if (r) { arEd = { isbn: r.isbn, dati: Object.assign({}, r.dati || {}), aggiornato: r.aggiornato }; pushBack('det'); paint(); } return; }
   if (a === 'arsalva') { arSave(); return; }

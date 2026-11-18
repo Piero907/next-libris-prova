@@ -6,7 +6,7 @@
 /* ---------- pannello Filtri (a sinistra): si apre dal pulsante o trascinando il pollice dal bordo sinistro verso destra ---------- */
 var NONE = '\u0001';
 var READ_TXT = { da: 'Da leggere', in: 'In lettura', ok: 'Letti', no: 'Non indicato' };
-var FLT_TXT = { notmine: 'Che non hai', common: 'In comune', qs: 'Con citazioni', fav: 'Preferiti', loan: 'In prestito', gone: 'Venduti e regalati', guess: 'Da verificare', dup: 'Copie e doppioni' };
+var FLT_TXT = { notmine: 'Che non hai', common: 'In comune', qs: 'Con citazioni', fav: 'Consigliati', loan: 'In prestito', gone: 'Venduti e regalati', guess: 'Da verificare', dup: 'Copie e doppioni' };
 function facetKey(s) { var k = L.norm(String(s || '').trim().replace(/\s+/g, ' ')); return k || NONE; }
 /* scaffali o generi del tab corrente: chiave normalizzata, nome piu' usato, quanti libri */
 function facets(field) {

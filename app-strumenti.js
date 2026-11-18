@@ -45,15 +45,14 @@ function shareable() { return visible().filter(function (b) { return hasData(b) 
 function toggleFav(id) {
   var b = get(id);
   if (!b) return;
-  b.fav = !b.fav; touch(); refreshRow(id);
-  if (flt === 'fav' && !b.fav) { renderList(); updateSummary(); }
-  toast(b.fav ? 'Tra i preferiti. Li trovi in Filtri › Preferiti: da lì puoi anche condividerli.' : 'Tolto dai preferiti.');
+  toggleLc(id);                                  // giro 10: la stella è «Lo consiglio»
 }
 /* «Lo consiglio» (giro 6, scelta di Piero: coccarda accanto alla stella): gli amici lo vedono tra i Consigliati del profilo */
 function toggleLc(id) {
   var b = get(id);
   if (!b || b.w) return;
-  b.lc = !b.lc; touch(); refreshRow(id); emit('lc');
+  b.lc = !b.lc; b.fav = b.lc; touch(); refreshRow(id); emit('lc');
+  if (flt === 'fav' && !b.lc) { renderList(); updateSummary(); }
   toast(b.lc ? 'Lo consigli: gli amici lo vedono nel tuo profilo.' : 'Non lo consigli più.');
 }
 var shareCtx = null;
@@ -66,7 +65,7 @@ function openShare(books, ctx) {
   var one = ctx.kind === 'book', n = shareCtx.books.length;
   $('#shareH').textContent = one ? 'Condividi il libro' : 'Condividi la lista';
   $('#shareWhat').textContent = one ? '«' + (books[0].t || 'ISBN ' + books[0].i) + '»' + (books[0].a ? ' di ' + books[0].a : '')
-    : (ctx.kind === 'fav' ? 'I tuoi preferiti: ' : ctx.kind === 'wish' ? 'I tuoi desideri: ' : '') + n + (n === 1 ? ' libro' : ' libri') + (cut ? ' (i primi ' + L.SHARE_MAX + ' su ' + books.length + ')' : '') + '.';
+    : (ctx.kind === 'fav' ? 'I libri che consigli: ' : ctx.kind === 'wish' ? 'I tuoi desideri: ' : '') + n + (n === 1 ? ' libro' : ' libri') + (cut ? ' (i primi ' + L.SHARE_MAX + ' su ' + books.length + ')' : '') + '.';
   $('#shareTitleBox').hidden = ctx.kind !== 'list';
   $('#shareTitle').value = ctx.kind === 'list' ? (ctx.title || '') : '';
   $('#shareName').value = settings.name || '';
@@ -232,7 +231,7 @@ function okWorker(v) { v = cleanWorker(v); return /^https:\/\/[^\s/]+\.[^\s]+$/.
 function svcRow(k, t, sub) { return '<button type="button" class="dopt dgo svc-go" data-svc="' + k + '"><span><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span><span class="n" aria-hidden="true">›</span></button>'; }
 function renderSvcShare() {
   var nm = ($('#optName').value || settings.name || 'Piero').trim();
-  $('#optNameHint').textContent = 'Compare quando condividi un libro o una lista: «I preferiti di ' + nm + '», «' + nm + ' ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l\'elenco, oppure Esporta.';
+  $('#optNameHint').textContent = 'Compare quando condividi un libro o una lista: «I consigli di ' + nm + '», «' + nm + ' ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l\'elenco, oppure Esporta.';
   var msb = mine('sbn'), mgk = mine('key'), b = lent(), bg = !!(b.gb && b.gb === settings.gbKey), bs = !!(b.sbn && b.sbn === settings.sbnUrl), h = '';
   var A = window.NLAmici, nUse = A && A.lentCount ? A.lentCount() : -1;   // contatore: solo gli amici (giro 5)
   if (msb || mgk) h += svcRow('lend', 'Presta a un amico', (mgk && msb ? 'La tua chiave Google e il tuo worker SBN' : mgk ? 'La tua chiave Google' : 'Il tuo worker SBN') + ': li usate tutti e due e smetti quando vuoi.' + (nUse >= 0 ? ' ' + A.lentText(nUse) + '.' : ''));

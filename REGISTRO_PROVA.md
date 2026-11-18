@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.13 · 18/11/2026 18:19
+- Giro 10: **guida senza parole tecniche** e schermata **Installala sul telefono**; **stella = Lo consiglio** (via i preferiti); **foto dell'amico grande**; **edizioni italiane in cima**; **avviso a persone scelte**
+
 ## Prova 104.12 · 18/11/2026 17:16
 - **Chat: libri e consigli**: 📚 accanto al campo per mandare un libro, «Consiglialo» ad amici e gruppi dalla scheda del libro (arriva nella chat), schedina del libro con «Aggiungi ai Desideri»
 - **Amministrazione** (solo per gli amministratori): segnalazioni, sospesi, avviso a tutti con anteprima, numeri dell'app, archivio comune

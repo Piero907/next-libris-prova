@@ -264,6 +264,7 @@ function head(id, name, when) {
   var av = avatar(id, name, true);
   if (!id) av = '<button type="button" class="pf-avbtn" data-p="photo" aria-expanded="' + photoOpen + '" aria-label="' + (my.foto ? 'Cambia la foto' : 'Metti una foto') + '">' + av +
     '<span class="pf-cam" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span></button>';   // il tocco sulla foto apre la scelta (Piero, 18/11/2026)
+  else if (okFoto((pics[id] || {}).f) && NL.openPh) av = '<button type="button" class="pf-avbtn" data-p="bigfoto" aria-label="Guarda la foto">' + av + '</button>';   // foto dell'amico: un tocco la mostra grande (giro 10)
   return '<div class="pf-top">' + av + '<div class="pf-id"><b class="pf-name">' + esc(name || 'Senza nome') + '</b>' + (when ? '<small>Su Next Libris da ' + esc(when) + '</small>' : '') + '</div></div>';
 }
 /* una fila di copertine scorrevole (In lettura, Preferiti, Consigliati): il tocco apre il libro */
@@ -332,7 +333,7 @@ function paint() {
       if (photoOpen) h += '<div class="pf-photo"><button class="btn" type="button" data-p="file">Dalla galleria</button><button class="btn" type="button" data-p="cam">Fotocamera</button>' + (uid() ? '<button class="btn" type="button" data-p="google">Usa quella di Google</button>' : '') +
         (my.foto ? '<button class="link" type="button" data-p="nofoto">Togli la foto</button>' : '') + '<p class="fr-small">' + (uid() ? 'La vedono solo i tuoi amici.' : 'Resta su questo telefono: con l\'account la vedono i tuoi amici.') + '</p></div>';
       h += numsLine(st);
-      h += strip('In lettura', ls.let) + strip('Consigliati', ls.cons, 'Nella pagina di un libro tocca la coccarda accanto alla stella: «Lo consiglio».');
+      h += strip('In lettura', ls.let) + strip('Consigliati', ls.cons, 'Nella pagina di un libro tocca la stella: «Lo consiglio».');
       h += '<section class="fr-sec"><h3 class="fr-h">Citazioni in evidenza' + (pins.length ? ' <span class="fr-n">' + pins.length + '</span>' : '') + '</h3>' +
         (pins.length ? '<div class="pf-qlist">' + pins.map(quoteHTML).join('') + '</div>' : '<p class="fr-small">' + (qs.length ? 'Scegli fino a ' + PINS + ' citazioni da mettere in evidenza con la puntina.' : 'Quando salvi una citazione da un libro, con la puntina puoi metterla in evidenza qui (fino a ' + PINS + ').') + '</p>') +
         (qs.length ? '<p class="pf-acts"><button class="link" type="button" data-p="pick">' + (pins.length ? 'Cambia' : 'Scegli le citazioni') + '</button></p>' : '') + '</section>';
@@ -387,6 +388,7 @@ async function onClick(e) {
   var a = b.dataset.p, id = cur;
   if (a === 'back') { mode = ''; paint(); }
   else if (a === 'photo') { photoOpen = !photoOpen; paint(); }
+  else if (a === 'bigfoto') { var bf = okFoto((pics[id] || {}).f); if (bf) { NL.openPh(bf, (data && data.utente) || ''); var pv = document.getElementById('phView'); if (pv) pv.classList.add('au'); } }
   else if (a === 'goal') { goalOpen = !goalOpen; paint(); if (goalOpen) setTimeout(function () { var g = document.getElementById('pfGoal'); if (g) g.focus(); }, 30); }
   else if (a === 'goalok' || a === 'goaloff') {
     var gv = a === 'goaloff' ? 0 : Math.round(Number((document.getElementById('pfGoal') || {}).value) || 0);

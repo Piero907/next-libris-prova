@@ -465,8 +465,15 @@
     var f = opts.fetch || (typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null);
     if (!f) throw { code: 'network' };
     var key = opts.gbKey ? '&key=' + encodeURIComponent(opts.gbKey) : '';
+    var base = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=10&printType=books' + key;
     try {
-      return parseGoogle(await getJson(f, 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=10&printType=books' + key, opts));
+      /* giro 10 (Piero, 18/11/2026): prima le edizioni italiane. Una sola ricerca se ne trova almeno 3; altrimenti una seconda
+         senza limiti di lingua, e le italiane restano in cima */
+      var it = parseGoogle(await getJson(f, base + '&langRestrict=it', opts));
+      if (it.length >= 3) return it;
+      var seen = {};
+      it.forEach(function (c) { seen[c.id] = 1; });
+      return it.concat(parseGoogle(await getJson(f, base, opts)).filter(function (c) { return !seen[c.id]; }));
     } catch (e) { throw { code: e && e.status === 429 ? 'rate' : 'network' }; }
   }
 
@@ -627,7 +634,7 @@
     { k: 'n', h: 'Note', w: 36, opt: true }, { k: 'p', h: 'Prestato a', w: 16, opt: true }, { k: 'pd', h: 'Data prestito', w: 13, opt: true },
     { k: 'rs', h: 'Lettura', w: 12, opt: true }, { k: 'rt', h: 'Voto', w: 7, type: 'n', opt: true }, { k: 'rd', h: 'Data lettura', w: 13, opt: true },
     { k: 'xs', h: 'Non più in libreria', w: 18, opt: true }, { k: 'xa', h: 'Dato a', w: 16, opt: true }, { k: 'xd', h: 'In data', w: 13, opt: true },
-    { k: 'fav', h: 'Preferito', w: 10, opt: true }, { k: 'fr', h: 'Ricevuto da', w: 16, opt: true }
+    { k: 'fav', h: 'Lo consiglio', w: 10, opt: true }, { k: 'fr', h: 'Ricevuto da', w: 16, opt: true }
   ];
   var READ_LABEL = { da: 'Da leggere', in: 'In lettura', ok: 'Letto' };
   var GONE_LABEL = { v: 'Venduto', r: 'Regalato', s: 'Smarrito' };
@@ -865,14 +872,14 @@
   function shareHeading(sh) {
     var n = sh.name, k = sh.kind, c = sh.books.length;
     if (k === 'book') return n ? n + ' ti consiglia un libro' : 'Un libro consigliato';
-    if (k === 'fav') return n ? 'I preferiti ' + diChi(n) : 'Una lista di libri preferiti';
+    if (k === 'fav') return n ? 'I consigli ' + diChi(n) : 'Una lista di libri consigliati';
     if (k === 'wish') return n ? 'I desideri ' + diChi(n) : 'Una lista dei desideri';
     if (sh.title) return '«' + sh.title + '»' + (n ? ' · lista ' + diChi(n) : '');
     return n ? (c === 1 ? 'Un libro da ' + n : 'Una lista ' + diChi(n)) : (c === 1 ? 'Un libro per te' : 'Una lista di libri');
   }
   /* Etichetta breve salvata sul libro importato: da quale lista arriva */
   function shareLabel(sh) {
-    if (sh.kind === 'fav') return 'Preferiti';
+    if (sh.kind === 'fav') return 'Consigliati';
     if (sh.kind === 'wish') return 'Desideri';
     return sh.kind === 'list' ? sh.title : '';
   }
