@@ -19,7 +19,7 @@ var cfg = {};
 try { cfg = JSON.parse(NL.ls.get(LS) || '{}') || {}; } catch (e) { cfg = {}; }
 function save() { NL.ls.set(LS, JSON.stringify(cfg)); }
 
-/* ---------- le otto schermate (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova) ---------- */
+/* ---------- le nove schermate (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova; giro 7: Prestiti e Desideri separati) ---------- */
 var S = [
   { ico: 'tolib', h: 'Benvenuto',
     p: ['Next Libris è la tua libreria in tasca: i libri che hai, quelli che leggi e quelli che desideri.', 'È gratuita; se ti piace, puoi sostenerla.'] },
@@ -35,13 +35,15 @@ var S = [
   { ico: 'search', h: 'Trova e ordina', go: 'sort', sel: '#q, #sortBar',
     p: ['Cerca per titolo o autore, usa i <b>Filtri</b> e <b>Ordina · Raggruppa</b> (per autore, genere, paese…). Scegli tra copertine ed elenco; sulle copertine <b>due dita</b> le ingrandiscono o le rimpiccioliscono.',
       'Serie e copie dello stesso libro stanno insieme. Tocca il nome di un autore per <b>Info Autore</b>.'] },
-  { ico: 'loan', h: 'Prestiti e Desideri', go: 'wish',
-    p: ['Segna a chi hai prestato un libro e chi l\'ha prestato a te.', 'Nei <b>Desideri</b> metti i libri che vorresti: gli amici possono vederli e regalarteli di nascosto.'] },
+  { ico: 'loan', h: 'Prestiti', go: 'loan',   // giro 7: Prestiti e Desideri in due schermate (testi approvati da Piero il 18/11/2026)
+    p: ['Segna a chi hai prestato un libro e chi l\'ha prestato a te. Quando te lo restituiscono, tocca <b>Restituiscilo</b>.'] },
+  { ico: 'towish', h: 'Desideri', go: 'wish',
+    p: ['Metti nei <b>Desideri</b> i libri che vorresti. Gli amici possono vederli e regalarteli di nascosto, e ti avvisiamo se un amico ce l\'ha già.'] },
   { ico: 'user', h: 'Amici e profilo', go: 'friends', mod: 'NLAmici',
     p: ['Con <b>Accedi con Google</b> i tuoi libri si salvano anche online e puoi trovare gli amici per nome. Guarda le loro librerie, chiedi <b>Me lo presti?</b> e segui i loro desideri.',
       'La <b>campanella</b> ti avvisa delle novità. Tocca il tuo nome in alto per vedere il tuo <b>profilo</b>.'] },
   { ico: 'chart', h: 'Per te',
-    p: ['Suggerimenti sui tuoi autori, novità, film tratti dai tuoi libri, statistiche e <b>La tua stagione in libri</b>.', 'Ogni tanto fai un <b>backup</b> dal Menu.'],
+    p: ['Suggerimenti sui tuoi autori, novità, film tratti dai tuoi libri, statistiche e <b>La tua stagione in libri</b>.', 'Ogni tanto ti ricordiamo di fare un <b>backup</b>: con un tocco lo mandi su Drive, WhatsApp o email, foto comprese.'],
     end: 'Rivedi questa guida quando vuoi: Menu › Info e aiuto › <b>Come si usa</b>.' }
 ];
 /* per la prova e2e123: ogni schermata dice quale parte dell'app deve esistere */
@@ -88,7 +90,7 @@ function paint() {
   $('#gdProg').innerHTML = list.map(function (x, k) { return '<span class="' + (k <= G.i ? 'on' : '') + '"></span>'; }).join('');
   var tries = s.go ? '<button type="button" class="btn primary gd-try" data-gd="try" data-go="' + s.go + '">' + esc(s.btn || 'Prova adesso') + '</button>' : '';
   var more = s.more ? '<p class="gd-more">' + esc(s.more.t) + ' <button type="button" class="gd-link" data-gd="try" data-go="' + s.more.go + '">Prova adesso ›</button></p>' : '';
-  var ex = /^(book|sort|wish)$/.test(s.go || '') ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
+  var ex = /^(book|sort|wish|loan)$/.test(s.go || '') ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
   $('#gdStage').innerHTML = '<div class="gd-slide" data-gs="' + G.i + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(s.ico) + '</span>' +
     '<h2 class="gd-h">' + esc(s.h) + '</h2>' + s.p.map(function (t) { return '<p class="gd-p">' + t + '</p>'; }).join('') +
     more + (tries ? '<div class="gd-acts">' + tries + '</div>' + ex : '') + (s.end ? '<p class="gd-end">' + s.end + '</p>' : '') + '</div>';
@@ -99,6 +101,7 @@ function paint() {
 function go(i) { if (i < 0 || i >= screens().length) return; G.i = i; paint(); }
 function open(i) {
   if (NL.guest && NL.guest()) NL.guestExit();
+  if (pillShown() && !P.want) pillOff();
   build();
   G.back = document.activeElement;
   G.i = Math.max(0, Math.min(i || 0, screens().length - 1));
@@ -127,7 +130,9 @@ var fromGuide = -1;
 function tryIt(what) {
   var at = G.i;
   close(false, true);
+  var real = what === 'add' || what === 'key' || what === 'friends';
   setTimeout(function () {
+    if (real) pillOn(at);
     if (what === 'add') {
       var plus = document.querySelector('#layNav [data-l="add"]');
       if (plus && plus.getClientRects().length) plus.click();
@@ -137,11 +142,53 @@ function tryIt(what) {
       else if (NL.openOptions) NL.openOptions('search');
     } else if (what === 'friends') {
       if (window.NLAmici && window.NLAmici.open) window.NLAmici.open();
-    } else if (what === 'book' || what === 'sort' || what === 'wish') {
+    } else if (what === 'book' || what === 'sort' || what === 'wish' || what === 'loan') {
       enter(at, what);
     }
   }, 60);
 }
+
+
+/* ---------- pillola «‹ Torna alla guida · 3/9» (giro 7) ----------
+   Dopo «Prova adesso» sulle parti vere (+, chiave, amici) resta in basso a destra. Si torna alla guida con la pillola o con
+   Indietro del telefono: sotto la parte aperta c'è un posto nella cronologia ({gdp}); quando Indietro lo toglie, la guida si riapre
+   dalla schermata di prima. Se la parte aperta ha una cronologia sua (fotocamera), il primo Indietro chiude quella. */
+var P = { el: null, at: -1, want: false, quiet: false };
+function pillOn(at) {
+  P.at = at;
+  if (!P.el) {
+    P.el = document.createElement('div'); P.el.id = 'gdPill'; P.el.className = 'gd-pill';
+    P.el.innerHTML = '<button type="button" class="gd-pill-go" data-gp="go"></button><button type="button" class="gd-pill-x" data-gp="x" aria-label="Chiudi: resta qui">' + NL.icon('x') + '</button>';
+    document.body.appendChild(P.el);
+    P.el.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-gp]'); if (!b) return;
+      if (b.dataset.gp === 'go') back(true); else back(false);
+    });
+  }
+  P.el.querySelector('.gd-pill-go').innerHTML = '‹ Torna alla guida <span>· ' + (at + 1) + '/' + screens().length + '</span>';
+  P.el.hidden = false; document.body.classList.add('gd-pill-on');
+  try { history.pushState({ gdp: 1 }, ''); } catch (e) { if (window.nlErr) nlErr(e); }
+}
+function pillOff() { if (P.el) P.el.hidden = true; document.body.classList.remove('gd-pill-on'); P.at = -1; P.want = false; P.quiet = false; }
+function pillShown() { return !!(P.el && !P.el.hidden); }
+/* toglie i posti della cronologia fino a sotto {gdp}; poi riapre la guida (go) o resta dove si è (✕) */
+function back(go) { if (!pillShown()) return; P.want = true; P.quiet = !go; try { history.back(); } catch (e) { if (window.nlErr) nlErr(e); reopen(); } }
+function reopen() {
+  var at = P.at, quiet = P.quiet; pillOff();
+  if (quiet) return;
+  if (document.querySelector('.sheet:not([hidden]), .lightbox:not([hidden])')) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));   // finestre senza cronologia (+, amici, chiave)
+  setTimeout(function () { if (document.querySelector('.sheet:not([hidden])')) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); open(at < 0 ? 0 : at); }, 30);
+}
+window.addEventListener('popstate', function (e) {
+  if (!pillShown()) return;
+  setTimeout(function () {                         // dopo le altre finestre, che si chiudono con il loro «popstate»
+    if (!pillShown()) return;
+    var st = history.state;
+    if (st && st.gdp) { if (P.want) { try { history.back(); } catch (x) { reopen(); } } return; }   // una finestra sopra si è chiusa: la pillola resta
+    reopen();
+  }, 0);
+});
+NL.on('guest', function () { if (pillShown() && NL.guest && NL.guest()) pillOff(); });
 
 /* ---------- la libreria di esempio ---------- */
 var D = '2026-';
@@ -200,6 +247,7 @@ function enter(at, what) {
   if (ok === false) return;
   bar();
   if (what === 'book') NL.openCard('ex7');
+  else if (what === 'loan') NL.openCard('ex4');   // Pinocchio, prestato a Marta
   else if (what === 'wish') { NL.setTab('wish'); bar(); window.scrollTo({ top: 0 }); }
   else if (what === 'sort') {
     var sb = $('#sortBar'); if (sb) { sb.scrollIntoView({ block: 'center' }); sb.classList.add('gd-flash'); setTimeout(function () { sb.classList.remove('gd-flash'); }, 2200); }
@@ -251,7 +299,7 @@ document.addEventListener('change', function (e) { if (stopped(e)) { e.stopImmed
 function menu() {
   var list = document.getElementById('infoList'); if (!list || document.getElementById('goGuida')) return;
   var a = document.createElement('button'); a.type = 'button'; a.className = 'dopt'; a.id = 'goGuida';
-  a.innerHTML = '<span><b>Come si usa</b><small>La guida in sette schermate</small></span><span class="n" aria-hidden="true">›</span>';
+  a.innerHTML = '<span><b>Come si usa</b><small>La guida in nove schermate</small></span><span class="n" aria-hidden="true">›</span>';
   var b = document.createElement('button'); b.type = 'button'; b.className = 'dopt'; b.id = 'goEsempio';
   b.innerHTML = '<span><b>Guarda una libreria di esempio</b><small>Prova l\'app senza i tuoi libri</small></span><span class="n" aria-hidden="true">›</span>';
   list.insertBefore(b, list.firstChild); list.insertBefore(a, b);

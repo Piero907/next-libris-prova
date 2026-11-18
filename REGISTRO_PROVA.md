@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.7 · 18/11/2026 12:16
+- **Giro 7**: guida a 9 schermate con «Torna alla guida», prezzi tolti da condivisioni e statistiche, profilo in testata, nel Menu e nella barra, promemoria del backup (45 giorni o 40 libri)
+
 ## Prova 104.6 · 18/11/2026 11:39
 - Giro 6: **profilo dell'amico** (Libreria, Desideri, copertine in fila, citazioni in evidenza, numeri), **«Lo consiglio»** con la coccarda, **puntine** sulle citazioni, **«Ce l'ha già…»** sui desideri, avviso **«trovato»** nella campanella
 

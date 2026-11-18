@@ -30,7 +30,7 @@ function doD(card, id) {
   dActs(card);
   if (!b.t) { card.classList.add('cv-edit'); return; }   // senza titolo (da completare): i campi, nella stessa disposizione di «Modifica» (Piero, 17/11/2026: su PC era sballata)
   if (editing[id]) { card.classList.add('cv-edit'); addDone(card, id); return; }
-  var img = NL.bigImg(b), dati = [b.e, b.y, b.pg ? b.pg + ' pagine' : '', b.c != null ? NL.eur(b.c) : ''].filter(Boolean);
+  var img = NL.bigImg(b), dati = [b.e, b.y, b.pg ? b.pg + ' pagine' : ''].filter(Boolean);
   var names = NL.authorsOf(b);
   var v = document.createElement('div'); v.className = 'cv-page';
   /* copertina: toccandola si ingrandisce (come nella scheda classica); senza copertina, la cerca online o la fotografi */

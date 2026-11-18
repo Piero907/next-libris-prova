@@ -708,13 +708,12 @@ function updateSummary() {
   renderOwner();                                   // «Libreria di» / «Desideri di» segue la scheda
   var all = tabBooks().filter(hasData), done = all.filter(function (b) { return !b.xs; });
   var gone = all.length - done.length;
-  var total = done.reduce(function (a, b) { return a + (b.c || 0); }, 0);
   var g = all.filter(function (b) { return b.g.length; }).length;
   var loans = tab === 'lib' ? done.filter(isLoan).length : 0;
   var n = done.length;
   $('#summary').innerHTML = tab === 'wish'
-    ? (n ? '<b>' + n + '</b> da comprare · <b>' + esc(eur(total)) + '</b>' : 'Nessun libro da comprare')
-    : (n ? '<b>' + n + '</b> ' + (n === 1 ? 'libro' : 'libri') + (settings.sumEur ? ' · <b>' + esc(eur(total)) + '</b>' : '') + (g ? ' · ' + g + ' da verificare' : '') +
+    ? (n ? '<b>' + n + '</b> da comprare' : 'Nessun libro da comprare')   /* giro 7: niente somme in euro */
+    : (n ? '<b>' + n + '</b> ' + (n === 1 ? 'libro' : 'libri') + (g ? ' · ' + g + ' da verificare' : '') +
         (loans && settings.sumLoan ? ' · <button type="button" class="sum-link" data-sum="loan" aria-pressed="' + (flt === 'loan' ? 'true' : 'false') + '">' + loans + ' in prestito</button>' : '') +
         (gone && settings.sumGone ? ' · ' + gone + ' non più in libreria' : '')
       : (gone ? gone + ' non più in libreria' : 'Ancora nessun libro')) + alertBtn();

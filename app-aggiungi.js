@@ -302,9 +302,8 @@ function applyOcrText(id) {
   if (!hasData(b)) { s.st = 'error'; s.err = 'Non ho letto nulla di utile. Scrivi i dati a mano o prova con il codice a barre.'; }
   touch(); refreshRow(id); updateSummary();
 }
-/* Lettori leggeri solo per il prezzo: lingua inglese (cifre e «€» bastano) e solo i caratteri di un prezzo, si avviano
-   in fretta e si preparano in anticipo. Due in parallelo sui telefoni con piu' processori: a ogni giro ciascuno legge
-   una versione diversa della stessa immagine, e il primo che trova un prezzo con «€» chiude la lettura. */
+/* Lettori leggeri (nati per il prezzo, dal giro 7 solo per l'ISBN scritto): lingua inglese e pochi caratteri, si avviano
+   in fretta e si preparano in anticipo. Due in parallelo sui telefoni con piu' processori. */
 var priceOcrP = null, PRICE_CHARS = '0123456789.,€EeUuRrOo ';
 function getPriceOcr() {
   if (priceOcrP) return priceOcrP;
@@ -334,62 +333,7 @@ function ocrText(w, chars, img) {
   return job;
 }
 function warmPriceOcr() { setTimeout(function () { getPriceOcr().catch(function () {}); }, 300); }
-/* Immagine ripulita per l'OCR: grigi, luce uniformata (divisa per lo sfondo locale), testo scuro su fondo chiaro, contrasto pieno */
-function prepPrice(src, k) {
-  var w = Math.max(1, Math.round(src.width * k)), h = Math.max(1, Math.round(src.height * k));
-  var c = document.createElement('canvas'); c.width = w; c.height = h;
-  var x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(src, 0, 0, w, h);
-  var id = x.getImageData(0, 0, w, h), d = id.data, n = w * h, g = new Float32Array(n), i, j;
-  for (i = 0, j = 0; i < n; i++, j += 4) g[i] = 0.299 * d[j] + 0.587 * d[j + 1] + 0.114 * d[j + 2];
-  var hist = new Uint32Array(256), acc = 0, med = 0;
-  for (i = 0; i < n; i++) hist[g[i] | 0]++;
-  for (i = 0; i < 256; i++) { acc += hist[i]; if (acc >= n / 2) { med = i; break; } }
-  if (med < 128) for (i = 0; i < n; i++) g[i] = 255 - g[i];                 // fondo scuro: testo chiaro -> lo rendo scuro
-  var r = Math.max(8, Math.round(Math.min(w, h) / 6)), W1 = w + 1, I = new Float64Array(W1 * (h + 1)), out = new Float32Array(n), yy, xx;
-  for (yy = 0; yy < h; yy++) { var row = 0; for (xx = 0; xx < w; xx++) { row += g[yy * w + xx]; I[(yy + 1) * W1 + xx + 1] = I[yy * W1 + xx + 1] + row; } }
-  for (yy = 0; yy < h; yy++) {
-    var y0 = Math.max(0, yy - r), y1 = Math.min(h, yy + r + 1);
-    for (xx = 0; xx < w; xx++) {
-      var x0 = Math.max(0, xx - r), x1 = Math.min(w, xx + r + 1);
-      var bg = (I[y1 * W1 + x1] - I[y0 * W1 + x1] - I[y1 * W1 + x0] + I[y0 * W1 + x0]) / ((y1 - y0) * (x1 - x0));
-      out[yy * w + xx] = Math.min(255, g[yy * w + xx] / Math.max(1, bg) * 212);
-    }
-  }
-  var hs = new Uint32Array(256), lo = 0, hi = 255;
-  for (i = 0; i < n; i++) hs[out[i] | 0]++;
-  for (i = 0, acc = 0; i < 256; i++) { acc += hs[i]; if (acc >= n * 0.01) { lo = i; break; } }
-  for (i = 255, acc = 0; i >= 0; i--) { acc += hs[i]; if (acc >= n * 0.01) { hi = i; break; } }
-  var span = Math.max(1, hi - lo);
-  for (i = 0, j = 0; i < n; i++, j += 4) { var v = (out[i] - lo) * 255 / span; v = v < 0 ? 0 : v > 255 ? 255 : v; d[j] = d[j + 1] = d[j + 2] = v; d[j + 3] = 255; }
-  x.putImageData(id, 0, 0);
-  return c;
-}
-function scaledBy(src, k) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(src.width * k)); c.height = Math.max(1, Math.round(src.height * k)); c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c; }
-function rotated(src, dir) { var c = document.createElement('canvas'); c.width = src.height; c.height = src.width; var x = c.getContext('2d'); x.translate(dir > 0 ? c.width : 0, dir > 0 ? 0 : c.height); x.rotate(dir * Math.PI / 2); x.drawImage(src, 0, 0); return c; }
-/* Legge il prezzo: 1) immagine ripulita e originale, 2) le stesse girate (prezzi stampati in verticale accanto al codice a barre).
-   Restituisce { v, sure } (sure: c'era il simbolo €) oppure null. rounds: quanti giri al massimo. */
-async function readPrice(base, rounds) {
-  var workers = await getPriceOcr();
-  var k = Math.min(2.5, Math.max(1, 900 / base.width));
-  if (base.width * k > 1400) k = 1400 / base.width;
-  if (base.height * k > 1400) k = Math.min(k, 1400 / base.height);
-  var pre = prepPrice(base, k), raw = scaledBy(base, k);
-  var plan = [[pre, raw], [rotated(pre, -1), rotated(pre, 1)], [rotated(raw, -1), rotated(raw, 1)]].slice(0, rounds || 3), weak = null;
-  for (var r = 0; r < plan.length; r++) {
-    var got = await new Promise(function (done) {
-      var list = plan[r], res = [], left = list.length, fin = false;
-      list.forEach(function (cv, i) {
-        ocrText(workers[i % workers.length], PRICE_CHARS, cv)
-          .then(function (text) { return L.findPrice(text); }, function () { return null; })
-          .then(function (g) { res[i] = g; left--; if (!fin && ((g && g.sure) || left === 0)) { fin = true; done(res.slice()); } });
-      });
-    });
-    for (var q = 0; q < got.length; q++) if (got[q] && got[q].sure) return got[q];
-    for (q = 0; q < got.length; q++) if (got[q] && !weak) weak = got[q];
-  }
-  return weak;
-}
-async function readPriceFromCanvas(canvas, rounds) { var r = await readPrice(canvas, rounds); return r ? r.v : null; }
+/* giro 7 (18/11/2026): tolta la lettura del prezzo dalle foto (scelta di Piero); i lettori leggeri restano per l'ISBN scritto */
 async function processPhoto(id, file) {
   var b = get(id);
   if (!b) return;
@@ -423,7 +367,7 @@ async function processPhoto(id, file) {
     if (stop()) return;
     s.pct = 82;
     var lines = L.ocrLines(data);
-    var price = L.extractPrice(data.text || '');
+    var price = null;                                // giro 7: niente prezzo letto dalla copertina
     var written = L.extractIsbns(data.text || '');
     if (!written.length) written = L.ocrIsbns(data.text || '', true);
     if (s.keep) written = written.filter(function (x) { return x !== L.toIsbn13(b.i); });

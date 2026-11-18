@@ -21,6 +21,7 @@ var I = {
   books: '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16.5 5l3.5-.8 2.6 15.4-3.5.8z"/>',
   heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
   spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   quote: '<path d="M7 7h4v4c0 3-2 5-4 6M14 7h4v4c0 3-2 5-4 6"/>',
@@ -43,6 +44,7 @@ function build() {
     '<button type="button" data-l="wish">' + svg(I.heart) + '<span>Desideri</span></button>' +
     '<button type="button" class="lay-plus" data-l="add" aria-label="Aggiungi un libro">' + svg(I.plus, 28) + '</button>' +
     '<button type="button" data-l="you">' + svg(I.spark) + '<span>Per te</span></button>' +
+    '<button type="button" data-l="prof">' + svg(I.user) + '<span>Profilo</span></button>' +   // giro 7: profilo più facile da trovare (in prova)
     '<button type="button" data-l="menu">' + svg(I.menu) + '<span>Menu</span></button></nav>'));
   document.body.appendChild(el('<div class="sheet" id="layAdd" hidden><div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="layAddH">' +
     '<h2 id="layAddH">Aggiungi un libro</h2>' +
@@ -90,6 +92,7 @@ function act(l) {
   else if (l === 'add') sheetOpen('#layAdd');
   else if (l === 'you') sheetOpen('#layYou');
   else if (l === 'menu') NL.openMenu();
+  else if (l === 'prof') { if (NL.guest && NL.guest()) NL.guestExit(); if (window.NLProfilo) window.NLProfilo.open(); }
   else if (l === 'scan') $('#btnScan').click();
   else if (l === 'photo') $('#btnPhoto').click();
   else if (l === 'type') $('#btnType').click();

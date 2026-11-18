@@ -647,7 +647,6 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <fieldset class="choice sum-opts">
         <legend>Riepilogo in alto</legend>
         <p class="hint">Sotto il nome compare sempre il numero dei libri. Puoi aggiungere:</p>
-        <label class="check"><input type="checkbox" id="optSumEur"><span>Valore in euro<small>La somma dei prezzi dei libri in libreria.</small></span></label>
         <label class="check"><input type="checkbox" id="optSumLoan"><span>Libri in prestito<small>«4 in prestito»: toccandolo vedi solo quelli.</small></span></label>
         <label class="check"><input type="checkbox" id="optSumGone"><span>Libri non più in libreria<small>Venduti, regalati o smarriti.</small></span></label>
         <label class="check"><input type="checkbox" id="optShowSync"><span>Conferma del salvataggio<small>Mostra «Salvato su questo telefono» sotto il riepilogo: vuol dire che ogni modifica è già salvata. Se il salvataggio non riesce o sei senza rete, l'avviso compare comunque.</small></span></label>
@@ -852,7 +851,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
         <button type="button" class="dopt dgo" id="goFilters"><span><b>Filtri</b><small id="goFltTxt">Tutti i libri</small></span><span class="dbadge" id="goFltN" hidden></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goSugg"><span><b>Suggerimenti</b><small>Cosa leggere dopo, da scoprire</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo dq-all" id="goQuotes" hidden><span><b>Tutte le citazioni</b><small id="goQTxt"></small></span><span class="n" aria-hidden="true">›</span></button>
-        <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, valore, pagine, letture</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, pagine, letture</small></span><span class="n" aria-hidden="true">›</span></button>
       </div>
       <div class="dlist dmenu ddon">
         <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Se ti piace, offrimi una birra!</small></span><span class="n" aria-hidden="true">♥</span></button>
@@ -1048,7 +1047,6 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   <p class="lb-cap" id="phCap"></p>
 </div>
 <input class="sr" id="fileCover" type="file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
-<input class="sr" id="filePrice" type="file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
 <input class="sr" id="fileGal" type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">
 <input class="sr" id="fileNative" type="file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
 <input class="sr" id="fileBackup" type="file" accept="application/json,.json,text/plain,.txt" tabindex="-1" aria-hidden="true">

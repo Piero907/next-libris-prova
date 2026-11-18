@@ -315,11 +315,7 @@ function paintMenu() {
     var at = document.querySelector('#drawerOpts .ddon') || top;   // dopo Sostieni (Piero, 17/11/2026: Sostieni sopra Amici)
     at.parentNode.insertBefore(h, at.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
     m.querySelector('#goFri').addEventListener('click', function () { NL.fromMenu(open); });
-    if (window.NLProfilo) {
-      var gp = document.createElement('button'); gp.type = 'button'; gp.className = 'dopt dgo'; gp.id = 'goProf';
-      gp.innerHTML = '<span><b>Il tuo profilo</b><small>Foto, citazione preferita, i tuoi numeri</small></span><span class="n" aria-hidden="true">›</span>';
-      m.appendChild(gp); gp.addEventListener('click', function () { NL.fromMenu(function () { window.NLProfilo.open(); }); });
-    }
+    /* «Il mio profilo» sta in cima al Menu (giro 7, profilo.js) */
   }
   var t, rec = received().length, fr = friends().length;
   if (!uid()) t = 'Entra per trovare gli amici';

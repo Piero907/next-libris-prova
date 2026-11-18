@@ -355,15 +355,34 @@ function updateBackupInfo() {
   var n = storable().length;
   $('#backupInfo').textContent = 'Ultimo backup: ' + L.agoText(settings.lastBackup) + ' · ' + n + (n === 1 ? ' libro' : ' libri') + ' salvati solo su questo telefono.';
 }
-/* Promemoria: con almeno 10 libri, se ci sono modifiche non salvate in un backup da piu' di 14 giorni (o mai). */
+/* Promemoria (giro 7, scelta di Piero): con almeno 10 libri e modifiche non salvate, ogni 45 giorni dall'ultimo backup
+   (o da quando l'avviso è stato chiuso), oppure dopo 40 libri nuovi (chiuso: si ripresenta dopo 7 giorni). */
+var BK_DAYS = 45, BK_NEW = 40;
+function backupDue(ignoreSnooze) {
+  var n = storable().length, now = Date.now(), DAY = 86400000, last = settings.lastBackup || 0, sn = ignoreSnooze ? 0 : settings.snooze || 0;
+  if (n < 10 || !(state.updated > last)) return false;
+  var fresh = state.books.filter(function (b) { return hasData(b) && (b.ts || 0) > last; }).length;
+  return now - Math.max(last, sn) > BK_DAYS * DAY || (fresh >= BK_NEW && now - sn > 7 * DAY);
+}
+/* con le tue foto il backup va preparato prima: lo preparo mentre l'avviso è in vista, cosi' «Fai il backup» lo manda con un tocco */
+var bkWarm = 0;
+function warmBackup() {
+  if (!coverIds().length || bkWarm === state.updated) return;
+  var at = state.updated; bkWarm = at;
+  buildBackup().then(function (d) { if (bkWarm === at) backupReady = d; }, function () { bkWarm = 0; });
+}
+function backupTap() {
+  if (!coverIds().length || (backupReady && bkWarm === state.updated)) shareBackup();
+  else openExport();
+}
 function checkBackupNag() {
   if (scanning) return;
-  var n = storable().length, now = Date.now(), DAY = 86400000;
-  var due = n >= 10 && state.updated > settings.lastBackup && now - Math.max(settings.lastBackup, settings.snooze) > 14 * DAY;
-  if (!due) { if (noticeKind === 'backup') { $('#notice').hidden = true; noticeKind = ''; } return; }
+  var n = storable().length;
+  if (!backupDue()) { if (noticeKind === 'backup') { $('#notice').hidden = true; noticeKind = ''; } return; }
   if (noticeKind === 'backup' || !$('#notice').hidden) return;
-  notice('Ultimo backup: ' + L.agoText(settings.lastBackup) + '. I ' + n + ' libri sono salvati solo su questo telefono: se cambi telefono o cancelli i dati di Chrome li perdi.',
-    'Fai il backup', function () { if (coverIds().length) openExport(); else shareBackup(); }, function () { settings.snooze = Date.now(); saveSettings(); }, 'backup');
+  warmBackup();
+  notice('Ultimo backup: ' + L.agoText(settings.lastBackup) + '. I ' + n + ' libri sono salvati solo su questo telefono: se cambi telefono o cancelli i dati di Chrome li perdi. Mandalo su Drive, WhatsApp o email con un tocco.',
+    'Fai il backup', backupTap, function () { settings.snooze = Date.now(); saveSettings(); }, 'backup');
 }
 /* dal backup: worker e chiave tornano tra i salvati; se qui mancano, li rimette in uso. Restituisce cosa ha rimesso. */
 function restoreCfg(c) {

@@ -6,12 +6,11 @@
 /* ---------- condividi la lista dei Desideri ---------- */
 function wishText() {
   var books = state.books.filter(function (b) { return b.w && hasData(b); }).sort(cmpFor('titolo'));
-  var total = books.reduce(function (s, b) { return s + (b.c || 0); }, 0);
   var lines = books.map(function (b) {
     var ed = [b.e, b.y].filter(Boolean).join(', ');
-    return '• ' + (b.t || 'ISBN ' + b.i) + (b.a ? ' — ' + b.a : '') + (ed ? ' (' + ed + ')' : '') + (b.c != null ? ' · ' + eur(b.c) : '') + (L.toIsbn13(b.i) ? '\n   ISBN ' + L.toIsbn13(b.i) : '');
+    return '• ' + (b.t || 'ISBN ' + b.i) + (b.a ? ' — ' + b.a : '') + (ed ? ' (' + ed + ')' : '') + (L.toIsbn13(b.i) ? '\n   ISBN ' + L.toIsbn13(b.i) : '');
   });
-  return { n: books.length, text: 'Libri che vorrei (' + books.length + '):\n\n' + lines.join('\n') + (total ? '\n\nTotale: ' + eur(total) : '') };
+  return { n: books.length, text: 'Libri che vorrei (' + books.length + '):\n\n' + lines.join('\n') };   // giro 7: niente prezzi nelle condivisioni
 }
 /* ---------- condividere un libro o una lista, e aprire quelli ricevuti ----------
    Il pacchetto (L.buildShare) viaggia nel link dell'app dopo «#l=»: compresso quando il browser lo permette («z…»), altrimenti
@@ -96,11 +95,12 @@ function renderOwner() {
   var el = $('#owner');
   var pf = window.NLProfilo ? ['<button type="button" class="owner-n" id="ownerProf" title="Apri il profilo">', '</button>'] : ['', ''];   // il nome apre la pagina del profilo (giro 3)
   if (esempio()) { el.innerHTML = (tab === 'wish' ? 'Desideri' : 'Libreria') + ' di <b>esempio</b>'; return; }   // guida di primo avvio (giro 4)
-  if (guest) { el.innerHTML = 'Libreria di ' + pf[0] + '<b>' + esc(guest.name) + '</b>' + pf[1]; return; }
-  el.innerHTML = settings.name ? (tab === 'wish' ? 'Desideri di ' : 'Libreria di ') + pf[0] + '<b>' + esc(settings.name) + '</b>' + pf[1]   // «Libreria di Piero R. · 120 libri», nei Desideri «Desideri di Piero R.» (Piero, 17/11/2026)
+  var av = window.NLProfilo ? '<button type="button" class="owner-av" id="ownerAv" aria-label="Apri il profilo">' + window.NLProfilo.avatar(guest && window.NLAmici ? window.NLAmici.guestId() : null, guest ? guest.name : settings.name).replace(/>[^<>]*<\/span>$/, '></span>') + '</button>' : '';   // giro 7: foto tonda in testata
+  if (guest) { el.innerHTML = av + 'Libreria di ' + pf[0] + '<b>' + esc(guest.name) + '</b>' + pf[1]; return; }
+  el.innerHTML = settings.name ? av + (tab === 'wish' ? 'Desideri di ' : 'Libreria di ') + pf[0] + '<b>' + esc(settings.name) + '</b>' + pf[1]   // «Libreria di Piero R. · 120 libri», nei Desideri «Desideri di Piero R.» (Piero, 17/11/2026)
     : '<button type="button" class="link" id="ownerSet">Scrivi il tuo nome</button>';
 }
-$('#owner').addEventListener('click', function (e) { if (e.target.closest('#ownerProf') && window.NLProfilo) { window.NLProfilo.open(guest && window.NLAmici ? window.NLAmici.guestId() : null); return; } if (e.target.closest('#ownerSet')) { openOptions('share'); setTimeout(function () { try { $('#optName').focus(); } catch (x) {} }, 80); } });
+$('#owner').addEventListener('click', function (e) { if (e.target.closest('#ownerProf, #ownerAv') && window.NLProfilo) { window.NLProfilo.open(guest && window.NLAmici ? window.NLAmici.guestId() : null); return; } if (e.target.closest('#ownerSet')) { openOptions('share'); setTimeout(function () { try { $('#optName').focus(); } catch (x) {} }, 80); } });
 async function sendShare(copyOnly) {
   if (!shareCtx) return;
   var pack = sharePack(), sh = L.parseShare(pack);
@@ -166,7 +166,7 @@ function openImport(sh) {
   $('#importList').innerHTML = sh.books.map(function (x, i) {
     var o = ownedLike(x), where = o ? (o.w ? 'Già nei Desideri' : 'Ce l\'hai già') : '';
     if (o) have++;
-    var ed = [x.e, x.y, x.gen, x.pg ? x.pg + ' pagine' : '', x.c != null ? eur(x.c) : ''].filter(Boolean).join(' · ');
+    var ed = [x.e, x.y, x.gen, x.pg ? x.pg + ' pagine' : ''].filter(Boolean).join(' · ');
     return '<li><label class="imp-row' + (o ? ' have' : '') + '"><input type="checkbox" data-i="' + i + '"' + (o ? ' disabled' : ' checked') + '>' +
       '<span class="imp-c">' + (x.img ? '<img src="' + esc(x.img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" data-rm>' : '') + '</span>' +
       '<span class="imp-t"><b>' + esc(x.t || 'ISBN ' + x.i) + '</b>' + (x.a ? '<span>' + esc(x.a) + '</span>' : '') + (ed ? '<small>' + esc(ed) + '</small>' : '') + '</span>' +
@@ -188,7 +188,7 @@ function doImport(wish) {
   if (!picked.length) { toast('Metti la spunta ad almeno un libro.'); return; }
   var from = sh.name || 'un amico', label = L.shareLabel(sh), ids = [], now = Date.now();
   picked.forEach(function (x, k) {
-    var b = blankBook({ t: x.t, a: x.a, e: x.e, y: x.y, i: x.i, c: x.c, img: x.img, imgL: x.imgL, gen: x.gen, pg: x.pg, w: wish, fr: from, fl: label, ts: now + k, ck: today() });
+    var b = blankBook({ t: x.t, a: x.a, e: x.e, y: x.y, i: x.i, img: x.img, imgL: x.imgL, gen: x.gen, pg: x.pg, w: wish, fr: from, fl: label, ts: now + k, ck: today() });
     state.books.push(b); ids.push(b.id);
   });
   closeImport();
@@ -355,21 +355,19 @@ async function printCatalog() {
   if (!books.length) { toast('Non ci sono libri da stampare con la ricerca e i filtri attuali.'); return; }
   var covers = $('#printCovers').checked && books.some(function (b) { return !!smallImg(b); });
   var has = function (k) { return books.some(function (b) { return b[k]; }); };
-  var cols = [['t', 'Titolo'], ['a', 'Autore'], ['e', 'Casa editrice'], ['y', 'Anno'], ['c', 'Prezzo']];
+  var cols = [['t', 'Titolo'], ['a', 'Autore'], ['e', 'Casa editrice'], ['y', 'Anno']];   // giro 7: niente colonna Prezzo
   if (has('sh')) cols.push(['sh', 'Scaffale']);
   if (has('rs')) cols.push(['rs', 'Lettura']);
   if (has('p')) cols.push(['p', 'Prestato a']);
   if (has('xs')) cols.push(['xs', 'Non più in libreria']);
-  var total = books.reduce(function (s, b) { return s + (b.xs ? 0 : b.c || 0); }, 0);
   var filt = [q ? 'ricerca «' + q + '»' : '', flt === 'loan' ? 'solo libri in prestito' : '', flt === 'gone' ? 'solo venduti e regalati' : '', flt === 'guess' ? 'solo da verificare' : '', flt === 'dup' ? 'solo copie e doppioni' : '', readFlt ? 'lettura: ' + READ_TXT[readFlt].toLowerCase() : '', shFlt ? 'scaffale: ' + facetName('sh', shFlt) : '', genFlt ? 'genere: ' + facetName('gen', genFlt) : '', autFlt ? 'autore: ' + autName : '', edFlt ? 'casa editrice: ' + facetName('e', edFlt) : ''].filter(Boolean).join(', ');
   function cell(b, k) {
-    if (k === 'c') return b.c == null ? '' : eur(b.c);
     if (k === 'rs') return readLabel(b);
     if (k === 'xs') return esc(goneText(b));
     return esc(b[k] || '');
   }
   $('#printView').innerHTML = '<h1>Next Libris · ' + (tab === 'wish' ? 'Desideri' : 'Libreria') + '</h1>' +
-    '<p class="pv-sub">' + esc(L.itDate(today())) + ' · ' + books.length + (books.length === 1 ? ' libro' : ' libri') + (total ? ' · valore di copertina ' + esc(eur(total)) : '') + (filt ? ' · ' + esc(filt) : '') + '</p>' +
+    '<p class="pv-sub">' + esc(L.itDate(today())) + ' · ' + books.length + (books.length === 1 ? ' libro' : ' libri') + (filt ? ' · ' + esc(filt) : '') + '</p>' +
     '<table><thead><tr>' + (covers ? '<th></th>' : '') + cols.map(function (c) { return '<th>' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody>' +
     books.map(function (b) {
       var img = covers ? smallImg(b) : '';
@@ -584,8 +582,6 @@ function openStats() {
   function tile(v, l, note) { return '<div class="tile"><b>' + esc(v) + '</b><span>' + esc(l) + '</span>' + (note ? '<small>' + esc(note) + '</small>' : '') + '</div>'; }
   var nf = new Intl.NumberFormat('it-IT');
   var tiles = tile(nf.format(st.n), tab === 'wish' ? 'da comprare' : 'libri') +
-    tile(eur(st.total), 'valore di copertina', st.noPrice ? 'senza prezzo: ' + st.noPrice : '') +
-    (st.priced ? tile(eur(st.avg), 'prezzo medio') : '') +
     (st.paged ? tile(nf.format(st.pages), 'pagine', st.paged < st.n ? 'su ' + st.paged + (st.paged === 1 ? ' libro' : ' libri') + ' · senza pagine: ' + (st.n - st.paged) : '') : '') +
     (tab === 'lib' ? tile(String(st.loans.length), 'in prestito') : '') +
     (st.gone ? tile(String(st.gone), 'non più in libreria', [st.goneBy.v ? st.goneBy.v + (st.goneBy.v === 1 ? ' venduto' : ' venduti') : '', st.goneBy.r ? st.goneBy.r + (st.goneBy.r === 1 ? ' regalato' : ' regalati') : '', st.goneBy.s ? st.goneBy.s + (st.goneBy.s === 1 ? ' smarrito' : ' smarriti') : ''].filter(Boolean).join(' · ')) : '') +

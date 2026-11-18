@@ -52,3 +52,18 @@ html.esempio #notice,html.esempio #nxBox,html.esempio #wrapAsk,html.esempio #don
 html.esempio #fltLoan,html.esempio #btnCheck,html.esempio #btnExport,html.esempio #tipTxt,html.esempio #layNav [data-l="add"],html.esempio .dock,
 html.esempio .notice-tri,html.esempio #btnShareWish,html.esempio #btnTodo,html.esempio #fltGuess,html.esempio .ret-btn{display:none!important}
 #sortBar.gd-flash{border-radius:12px;box-shadow:0 0 0 3px var(--accent);transition:box-shadow .3s}
+
+/* ---------- pillola «‹ Torna alla guida · 3/9» (giro 7): dopo «Prova adesso» sulle parti vere ---------- */
+.gd-pill{position:fixed;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;align-items:center;
+  border-radius:999px;background:var(--accent);color:var(--accent-ink,#fff);box-shadow:0 4px 14px #0003;max-width:calc(100vw - 24px)}
+.gd-pill[hidden]{display:none}
+html[data-layout="a"] .gd-pill{bottom:calc(84px + env(safe-area-inset-bottom,0px))}   /* sopra la barra in basso */
+.gd-pill button{border:0;background:none;color:inherit;cursor:pointer;min-height:44px}
+.gd-pill-go{padding:0 6px 0 16px;font:600 14.5px/1 var(--font-body);white-space:nowrap}
+.gd-pill-go span{font-weight:500;opacity:.85}
+.gd-pill-x{display:grid;place-items:center;width:40px;padding:0 4px 0 0;opacity:.85}
+.gd-pill-x svg{width:16px;height:16px}
+.gd-pill :focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:999px}
+html[data-layout="a"] body.gd-pill-on .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+/* con una finestra aperta dal basso (il +, gli amici…) la pillola sale in alto, per non coprire i tasti */
+body:has(.sheet:not([hidden])) .gd-pill,body:has(.lay-sheet:not([hidden])) .gd-pill{top:calc(10px + env(safe-area-inset-top,0px));bottom:auto}

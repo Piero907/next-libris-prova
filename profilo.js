@@ -339,4 +339,15 @@ NL.on('lc', function () { if (!cur) paint(); });
 NL.on('keys', function () { if (cur && data && !data.err && !mode) paint(); });
 window.NLProfilo = { open: open, avatar: avatar, stats: stats, lists: lists, pins: myPins, state: function () { return { my: my, pics: pics, cur: cur, data: data, mode: mode }; }, push: push };   // per amici.js e le prove
 if (NL.renderOwner) NL.renderOwner();      // il nome in testata diventa il tasto del profilo
+/* giro 7 (in prova): «Il mio profilo» in cima al Menu, con la tua foto */
+(function menu() {
+  var top = document.querySelector('#drawerOpts .dmain'); if (!top || document.getElementById('goProf')) return;
+  var gp = document.createElement('button'); gp.type = 'button'; gp.className = 'dopt dgo pf-menu'; gp.id = 'goProf';
+  gp.innerHTML = '<span class="pf-menu-av"></span><span><b>Il mio profilo</b><small>Foto, citazioni, numeri</small></span><span class="n" aria-hidden="true">›</span>';
+  top.insertBefore(gp, top.firstChild);
+  gp.addEventListener('click', function () { NL.fromMenu(function () { open(); }); });
+})();
+function menuAv() { var s = document.querySelector('#goProf .pf-menu-av'); if (s) s.innerHTML = avatar(null, (NL.name && NL.name()) || ''); }
+menuAv();
+NL.on('name', function () { menuAv(); });
 })();

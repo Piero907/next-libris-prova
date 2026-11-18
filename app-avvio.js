@@ -168,34 +168,6 @@ list.addEventListener('click', function (e) {
   }
 });
 
-var priceId = null;
-/* apre la scheda e mette il cursore nel campo Costo (dal tocco su «Scrivilo»: la tastiera si apre) */
-function typeCost(id) {
-  var b = get(id);
-  if (!b) return;
-  if (!isOpen(b)) { openState[id] = true; refreshRow(id); }
-  var inp = document.getElementById('c-' + id);
-  if (!inp) return;
-  try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); }
-  inp.scrollIntoView({ block: 'center', behavior: 'smooth' });
-}
-bindFile('#filePrice', async function (f) {   // non piu' usato dall'interfaccia (v62): resta per i backup di prova
-  var id = priceId; priceId = null;
-  var b = id && bookFor(id);
-  if (!b) return;
-  toast('Leggo il prezzo…');
-  try {
-    var canvas = await loadCanvas(f[0], 1280);
-    var got = await readPrice(canvas, 3), pr = got ? got.v : null;
-    b = bookFor(id);
-    if (!b) return;
-    id = b.id;
-    if (pr == null) { toast('Non trovo il prezzo in questa foto: avvicinati al «€» stampato, oppure scrivilo.', { label: 'Scrivilo', fn: function () { typeCost(id); } }); return; }
-    var old = b.c;
-    b.c = pr; touch(); refreshRow(id); updateSummary();
-    toast('Prezzo letto: ' + eur(pr) + '. Controllalo.', { label: 'Annulla', fn: function () { var x = get(id); if (x) { x.c = old; touch(); refreshRow(id); updateSummary(); } } });
-  } catch (e) { toast('Non riesco a leggere la foto.', { label: 'Scrivilo', fn: function () { typeCost(id); } }); }
-});
 bindFile('#fileCam', function (f) { addPhotos(f, true); });
 bindFile('#fileGal', function (f) {
   var n = Array.prototype.filter.call(f || [], function (x) { return !x.type || x.type.indexOf('image/') === 0; }).length;
@@ -830,7 +802,7 @@ function closedNotices() {
   var longLoans = state.books.some(function (b) { return !b.w && b.p && b.pd && now - Date.parse(b.pd) > 30 * DAY; });
   if (longLoans && showing !== 'loan' && now - settings.loanSnooze < 7 * DAY) out.push({ k: 'loan', reopen: function () { settings.loanSnooze = 0; saveSettings(); if (!$('#notice').hidden && noticeKind !== 'loan') $('#notice').hidden = true; noticeKind = ''; checkLoanNag(); } });
   var n = storable().length;
-  if (n >= 10 && state.updated > settings.lastBackup && now - settings.lastBackup > 14 * DAY && now - settings.snooze <= 14 * DAY && showing !== 'backup')
+  if (backupDue(true) && !backupDue() && showing !== 'backup')   // giro 7: stessa regola del promemoria (45 giorni o 40 libri nuovi)
     out.push({ k: 'backup', reopen: function () { settings.snooze = 0; saveSettings(); if ($('#notice').hidden) checkBackupNag(); } });
   var last = nxJustRead();
   if (last && settings.nxSeen === last.id && !state.books.some(function (b) { return !b.w && b.rs === 'in'; }) && nextList().length)
@@ -943,5 +915,5 @@ window.NL = {
   fields: FIELDS, clean: function (x) { return cleanBook(x); }, stored: function () { return storable(); }, save: function () { touch(); }   // per la sincronizzazione (modulo social)
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };
-window.__app = { openLoan: openLoan, openShare: openShare, sugg: function () { return sugg; }, suggRank: function () { return { a: suggAuthors().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }), g: suggGenres().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }) }; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, readPrice: function (c, r) { return readPrice(c, r); }, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
+window.__app = { openLoan: openLoan, openShare: openShare, sugg: function () { return sugg; }, suggRank: function () { return { a: suggAuthors().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }), g: suggGenres().map(function (x) { return x.name + ':' + x.n + '/' + x.books; }) }; }, autoSugg: autoSugg, openSugg: openSugg, nextList: nextList, sounds: function () { return { beep: beep.n || 0, chime: chime.n || 0, fail: failSound.n || 0 }; }, snapInfo: function () { return { lum: snap.lum, dark: !!snap.dark, taps: snap.taps || 0, msg: $('#snapMsg').textContent }; }, flow: function () { return flow.id; }, chimes: function () { return chime.n || 0; }, openManual: openManual, processPhoto: processPhoto, donAway: function (ms) { donHiddenAt = Date.now() - ms; }, donPaint: donPaint, donBack: donBack, openDon: openDon, buildBackup: buildBackup, filtersAll: function () { return { frFlt: frFlt, autFlt: autFlt, edFlt: edFlt, genFlt: genFlt, shFlt: shFlt, q: q }; }, openDrawer: openDrawer, closeDrawer: closeDrawer, openOptions: function (s) { openOptions(s || 'search'); }, closeOptions: function () { closeOptions(); }, filters: function () { return { flt: flt, readFlt: readFlt, shFlt: shFlt, genFlt: genFlt, sortBy: sortBy }; }, state: state, S: S, openState: function () { return openState; }, addIsbn: addIsbn, addPhotos: addPhotos, settings: settings, setTab: setTab, onScanned: onScanned, startScan: startScan,
   get scanning() { return scanning; }, setScanMode: function (m) { scanMode = m; }, setScanKind: setScanKind, get scanKind() { return scanKind; } };
