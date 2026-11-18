@@ -1,10 +1,12 @@
-/* Next Libris · modulo «Chat» (giro 9b, 18/11/2026, nella copia di prova). Scelte di Piero in claude/giro-9-chat-scelte.md.
+/* Next Libris · modulo «Chat» (giro 9b e 9c, 18/11/2026, nella copia di prova). Scelte di Piero in claude/giro-9-chat-scelte.md.
    Fumetto in testata (tra campanella e Amici) con il numero delle chat con messaggi nuovi e delle richieste.
    Elenco delle chat con le «Richieste di messaggio» in una riga a parte; chat aperta con i miei messaggi a destra.
    Tenendo premuto un messaggio: Copia · Elimina per tutti (i miei, entro 1 ora) · Segnala (quelli degli altri).
    Menu ⋮: Silenzia · Profilo · Blocca · Elimina chat (solo per me). Niente segno «letto».
    Quasi in diretta senza Realtime: con la chat aperta l'app chiede i messaggi nuovi ogni 15 secondi; altrimenti il numero
    arriva con il giro degli amici (ogni ~3 minuti, chat_numeri). Tutto passa dalle funzioni del database (supabase/023_chat.sql).
+   Gruppi (9c): «+ Nuova» › Nuovo gruppo (nome + amici da spuntare, una schermata); «Info gruppo» dal nome in cima o dal ⋮:
+   membri (⋮: Profilo · Scrivi · Togli, solo per chi l'ha creato), + Aggiungi amici, ✎ nome (solo chi l'ha creato), Silenzia, Esci.
    Usa window.NL, window.NLSocial (social.js), window.NLAmici (amici.js) e, se c'è, window.NLProfilo (foto). */
 (function () {
 'use strict';
@@ -12,6 +14,7 @@ var NL = window.NL, S = window.NLSocial; if (!NL || !S || !S.call) return;
 var esc = NL.esc, K = 'catalogo-libri-chat';
 var POLL = 15000, MAX = 1000;
 var chats = rd(K) || [], nums = { nuovi: 0, richieste: 0 }, lastList = 0, loadingList = null;
+var gsel = {}, gname = '', glim = 29, gm = null, gmErr = '';                          // gruppi: scelti, nome, posti liberi, membri
 var view = 'list', cur = null, msgs = [], info = null, more = false, draftTo = null, timer = 0, sending = false, depth = 0;
 var CHAT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>';
 var SEND = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/></svg>';
@@ -22,6 +25,16 @@ function rpc(name, body) { return S.call('/rest/v1/rpc/' + name, { method: 'POST
 function uid() { var a = S.auth(); return a && a.uid; }
 function $(id) { return document.getElementById(id); }
 function av(id, name) { return window.NLProfilo && window.NLProfilo.avatar ? window.NLProfilo.avatar(id, name) : '<span class="pf-av" aria-hidden="true">' + esc((String(name || '?').trim()[0] || '?').toUpperCase()) + '</span>'; }
+function ini(name) {                                  // iniziali del gruppo: le prime due parole che contano («Lettori di gialli» → LG)
+  var w = String(name || '').split(/[^0-9A-Za-zÀ-ÿ]+/).filter(Boolean), big = w.filter(function (x) { return x.length > 2; });
+  if (big.length) w = big;
+  return ((w[0] || '?')[0] + (w[1] ? w[1][0] : '')).toUpperCase();
+}
+function grpAv(name) { return '<span class="pf-av ch-gav" style="--pf-h:' + (NL.hue ? NL.hue(name || '') : 150) + '" aria-hidden="true">' + esc(ini(name)) + '</span>'; }
+function friends() {
+  var A = window.NLAmici; return ((A && A.state && A.state().list) || []).filter(function (x) { return x.stato === 'amici'; })
+    .sort(function (a, b) { return (a.utente || '').localeCompare(b.utente || '', 'it'); });
+}
 function nlTag(on) { return on ? ' <span class="ch-nl" title="Next Libris">Next Libris</span>' : ''; }
 function isFriend(id) { var A = window.NLAmici, l = A && A.state && A.state().list; return !!(l && l.some(function (x) { return x.id === id && x.stato === 'amici'; })); }
 function nice(e) {
@@ -40,7 +53,13 @@ function nice(e) {
     'non segnalabile': 'Questo messaggio non si può segnalare.',
     'troppe segnalazioni oggi': 'Oggi hai già fatto tante segnalazioni: riprova domani.',
     'troppe persone bloccate': 'Hai bloccato troppe persone: sbloccane qualcuna.',
-    'richiesta non trovata': 'La richiesta non c\'è più.' };
+    'richiesta non trovata': 'La richiesta non c\'è più.',
+    'nome: da 1 a 40': 'Scrivi un nome per il gruppo (al massimo 40 caratteri).',
+    'scegli almeno un amico': 'Scegli almeno un amico.',
+    'al massimo 30 persone': 'Un gruppo può avere al massimo 30 persone.',
+    'non amici': 'Nel gruppo puoi aggiungere solo i tuoi amici.',
+    'troppi gruppi oggi': 'Oggi hai creato tanti gruppi: riprova domani.',
+    'solo chi ha creato il gruppo': 'Può farlo solo chi ha creato il gruppo.' };
   for (var k in T) if (m.indexOf(k) >= 0) return T[k];
   return 'Non ci riesco: riprova tra poco.';
 }
@@ -104,7 +123,12 @@ function sheet() {
   el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="chH"><div class="ch-head" id="chHead"></div><div class="ch-body" id="chBody"></div><div class="ch-foot" id="chFoot"></div></div>';
   document.body.appendChild(el);
   el.addEventListener('click', onClick);
-  el.addEventListener('input', function (e) { if (e.target.id === 'chTxt') grow(e.target); });
+  el.addEventListener('input', function (e) {
+    if (e.target.id === 'chTxt') grow(e.target);
+    if (e.target.id === 'chGName') { gname = e.target.value; gBtn(); }
+    if (e.target.id === 'chNewQ') { var v = e.target.value.toLowerCase(); Array.prototype.forEach.call(document.querySelectorAll('#chNewL li'), function (li) { li.hidden = v && li.textContent.toLowerCase().indexOf(v) < 0; }); }
+  });
+  el.addEventListener('change', function (e) { var g = e.target.dataset && e.target.dataset.g; if (g) { if (e.target.checked) gsel[g] = 1; else delete gsel[g]; gBtn(); } });
   el.addEventListener('keydown', function (e) { if (e.target.id === 'chTxt' && e.key === 'Enter' && !e.shiftKey && window.matchMedia('(hover:hover) and (pointer:fine)').matches) { e.preventDefault(); send(); } });
   el.addEventListener('contextmenu', function (e) { var m = e.target.closest('.ch-msg[data-m]'); if (m) { e.preventDefault(); msgMenu(m.dataset.m); } });
   var pt = 0, px = 0, py = 0;
@@ -135,10 +159,13 @@ function close(fromBack) {
 window.addEventListener('popstate', function (e) {
   var el = $('chSheet'); if (!el || el.hidden) return;
   var st = e.state && e.state.chat;
-  depth = st === 'conv' ? 2 : st === 'list' ? 1 : 0;
-  if ($('chMenu')) { closeMenu(); if (view === 'conv' && st !== 'conv') pushBack('conv'); else if (!st) pushBack('list'); return; }   // prima si chiude il menu
+  depth = st === 'gadd' ? 4 : st === 'ginfo' ? 3 : st === 'conv' ? 2 : st === 'list' ? 1 : 0;
+  var want = { conv: 'conv', ginfo: 'ginfo', gadd: 'gadd' }[view];
+  if ($('chMenu')) { closeMenu(); if (want && st !== want) pushBack(want); else if (!st) pushBack('list'); return; }   // prima si chiude il menu
+  if (view === 'gadd' && st === 'ginfo') { view = 'ginfo'; paint(); loadMembers(); return; }          // Aggiungi amici › Info gruppo
+  if ((view === 'ginfo' || view === 'gadd') && st === 'conv') { view = 'conv'; paintConv('end'); read(); return; }   // Info gruppo › chat
   if (view === 'conv' && st === 'list') { toList(true); return; }
-  if (!st && (view === 'req' || view === 'new')) { view = 'list'; paint(); pushBack('list'); return; }   // dalle richieste si torna all'elenco
+  if (!st && (view === 'req' || view === 'new' || view === 'grp')) { view = 'list'; paint(); pushBack('list'); return; }   // dalle richieste si torna all'elenco
   if (!st) close(true);
 });
 function toList(fromBack) {
@@ -153,6 +180,8 @@ var curWasReq = false;
 function paint() {
   var el = $('chSheet'); if (!el || el.hidden) return;
   if (view === 'conv') return paintConv();
+  if (view === 'grp' || view === 'gadd') return paintPick();
+  if (view === 'ginfo') return paintInfo();
   var head = $('chHead'), body = $('chBody'), foot = $('chFoot'), h = '';
   if (view === 'req') {
     head.innerHTML = '<button class="ico ch-back" type="button" data-c="list" aria-label="Indietro">‹</button><h2 id="chH">Richieste di messaggio</h2><button class="ico ch-x" type="button" data-c="close" aria-label="Chiudi">×</button>';
@@ -166,11 +195,10 @@ function paint() {
     head.innerHTML = '<button class="ico ch-back" type="button" data-c="list" aria-label="Indietro">‹</button><h2 id="chH">Scrivi a…</h2><button class="ico ch-x" type="button" data-c="close" aria-label="Chiudi">×</button>';
     var A = window.NLAmici, fr = ((A && A.state && A.state().list) || []).filter(function (x) { return x.stato === 'amici'; })
       .sort(function (a, b) { return (a.utente || '').localeCompare(b.utente || '', 'it'); });
-    h = fr.length ? (fr.length > 8 ? '<input type="search" class="fr-libq ch-q" id="chNewQ" placeholder="Cerca tra i tuoi amici" autocomplete="off">' : '') +
+    h = fr.length ? (fr.length > 8 ? searchBox() : '') +
       '<ul class="ch-list" id="chNewL">' + fr.map(function (x) { return '<li><button type="button" class="ch-row" data-c="to" data-id="' + esc(x.id) + '" data-n="' + esc(x.utente || x.nome || '') + '">' + av(x.id, x.utente) + '<span class="ch-t"><b>' + esc(x.utente || x.nome || '') + '</b></span></button></li>'; }).join('') + '</ul>'
       : '<p class="ch-empty">Non hai ancora amici. Puoi scrivere anche a chi non è tuo amico dal suo nome, in Amici › «Aggiungi un amico».</p>';
     body.innerHTML = h; foot.innerHTML = '';
-    var q = $('chNewQ'); if (q) q.addEventListener('input', function () { var v = q.value.toLowerCase(); Array.prototype.forEach.call(document.querySelectorAll('#chNewL li'), function (li) { li.hidden = v && li.textContent.toLowerCase().indexOf(v) < 0; }); });
     return;
   }
   var reqs = chats.filter(function (c) { return c.stato === 'richiesta'; }), rest = chats.filter(function (c) { return c.stato !== 'richiesta'; });
@@ -193,7 +221,7 @@ function lastText(c) {
 }
 function rowHTML(c) {
   var name = c.nome || (c.tipo === 'gruppo' ? 'Gruppo' : 'Senza nome'), sub = c.stato === 'attesa' ? '<i>In attesa di risposta</i>' : lastText(c);
-  return '<li><button type="button" class="ch-row' + (c.nuovi > 0 ? ' ch-unread' : '') + '" data-c="chat" data-id="' + esc(c.id) + '">' + av(c.altro, name) +
+  return '<li><button type="button" class="ch-row' + (c.nuovi > 0 ? ' ch-unread' : '') + '" data-c="chat" data-id="' + esc(c.id) + '">' + (c.tipo === 'gruppo' ? grpAv(name) : av(c.altro, name)) +
     '<span class="ch-t"><span class="ch-l1"><b>' + esc(name) + '</b>' + nlTag(c.nl) + (c.silenziata ? '<span class="ch-mute" title="Silenziata" aria-label="silenziata">🔕</span>' : '') + '<small>' + esc(c.ultimo ? when(c.ultimo.creato) : '') + '</small></span>' +
     '<span class="ch-l2"><span class="ch-last">' + sub + '</span>' + (c.nuovi > 0 ? '<span class="ch-dot" aria-label="' + c.nuovi + ' nuovi"></span>' : '') + '</span></span></button></li>';
 }
@@ -203,7 +231,7 @@ function sysText(m) {
     case 'creato': return who + ' ha creato il gruppo';
     case 'aggiunto': return who + ' ha aggiunto ' + (su || 'una persona');
     case 'tolto': return who + ' ha tolto ' + (su || 'una persona');
-    case 'uscito': return who + ' è uscito dal gruppo';
+    case 'uscito': return who + ' ha lasciato il gruppo';
     case 'nome': return who + ' ha cambiato il nome del gruppo';
   }
   return '';
@@ -291,9 +319,12 @@ function convName() { var c = curChat(); return c ? c.nome : draftTo ? draftTo.n
 function convOther() { var c = curChat(); return c ? c.altro : draftTo ? draftTo.id : null; }
 function paintConv(scroll) {
   var el = $('chSheet'); if (!el || el.hidden || view !== 'conv') return;
-  var head = $('chHead'), body = $('chBody'), foot = $('chFoot'), c = curChat(), name = convName(), other = convOther();
+  var head = $('chHead'), body = $('chBody'), foot = $('chFoot'), c = curChat(), name = convName(), other = convOther(), grp = c && c.tipo === 'gruppo';
+  var sub = [grp && c.membri ? c.membri + ' persone' : '', c && c.silenziata ? 'Silenziata' : ''].filter(Boolean).join(' · ');
   head.innerHTML = '<button class="ico ch-back" type="button" data-c="back" aria-label="Indietro">‹</button>' +
-    '<button type="button" class="ch-who" data-c="prof"' + (other && isFriend(other) ? '' : ' disabled') + '>' + av(other, name) + '<span class="ch-wn"><b id="chH">' + esc(name || 'Chat') + '</b>' + nlTag(c && c.nl) + (c && c.silenziata ? '<small>Silenziata</small>' : '') + '</span></button>' +
+    (grp ? '<button type="button" class="ch-who" data-c="ginfo" aria-label="Info gruppo">' + grpAv(name)
+         : '<button type="button" class="ch-who" data-c="prof"' + (other && isFriend(other) ? '' : ' disabled') + '>' + av(other, name)) +
+    '<span class="ch-wn"><b id="chH">' + esc(name || 'Chat') + '</b>' + nlTag(c && c.nl) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></button>' +
     (c ? '<button class="ico ch-more" type="button" data-c="menu" aria-label="Altre azioni" aria-haspopup="true">⋮</button>' : '');
   var atEnd = body.scrollHeight - body.scrollTop - body.clientHeight < 60, oldH = body.scrollHeight, oldT = body.scrollTop;
   var h = '';
@@ -410,6 +441,12 @@ async function delMsg(m) {
 function chatMenu() {
   var c = curChat(); if (!c) return;
   var name = c.nome || 'questa persona', items = [];
+  if (c.tipo === 'gruppo') {
+    items.push({ k: 'info', t: 'Info gruppo', go: openInfo });
+    items.push({ k: 'mute', t: c.silenziata ? 'Riattiva gli avvisi' : 'Silenzia', go: function () { mute(c, !c.silenziata); } });
+    items.push({ k: 'exit', t: 'Esci dal gruppo', bad: true, go: askExit });
+    return menu(items);
+  }
   items.push({ k: 'mute', t: c.silenziata ? 'Riattiva gli avvisi' : 'Silenzia', go: function () { mute(c, !c.silenziata); } });
   if (c.tipo === 'due' && c.altro && isFriend(c.altro) && window.NLProfilo) items.push({ k: 'prof', t: 'Profilo di ' + esc(name), go: function () { prof(c.altro); } });
   if (c.tipo === 'due' && c.altro) items.push(c.bloccato ? { k: 'unb', t: 'Sblocca ' + esc(name), go: function () { block(c.altro, name, false); } }
@@ -451,6 +488,154 @@ async function answer(yes) {
     if (yes) { c.stato = 'attiva'; curWasReq = false; NL.toast('Richiesta accettata: ora potete scrivervi.'); await read(); paintConv('end'); }
     else { chats = chats.filter(function (x) { return x.id !== c.id; }); wr(K, chats); numsFromList(); NL.toast('Richiesta rifiutata.'); toList(); }
   } catch (e) { NL.toast(nice(e)); }
+}
+
+/* ---------- gruppi (giro 9c) ---------- */
+function searchBox() { return '<input type="search" class="fr-libq ch-q" id="chNewQ" placeholder="Cerca tra i tuoi amici" autocomplete="off">'; }
+function newMenu() {
+  menu([{ k: 'one', t: '✉ Scrivi a un amico', go: function () { view = 'new'; paint(); loadFriends(); } },
+        { k: 'grp', t: '👥 Nuovo gruppo', go: function () { view = 'grp'; gsel = {}; gname = ''; glim = 29; paint(); loadFriends(); } }]);
+}
+function loadFriends() { var A = window.NLAmici; if (A && A.load && !(A.state().list)) A.load(true).then(paint); }
+function nSel() { return Object.keys(gsel).length; }
+/* una schermata con le caselle: «Nuovo gruppo» (nome + amici) oppure «Aggiungi amici» a un gruppo che c'è già */
+function paintPick() {
+  var head = $('chHead'), body = $('chBody'), foot = $('chFoot'), add = view === 'gadd', h = '';
+  head.innerHTML = '<button class="ico ch-back" type="button" data-c="' + (add ? 'hist' : 'list') + '" aria-label="Indietro">‹</button><h2 id="chH">' + (add ? 'Aggiungi amici' : 'Nuovo gruppo') + '</h2><button class="ico ch-x" type="button" data-c="close" aria-label="Chiudi">×</button>';
+  var inside = {}; (gm || []).forEach(function (m) { inside[m.id] = 1; });
+  var fr = friends().filter(function (x) { return !add || !inside[x.id]; });
+  if (!add) h += '<label class="ch-gl" for="chGName">Nome del gruppo</label><input type="text" id="chGName" class="ch-gname" maxlength="40" value="' + esc(gname) + '" placeholder="Per esempio: Lettori di gialli" autocomplete="off">';
+  else h += '<p class="fr-small ch-note">Chi aggiungi vede i messaggi da quel momento in poi. Puoi aggiungere solo i tuoi amici.</p>';
+  if (!fr.length) h += '<p class="ch-empty">' + (add ? 'Tutti i tuoi amici sono già nel gruppo.' : 'Per creare un gruppo servono degli amici: aggiungili da Amici › «Aggiungi un amico».') + '</p>';
+  else {
+    if (!add) h += '<p class="ch-gl">Scegli gli amici <small>(fino a 29)</small></p>';
+    h += (fr.length > 8 ? searchBox() : '') + '<ul class="ch-list" id="chNewL">' + fr.map(function (x) {
+      var n = x.utente || x.nome || '';
+      return '<li><label class="ch-row ch-pick"><input type="checkbox" data-g="' + esc(x.id) + '"' + (gsel[x.id] ? ' checked' : '') + '>' + av(x.id, n) + '<span class="ch-t"><b>' + esc(n) + '</b></span></label></li>';
+    }).join('') + '</ul>';
+  }
+  body.innerHTML = h;
+  foot.innerHTML = fr.length ? '<button class="btn primary ch-gok" type="button" data-c="' + (add ? 'gaddok' : 'gmake') + '" id="chGOk"></button>' : '';
+  gBtn();
+}
+function gBtn() {
+  var b = $('chGOk'); if (!b) return;
+  var n = nSel(), add = view === 'gadd';
+  b.textContent = add ? (n ? 'Aggiungi (' + n + ')' : 'Aggiungi') : 'Crea il gruppo (' + (n + 1) + ')';
+  b.disabled = !n || (!add && !gname.trim());
+  var full = n >= glim;                                        // posti finiti: le altre caselle non si spuntano
+  Array.prototype.forEach.call(document.querySelectorAll('#chNewL input[data-g]'), function (i) { i.disabled = full && !i.checked; });
+  var q = document.querySelector('.ch-gfull'); if (full && !q && $('chNewL')) $('chNewL').insertAdjacentHTML('beforebegin', '<p class="fr-small ch-gfull">Il gruppo arriva a 30 persone: è pieno.</p>'); else if (!full && q) q.remove();
+}
+async function makeGroup(b) {
+  var ids = Object.keys(gsel), nome = gname.trim();
+  if (!nome) { NL.toast(nice({ message: 'nome: da 1 a 40' })); var i = $('chGName'); if (i) i.focus(); return; }
+  b.disabled = true;
+  try {
+    var id = await rpc('gruppo_crea', { nome: nome, membri: ids });
+    if (!id) throw new Error('');
+    chats.unshift({ id: id, tipo: 'gruppo', nome: nome, membri: ids.length + 1, stato: 'attiva', nuovi: 0, ultimo: null });
+    wr(K, chats.slice(0, 100)); gsel = {}; gname = ''; lastList = 0; view = 'list';
+    NL.toast('Gruppo «' + nome + '» creato.');
+    openChat(id);
+  } catch (e) { b.disabled = false; NL.toast(nice(e)); }
+}
+/* Info gruppo: dal nome in cima alla chat o dal ⋮ */
+function openInfo() {
+  var c = curChat(); if (!c || c.tipo !== 'gruppo') return;
+  view = 'ginfo'; gm = null; gmErr = ''; pushBack('ginfo'); paint(); loadMembers();
+}
+async function loadMembers() {
+  var id = cur; if (!id) return;
+  try { var r = await rpc('gruppo_membri', { chat: id }); if (cur !== id) return; gm = r || []; gmErr = ''; var c = curChat(); if (c) c.membri = gm.length; }
+  catch (e) { if (cur !== id) return; if (/non disponibile/.test(String(e && e.message))) { NL.toast('Non fai più parte di questo gruppo.'); goList(); return; } gmErr = nice(e); }
+  if (view === 'ginfo' || view === 'gadd') paint();
+}
+function amCapo() { var me = uid(); return !!(gm && gm.some(function (m) { return m.id === me && m.capo; })); }
+function paintInfo() {
+  var head = $('chHead'), body = $('chBody'), foot = $('chFoot'), c = curChat(), name = (c && c.nome) || 'Gruppo', me = uid(), capo = amCapo(), h = '';
+  head.innerHTML = '<button class="ico ch-back" type="button" data-c="hist" aria-label="Indietro">‹</button><h2 id="chH">' + esc(name) + '</h2>' +
+    (capo ? '<button class="ico ch-ren" type="button" data-c="gren" aria-label="Cambia il nome del gruppo" title="Cambia il nome">✎</button>' : '') +
+    '<button class="ico ch-x" type="button" data-c="close" aria-label="Chiudi">×</button>';
+  if (gmErr) h = '<p class="msg bad">' + esc(gmErr) + '</p>';
+  else if (!gm) h = '<p class="ch-empty">Un momento…</p>';
+  else {
+    h += '<p class="ch-gn">' + gm.length + (gm.length === 1 ? ' persona' : ' persone') + '</p>';
+    h += gm.length < 30 ? '<button class="btn ch-gadd" type="button" data-c="gadd">+ Aggiungi amici</button>' : '<p class="fr-small">Il gruppo è pieno: 30 persone.</p>';
+    h += '<ul class="ch-list ch-mems">' + gm.map(function (m) {
+      var n = m.utente || 'Senza nome', mine = m.id === me;
+      return '<li class="ch-brow ch-mem">' + av(m.id, n) + '<span class="ch-mn"><b>' + esc(n) + (mine ? ' (tu)' : '') + nlTag(m.nl) + '</b>' +
+        (m.capo ? '<small>ha creato il gruppo</small>' : '') + (m.bloccato ? '<small>Hai bloccato questa persona: i suoi messaggi sono nascosti</small>' : '') + '</span>' +
+        (mine ? '' : '<button class="ico ch-more" type="button" data-c="gmem" data-id="' + esc(m.id) + '" aria-label="Altre azioni su ' + esc(n) + '">⋮</button>') + '</li>';
+    }).join('') + '</ul>';
+    h += '<div class="ch-gact"><button type="button" class="ch-mi" data-c="gmute">' + (c && c.silenziata ? '🔔 Riattiva gli avvisi' : '🔕 Silenzia gli avvisi') + '</button>' +
+      '<button type="button" class="ch-mi bad" data-c="gexit">🚪 Esci dal gruppo</button></div>';
+  }
+  body.innerHTML = h; foot.innerHTML = '';
+}
+function memMenu(id) {
+  var m = (gm || []).filter(function (x) { return x.id === id; })[0]; if (!m) return;
+  var n = m.utente || 'questa persona', items = [];
+  if (m.amico && window.NLProfilo) items.push({ k: 'prof', t: 'Profilo', go: function () { prof(id); } });
+  if (!m.bloccato) items.push({ k: 'chat', t: 'Scrivi', go: function () { goList(function () { to(id, n); }); } });
+  if (amCapo()) items.push({ k: 'out', t: 'Togli dal gruppo', bad: true, go: function () {
+    confirmBox('Togliere ' + esc(n) + ' dal gruppo?', 'Non vedrà più i messaggi nuovi. Nel gruppo compare «… ha tolto ' + esc(n) + '».', 'Togli', async function () {
+      try { await rpc('gruppo_togli', { chat: cur, utente: id }); NL.toast('Hai tolto ' + n + ' dal gruppo.'); loadMembers(); }
+      catch (e) { NL.toast(nice(e)); }
+    });
+  } });
+  if (items.length) menu(items, '<b>' + esc(n) + '</b>');
+}
+function rename() {
+  var c = curChat(); if (!c) return;
+  closeMenu();
+  var el = document.createElement('div'); el.className = 'sheet ch-rep'; el.id = 'chMenu';
+  el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="chRenH"><h2 id="chRenH">Nome del gruppo</h2>' +
+    '<input type="text" id="chRen" class="ch-gname" maxlength="40" value="' + esc(c.nome || '') + '" autocomplete="off" aria-labelledby="chRenH">' +
+    '<div class="row-btns"><button class="btn" type="button" data-r="x">Annulla</button><button class="btn primary" type="button" data-r="ok">Salva</button></div></div>';
+  document.body.appendChild(el);
+  var inp = $('chRen'); inp.focus(); inp.select();
+  el.addEventListener('click', async function (e) {
+    if (e.target === el) return closeMenu();
+    var b = e.target.closest('[data-r]'); if (!b) return;
+    if (b.dataset.r === 'x') return closeMenu();
+    var v = inp.value.replace(/\s+/g, ' ').trim();
+    if (!v) { NL.toast(nice({ message: 'nome: da 1 a 40' })); return; }
+    if (v === c.nome) return closeMenu();
+    b.disabled = true;
+    try { await rpc('gruppo_nome', { chat: c.id, nome: v }); c.nome = v; wr(K, chats.slice(0, 100)); lastList = 0; closeMenu(); NL.toast('Nome cambiato.'); paint(); }
+    catch (x) { b.disabled = false; NL.toast(nice(x)); }
+  });
+}
+function askExit() {
+  var c = curChat(); if (!c) return;
+  var more = amCapo() && gm && gm.length > 1 ? ' Togliere persone e cambiare il nome passa a chi è nel gruppo da più tempo.' : '';
+  confirmBox('Uscire da «' + esc(c.nome || 'questo gruppo') + '»?', 'Non riceverai più i messaggi del gruppo. Per tornare, qualcuno del gruppo dovrà aggiungerti di nuovo.' + more, 'Esci dal gruppo', async function () {
+    try {
+      await rpc('gruppo_esci', { chat: c.id });
+      chats = chats.filter(function (x) { return x.id !== c.id; }); wr(K, chats.slice(0, 100)); numsFromList();
+      NL.toast('Hai lasciato il gruppo.'); goList();
+    } catch (e) { NL.toast(nice(e)); }
+  });
+}
+async function addPicked(b) {
+  var ids = Object.keys(gsel), id = cur, ok = 0, err = null; if (!ids.length || !id) return;
+  b.disabled = true;
+  for (var i = 0; i < ids.length; i++) {
+    try { await rpc('gruppo_aggiungi', { chat: id, utente: ids[i] }); ok++; } catch (e) { err = e; break; }
+  }
+  if (err) NL.toast(nice(err));
+  else NL.toast(ok === 1 ? 'Amico aggiunto al gruppo.' : 'Aggiunti ' + ok + ' amici al gruppo.');
+  gsel = {}; lastList = 0;
+  try { history.back(); } catch (e) { view = 'ginfo'; paint(); loadMembers(); }
+}
+/* da Info gruppo (o più dentro) all'elenco delle chat, poi eventualmente un'altra cosa (Scrivi) */
+function goList(then) {
+  stop(); var d = depth - 1;
+  view = 'list'; cur = null; msgs = []; info = null; gm = null; curWasReq = false;
+  var done = false, fin = function () { if (done) return; done = true; window.removeEventListener('popstate', fin); paint(); if (then) then(); else loadList(); };
+  if (d > 0) { window.addEventListener('popstate', fin); setTimeout(fin, 600); try { history.go(-d); } catch (e) { fin(); } }
+  else fin();
 }
 
 /* ---------- Segnala ---------- */
@@ -521,7 +706,16 @@ function onClick(e) {
   var b = e.target.closest('[data-c]'); if (!b) return;
   var a = b.dataset.c;
   if (a === 'close') return close();
-  if (a === 'new') { view = 'new'; paint(); var A = window.NLAmici; if (A && A.load && !(A.state().list)) A.load(true).then(paint); return; }
+  if (a === 'new') { newMenu(); return; }
+  if (a === 'gmake') { makeGroup(b); return; }
+  if (a === 'ginfo') { openInfo(); return; }
+  if (a === 'hist') { try { history.back(); } catch (x) {} return; }
+  if (a === 'gadd') { view = 'gadd'; gsel = {}; glim = Math.max(0, 30 - (gm ? gm.length : 1)); pushBack('gadd'); paint(); loadFriends(); return; }
+  if (a === 'gaddok') { addPicked(b); return; }
+  if (a === 'gmem') { memMenu(b.dataset.id); return; }
+  if (a === 'gren') { rename(); return; }
+  if (a === 'gmute') { var cg = curChat(); if (cg) mute(cg, !cg.silenziata); return; }
+  if (a === 'gexit') { askExit(); return; }
   if (a === 'list') { view = 'list'; paint(); return; }
   if (a === 'reqs') { view = 'req'; paint(); return; }
   if (a === 'chat') { openChat(b.dataset.id); return; }

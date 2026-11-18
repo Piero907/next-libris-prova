@@ -108,3 +108,27 @@ html.esempio .ch-top{display:none}
 .ch-to svg{width:22px;height:22px}
 .prof .pf-go:has(.pf-chat){gap:6px}
 .prof .pf-go:has(.pf-chat) .btn{padding:6px 11px}   /* tre tasti (Libreria, Desideri, Scrivi) e l'icona sulla stessa riga */
+
+/* gruppi (giro 9c): iniziali, Nuovo gruppo, Aggiungi amici, Info gruppo */
+.ch-gav{letter-spacing:.02em}
+.ch-row .ch-gav{font-size:17px}
+.ch-gl{display:block;margin:12px 2px 6px;font:600 14.5px/1.3 var(--font-body);color:var(--ink)}
+.ch-gl small{font-weight:400;color:var(--muted)}
+.ch-gname{width:100%;box-sizing:border-box;font-size:16px}
+.ch-pick{cursor:pointer}
+.ch-pick input{flex:none;width:22px;height:22px;margin:0 2px 0 0;accent-color:var(--accent)}
+.ch-pick .pf-av{width:40px;height:40px;font-size:16px}
+.ch-pick:has(input:disabled){opacity:.5;cursor:default}
+.ch-gok{width:100%;min-height:46px}
+.ch-gfull{margin:4px 2px}
+.ch-head .ch-ren{font-size:20px;min-width:40px;padding:0;color:var(--ink)}
+.ch-gn{margin:10px 2px 8px;color:var(--muted);font-size:14px}
+.ch-gadd{width:100%;margin-bottom:6px}
+.ch-mem .pf-av{width:40px;height:40px;font-size:16px}
+.ch-mn{flex:1;min-width:0;display:grid;gap:1px}
+.ch-mn b{overflow-wrap:anywhere}
+.ch-mn small{font-size:12.5px;color:var(--muted)}
+.ch-mem .ch-more{flex:none;font-size:22px;min-width:40px;padding:0;color:var(--ink)}
+.ch-gact{display:grid;margin-top:14px;border-top:1px solid var(--line)}
+.ch-gact .ch-mi{text-align:left}
+.ch-rep .ch-gname{margin:4px 0 12px}

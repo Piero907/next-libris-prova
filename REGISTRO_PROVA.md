@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.11 · 18/11/2026 16:38
+- Chat: gruppi (Nuovo gruppo da «+ Nuova», Info gruppo, aggiungi e togli persone, nome, esci, iniziali nell'elenco)
+
 ## Prova 104.10 · 18/11/2026 16:21
 - **Chat a due e richieste di messaggio**: fumetto in testata, elenco delle chat, richieste da chi non è amico (Accetta/Rifiuta), blocca e segnala, Possono scrivermi in Amici e privacy, tipo Chat nelle notifiche, privacy aggiornata
 
