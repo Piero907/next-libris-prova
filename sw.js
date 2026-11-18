@@ -14,6 +14,7 @@ const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app
   'profilo.js', 'profilo.css',   // modulo: profilo
   'amici.js', 'amici.css',   // modulo: amici
   'notifiche.js', 'notifiche.css',   // modulo: notifiche (campanella)
+  'chat.js', 'chat.css',   // modulo: chat (giro 9b)
   'ricerche.js', 'ricerche.css',   // modulo: ricerche condivise e archivio comune
   'push.js', 'push.css',   // modulo: notifiche push
   'guida.js', 'guida.css',   // modulo: guida di primo avvio e libreria di esempio

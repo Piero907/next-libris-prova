@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.10 · 18/11/2026 16:21
+- **Chat a due e richieste di messaggio**: fumetto in testata, elenco delle chat, richieste da chi non è amico (Accetta/Rifiuta), blocca e segnala, Possono scrivermi in Amici e privacy, tipo Chat nelle notifiche, privacy aggiornata
+
 ## Prova 104.9 · 18/11/2026 14:18
 - **Chiave prestata sul server**: l'amico non riceve mai la chiave, 300 ricerche al giorno; «La mia chiave è finita in giro»; avvisi importanti; via «Manda con un link»
 - Profilo: scheda colorata dell'anno con obiettivo facoltativo, tessere con le icone; foto da toccare; Impostazioni nel profilo; via i Preferiti

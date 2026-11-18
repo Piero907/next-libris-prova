@@ -53,7 +53,7 @@ async function load(force) {
   loading = (async function () {
     try {
       var p;
-      var cols = ['utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits,p_let,p_pref,p_cons', 'utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits', 'utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
+      var cols = ['utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits,p_let,p_pref,p_cons,scrivermi', 'utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits,p_let,p_pref,p_cons', 'utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits', 'utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
       for (var ci = 0; ci < cols.length; ci++) {
         try { p = await S.call('/rest/v1/profili?select=' + cols[ci] + '&id=eq.' + encodeURIComponent(uid()), { user: true }); break; }
         catch (e0) { if ((e0 && e0.code === 'net') || ci === cols.length - 1) throw e0; }
@@ -108,6 +108,15 @@ function sheet() {
   el.addEventListener('submit', onSubmit);
   el.addEventListener('input', function (e) { if (e.target.id === 'friLibQ') { libsQ = e.target.value; libsShow = 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); } });
   el.addEventListener('change', async function (e) {
+    if (e.target.name === 'friScr') {                        // Possono scrivermi (giro 9b): si scrive direttamente nel profilo
+      var v = e.target.value, prev = me.scrivermi || 'amici_amici', boxes = el.querySelectorAll('input[name="friScr"]');
+      Array.prototype.forEach.call(boxes, function (r) { r.disabled = true; });
+      try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: { id: uid(), scrivermi: v } });
+        me.scrivermi = v; NL.toast(v === 'tutti' ? 'Ora possono scriverti tutti (chi non è tuo amico con una richiesta).' : v === 'amici' ? 'Ora possono scriverti solo i tuoi amici.' : 'Ora possono scriverti i tuoi amici e gli amici dei tuoi amici.'); }
+      catch (x) { Array.prototype.forEach.call(boxes, function (r) { r.checked = r.value === prev; }); NL.toast(nice(x)); }
+      Array.prototype.forEach.call(boxes, function (r) { r.disabled = false; });
+      return;
+    }
     var k = { friWish: 'desideri', friLib: 'libreria', friAmici: 'amici', friRegali: 'regali', friPCit: 'p_cit', friPStat: 'p_stat', friPCits: 'p_cits', friPLet: 'p_let', friPPref: 'p_pref', friPCons: 'p_cons' }[e.target.id] || ''; if (!k) return;
     var on = e.target.checked, body = { id: uid() }; body[k] = on; e.target.disabled = true;
     try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: body });
@@ -138,6 +147,9 @@ function relBtn(x) {
   if (x.rel === 'ricevuta') return '<button class="btn primary" type="button" data-f="yes" data-id="' + esc(x.id) + '">Accetta</button>';
   return '<button class="btn primary" type="button" data-f="ask" data-u="' + esc(x.utente) + '"' + (busy === x.utente ? ' disabled' : '') + '>Chiedi l\'amicizia</button>';
 }
+/* «Scrivi» (giro 9b): apre la chat con questa persona; il database decide se si può (amico, richiesta, «Possono scrivermi») */
+var I_CHAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>';
+function chatBtn(x) { var n = x.utente || x.nome || ''; return window.NLChat && x.id && x.id !== uid() ? '<button class="ico ch-to" type="button" data-f="chat" data-id="' + esc(x.id) + '" data-u="' + esc(n) + '" title="Scrivi a ' + esc(n) + '" aria-label="Scrivi a ' + esc(n) + '">' + I_CHAT + '</button>' : ''; }
 function row(x, btns) { return '<li class="fr-row"><span class="fr-who">' + nameOf(x) + '</span><span class="fr-act">' + btns + '</span></li>'; }
 function nameForm(first) {
   var v = first ? tidy(NL.name()).slice(0, 20) : me.utente;
@@ -189,11 +201,11 @@ function paint() {
       if (nn.comuni != null) info.push(nn.comuni + (nn.comuni === 1 ? ' amico' : ' amici') + ' in comune');
       if (nn.libri != null) info.push(nn.libri + (nn.libri === 1 ? ' libro' : ' libri') + ' in comune');
       return '<li class="fr-row fr-go fr-av">' + (window.NLProfilo ? window.NLProfilo.avatar(x.id, x.utente || x.nome) : '') + '<button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + esc(info.join(' · ') || 'Guarda il suo profilo') + '</small></button>' +
-        ('segue' in x ? '<button class="fr-fol" type="button" data-f="segui" data-id="' + esc(x.id) + '" aria-pressed="' + !!x.segue + '" title="' + (x.segue ? 'Segui i suoi desideri: tocca per smettere' : 'Segui i suoi desideri: un riassunto al giorno') + '">' + (x.segue ? 'Segui ✓' : 'Segui') + '</button>' : '') + '<span class="n" aria-hidden="true">›</span></li>';
+        chatBtn(x) + ('segue' in x ? '<button class="fr-fol" type="button" data-f="segui" data-id="' + esc(x.id) + '" aria-pressed="' + !!x.segue + '" title="' + (x.segue ? 'Segui i suoi desideri: tocca per smettere' : 'Segui i suoi desideri: un riassunto al giorno') + '">' + (x.segue ? 'Segui ✓' : 'Segui') + '</button>' : '') + '<span class="n" aria-hidden="true">›</span></li>';
     }).join('') + '</ul>' + (fr.some(function (x) { return 'segue' in x; }) ? '<p class="fr-small">«Segui»: un avviso al giorno quando aggiunge dei desideri, se li mostra agli amici. Non viene a saperlo.</p>' : '') : '<p class="fr-small">Ancora nessuno: cercalo per nome qui sotto, oppure mandagli il tuo invito.</p>';
     h += '</section>';
     h += '<section class="fr-sec"><h3 class="fr-h">Aggiungi un amico</h3><form id="friFormQ" class="fr-q"><input type="search" id="friQ" placeholder="Il suo nome" autocomplete="off" spellcheck="false" enterkeyhint="search" value="' + esc(foundQ && foundQ !== invite ? foundQ : '') + '"><button class="btn" type="submit">Cerca</button></form>';
-    if (found && foundQ && foundQ !== invite) h += found.length ? '<ul class="fr-list">' + found.map(function (x) { return row(x, relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessuno con un nome così.</p>';
+    if (found && foundQ && foundQ !== invite) h += found.length ? '<ul class="fr-list">' + found.map(function (x) { return row(x, chatBtn(x) + relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessuno con un nome così.</p>';
     if (found && found.some(function (x) { return !x.rel; })) h += '<label class="check fr-wish fr-segui"><input type="checkbox" id="friSegui"' + (askFollow ? ' checked' : '') + '><span>Segui i suoi desideri<small>Quando sarete amici: un avviso al giorno se ne aggiunge e li mostra. Non viene a saperlo.</small></span></label>';
     if (err) h += '<p class="msg bad" id="friErr">' + esc(err) + '</p>';
     h += '<button class="btn fr-invite" type="button" data-f="invite">Invita un amico</button></section>';
@@ -232,6 +244,8 @@ async function onClick(e) {
   if (a === 'optsback') { opts = false; paint(); return; }
   if (a === 'friend') { close(); if (window.NLProfilo && window.NLProfilo.open) window.NLProfilo.open(id); else openGuest(id); return; }   // il nome apre il profilo; da lì Libreria e Desideri (giro 6)
   if (a === 'tipwish' || a === 'tipdrop') { tipAct(a, id); return; }
+  if (a === 'chat') { close(); if (window.NLChat) { var cu = b.dataset.u; setTimeout(function () { window.NLChat.to(id, cu); }, 60); } return; }   // Scrivi (giro 9b)
+  if (a === 'blocked') { if (window.NLChat) window.NLChat.blocked(); return; }
   if (a === 'keyshare') { keySheet(id); return; }
   if (a === 'keyuse' || a === 'keyoff') { keyAct(a, id); return; }
   if (a === 'askyes' || a === 'askno') { askAnswer(id, a === 'askyes'); return; }
@@ -665,10 +679,12 @@ function whoActs(el) {
     var box = document.createElement('div'); box.className = 'cv-guest cv-who';
     box.innerHTML = '<p class="cvg-h">Ce l\'hanno i tuoi amici</p>' + who[b.i].map(function (x) {
       var ask = asks.filter(function (r) { return r.da === uid() && r.a === x.amico && r.libro_id === x.libro_id && r.stato === 'attesa'; })[0];
-      return '<div class="cvg-row"><b>' + esc(x.utente) + '</b>' + (x.fuori ? '<span class="fr-tag">Adesso è in prestito</span>' : ask ? '<span class="fr-tag">Richiesta mandata</span>' : '<button type="button" class="btn primary" data-w="' + esc(x.amico) + '" data-l="' + esc(x.libro_id) + '">Me lo presti?</button>') + '</div>';
+      return '<div class="cvg-row"><b>' + esc(x.utente) + '</b>' + chatBtn({ id: x.amico, utente: x.utente }) + (x.fuori ? '<span class="fr-tag">Adesso è in prestito</span>' : ask ? '<span class="fr-tag">Richiesta mandata</span>' : '<button type="button" class="btn primary" data-w="' + esc(x.amico) + '" data-l="' + esc(x.libro_id) + '">Me lo presti?</button>') + '</div>';
     }).join('');
     box.addEventListener('click', async function (e) {
-      e.stopPropagation(); var x = e.target.closest('[data-w]'); if (!x) return; x.disabled = true;
+      e.stopPropagation();
+      var c = e.target.closest('[data-f="chat"]'); if (c) { if (window.NLChat) window.NLChat.to(c.dataset.id, c.dataset.u); return; }   // Scrivi (giro 9b)
+      var x = e.target.closest('[data-w]'); if (!x) return; x.disabled = true;
       try { await rpc('chiedi_prestito', { amico: x.dataset.w, libro_id: x.dataset.l }); asks = (await rpc('mie_richieste')) || []; NL.toast('Richiesta mandata.'); }
       catch (y) { NL.toast(nice(y)); }
       NL.refreshRow(card.dataset.id);
@@ -733,6 +749,14 @@ function optsView() {
     '<label class="check fr-wish"><input type="checkbox" id="friPCit"' + (me.p_cit ? ' checked' : '') + '><span>Gli amici vedono le mie citazioni in evidenza<small>Quelle con la puntina (fino a 3), con titolo e autore del libro.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friPStat"' + (me.p_stat ? ' checked' : '') + '><span>Gli amici vedono i miei numeri<small>Libri e pagine lette, autore e genere più letti, paesi, libri prestati. Solo se vedono anche la libreria.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friPCits"' + (me.p_cits ? ' checked' : '') + '><span>Gli amici vedono tutte le mie citazioni<small>Il testo, la pagina e il libro. Mai gli appunti né le foto delle pagine.</small></span></label></div></section>';
+  if ('scrivermi' in me && window.NLChat) {                 // chat (giro 9b): chi può scrivermi; di partenza gli amici degli amici
+    var sc = me.scrivermi || 'amici_amici';
+    h += '<section class="fr-sec"><h3 class="fr-h">Chat</h3><fieldset class="choice fr-scr"><legend>Possono scrivermi</legend>' +
+      [['tutti', 'Tutti', 'Chi non è tuo amico ti manda prima una richiesta: decidi tu se accettarla.'], ['amici_amici', 'Gli amici dei miei amici', 'Anche loro con una richiesta. È la scelta di partenza.'], ['amici', 'Solo i miei amici', '']].map(function (o) {
+        return '<label class="check"><input type="radio" name="friScr" value="' + o[0] + '"' + (sc === o[0] ? ' checked' : '') + '><span>' + o[1] + (o[2] ? '<small>' + o[2] + '</small>' : '') + '</span></label>';
+      }).join('') + '</fieldset>' +
+      '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="blocked">Persone bloccate<small>Non ti trovano e non possono scriverti</small></button><span class="n" aria-hidden="true">›</span></li></ul></section>';
+  }
   h += keysHTML(true);
   h += '<p class="fr-small">Gli altri vedono solo il tuo nome. Il resto, solo se lo scegli qui.</p>';
   return h;
@@ -768,7 +792,7 @@ function ffView() {
   if (ff.visibili) {
     h += '<section class="fr-sec"><h3 class="fr-h">Altri amici di ' + esc(n) + (oth.length ? ' <span class="fr-n">' + oth.length + '</span>' : '') + '</h3>';
     if (oth.length > 8) h += '<input type="search" class="fr-libq" data-pick-q placeholder="Cerca tra i suoi amici" autocomplete="off" enterkeyhint="search">';
-    h += oth.length ? '<ul class="fr-list">' + oth.map(function (x) { return row(x, relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessun altro.</p>';
+    h += oth.length ? '<ul class="fr-list">' + oth.map(function (x) { return row(x, chatBtn(x) + relBtn(x)); }).join('') + '</ul>' : '<p class="fr-small">Nessun altro.</p>';
     h += '</section>';
   } else h += '<p class="fr-small">' + esc(n) + ' mostra solo gli amici che avete in comune.</p>';
   if (err) h += '<p class="msg bad" id="friErr">' + esc(err) + '</p>';

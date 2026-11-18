@@ -296,7 +296,8 @@ function paint() {
     var name = A().friendName(cur);
     document.getElementById('profH').textContent = 'Profilo di ' + name;
     var acts = (A().acts && A().acts(cur)) || {};
-    var go = '<div class="pf-go"><button class="btn" type="button" data-p="lib">Libreria</button><button class="btn" type="button" data-p="wish">Desideri</button><span class="pf-icos">' +
+    var go = '<div class="pf-go"><button class="btn" type="button" data-p="lib">Libreria</button><button class="btn" type="button" data-p="wish">Desideri</button>' +
+      (window.NLChat ? '<button class="btn pf-chat" type="button" data-p="chat">Scrivi</button>' : '') + '<span class="pf-icos">' +   // chat (giro 9b)
       (acts.swap ? icoBtn('swap', ' gb-swap', 'Prestiti e regali tra te e ' + name, I_SWAP) : '') +
       (acts.key ? icoBtn('key', acts.lent ? ' on' : '', acts.lent ? acts.lent + ' ' + aNome(name) : 'Presta la tua chiave Google o il worker ' + aNome(name), I_KEY + (acts.lent ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '')) : '') +
       icoBtn('drop', ' gb-drop', 'Togli ' + name + ' dagli amici', I_DROP) + '</span></div>';                       // Libreria e Desideri ci sono sempre, anche se il profilo non si carica
@@ -410,6 +411,7 @@ async function onClick(e) {
   else if (id === 'esempio' && a === 'book') { var eb = b.dataset.id; close(); NL.openCard(eb); }
   else if ((a === 'lib' || a === 'wish') && id) { close(); goGuest(id, a); }
   else if (a === 'book') { var bid = b.dataset.id; close(); if (id) goGuest(id, 'lib', bid); else if (NL.showBook) NL.showBook(bid); }
+  else if (a === 'chat' && id && window.NLChat) { var cn = (data && data.utente) || A().friendName(id); close(); setTimeout(function () { window.NLChat.to(id, cn); }, 60); }   // Scrivi (giro 9b)
   else if (a === 'swap' && id && A().swapSheet) A().swapSheet(id);
   else if (a === 'key' && id && A().keySheet) A().keySheet(id);
   else if (a === 'drop' && id && A().dropSheet) A().dropSheet(id);

@@ -62,13 +62,18 @@ function text(x) {
     case 'desideri': var nd = Number(x.rif) || 1; return who(x) + (nd === 1 ? ' ha un nuovo desiderio: ' : ' ha ' + nd + ' nuovi desideri: ') + '<b>' + esc(x.titolo || '') + '</b>' + (nd > 3 ? ' e altri' : '');   // riassunto del giorno di un amico che segui (giro 3)
     case 'trovato': var nt = trovN(x); return '📚 ' + who(x) + ' ha aggiunto <b>' + esc(x.titolo || 'un libro') + '</b>' + (nt > 3 ? ' e altri' : '') + (nt === 1 ? ', che è nei tuoi Desideri' : ', che sono nei tuoi Desideri');   // un tuo desiderio è entrato nella libreria di un amico (giro 6)
     case 'avviso': return '<b>' + esc(x.rif || 'Avviso di Next Libris') + '</b><br>' + esc(x.titolo || '');   // avviso importante di Next Libris (giro 8): rif = titolo, titolo = testo, tutto in vista
+    case 'messaggi': var mp = String(x.rif || '').split(':'), mn = Number(mp[0]) || 1, mc = Number(mp[1]) || 1, mr = Number(mp[2]) || 0;   // riassunto della chat (giro 9b): rif = messaggi:chat:richieste
+      if (mr && mr === mc) return mr === 1 ? (x.da ? who(x) : '<b>' + esc(x.titolo || 'Qualcuno') + '</b>') + ' vuole scriverti: hai una richiesta di messaggio'
+        : '<b>' + esc(x.titolo || 'Alcune persone') + '</b> vogliono scriverti: hai ' + mr + ' richieste di messaggio';
+      return (mn === 1 ? 'Un messaggio nuovo' : mn + ' messaggi nuovi') + ' da <b>' + esc(x.titolo || x.nome || 'un amico') + '</b>' + (mr ? (mr === 1 ? ' e una richiesta di messaggio' : ' e ' + mr + ' richieste di messaggio') : '');
+    case 'segnalazione': return 'Nuova segnalazione nella chat' + (x.titolo ? ' su <b>' + esc(x.titolo) + '</b>' : '') + ': controlla nel pannello Amministrazione';
     case 'limite': return x.titolo ? 'La chiave Google di <b>' + esc(x.titolo) + '</b> ha finito le ricerche di oggi: <b>creane una tua, è gratis</b>'
       : 'La tua chiave Google ha finito le ricerche di oggi: torna domattina';
   }
   return who(x);
 }
 var KIND = { amicizia: 'fr', amico: 'fr', prestito: 'bk', regalo: 'gift', reso: 'bk', reso_ok: 'bk', reso_no: 'bk', chiuso: 'bk',
-  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim', desideri: 'gift', trovato: 'bk', avviso: 'av' };
+  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim', desideri: 'gift', trovato: 'bk', avviso: 'av', messaggi: 'msg', segnalazione: 'lim' };
 /* «trovato»: rif = quanti:id del libro dell'amico (il primo) */
 function trovN(x) { return Number(String(x.rif || '').split(':')[0]) || 1; }
 function trovId(x) { var r = String(x.rif || ''), i = r.indexOf(':'); return i < 0 ? '' : r.slice(i + 1); }
@@ -143,7 +148,7 @@ function paint() {
   }
   body.innerHTML = '<ul class="nt-list">' + items.map(function (x) {
     return '<li><button type="button" class="nt-item' + (fresh[x.id] ? ' nt-new' : '') + '" data-n="' + esc(x.id) + '">' +
-      '<span class="nt-ico nt-' + (KIND[x.tipo] || 'fr') + '" aria-hidden="true">' + (x.tipo === 'limite' ? '!' : x.tipo === 'avviso' ? 'NL' : esc(((x.nome || '?').trim()[0] || '?').toUpperCase())) + '</span>' +
+      '<span class="nt-ico nt-' + (KIND[x.tipo] || 'fr') + '" aria-hidden="true">' + (x.tipo === 'limite' || x.tipo === 'segnalazione' ? '!' : x.tipo === 'avviso' ? 'NL' : x.tipo === 'messaggi' && !x.da ? '…' : esc(((x.nome || '?').trim()[0] || '?').toUpperCase())) + '</span>' +
       '<span class="nt-t"><span class="nt-txt">' + text(x) + '</span><small>' + esc(ago(x.creata)) + (fresh[x.id] ? ' · <span class="nt-dot">nuova</span>' : '') + '</small></span>' +
       '</button>' + (x.tipo === 'trovato' && trovN(x) === 1 && trovId(x) && x.da ? (sent[x.id] || asked(x) ? '<span class="nt-asked">Richiesta mandata</span>' : '<button type="button" class="btn nt-lend" data-ask="' + esc(x.id) + '">Me lo presti?</button>') : '') + '</li>';
   }).join('') + '</ul>';
@@ -152,7 +157,9 @@ function paint() {
 /* ---------- tocco: il libro o la finestra Amici ---------- */
 function go(id) {
   var x = items.filter(function (y) { return y.id === id; })[0]; if (!x) return;
-  if (x.tipo === 'avviso') return;                       // l'avviso si legge tutto qui: il tocco non porta altrove
+  if (x.tipo === 'avviso') return;
+  if (x.tipo === 'messaggi') { close(); if (window.NLChat) setTimeout(function () { window.NLChat.open(); }, 60); return; }   // la chat (giro 9b)
+  if (x.tipo === 'segnalazione') { close(); if (window.NLAdmin) setTimeout(function () { window.NLAdmin.open(x.rif); }, 60); return; }   // pannello: giro 9e                       // l'avviso si legge tutto qui: il tocco non porta altrove
   close();
   var A = amici();
   if (x.tipo === 'limite') { if (window.NLRicerche) setTimeout(function () { window.NLRicerche.guide(x.titolo); }, 60); return; }   // guida: crea la tua chiave, è gratis
