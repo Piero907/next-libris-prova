@@ -426,6 +426,7 @@ async function openGuest(id) {
 var entering = false;
 function guestBar() {
   var g = NL.guest && NL.guest(), bar = document.getElementById('guestBar');
+  if (g && NL.esempio && NL.esempio()) { if (bar) bar.hidden = true; return; }   // libreria di esempio della guida: la sua striscia la mette guida.js (giro 4)
   if (!g) { if (bar) bar.hidden = true; ['guestKey', 'guestSwap', 'guestDrop'].forEach(function (i) { var k0 = document.getElementById(i); if (k0) k0.hidden = true; }); ownKeyIco(); return; }
   if (!bar) {
     var top = document.querySelector('header.top'); if (!top) return;
@@ -523,7 +524,7 @@ var _enter = NL.guestEnter;
 if (_enter) NL.guestEnter = function (name, books, info) { window.__guestInfo = info; var r = _enter(name, books, info); guestBar(); return r; };
 /* sulla scheda di un suo libro: Aggiungi ai miei desideri / Ce l'hai anche tu / Me lo presti? / Te lo regalo io */
 function guestActs(el) {
-  if (!(NL.guest && NL.guest())) return;
+  if (!(NL.guest && NL.guest()) || (NL.esempio && NL.esempio())) return;
   var cards = el.matches && el.matches('.row.open') ? [el] : Array.prototype.slice.call(el.querySelectorAll ? el.querySelectorAll('.row.open') : []);
   cards.forEach(function (card) {
     var id = card.dataset.id, b = NL.get(id), m = gMeta[id] || {}; if (!b) return;

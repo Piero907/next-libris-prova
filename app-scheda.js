@@ -25,6 +25,7 @@ function auWikiUrl(t) { return 'https://it.wikipedia.org/wiki/' + encodeURICompo
 var AU_WRITE = /scritt|autor|romanz|poet|saggist|giornalist|drammaturg|filosof|storic|letterat|narrat|fumett|sceneggiat|critic|traduttor|accademic|docent|scienziat|teolog|biograf|novellier/i;
 var AU_WORDS = /scritt|autor|romanz|poet|saggist|giornalist|drammaturg|filosof|storic|letterat|narrat|fumett|sceneggiat|critic|traduttor|accademic|docent|scienziat|teolog|biograf|novellier|fotograf|illustrat|disegnat|pittor|artist|scultor|architett|design|music|compositor|cantaut|cantant|regist|attor|attric|cuoc|chef|gastronom|politic|economist|psicolog|psicoanal|psichiatr|medic|biolog|chimic|fisic|matematic|astronom|astrofisic|geolog|naturalist|etolog|sociolog|antropolog|archeolog|linguist|filolog|pedagog|educat|divulgat|alpinist|esplorat|viaggiat|sportiv|calciator|allenator|ciclist|imprenditor|avvocat|magistrat|giurist|militar|diplomat|religios|monac|sacerdot|vescov|papa|santo|attivist|conduttor|comic|umorist|blogger|youtuber|influencer|editor|curator|insegnant|professor|ricercat|ingegner|informatic|inventor|stilist|fumettist/i;
 async function auLookup(name) {
+  if (esempio()) return { none: true, retry: true };   // libreria di esempio: nessuna chiamata a Wikipedia (giro 4)
   if (auCache[name]) return auCache[name];
   async function summary(title) {
     var j = await L.getJson(fetch, 'https://it.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title.replace(/ /g, '_')) + '?redirect=true', { waits: [], timeout: 8000 });
@@ -85,6 +86,7 @@ async function auWdImg(qid) {
   return auImgOk(u);
 }
 async function openAuthor(id, name) {
+  if (esempio()) { toast('Info Autore cerca su Wikipedia: provalo con i tuoi libri.'); return; }   // libreria di esempio: nessuna chiamata (giro 4)
   auNow = { id: id, name: name };
   var mine = state.books.filter(function (x) { return !x.w && authorsOf(x).some(function (n) { return L.norm(n) === L.norm(name); }); }).length;
   $('#auH').textContent = name; $('#auDesc').textContent = ''; $('#auSrc').hidden = true; $('#auWiki').hidden = true; auPic('');

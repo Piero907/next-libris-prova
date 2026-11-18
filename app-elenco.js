@@ -18,7 +18,7 @@ var RD_CAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" widt
 var RATE_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="pg" d="M3 6a9 9 0 0 1 9 0v13a9 9 0 0 0-9 0z"/><path class="pg" d="M12 6a9 9 0 0 1 9 0v13a9 9 0 0 0-9 0z"/></svg>';   // libro aperto (Piero: «era più bella l'icona con il libro aperto»)
 function readHTML(b, off) {
   if (b.w) return '';
-  if (guest) {                                     // libro di un amico: una frase al posto dei tasti; niente se non l'ha segnato (Piero, 17/11/2026 sera)
+  if (guest && !esempio()) {                       // libro di un amico: una frase al posto dei tasti; niente se non l'ha segnato (Piero, 17/11/2026 sera)
     if (b.rs !== 'in' && b.rs !== 'ok') return '';
     var who = esc(guest.name), bits = [];
     if (b.rs === 'ok' && b.rd) bits.push('il ' + esc(rdLong(b.rd)));
@@ -522,7 +522,7 @@ function aufAgain() {                                    // si riguardano le cop
   aufLater = setTimeout(function () { if (aufIO) Array.prototype.forEach.call(document.querySelectorAll('#list [data-auf]'), function (el) { aufIO.unobserve(el); aufIO.observe(el); }); }, 60000);
 }
 window.addEventListener('online', function () { if (aufIO) Array.prototype.forEach.call(document.querySelectorAll('#list [data-auf]'), function (el) { aufIO.unobserve(el); aufIO.observe(el); }); });
-function aufWant(name) { if (aufQ.indexOf(name) < 0) aufQ.push(name); aufRun(); }
+function aufWant(name) { if (esempio()) return; if (aufQ.indexOf(name) < 0) aufQ.push(name); aufRun(); }
 function aufWatch(root) {                                // si cercano solo le foto dei gruppi che si vedono
   var els = root.querySelectorAll('[data-auf]'); if (!els.length) return;
   if (!window.IntersectionObserver) { Array.prototype.forEach.call(els, function (el) { aufWant(el.dataset.aun); }); return; }

@@ -32,6 +32,7 @@ function wdCodeOf(name) { var k = L.norm(name); if (!wdCodes[k]) WD_ISO.forEach(
 
 /* ---------- dati salvati per autore: { q: voce di Wikidata, c: paese, b: paese di nascita se diverso, f: film, t: quando } ---------- */
 function wdMap() {
+  if (esempio() && guest.info.wd) return guest.info.wd;   // libreria di esempio: paesi e film già scritti nei dati (giro 4)
   if (!wdo) {
     try { wdo = JSON.parse(ls.get(WD_LS) || '{}'); } catch (e) { nlErr(e); }
     if (!wdo || typeof wdo !== 'object' || wdo['~v'] !== WD_V) wdo = { '~v': WD_V };
@@ -39,6 +40,7 @@ function wdMap() {
   return wdo;
 }
 function wdStore() {
+  if (esempio()) return;
   var m = wdMap(), ks = Object.keys(m).filter(function (k) { return k.charAt(0) !== '~'; });
   if (ks.length >= 2000) ks.sort(function (a, b) { return (m[a].t || 0) - (m[b].t || 0); }).slice(0, 200).forEach(function (k) { delete m[k]; });
   try { ls.set(WD_LS, JSON.stringify(m)); } catch (e) { nlErr(e); }
@@ -147,6 +149,7 @@ var wdRun1 = {}, wdLater = {};                           // wdLater: autori la c
 function wdFetch(name) {
   var k = wdKey(name), have = wdEntry(name);
   if (have) return Promise.resolve(have);
+  if (esempio()) return Promise.reject(new Error('esempio'));   // nessuna chiamata a Wikidata nella libreria di esempio
   if (!wdRun1[k]) wdRun1[k] = wdFetchNow(name, k).then(function (x) { delete wdRun1[k]; return x; }, function (e) { delete wdRun1[k]; throw e; });
   return wdRun1[k];
 }
@@ -175,7 +178,7 @@ function wdKick(ms) {
   wdTimer = setTimeout(function () { wdTimer = 0; wdLoop(); }, ms == null ? 3000 : ms);
 }
 async function wdLoop() {
-  if (wdBusy || navigator.onLine === false) return;
+  if (wdBusy || navigator.onLine === false || esempio()) return;
   wdBusy = true;
   try {
     for (var guard = 0; guard < 400; guard++) {

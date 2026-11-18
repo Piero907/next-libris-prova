@@ -920,6 +920,8 @@ window.NL = {
   L: L, esc: esc, $: $, ls: ls, toast: toast, eur: eur, hue: hue, bigImg: bigImg, authorsOf: authorsOf, coll: coll, PROVA: PROVA, COPIA: COPIA,
   books: function () { return state.books; }, quotes: allQuotes, tab: function () { return tab; }, settings: settings, saveSettings: saveSettings,
   name: function () { return settings.name || ''; }, setName: function (v) { saveName(v); }, newId: newId, today: today,
+  esempio: function () { return esempio(); }, firstRun: function () { return nlFirstRun; },   // guida di primo avvio (giro 4)
+  openCard: function (id) { var b = get(id); if (!b) return false; if (b.w !== (tab === 'wish')) setTab(b.w ? 'wish' : 'lib'); if (settings.view === 'grid') { openFromGrid(id); return true; } openState[id] = true; renderList(); var el = rowEl(id); if (el) el.scrollIntoView({ block: 'start' }); return true; },   // apre un libro senza uscire dalla libreria mostrata
   guest: function () { return guest ? guest.name : null; }, showBook: showBook, guestEnter: guestEnter, guestExit: function () { guestExit(); }, myBooks: myBooks, addMine: addMine, removeMine: removeMine, restoreMine: restoreMine, isMine: isMine,
   setFlt: function (v) { flt = v; collapseCards(); renderList(); updateSummary(); if (typeof updateActiveFilters === 'function') updateActiveFilters(); }, flt: function () { return flt; }, goal: function () { return settings.goal || 0; },
   closeDrawer: function () { closeDrawer(); }, fromMenu: fromMenu, refresh: function () { renderList(); updateSummary(); },

@@ -88,6 +88,7 @@ function saveName(v) {
 function renderOwner() {
   var el = $('#owner');
   var pf = window.NLProfilo ? ['<button type="button" class="owner-n" id="ownerProf" title="Apri il profilo">', '</button>'] : ['', ''];   // il nome apre la pagina del profilo (giro 3)
+  if (esempio()) { el.innerHTML = (tab === 'wish' ? 'Desideri' : 'Libreria') + ' di <b>esempio</b>'; return; }   // guida di primo avvio (giro 4)
   if (guest) { el.innerHTML = 'Libreria di ' + pf[0] + '<b>' + esc(guest.name) + '</b>' + pf[1]; return; }
   el.innerHTML = settings.name ? (tab === 'wish' ? 'Desideri di ' : 'Libreria di ') + pf[0] + '<b>' + esc(settings.name) + '</b>' + pf[1]   // «Libreria di Piero R. · 120 libri», nei Desideri «Desideri di Piero R.» (Piero, 17/11/2026)
     : '<button type="button" class="link" id="ownerSet">Scrivi il tuo nome</button>';

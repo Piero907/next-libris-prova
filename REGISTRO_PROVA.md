@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.4 · 18/11/2026 10:02
+- Giro 4: **guida di primo avvio** (Menu › Info e aiuto › Come si usa) e **libreria di esempio**
+
 ## Prova 104.3 · 18/11/2026 09:23
 - **Profilo e amici**: pagina del profilo (tocca il tuo nome in testata o Menu › Il tuo profilo) con foto, citazione preferita e i tuoi numeri; dal nome di un amico si apre il suo profilo
 - Foto del profilo (scattata, scelta o quella di Google): la vedono solo gli amici, anche nell'elenco degli amici
