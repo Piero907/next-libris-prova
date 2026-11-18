@@ -88,6 +88,12 @@ function sheetOpen(id) { var s = $(id); s.hidden = false; if (id === '#layYou') 
 function sheetsClose() { ['#layAdd', '#layYou'].forEach(function (k) { var s = $(k); if (s) s.hidden = true; }); }
 function act(l) {
   sheetsClose();
+  // libreria di esempio (guida): la barra resta dentro l'esempio (Piero, 18/11/2026)
+  if (NL.esempio && NL.esempio()) {
+    if (l === 'lib' || l === 'wish') { NL.setTab(l); window.scrollTo({ top: 0 }); paintNav(); NL.emit('guest'); return; }
+    if (l === 'prof') { if (window.NLProfilo) window.NLProfilo.open('esempio'); return; }
+    if (l === 'add' || l === 'you') { NL.toast('È solo un esempio: prova con i tuoi libri.'); return; }
+  }
   if (l === 'lib' || l === 'wish') { if (NL.guest && NL.guest()) NL.guestExit(); NL.setTab(l); window.scrollTo({ top: 0 }); paintNav(); }   // sempre i tuoi, anche dalla libreria di un amico (17/11/2026 sera)
   else if (l === 'add') sheetOpen('#layAdd');
   else if (l === 'you') sheetOpen('#layYou');

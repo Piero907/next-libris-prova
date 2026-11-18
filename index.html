@@ -23,7 +23,7 @@
 <link rel="manifest" href="manifest.json?v=36" crossorigin="use-credentials">
 <link rel="icon" type="image/png" href="icons/next-libris-192.png">
 <link rel="apple-touch-icon" href="icons/next-libris-192.png">
-<script src="indirizzo.js"></script><!-- vecchio indirizzo: solo la pagina del trasloco -->
+<script src="indirizzo.js"></script><!-- vecchio indirizzo: solo «Ci siamo spostati» -->
 <script src="avvio.js"></script><!-- aspetto e tema prima di disegnare; mai dentro la cornice di un altro sito -->
 <link rel="preload" href="vendor/fonts/literata-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>/* schermata d'apertura: qui e non nel CSS, cosi' e' la primissima cosa disegnata */
@@ -59,7 +59,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <p class="top-meta"><span class="owner" id="owner"></span><span class="summary" id="summary" aria-live="polite"></span></p>
     </div>
     <div class="sync" id="sync" role="status"><span class="dot"></span><span id="syncTxt">Salvato su questo telefono</span></div>
-    <button class="ico beer-top" id="btnBeer" type="button" aria-label="Sostieni Next Libris: offrimi una birra" title="Offrimi una birra"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></button>
+    <button class="ico beer-top beer-pill" id="btnBeer" type="button" aria-label="Sostieni Next Libris: offrimi una birra" title="Offrimi una birra"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg><span class="beer-t">Sostieni</span></button>
     <button class="ico gear" id="btnOpts" aria-label="Opzioni" title="Opzioni"></button>
   </header>
 
@@ -138,7 +138,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   </section>
   <section class="don-ask" id="donAsk" hidden aria-labelledby="donAskT">
     <h3 id="donAskT">50 libri catalogati</h3>
-    <p>Next Libris è gratis, senza pubblicità e senza abbonamenti. Se ti è utile, offrimi una birra!</p>
+    <p>Grazie per usare Next Libris! È gratis per tutti e senza pubblicità: se ti è utile, aiutaci a tenerla così con una birra.</p>
     <button class="btn primary" type="button" id="donAskGo">Offrimi una birra</button>
     <div class="don-ask-more"><button class="link" type="button" id="donAskLater">Più tardi</button><button class="link" type="button" id="donAskNever">Non chiedere più</button></div>
   </section>
@@ -671,6 +671,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
           <input type="text" id="gbKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla la chiave (inizia con AIza)">
           <button class="btn svc-show" type="button" id="gbShow" aria-pressed="false" hidden>Mostra</button>
         </div>
+        <p class="hint svc-uff">Incolla la chiave solo in Next Libris, su nextlibris.github.io. Non te la chiederemo mai per email o messaggio.</p>
         <div class="svc-acts">
           <button class="btn svc-clear" id="gbClear" type="button" hidden>Cancella</button>
           <div class="svc-saved" id="gbSaved" hidden></div>
@@ -847,14 +848,14 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   </div>
   <div class="drawer-body" id="drawerBody">
     <div id="drawerOpts" hidden>
+      <div class="dlist dmenu ddon">
+        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Next Libris è gratis e senza pubblicità. Se ti piace, offrici una birra.</small></span><span class="n" aria-hidden="true">♥</span></button>
+      </div>
       <div class="dlist dmenu dmain">
         <button type="button" class="dopt dgo" id="goFilters"><span><b>Filtri</b><small id="goFltTxt">Tutti i libri</small></span><span class="dbadge" id="goFltN" hidden></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goSugg"><span><b>Suggerimenti</b><small>Cosa leggere dopo, da scoprire</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo dq-all" id="goQuotes" hidden><span><b>Tutte le citazioni</b><small id="goQTxt"></small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt dgo" id="goStats"><span><b>Statistiche</b><small>Libri, pagine, letture</small></span><span class="n" aria-hidden="true">›</span></button>
-      </div>
-      <div class="dlist dmenu ddon">
-        <button type="button" class="dopt don-menu" id="donMenu"><span class="don-cup" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M5 8a2.5 2.5 0 0 1 2.5-3 3 3 0 0 1 5 0A2.5 2.5 0 0 1 15 8"/><path d="M8.5 12v5.5M11.5 12v5.5"/></svg></span><span><b>Sostieni Next Libris</b><small>Se ti piace, offrimi una birra!</small></span><span class="n" aria-hidden="true">♥</span></button>
       </div>
       <h3>La tua libreria</h3>
       <div class="dlist dmenu">

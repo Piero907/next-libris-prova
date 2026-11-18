@@ -36,14 +36,15 @@ var S = [
     p: ['Cerca per titolo o autore, usa i <b>Filtri</b> e <b>Ordina · Raggruppa</b> (per autore, genere, paese…). Scegli tra copertine ed elenco; sulle copertine <b>due dita</b> le ingrandiscono o le rimpiccioliscono.',
       'Serie e copie dello stesso libro stanno insieme. Tocca il nome di un autore per <b>Info Autore</b>.'] },
   { ico: 'loan', h: 'Prestiti', go: 'loan',   // giro 7: Prestiti e Desideri in due schermate (testi approvati da Piero il 18/11/2026)
-    p: ['Segna a chi hai prestato un libro e chi l\'ha prestato a te. Quando te lo restituiscono, tocca <b>Restituiscilo</b>.'] },
+    p: ['Tieni il conto dei libri che presti e di quelli che ti prestano. Quando ridai un libro a un amico, tocca <b>Restituiscilo</b>; quando un tuo libro torna a casa, tocca <b>È tornato</b>.'] },
   { ico: 'towish', h: 'Desideri', go: 'wish',
-    p: ['Metti nei <b>Desideri</b> i libri che vorresti. Gli amici possono vederli e regalarteli di nascosto, e ti avvisiamo se un amico ce l\'ha già.'] },
+    p: ['Metti nei <b>Desideri</b> i libri che vorresti leggere. Gli amici possono vederli e trovare l\'idea giusta per un regalo. Se un amico ce l\'ha già, te lo diciamo: magari ve lo prestate.'] },
   { ico: 'user', h: 'Amici e profilo', go: 'friends', mod: 'NLAmici',
     p: ['Con <b>Accedi con Google</b> i tuoi libri si salvano anche online e puoi trovare gli amici per nome. Guarda le loro librerie, chiedi <b>Me lo presti?</b> e segui i loro desideri.',
       'La <b>campanella</b> ti avvisa delle novità. Tocca il tuo nome in alto per vedere il tuo <b>profilo</b>.'] },
-  { ico: 'chart', h: 'Per te',
-    p: ['Suggerimenti sui tuoi autori, novità, film tratti dai tuoi libri, statistiche e <b>La tua stagione in libri</b>.', 'Ogni tanto ti ricordiamo di fare un <b>backup</b>: con un tocco lo mandi su Drive, WhatsApp o email, foto comprese.'],
+  { ico: 'chart', h: 'Per te', go: 'don', btn: 'Sostieni Next Libris',   // Sostieni (Piero, 18/11/2026)
+   
+    p: ['Suggerimenti sui tuoi autori, novità, film tratti dai tuoi libri, statistiche e <b>La tua stagione in libri</b>.', 'Ogni tanto ti ricordiamo di fare un <b>backup</b>: con un tocco lo mandi su Drive, WhatsApp o email, foto comprese.', 'Next Libris è gratis per tutti: se ti piace, puoi sostenerla.'],
     end: 'Rivedi questa guida quando vuoi: Menu › Info e aiuto › <b>Come si usa</b>.' }
 ];
 /* per la prova e2e123: ogni schermata dice quale parte dell'app deve esistere */
@@ -130,7 +131,7 @@ var fromGuide = -1;
 function tryIt(what) {
   var at = G.i;
   close(false, true);
-  var real = what === 'add' || what === 'key' || what === 'friends';
+  var real = what === 'add' || what === 'key' || what === 'friends' || what === 'don';
   setTimeout(function () {
     if (real) pillOn(at);
     if (what === 'add') {
@@ -140,6 +141,8 @@ function tryIt(what) {
     } else if (what === 'key') {
       if (window.NLRicerche && window.NLRicerche.guide) window.NLRicerche.guide();
       else if (NL.openOptions) NL.openOptions('search');
+    } else if (what === 'don') {
+      if (NL.openDon) NL.openDon();
     } else if (what === 'friends') {
       if (window.NLAmici && window.NLAmici.open) window.NLAmici.open();
     } else if (what === 'book' || what === 'sort' || what === 'wish' || what === 'loan') {
@@ -195,13 +198,15 @@ var D = '2026-';
 function bk(k, o) { return Object.assign({ id: 'ex' + k, ts: Date.parse(D + '01-01') - k * 864e5, g: [], c: null }, o); }
 /* libri: classici, più García Márquez e Asimov (scelta di Piero); solo titolo, autore e dati; descrizioni nostre */
 var BOOKS = [
-  bk(1, { t: 'I promessi sposi', a: 'Alessandro Manzoni', e: 'Mondadori', y: '2002', pg: '720', gen: 'Romanzo storico', rs: 'ok', rt: 5, rd: D + '03-10', fav: true,
+  bk(1, { t: 'I promessi sposi', a: 'Alessandro Manzoni', e: 'Mondadori', y: '2002', pg: '720', gen: 'Romanzo storico', rs: 'ok', rt: 5, rd: D + '03-10', fav: true, lc: true,
+    qs: [{ x: 'Quel ramo del lago di Como, che volge a mezzogiorno, tra due catene non interrotte di monti…', pg: '1', d: 3, pin: true }],
     ds: 'Renzo e Lucia vogliono sposarsi, ma un signorotto prepotente lo impedisce. Tra fughe, peste e carestia, la loro storia attraversa la Lombardia del Seicento.' }),
   bk(2, { t: 'I promessi sposi', a: 'Alessandro Manzoni', e: 'Einaudi', y: '2014', pg: '880', gen: 'Romanzo storico',
     ds: 'La stessa storia in un\'altra edizione, con note e commento: le due copie stanno insieme sotto un solo libro.' }),
   bk(3, { t: 'Il fu Mattia Pascal', a: 'Luigi Pirandello', e: 'Feltrinelli', y: '2015', pg: '280', gen: 'Romanzo', rs: 'in', pp: '112',
     ds: 'Un uomo legge sul giornale della propria morte e decide di approfittarne per ricominciare da capo con un altro nome.' }),
-  bk(4, { t: 'Le avventure di Pinocchio', a: 'Carlo Collodi', e: 'Giunti', y: '2019', pg: '240', gen: 'Per ragazzi', rs: 'ok', rt: 4, rd: D + '01-22', p: 'Marta', pd: D + '10-02',
+  bk(4, { t: 'Le avventure di Pinocchio', a: 'Carlo Collodi', e: 'Giunti', y: '2019', pg: '240', gen: 'Per ragazzi', rs: 'ok', rt: 4, rd: D + '01-22', lc: true,
+    qs: [{ x: 'C\'era una volta… un pezzo di legno.', pg: '7', d: 2, pin: true }], p: 'Marta', pd: D + '10-02',
     ds: 'Il burattino di legno che vorrebbe diventare un bambino vero, tra bugie, cattive compagnie e un padre che non smette di cercarlo.' }),
   bk(5, { t: 'Anna Karenina', a: 'Lev Tolstoj', e: 'Garzanti', y: '2008', pg: '960', gen: 'Romanzo', rs: 'ok', rt: 4, rd: D + '07-15',
     ds: 'Nella Russia dell\'Ottocento, una donna sceglie l\'amore contro le regole della sua società, mentre accanto a lei altre vite cercano la loro strada.' }),
@@ -302,7 +307,10 @@ function menu() {
   a.innerHTML = '<span><b>Come si usa</b><small>La guida in nove schermate</small></span><span class="n" aria-hidden="true">›</span>';
   var b = document.createElement('button'); b.type = 'button'; b.className = 'dopt'; b.id = 'goEsempio';
   b.innerHTML = '<span><b>Guarda una libreria di esempio</b><small>Prova l\'app senza i tuoi libri</small></span><span class="n" aria-hidden="true">›</span>';
-  list.insertBefore(b, list.firstChild); list.insertBefore(a, b);
+  // indirizzo ufficiale (Piero, 18/11/2026): contro le copie dell'app ad altri indirizzi
+  var u = document.createElement('p'); u.className = 'gd-uff'; u.id = 'nlUfficiale';
+  u.innerHTML = 'Next Libris è solo su <b>nextlibris.github.io</b>. Una copia a un altro indirizzo non è nostra: non darle la tua chiave né i tuoi dati.';
+  list.insertBefore(u, list.firstChild); list.insertBefore(b, u); list.insertBefore(a, b);
   a.addEventListener('click', function () { NL.fromMenu(function () { open(0); }); });
   b.addEventListener('click', function () { NL.fromMenu(function () { enter(-1, ''); }); });
   var sm = document.querySelector('#goInfo small'); if (sm) sm.textContent = 'Guida, condividi, installa, contatti';

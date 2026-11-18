@@ -67,3 +67,7 @@ html[data-layout="a"] .gd-pill{bottom:calc(84px + env(safe-area-inset-bottom,0px
 html[data-layout="a"] body.gd-pill-on .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))}
 /* con una finestra aperta dal basso (il +, gli amici…) la pillola sale in alto, per non coprire i tasti */
 body:has(.sheet:not([hidden])) .gd-pill,body:has(.lay-sheet:not([hidden])) .gd-pill{top:calc(10px + env(safe-area-inset-top,0px));bottom:auto}
+
+/* Menu › Info e aiuto: riga dell'indirizzo ufficiale (18/11/2026) */
+.gd-uff{margin:2px 16px 12px;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.gd-uff b{color:var(--ink)}

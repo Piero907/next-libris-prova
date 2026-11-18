@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.8 · 18/11/2026 13:05
+- **Indirizzo ufficiale**: Next Libris è solo su nextlibris.github.io (Info e aiuto, chiave, privacy); il vecchio indirizzo porta soltanto al nuovo
+- **Chiave**: fuori dalla testata, nel Menu e nel profilo; la guida della chiave ha il campo per incollarla
+- **Sostieni**: pillola con la parola in testata (da riconfermare), scheda in cima al Menu, riga nella guida, grazie ai 50 libri
+- **Guida**: testi di Prestiti e Desideri riscritti; nella libreria di esempio la barra in basso e il Profilo di esempio
+
 ## Prova 104.7 · 18/11/2026 12:16
 - **Giro 7**: guida a 9 schermate con «Torna alla guida», prezzi tolti da condivisioni e statistiche, profilo in testata, nel Menu e nella barra, promemoria del backup (45 giorni o 40 libri)
 

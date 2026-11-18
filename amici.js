@@ -312,11 +312,12 @@ function paintMenu() {
     var h = document.createElement('h3'); h.id = 'friMenuH'; h.textContent = 'Amici';
     m = document.createElement('div'); m.className = 'dlist dmenu'; m.id = 'friMenu';
     m.innerHTML = '<button type="button" class="dopt dgo" id="goFri"><span><b>I tuoi amici</b><small id="goFriTxt"></small></span><span class="n" aria-hidden="true">›</span></button>';   // «Invita» sta nella finestra Amici (17/11/2026)
-    var at = document.querySelector('#drawerOpts .ddon') || top;   // dopo Sostieni (Piero, 17/11/2026: Sostieni sopra Amici)
+    var at = top;   // dopo Sostieni (Piero, 17/11/2026: Sostieni sopra Amici)
     at.parentNode.insertBefore(h, at.nextSibling); h.parentNode.insertBefore(m, h.nextSibling);
     m.querySelector('#goFri').addEventListener('click', function () { NL.fromMenu(open); });
     /* «Il mio profilo» sta in cima al Menu (giro 7, profilo.js) */
   }
+  ownKeyIco();   // «Chiave Google e worker» sotto «I tuoi amici» (18/11/2026)
   var t, rec = received().length, fr = friends().length;
   if (!uid()) t = 'Entra per trovare gli amici';
   else if (!me || !list) t = 'Richieste e amici';
@@ -499,20 +500,21 @@ function guestBar() {
 }
 /* nella propria libreria (e nei Desideri): icona della chiave sempre in alto a destra sulla riga «Libreria di …»; apre la finestra della chiave,
    accesa se hai chiave o worker (tuoi o prestati). Senza chiave: la finestra porta alla guida «Crea la tua chiave Google» (giro 1, 18/11/2026) */
+/* 18/11/2026 (Piero): la chiave esce dalla testata; sta in Impostazioni, nel Menu (sotto «I tuoi amici») e nel tuo profilo */
 function ownKeyIco() {
-  var meta = document.querySelector('header.top .top-meta'); if (!meta) return;
-  var box = document.getElementById('guestIcos');
-  if (!box) { box = document.createElement('span'); box.id = 'guestIcos'; box.className = 'gb-icos'; meta.appendChild(box); }
-  var kb = document.getElementById('ownKey');
-  if (!kb) { kb = document.createElement('button'); kb.type = 'button'; kb.id = 'ownKey'; kb.className = 'ico gb-key'; kb.addEventListener('click', function () { keyWin(); }); }
-  if (kb.parentNode !== box) box.appendChild(kb);
+  var kb0 = document.getElementById('ownKey'); if (kb0) kb0.remove();
+  if (!(NL.guest && NL.guest())) { var mt = document.querySelector('header.top .top-meta'); if (mt) mt.style.paddingRight = ''; }
+  var g = document.getElementById('goKeys');
+  if (!g) {
+    var fm = document.getElementById('friMenu'); if (!fm) return;
+    g = document.createElement('button'); g.type = 'button'; g.className = 'dopt dgo'; g.id = 'goKeys';
+    g.innerHTML = '<span><b>Chiave Google e worker</b><small id="goKeysTxt"></small></span><span class="n" aria-hidden="true">›</span>';
+    fm.appendChild(g); g.addEventListener('click', function () { NL.fromMenu(keyWin); });
+  }
   var own = ownKeys(), b = borrowed(), on = !!(own.gb || own.sbn || (b && (b.gb || b.sbn)));
-  var tl = on ? 'Chiave Google e worker' : 'Chiave Google e worker: crea la tua chiave, è gratis';
-  kb.hidden = false; kb.classList.toggle('on', on); kb.title = tl; kb.setAttribute('aria-label', tl);
-  kb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></svg>';
-  meta.style.paddingRight = (box.offsetWidth + 8) + 'px';
+  document.getElementById('goKeysTxt').textContent = on ? (own.gb || own.sbn ? 'Le tue, da prestare agli amici' : 'Prestate da un amico') : 'Crea la tua chiave, è gratis';
 }
-function okRefresh() { if (!(NL.guest && NL.guest())) ownKeyIco(); }
+function okRefresh() { ownKeyIco(); }
 NL.on('keys', okRefresh); NL.on('optclose', okRefresh);
 NL.on('guest', function (name) { if (!name && entering) return; if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
 /* le info della libreria aperta (amici in comune): le passa openGuest prima di entrare */
@@ -798,7 +800,8 @@ function keysInner(full) {
   if ((own.gb || own.sbn) && fr.length) {
     h += '<p class="fr-small">Prestarli non ti costa niente e puoi smettere quando vuoi. Tocca un amico per scegliere cosa prestargli.</p>' +   // testo approvato (giro 5)
       pickerHTML(fr, 'data-f="keyshare" data-id', function (x) { return !!outKey(x.id); }, function (x) { var k = outKey(x.id); return k ? lentLabel(k) : ''; }) +
-      '<p class="fr-small kw-n">' + lentText(lentCount()) + '.</p>';
+      '<p class="fr-small kw-n">' + lentText(lentCount()) + '.</p>' +
+      '<p class="fr-small kw-uff">Incolla la chiave solo in Next Libris, su nextlibris.github.io. Non te la chiederemo mai per email o messaggio.</p>';   // indirizzo ufficiale (Piero, 18/11/2026)
   }
   inn.forEach(function (k) {
     var using = b && b.da === k.da, what = k.gb_key && k.sbn ? 'la sua chiave Google e il worker SBN' : k.gb_key ? 'la sua chiave Google' : 'il suo worker SBN';

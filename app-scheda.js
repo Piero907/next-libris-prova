@@ -320,7 +320,7 @@ function donPaint() {
   if (settings.donMs == null) { settings.donMs = ms; saveSettings(); }      // chi ha gia' dei libri non lo vede subito: al prossimo multiplo di 50
   var on = tab !== 'wish' && Date.now() >= settings.donUntil;
   ask.hidden = !(on && !settings.donNever && ms >= DON_STEP && ms > settings.donMs);
-  if (!ask.hidden) $('#donAskT').textContent = ms + ' libri catalogati';
+  if (!ask.hidden) $('#donAskT').textContent = ms + ' libri catalogati: grazie!';
   row.hidden = !(on && n > 0 && ask.hidden && settings.donOpens > DON_OPENS);
 }
 function donSnooze(ms) { settings.donUntil = Math.max(settings.donUntil, Date.now() + ms); saveSettings(); donPaint(); }
