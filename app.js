@@ -124,7 +124,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 104, date: '2026-11-17', note: 'Foto degli autori dal nuovo indirizzo di Wikipedia (Flaiano), titolare della privacy' };
-var BUILD = {"t": "2026-11-18 10:02", "n": "104.4", "note": "Giro 4: guida di primo avvio (Menu › Info e aiuto › Come si usa) e libreria di esempio"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-18 10:58", "n": "104.5", "note": "Giro 5: X nella ricerca, bandiere come immagini, «Dal libro» con i film, Ricerca dei libri"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -224,15 +224,35 @@ $('#sbnCopy').addEventListener('click', async function () {
 $('#optSheet').addEventListener('click', function (e) {
   var b = e.target.closest('.svc-own'); if (!b || !window.NLAmici || !window.NLAmici.ownPart) return;
   var p = b.dataset.own, had = window.NLAmici.ownPart(p);
+  if (!had) { svcFold(p === 'sbn' ? 'sbn' : 'key', true); if (p !== 'sbn') gbShown = true; }
   renderSvc();
   if (!had) setTimeout(function () { try { $(p === 'sbn' ? '#sbnUrl' : '#gbKey').focus(); } catch (x) {} }, 50);
+});
+/* sezioni «Google Libri» e «Worker SBN» richiudibili (giro 5): chiuse si vedono stato, due righe e la guida */
+var svcOpenK = {}, gbShown = false;
+function svcFold(k, open) {
+  var box = $(k === 'sbn' ? '#svcSbn' : '#svcKey'); if (!box) return;
+  var o = open == null ? !svcOpenK[k] : !!open; svcOpenK[k] = o;
+  box.querySelector('.svc-tog').setAttribute('aria-expanded', o ? 'true' : 'false'); box.querySelector('.svc-b').hidden = !o; box.classList.toggle('open', o);
+}
+function gbMask(v) { return v.length > 10 ? v.slice(0, 4) + '…' + v.slice(-3) : '…'; }   // «AIza…7Gt»: la chiave non resta in vista (giro 5)
+$('#optSheet').addEventListener('click', function (e) {
+  var t = e.target.closest('.svc-tog'); if (t) { svcFold(t.closest('.svc').id === 'svcSbn' ? 'sbn' : 'key'); return; }
+  var g = e.target.closest('.svc-guide'); if (!g) return;
+  var k = g.dataset.guide, R = window.NLRicerche;
+  if (k === 'key' && R && R.guide) { R.guide(true); return; }
+  svcFold(k, true);
+  var d = $(k === 'sbn' ? '#sbnHow' : '#svcKey .svc-how'); if (d) { d.open = true; try { d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (x) {} }
 });
 function renderSvc() {
   var sb = settings.sbnUrl, gk = settings.gbKey, ls_ = isLent('sbn', sb), lk = isLent('key', gk), who = lent().nome || 'un amico';
   if (document.activeElement !== $('#sbnUrl')) $('#sbnUrl').value = ls_ ? '' : sb;
-  if (document.activeElement !== $('#gbKey')) $('#gbKey').value = lk ? '' : gk;
-  $('#sbnSt').textContent = ls_ ? 'Prestato' : sb ? 'In uso' : 'Non impostato'; $('#sbnSt').className = 'svc-st' + (sb ? ' on' : '');
-  $('#gbSt').textContent = lk ? 'Prestata' : gk ? 'In uso' : 'Nessuna chiave'; $('#gbSt').className = 'svc-st' + (gk ? ' on' : '');
+  var gi = $('#gbKey'), masked = !!gk && !lk && !gbShown;
+  if (document.activeElement !== gi) { gi.value = lk ? '' : masked ? gbMask(gk) : gk; gi.readOnly = masked; gi.dataset.mask = masked ? '1' : ''; }
+  $('#gbShow').hidden = !gk || lk; $('#gbShow').textContent = gbShown ? 'Nascondi' : 'Mostra'; $('#gbShow').setAttribute('aria-pressed', gbShown ? 'true' : 'false');
+  $('#sbnSt').textContent = ls_ ? 'Prestato da ' + who : sb ? 'In uso' : 'Non impostato'; $('#sbnSt').className = 'svc-st' + (sb ? ' on' : '');
+  $('#gbSt').textContent = lk ? 'Prestata da ' + who : gk ? 'In uso' : 'Nessuna chiave'; $('#gbSt').className = 'svc-st' + (gk ? ' on' : '');
+  $('#gbGuide').hidden = !!mine('key'); $('#sbnGuide').hidden = !!mine('sbn');
   $('#sbnClear').hidden = !sb || ls_; $('#gbClear').hidden = !gk || lk;
   [['sbn', ls_, 'il worker SBN di '], ['key', lk, 'la chiave Google di ']].forEach(function (x) {
     var box = $(x[0] === 'sbn' ? '#svcSbn' : '#svcKey'), row = box.querySelector('.svc-row'), note = box.querySelector('.svc-lent');

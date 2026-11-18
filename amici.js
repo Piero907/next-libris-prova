@@ -755,8 +755,9 @@ function ownKeys() {   // le tue, anche mentre usi quelle di un amico (tenute da
 function keysInner(full) {
   var own = ownKeys(), fr = friends(), out = keys.filter(function (k) { return k.da === uid(); }), inn = keys.filter(function (k) { return k.a === uid(); }), b = borrowed(), h = '';
   if ((own.gb || own.sbn) && fr.length) {
-    h += '<p class="fr-small">Presta ' + (own.gb && own.sbn ? 'la tua chiave API di Google Libri e il tuo worker SBN' : own.gb ? 'la tua chiave API di Google Libri' : 'il tuo worker SBN') + ' a un amico: li usate tutti e due e trova più libri. Tocca un amico per scegliere cosa prestare o per smettere.</p>' +
-      pickerHTML(fr, 'data-f="keyshare" data-id', function (x) { return !!outKey(x.id); }, function (x) { var k = outKey(x.id); return k ? lentLabel(k) : ''; });
+    h += '<p class="fr-small">Prestarli non ti costa niente e puoi smettere quando vuoi. Tocca un amico per scegliere cosa prestargli.</p>' +   // testo approvato (giro 5)
+      pickerHTML(fr, 'data-f="keyshare" data-id', function (x) { return !!outKey(x.id); }, function (x) { var k = outKey(x.id); return k ? lentLabel(k) : ''; }) +
+      '<p class="fr-small kw-n">' + lentText(lentCount()) + '.</p>';
   }
   inn.forEach(function (k) {
     var using = b && b.da === k.da, what = k.gb_key && k.sbn ? 'la sua chiave Google e il worker SBN' : k.gb_key ? 'la sua chiave Google' : 'il suo worker SBN';
@@ -766,6 +767,8 @@ function keysInner(full) {
   if (!h && full) h = '<p class="fr-small">Non hai ancora una chiave Google o un worker SBN da condividere: si impostano in Menu › Impostazioni › Ricerca dei libri. Se un amico condivide i suoi con te, li trovi qui.</p>';
   return h;
 }
+function lentCount() { var m = {}; keys.forEach(function (k) { if (k.da === uid()) m[k.a] = 1; }); return Object.keys(m).length; }   // amici a cui presti (chi la riceve con il link non si conta; giro 5)
+function lentText(n) { return n === 0 ? 'Non la usa ancora nessun amico' : n === 1 ? 'La usa 1 amico' : 'La usano ' + n + ' amici'; }
 function keysHTML(full) { var h = keysInner(full); return h ? '<section class="fr-sec" id="friKeys"><h3 class="fr-h">Chiave Google e worker SBN</h3>' + h + '</section>' : ''; }
 
 /* ---------- finestra «Chiave Google e worker» (da Condivisione; Piero, 16/11/2026): solo la chiave, e chiudendo torni dove eri ---------- */
@@ -793,7 +796,7 @@ function kwSheet() {
 function kwRow(k, t, sub) { return '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-kw="' + k + '">' + esc(t) + '<small>' + esc(sub) + '</small></button><span class="n" aria-hidden="true">›</span></li></ul>'; }
 function paintKw() {
   var el = document.getElementById('kwSheet'), body = document.getElementById('kwBody'); if (!el || el.hidden || !body) return;
-  var own = ownKeys(), b = borrowed(), h = '';
+  var own = ownKeys(), b = borrowed(), h = '', intro = '<p class="fr-small kw-intro">Una chiave Google Libri fa 1.000 ricerche al giorno. Con un uso normale bastano per te e per decine di amici. Il primo giorno, quando un amico carica la sua libreria, ne consuma di più: puoi aiutare fino a <b>6 amici nuovi al giorno</b> (50 libri ciascuno). Il worker ne regge migliaia.</p>';   // testo approvato (giro 5)
   if (!uid()) {
     h = '<p class="fr-small">Per prestarli agli amici, o per usare quelli che un amico ti presta, serve l\'account.</p><button class="btn primary" type="button" data-kw="login">Entra con il tuo account</button>';
     if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi usa Next Libris senza account.');
@@ -807,7 +810,7 @@ function paintKw() {
     if (own.gb || own.sbn) h += kwRow('link', 'Manda con un link', 'A chi non è tra i tuoi amici su Next Libris.');
   }
   if (!own.gb) h += kwRow('guide', 'Crea la tua chiave Google', 'È gratis: 1.000 ricerche al giorno solo per te.');
-  body.innerHTML = h;
+  body.innerHTML = intro + h;
 }
 function keyWin() {
   var el = kwSheet(); document.body.appendChild(el); el.hidden = false; paintKw();
@@ -1153,5 +1156,5 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();

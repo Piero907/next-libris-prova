@@ -254,9 +254,11 @@ if ('IntersectionObserver' in window) {
   }).observe($('#stickSentinel'));
 }
 window.addEventListener('resize', function () { updateStick(); });
+function qxSync() { var x = document.getElementById('qX'); if (x) x.hidden = !$('#q').value; }   // X nella ricerca: visibile solo con del testo (giro 5)
 function renderList() {
   clearTimeout(tGrid);
   setTimeout(updateStick, 0);
+  qxSync();
   if (scanning) return;
   if (gridGone()) { dropCard(); backToGrid(); return; }   // la vista resta quella scelta dopo ogni azione sul libro (Piero, 17/11/2026)
   donPaint(); nxBoxPaint();
@@ -594,7 +596,7 @@ function grpFace(kind, name, none, small) {
   var url = kind === 'aut' && !none ? aufGet(name) : '';
   var wait = kind === 'aut' && !none && url === null, inner;
   if (none) inner = '<b>?</b>';
-  else if (kind === 'pae') inner = '<span class="gc-flag" aria-hidden="true">' + wdFlag(wdCodeOf(name)) + '</span>' + (small ? '' : '<b class="gc-gn">' + esc(name) + '</b>');   // bandiera del paese (giro 2)
+  else if (kind === 'pae') inner = '<span class="gc-flag" aria-hidden="true">' + wdFlagImg(wdCodeOf(name)) + '</span>' + (small ? '' : '<b class="gc-gn">' + esc(name) + '</b>');   // bandiera del paese (giro 2)
   else if (kind === 'gen') inner = small ? genIco(name) : genIco(name) + '<b class="gc-gn">' + esc(name) + '</b>';
   else if (small) inner = '<b>' + esc(grpInitials(name)) + '</b>';
   else {

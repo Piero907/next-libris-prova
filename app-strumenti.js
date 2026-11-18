@@ -228,8 +228,9 @@ function renderSvcShare() {
   var nm = ($('#optName').value || settings.name || 'Piero').trim();
   $('#optNameHint').textContent = 'Compare quando condividi un libro o una lista: «I preferiti di ' + nm + '», «' + nm + ' ti consiglia un libro». Per un libro apri la sua scheda e tocca «Condividi»; per una lista usa «Condividi la lista» sopra l\'elenco, oppure Esporta.';
   var msb = mine('sbn'), mgk = mine('key'), b = lent(), bg = !!(b.gb && b.gb === settings.gbKey), bs = !!(b.sbn && b.sbn === settings.sbnUrl), h = '';
-  if (msb || mgk) h += svcRow('lend', 'Presta a un amico', (mgk && msb ? 'La tua chiave Google e il tuo worker SBN' : mgk ? 'La tua chiave Google' : 'Il tuo worker SBN') + ': li usate tutti e due e smetti quando vuoi.');
-  var A = window.NLAmici, off = !bg && !bs && A && A.offers ? A.offers() : [];
+  var A = window.NLAmici, nUse = A && A.lentCount ? A.lentCount() : -1;   // contatore: solo gli amici (giro 5)
+  if (msb || mgk) h += svcRow('lend', 'Presta a un amico', (mgk && msb ? 'La tua chiave Google e il tuo worker SBN' : mgk ? 'La tua chiave Google' : 'Il tuo worker SBN') + ': li usate tutti e due e smetti quando vuoi.' + (nUse >= 0 ? ' ' + A.lentText(nUse) + '.' : ''));
+  var off = !bg && !bs && A && A.offers ? A.offers() : [];
   if (off.length) h += svcRow('offer', off[0].nome + (off.length > 1 ? ' e altri ' + (off.length - 1) : '') + ' ti ' + (off.length > 1 ? 'prestano' : 'presta') + ' ' + (off[0].gb && off[0].sbn ? 'chiave Google e worker' : off[0].gb ? 'la chiave Google' : 'il worker SBN'), 'Tocca per usarli: la ricerca trova più libri.');
   if (bg || bs) h += svcRow('used', 'Usi ' + (bg && bs ? 'la chiave Google e il worker SBN' : bg ? 'la chiave Google' : 'il worker SBN') + ' di ' + (b.nome || 'un amico'), 'Prestati da un amico: tocca per vedere o per smettere di usarli.');
   if (!mgk) {
@@ -248,7 +249,7 @@ $('#svcBox').addEventListener('click', function (e) {
 function openSvcShare() {
   var msb = mine('sbn'), mgk = mine('key');
   if (!msb && !mgk) { toast('Non hai né chiave Google né worker tuoi da condividere: impostali in Menu › Impostazioni › Ricerca dei libri.'); return; }
-  $('#svcWhat').textContent = [msb ? 'Worker SBN: ' + svcShort('sbn', msb) : '', mgk ? 'Chiave Google: ' + svcShort('key', mgk) : ''].filter(Boolean).join(' · ');
+  $('#svcWhat').textContent = [mgk ? 'Chiave Google: ' + svcShort('key', mgk) : '', msb ? 'Worker SBN: ' + svcShort('sbn', msb) : ''].filter(Boolean).join(' · ');
   $('#svcSbnOn').checked = !!msb; $('#svcSbnOn').disabled = !msb;
   $('#svcKeyOn').checked = !!mgk; $('#svcKeyOn').disabled = !mgk;
   $('#svcSendName').value = settings.name || '';
@@ -282,8 +283,8 @@ function openSvcImport(o) {
   svcIn = { sb: sb, gk: gk };
   $('#svcInH').textContent = (from ? from + ' ti manda ' : 'Ti arrivano ') + (sb && gk ? 'chiave Google e worker SBN' : gk ? 'la chiave Google' : 'il worker SBN');
   var rows = [];
+  if (gk) rows.push('Chiave Google: ' + svcShort('key', gk) + (settings.gbKey && settings.gbKey !== gk ? ' (al posto della tua, che resta tra le salvate)' : settings.gbKey === gk ? ' (la usi già)' : ''));   // Google sempre prima del worker (giro 5)
   if (sb) rows.push('Worker SBN: ' + svcShort('sbn', sb) + (settings.sbnUrl && settings.sbnUrl !== sb ? ' (al posto del tuo, che resta tra i salvati)' : settings.sbnUrl === sb ? ' (lo usi già)' : ''));
-  if (gk) rows.push('Chiave Google: ' + svcShort('key', gk) + (settings.gbKey && settings.gbKey !== gk ? ' (al posto della tua, che resta tra le salvate)' : settings.gbKey === gk ? ' (la usi già)' : ''));
   $('#svcInList').innerHTML = rows.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('');
   $('#svcInSheet').hidden = false;
 }
@@ -294,7 +295,7 @@ $('#svcInUse').addEventListener('click', function () {
   if (x.sb) setSvc('sbn', x.sb);
   if (x.gk) setSvc('key', x.gk);
   closeSvcImport();
-  toast((x.sb && x.gk ? 'Worker e chiave in uso' : x.gk ? 'Chiave in uso' : 'Worker in uso') + '. Li trovi in Menu › Impostazioni › Ricerca dei libri.', { label: 'Annulla', fn: function () { setSvc('sbn', before.sbn); setSvc('key', before.key); } });
+  toast((x.sb && x.gk ? 'Chiave e worker in uso' : x.gk ? 'Chiave in uso' : 'Worker in uso') + '. Li trovi in Menu › Impostazioni › Ricerca dei libri.', { label: 'Annulla', fn: function () { setSvc('sbn', before.sbn); setSvc('key', before.key); } });
 });
 $('#svcInLater').addEventListener('click', function () {
   var x = svcIn; if (!x) return;

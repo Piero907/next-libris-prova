@@ -1,9 +1,9 @@
 /* Next Libris · modulo «Come si usa»: guida di primo avvio e libreria di esempio (giro 4, 18/11/2026).
    Modulo a parte: usa solo window.NL. Per toglierlo: cancellare guida.js e guida.css e le loro righe in index.html e in SHELL di sw.js
    (togli_modulo.py, nel ramo prove). Dati suoi: 'catalogo-libri-guida' ({ seen: 1 } quando la guida è stata vista).
-   - Sette schermate da sfogliare col dito (o con i tasti), «Salta» sempre in vista. Si apre da sola solo alla prima apertura in assoluto
-     (NL.firstRun: né libri né impostazioni sul telefono); chi aggiorna non la vede, ha «Cosa c'è di nuovo». Si riapre da Menu › Info e aiuto › Come si usa.
-   - «Prova adesso» apre la parte vera dell'app; nelle schermate 3, 4 e 5 apre la libreria di esempio.
+   - Otto schermate da sfogliare col dito, con un tocco ai lati dello schermo o con i tasti; «Salta» sempre in vista. Si apre da sola una volta,
+     ai nuovi e a chi usa già l'app (al primo avvio dopo l'aggiornamento: cfg.v < GV). Si riapre da Menu › Info e aiuto › Come si usa.
+   - «Prova adesso» apre la parte vera dell'app; nelle schermate 4, 5 e 6 apre la libreria di esempio.
    - Libreria di esempio: la modalità ospite dell'app (NL.guestEnter con info.esempio): solo da guardare, niente salvataggi né sincronizzazione,
      mai mescolata con i libri veri, fuori dalle statistiche. Zero chiamate: nessuna ricerca, niente Wikipedia/Wikidata (paesi e film sono
      scritti qui sotto), copertine disegnate dall'app, descrizioni brevi scritte da noi.
@@ -14,18 +14,21 @@ var NL = window.NL;
 if (!NL || !NL.guestEnter) return;
 var L = NL.L, esc = NL.esc, $ = NL.$;
 var LS = 'catalogo-libri-guida';
+var GV = 2;                                               // versione della guida: 2 = otto schermate (giro 5); chi ha visto una versione più vecchia la rivede una volta
 var cfg = {};
 try { cfg = JSON.parse(NL.ls.get(LS) || '{}') || {}; } catch (e) { cfg = {}; }
 function save() { NL.ls.set(LS, JSON.stringify(cfg)); }
 
-/* ---------- le sette schermate (testi approvati da Piero il 18/11/2026) ---------- */
+/* ---------- le otto schermate (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova) ---------- */
 var S = [
   { ico: 'tolib', h: 'Benvenuto',
     p: ['Next Libris è la tua libreria in tasca: i libri che hai, quelli che leggi e quelli che desideri.', 'È gratuita; se ti piace, puoi sostenerla.'] },
-  { ico: 'scan', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',
-    p: ['Tocca <b>+</b>: inquadra il codice a barre (<b>Scansiona</b>), fotografa la copertina (<b>Fotografa</b>) oppure scrivi titolo o ISBN (<b>Digita</b>).',
-      'Con <b>Per autore</b> trovi tutte le opere di uno scrittore. In libreria, <b>Ce l\'ho già?</b> ti dice subito se un libro ce l\'hai già.'],
-    more: { t: 'Per cercare di più, crea gratis la tua chiave: ti guidiamo noi.', go: 'key' } },
+  { ico: 'scan', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',   // testo riscritto (giro 5)
+    p: ['Tocca il <b>+</b> in basso e scegli come: <b>Scansiona</b> il codice a barre sul retro, <b>Fotografa</b> la copertina o <b>Digita</b> titolo o ISBN.',
+      'Con <b>Per autore</b> trovi tutti i libri di uno scrittore. In negozio, <b>Ce l\'ho già?</b> ti dice se un libro ce l\'hai già.'] },
+  { ico: 'gear', h: 'Trova più libri (facoltativo)', go: 'key', btn: 'Crea la chiave',   // schermata nuova: chiave e worker (giro 5)
+    p: ['Next Libris cerca i libri in archivi gratuiti. Con una <b>chiave Google Libri</b>, gratuita e tua, ne trova molti di più, con copertine e descrizioni. Si crea in 5 minuti e ti guidiamo passo passo.',
+      'Il <b>worker</b> aggiunge i dati delle biblioteche italiane. Se un amico ti presta la sua chiave, non devi crearla.'] },
   { ico: 'fav', h: 'La pagina del libro', go: 'book',
     p: ['Tocca un libro per aprirlo. Segna se lo stai leggendo o l\'hai già letto, dagli un voto con i <b>libricini</b>, mettilo tra i preferiti con la <b>stella</b> e tieni il segno con il <b>segnalibro</b>.',
       'La <b>matita</b> serve a correggere i dati. Se dal libro hanno tratto un film o una serie, lo trovi qui.'] },
@@ -70,16 +73,22 @@ function build() {
   el.addEventListener('pointerup', function (e) {
     if (x0 == null) return;
     var dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) go(G.i + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) { go(G.i + (dx < 0 ? 1 : -1)); return; }
+    /* tocco ai lati dello schermo (un quarto a sinistra / a destra), non su tasti o link: indietro / avanti (giro 5) */
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && !(e.target.closest && e.target.closest('button, a, input, label'))) {
+      var w = window.innerWidth || 360;
+      if (e.clientX < w * 0.25) go(G.i - 1);
+      else if (e.clientX > w * 0.75) { if (G.i >= screens().length - 1) close(); else go(G.i + 1); }
+    }
   });
   el.addEventListener('pointercancel', function () { x0 = null; });
 }
 function paint() {
   var list = screens(), s = list[G.i], n = list.length;
   $('#gdProg').innerHTML = list.map(function (x, k) { return '<span class="' + (k <= G.i ? 'on' : '') + '"></span>'; }).join('');
-  var tries = s.go ? '<button type="button" class="btn primary gd-try" data-gd="try" data-go="' + s.go + '">Prova adesso</button>' : '';
+  var tries = s.go ? '<button type="button" class="btn primary gd-try" data-gd="try" data-go="' + s.go + '">' + esc(s.btn || 'Prova adesso') + '</button>' : '';
   var more = s.more ? '<p class="gd-more">' + esc(s.more.t) + ' <button type="button" class="gd-link" data-gd="try" data-go="' + s.more.go + '">Prova adesso ›</button></p>' : '';
-  var ex = G.i === 2 || G.i === 3 || G.i === 4 ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
+  var ex = /^(book|sort|wish)$/.test(s.go || '') ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
   $('#gdStage').innerHTML = '<div class="gd-slide" data-gs="' + G.i + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(s.ico) + '</span>' +
     '<h2 class="gd-h">' + esc(s.h) + '</h2>' + s.p.map(function (t) { return '<p class="gd-p">' + t + '</p>'; }).join('') +
     more + (tries ? '<div class="gd-acts">' + tries + '</div>' + ex : '') + (s.end ? '<p class="gd-end">' + s.end + '</p>' : '') + '</div>';
@@ -95,7 +104,7 @@ function open(i) {
   G.i = Math.max(0, Math.min(i || 0, screens().length - 1));
   paint();
   G.el.hidden = false; document.body.classList.add('guida-open');
-  if (!cfg.seen) { cfg.seen = 1; save(); }
+  if (!cfg.seen || (cfg.v || 1) < GV) { cfg.seen = 1; cfg.v = GV; save(); }
   if (!G.pushed) { try { history.pushState({ guida: 1 }, ''); G.pushed = true; } catch (e) { if (window.nlErr) nlErr(e); } }
   setTimeout(function () { try { G.el.querySelector('.gd-next').focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } }, 30);
 }
@@ -253,7 +262,9 @@ function menu() {
 menu();
 
 /* prima apertura in assoluto: la guida si apre da sola (dopo la schermata d'apertura) */
-if (NL.firstRun && NL.firstRun() && !cfg.seen && !/[?&]amico=|#k=/.test(location.search + location.hash)) setTimeout(function () { if (!cfg.seen) open(0); }, 900);
+/* si apre da sola una volta: ai nuovi e, dal giro 5, anche a chi usa già l'app, al primo avvio dopo l'aggiornamento (GV = versione della guida) */
+function due() { return !cfg.seen || (cfg.v || 1) < GV; }
+if (due() && !/[?&]amico=|#k=/.test(location.search + location.hash)) setTimeout(function () { if (due() && !(NL.guest && NL.guest())) open(0); }, 900);
 
 window.NLGuida = { open: open, close: close, esempio: function (what) { enter(-1, what || ''); }, screens: function () { return screens().map(function (s) { return { h: s.h, go: s.go || '', sel: s.sel || '', mod: s.mod || '' }; }); } };
 })();

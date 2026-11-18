@@ -175,3 +175,4 @@ header.top .top-meta .gb-icos{position:absolute;right:max(4px,env(safe-area-inse
 /* nella propria libreria: icona della chiave in alto a destra, sulla riga «Libreria di …» (giro 1, 18/11/2026) */
 html:not(.guest) header.top .top-meta{position:relative}
 html:not(.guest) header.top .top-meta .gb-icos{top:-8px;margin-top:0}
+.fri .kw-intro{color:var(--ink);font-size:14px}

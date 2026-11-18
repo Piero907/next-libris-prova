@@ -101,7 +101,7 @@ function sheet() {
   var shut = function () { el.hidden = true; };
   el.addEventListener('click', function (e) { if (e.target === el) shut(); });
   el.querySelector('#kgClose').addEventListener('click', shut);
-  el.querySelector('#kgPaste').addEventListener('click', function () { shut(); NL.openOptions('search'); setTimeout(function () { var i = document.getElementById('gbKey'); if (i) i.focus(); }, 300); });
+  el.querySelector('#kgPaste').addEventListener('click', function () { shut(); NL.openOptions('search'); setTimeout(function () { if (NL.svcFold) NL.svcFold('key', true); var i = document.getElementById('gbKey'); if (i) i.focus(); }, 300); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) shut(); });
   return el;
 }

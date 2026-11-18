@@ -207,6 +207,12 @@ details.opts summary{cursor:pointer;padding:6px 0}
 
 /* ---- barra strumenti ---- */
 .tools input[type="search"]{flex:1 1 150px;min-width:0}
+.tools .qwrap{position:relative;display:flex;flex:1 1 150px;min-width:0}
+.tools .qwrap input[type="search"]{flex:1 1 auto;width:100%;padding-right:44px}
+#q::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+.qx{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qx:hover,.qx:focus-visible{color:var(--ink);background:var(--surface2)}
+.qx[hidden]{display:none}
 .tools select{flex:0 1 150px;min-width:0}
 .acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;flex:1 1 100%}
 .btn.sm{flex-direction:column;gap:3px;min-height:58px;padding:6px 2px;font-size:12.5px;line-height:1.15;text-align:center;font-weight:600}
@@ -920,6 +926,19 @@ svg.qr path{fill:none;stroke-linecap:butt}
 .schip-x{flex:none;padding:0 11px 0 7px;color:var(--muted);font-size:18px;line-height:1}
 .schip button:hover{background:var(--accent-soft)}
 .svc .hint{margin:0}
+.svc-fold{gap:6px}   /* sezioni richiudibili di Ricerca dei libri (giro 5) */
+button.svc-h.svc-tog{width:100%;min-height:44px;margin:-6px 0 0;padding:4px 0;border:0;background:none;color:var(--ink);text-align:left;cursor:pointer;align-items:center;font:inherit}
+.svc-tog .svc-t{flex:1 1 auto;min-width:0;font:600 18px/1.2 var(--font-display)}
+.svc-tog .svc-st{margin-top:0}
+.svc-chev{flex:none;width:10px;height:10px;margin:0 4px 4px 2px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .15s}
+.svc-fold.open .svc-chev{transform:rotate(-135deg);margin-bottom:-4px}
+.svc-desc{font-size:14px;line-height:1.4}
+.btn.svc-guide{justify-self:start;min-height:40px;padding:6px 14px;font-size:14px}
+.btn.svc-guide[hidden]{display:none}
+.svc-b{display:grid;gap:10px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
+.svc-b[hidden]{display:none}
+#gbKey[readonly]{color:var(--muted);letter-spacing:.02em;cursor:pointer}
+.btn.svc-show[hidden]{display:none}
 .svc-how summary{cursor:pointer;min-height:36px;display:flex;align-items:center;font-size:14px;font-weight:600;color:var(--accent)}
 .svc-how .keysteps{margin:6px 0 0}
 .opt-sec>*{min-width:0}
@@ -1799,17 +1818,24 @@ body.gridview #list{touch-action:pan-x pan-y}
 .au-pa .aup-list .msg{margin:6px 4px}
 .gc-flag{font-size:44px;line-height:1}
 .gc-face.sm .gc-flag{font-size:20px}
+img.flag{display:inline-block;width:1.34em;height:1em;object-fit:cover;border-radius:2px;vertical-align:-.14em;margin-right:.35em;box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 14%,transparent)}   /* bandiere come immagini (giro 5) */
+.gc-flag img.flag{display:block;width:56px;height:42px;margin:0;border-radius:4px}
+.gc-face.sm .gc-flag img.flag{width:24px;height:18px;border-radius:2px}
+.w-flags img.flag,.pf-flags img.flag{margin-right:0}
 .st-pa-note b{color:var(--ink);font-weight:600}
 .st-pa-wait{display:flex;align-items:center;gap:8px}
-.filmbox{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.45;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.filmbox{display:block;font-size:14.5px;line-height:1.4;padding:4px 12px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}   /* «Dal libro»: film e serie TV (giro 5) */
 .filmbox[hidden]{display:none}
-.filmbox .fm-ico{flex:none;width:20px;height:20px;margin-top:1px;color:var(--accent)}
-.filmbox .fm-ico svg{width:20px;height:20px;display:block}
-.filmbox .fm-b{min-width:0}
-.filmbox p{margin:0}
-.filmbox p + p{margin-top:3px}
-.filmbox b{font-weight:600}
-.filmbox a,.fm-films a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.filmbox .fl-h{margin:6px 0 2px;font-size:13px;font-weight:600;color:var(--muted)}
+.filmbox .fl-row{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 0;color:var(--ink);text-decoration:none}
+.filmbox .fl-row + .fl-row{border-top:1px solid var(--line)}
+.filmbox .fl-e{flex:none;font-size:18px;line-height:1}
+.filmbox .fl-m{flex:1;min-width:0}
+.filmbox .fl-m b{font-weight:600}
+.filmbox .fl-go{flex:none;font-size:22px;line-height:1;color:var(--muted)}
+.filmbox a.fl-row:hover b,.filmbox a.fl-row:focus-visible b{color:var(--accent)}
+.filmbox .fl-more{margin:2px 0 4px;font-size:13px}
+.fm-films a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 .fm-x{color:var(--muted)}
 @media (min-width:880px){ .filmbox{grid-column:1 / -1} }
 .fm-list{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:10px}

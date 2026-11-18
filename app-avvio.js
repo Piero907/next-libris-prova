@@ -319,6 +319,7 @@ function endSheetDrag() {
 document.addEventListener('touchend', endSheetDrag);
 document.addEventListener('touchcancel', endSheetDrag);
 $('#q').addEventListener('input', function (e) { q = e.target.value; collapseCards(); renderList(); });
+$('#qX').addEventListener('click', function () { q = ''; $('#q').value = ''; collapseCards(); renderList(); updateSummary(); });   // solo il testo: i filtri restano (giro 5)
 /* × in alto a destra in tutte le finestre (Piero, 17/11/2026 sera): si aggiunge da sola a ogni finestra che ha «Chiudi» o «Ho capito»
    (anche a quelle create dai moduli) e fa lo stesso tocco di quel tasto, che resta in fondo. Le richieste con «Annulla» restano com'erano. */
 function sheetCloser(s) {
@@ -598,7 +599,10 @@ $('#sbnUrl').addEventListener('change', function (e) {
   if (v) toast('Worker SBN in uso. Premi «Prova la ricerca ISBN» per controllare.');
   else toast('Worker tolto: ora cerco senza il catalogo SBN.', { label: 'Annulla', fn: function () { setSvc('sbn', before); } });
 });
+$('#gbShow').addEventListener('click', function () { gbShown = !gbShown; renderSvc(); });
+$('#gbKey').addEventListener('click', function (e) { if (e.target.dataset.mask === '1') { gbShown = true; renderSvc(); e.target.focus(); } });   // tocco sulla chiave coperta: si scopre per cambiarla
 $('#gbKey').addEventListener('change', function (e) {
+  if (e.target.dataset.mask === '1') return;
   var v = e.target.value.replace(/\s+/g, ''), before = settings.gbKey;
   if (v === before) { e.target.value = v; return; }
   e.target.value = v; setSvc('key', v);
@@ -926,13 +930,13 @@ window.NL = {
   setFlt: function (v) { flt = v; collapseCards(); renderList(); updateSummary(); if (typeof updateActiveFilters === 'function') updateActiveFilters(); }, flt: function () { return flt; }, goal: function () { return settings.goal || 0; },
   closeDrawer: function () { closeDrawer(); }, fromMenu: fromMenu, refresh: function () { renderList(); updateSummary(); },
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
-  wdBookCountry: wdBookCountry, wdFlag: wdFlag, wdCName: wdCName, films: function () { return filmsMine(); }, openFilms: function () { openFilms(); }, openWorks: function () { openWorks('', '', true); },   // Wikidata (giro 2)
+  wdBookCountry: wdBookCountry, wdFlag: wdFlag, wdFlagImg: wdFlagImg, wdCName: wdCName, films: function () { return filmsMine(); }, openFilms: function () { openFilms(); }, openWorks: function () { openWorks('', '', true); },   // Wikidata (giro 2)
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
   updateStick: function () { updateStick(); }, summary: function () { updateSummary(); }, autosize: function (el) { autosizeAll(el); },
   rdLong: function (v) { return rdLong(v); }, get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); },
   quota: function () { rollQuota(); return { d: quota.d, ds: quota.ds, g: quota.g, s: quota.s }; },   // contatore condiviso (modulo ricerche.js)
   setShared: function (k, n, day) { if (k === 'g') { shared.g = n; shared.d = day; } else { shared.s = n; shared.ds = day; } if (!$('#optSheet').hidden) updateQuotaInfo(); },
-  svc: function () { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl }; }, contactURL: function () { return contactURL(); }, backupCfg: function () { return backupCfg(); }, openOptions: function (sec) { openOptions(sec); },
+  svc: function () { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl }; }, contactURL: function () { return contactURL(); }, backupCfg: function () { return backupCfg(); }, openOptions: function (sec) { openOptions(sec); }, svcFold: function (k, o) { svcFold(k, o); },
   fields: FIELDS, clean: function (x) { return cleanBook(x); }, stored: function () { return storable(); }, save: function () { touch(); }   // per la sincronizzazione (modulo social)
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };

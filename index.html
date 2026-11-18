@@ -89,7 +89,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
 
   <section class="tools" aria-label="Strumenti">
     <button class="btn filt" id="btnFilters" aria-expanded="false" aria-controls="drawer"><span id="icoFilt" aria-hidden="true"></span>Filtri<span class="badge" id="fltBadge" hidden></span></button>
-    <input id="q" type="search" placeholder="Cerca nell'elenco" aria-label="Cerca nell'elenco" autocomplete="off">
+    <span class="qwrap"><input id="q" type="search" placeholder="Cerca nell'elenco" aria-label="Cerca nell'elenco" autocomplete="off"><button type="button" class="qx" id="qX" aria-label="Cancella la ricerca" title="Cancella la ricerca" hidden>×</button></span>   <!-- X: cancella solo il testo, non i filtri (giro 5) -->
     <div class="acts">
       <button class="btn sm" id="btnView"></button>
       <button class="btn sm" id="btnCheck"></button>
@@ -552,8 +552,8 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
   <form class="sheet-in" id="svcForm" role="dialog" aria-modal="true" aria-labelledby="svcH">
     <h2 id="svcH">Condividi chiave e worker</h2>
     <p class="msg" id="svcWhat"></p>
-    <label class="check"><input type="checkbox" id="svcSbnOn"><span>Worker SBN (catalogo delle biblioteche)</span></label>
     <label class="check"><input type="checkbox" id="svcKeyOn"><span>Chiave Google Libri</span></label>
+    <label class="check"><input type="checkbox" id="svcSbnOn"><span>Worker SBN (catalogo delle biblioteche)</span></label>
     <label class="field"><span>Il tuo nome</span><input type="text" id="svcSendName" enterkeyhint="done" maxlength="30" autocomplete="given-name" autocapitalize="words" placeholder="es. Piero"></label>
     <div class="svc-warn">
       <p><b>Mandalo solo a persone di fiducia, in un messaggio privato.</b> Chi ha il link usa la tua quota: Google 1.000 ricerche al giorno, Cloudflare 100.000, divise tra chi le usa. Non costa nulla, ma se finisce la quota le ricerche rallentano per tutti fino al giorno dopo.</p>
@@ -654,46 +654,23 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       </fieldset>
     </section>
     <section class="opt-sec" data-sec="search" data-title="Ricerca dei libri">
-      <p class="hint">Senza worker e senza chiave l'app cerca lo stesso (Google Libri e Open Library): servono a fare più ricerche e ad avere dati più precisi.</p>
+      <p class="hint">Chiave e worker sono facoltativi: servono a trovare più libri e ad avere dati più precisi.</p>
       <button class="btn primary" id="svcRestore" type="button" hidden>Rimetti chiave e worker salvati</button>
 
-      <div class="svc" id="svcSbn">
-        <div class="svc-h">
-          <h3>Catalogo SBN<small>Worker Cloudflare</small></h3>
-          <span class="svc-st" id="sbnSt"></span>
-        </div>
-        <p class="svc-count" id="sbnCount" aria-live="polite"></p>
-        <div class="svc-row">
-          <label class="sr" for="sbnUrl">Indirizzo del worker Cloudflare</label>
-          <input type="url" id="sbnUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla l'indirizzo del worker">
-        </div>
-        <div class="svc-acts">
-          <button class="btn svc-clear" id="sbnClear" type="button" hidden>Cancella</button>
-          <div class="svc-saved" id="sbnSaved" hidden></div>
-        </div>
-        <p class="hint">Il catalogo delle biblioteche italiane ha i dati più precisi su editore, anno e pagine. Il worker è un piccolo intermediario gratuito su Cloudflare (100.000 richieste al giorno).</p>
-        <details class="svc-how" id="sbnHow">
-          <summary>Come si crea il worker (gratis, una volta sola)</summary>
-          <ol class="hint keysteps">
-          <li>Meglio da computer o tablet: apri <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">dash.cloudflare.com</a> e crea un account gratuito.</li>
-          <li>A sinistra «Workers &amp; Pages» › «Create» › «Start with Hello World!». Come nome scrivi <b>sbn-libri</b> e premi «Deploy».</li>
-          <li>Premi «Edit code», cancella tutto il codice di esempio e incolla il codice del worker, poi premi «Deploy».
-            <button class="btn sbn-copy" id="sbnCopy" type="button">Copia il codice del worker</button></li>
-          <li>Copia l'indirizzo del worker (tipo <b>sbn-libri.tuonome.workers.dev</b>) e incollalo qui sopra.</li>
-          <li>Tocca «Prova la ricerca ISBN» qui sotto: deve comparire «✓ Catalogo SBN».</li>
-          </ol>
-        </details>
-      </div>
-
-      <div class="svc" id="svcKey">
-        <div class="svc-h">
-          <h3>Google Libri<small>Chiave API</small></h3>
+      <div class="svc svc-fold" id="svcKey">   <!-- sezioni richiudibili, Google sopra il worker (giro 5) -->
+        <button type="button" class="svc-h svc-tog" aria-expanded="false" aria-controls="svcKeyB">
+          <span class="svc-t">Google Libri</span>
           <span class="svc-st" id="gbSt"></span>
-        </div>
+          <span class="svc-chev" aria-hidden="true"></span>
+        </button>
+        <p class="hint svc-desc">Trova titoli, copertine e descrizioni nell'archivio di Google. Senza chiave l'app usa solo Open Library e trova meno libri.</p>
+        <button class="btn svc-guide" type="button" data-guide="key" id="gbGuide">Come si crea la chiave (gratis)</button>
+        <div class="svc-b" id="svcKeyB" hidden>
         <p class="svc-count" id="gbCount" aria-live="polite"></p>
         <div class="svc-row">
           <label class="sr" for="gbKey">Chiave API di Google Libri</label>
           <input type="text" id="gbKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla la chiave (inizia con AIza)">
+          <button class="btn svc-show" type="button" id="gbShow" aria-pressed="false" hidden>Mostra</button>
         </div>
         <div class="svc-acts">
           <button class="btn svc-clear" id="gbClear" type="button" hidden>Cancella</button>
@@ -708,7 +685,42 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
           <li>Copia la chiave e incollala qui sopra.</li>
         </ol>
         </details>
+        </div>
       </div>
+
+
+      <div class="svc svc-fold" id="svcSbn">
+        <button type="button" class="svc-h svc-tog" aria-expanded="false" aria-controls="svcSbnB">
+          <span class="svc-t">Worker SBN</span>
+          <span class="svc-st" id="sbnSt"></span>
+          <span class="svc-chev" aria-hidden="true"></span>
+        </button>
+        <p class="hint svc-desc">Aggiunge i dati delle biblioteche italiane: editore, anno e pagine più precisi. Il worker è un piccolo intermediario gratuito su Cloudflare (100.000 richieste al giorno).</p>
+        <button class="btn svc-guide" type="button" data-guide="sbn" id="sbnGuide">Come si crea il worker (gratis)</button>
+        <div class="svc-b" id="svcSbnB" hidden>
+        <p class="svc-count" id="sbnCount" aria-live="polite"></p>
+        <div class="svc-row">
+          <label class="sr" for="sbnUrl">Indirizzo del worker Cloudflare</label>
+          <input type="url" id="sbnUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla l'indirizzo del worker">
+        </div>
+        <div class="svc-acts">
+          <button class="btn svc-clear" id="sbnClear" type="button" hidden>Cancella</button>
+          <div class="svc-saved" id="sbnSaved" hidden></div>
+        </div>
+        <details class="svc-how" id="sbnHow">
+          <summary>Come si crea il worker (gratis, una volta sola)</summary>
+          <ol class="hint keysteps">
+          <li>Meglio da computer o tablet: apri <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">dash.cloudflare.com</a> e crea un account gratuito.</li>
+          <li>A sinistra «Workers &amp; Pages» › «Create» › «Start with Hello World!». Come nome scrivi <b>sbn-libri</b> e premi «Deploy».</li>
+          <li>Premi «Edit code», cancella tutto il codice di esempio e incolla il codice del worker, poi premi «Deploy».
+            <button class="btn sbn-copy" id="sbnCopy" type="button">Copia il codice del worker</button></li>
+          <li>Copia l'indirizzo del worker (tipo <b>sbn-libri.tuonome.workers.dev</b>) e incollalo qui sopra.</li>
+          <li>Tocca «Prova la ricerca ISBN» qui sotto: deve comparire «✓ Catalogo SBN».</li>
+          </ol>
+        </details>
+        </div>
+      </div>
+
 
       <h3 class="opt-h3">Con gli amici</h3>
       <div class="svc-box dmenu" id="svcBox"></div>

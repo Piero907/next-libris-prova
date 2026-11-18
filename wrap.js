@@ -113,7 +113,7 @@ function slides(d) {
   if (d.countries && d.countries.length) {
     var pn = d.countries.length;
     out.push({ cls: 'w-c4', html: '<p class="w-kick">Con i libri letti</p><p class="w-mid">Hai viaggiato in ' + (pn === 1 ? '1 paese' : pn + ' paesi') + '</p>' +
-      '<p class="w-flags" aria-hidden="true">' + d.countries.map(function (x) { return '<span>' + NL.wdFlag(x.c) + '</span>'; }).join('') + '</p>' +
+      '<p class="w-flags" aria-hidden="true">' + d.countries.map(function (x) { return '<span>' + (NL.wdFlagImg ? NL.wdFlagImg(x.c) : NL.wdFlag(x.c)) + '</span>'; }).join('') + '</p>' +
       '<p class="w-sub">' + esc(d.countries.map(function (x) { return NL.wdCName(x.c) + (x.n > 1 ? ' (' + x.n + ')' : ''); }).join(', ')) + '</p>' });
   }
   if (d.longest || d.best) {

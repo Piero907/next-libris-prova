@@ -61,7 +61,12 @@ function wdCountry(name) {                               // il paese dell'autore
 }
 function wdBirth(name) { var x = wdEntry(name), b = x ? wdCode(x.b) : ''; return b && b !== wdCountry(name) ? b : ''; }
 function wdBookCountry(b) { var a0 = authorsOf(b)[0]; return a0 ? wdCountry(a0) : ''; }   // come nei gruppi: conta il primo autore
-function wdCLabel(c) { return wdFlag(c) + ' ' + wdCName(c); }
+function wdCLabel(c) { return wdCName(c); }               // solo testo (avvisi, pillola del filtro): l'emoji su Windows diventa due lettere
+function wdFlagImg(c, cls) {                             // bandiera come piccola immagine dell'app (vendor/flags, da flag-icons, MIT): si scarica solo quella che serve (giro 5)
+  c = wdCode(c); if (!c) return '';
+  return '<img class="flag' + (cls ? ' ' + cls : '') + '" src="vendor/flags/' + c.toLowerCase() + '.webp" alt="" width="20" height="15" loading="lazy" decoding="async">';
+}
+function wdCLabelH(c) { var n = wdCName(c); return n ? wdFlagImg(c) + esc(n) : ''; }   // bandiera + nome, per l'HTML
 
 /* ---------- le domande a Wikidata ---------- */
 /* il servizio ogni tanto risponde 502 o 503 per un attimo (visto il 18/11/2026): si riprova una volta dopo due secondi */
@@ -219,7 +224,7 @@ function auPaPaint(name, open) {
   var box = $('#auPa'); if (!box) return;
   auPaOpen = !!open;
   var k = wdKey(name), man = wdCode(settings.auPa[k]), x = wdEntry(name), c = wdCountry(name), b = wdBirth(name);
-  var txt = c ? '<b>' + esc(wdCLabel(c)) + '</b>' + (b ? ' <span class="aup-b">(nascita: ' + esc(wdCLabel(b)) + ')</span>' : '') + (man ? ' <small>(corretto)</small>' : '')
+  var txt = c ? '<b>' + wdCLabelH(c) + '</b>' + (b ? ' <span class="aup-b">(nascita: ' + wdCLabelH(b) + ')</span>' : '') + (man ? ' <small>(corretto)</small>' : '')
     : x || navigator.onLine === false ? 'non trovato' : '<span class="aup-wait">lo sto cercando…</span>';
   var h = '<p class="auc-now">Paese: ' + txt + ' <button type="button" class="link" data-aup="open" aria-expanded="' + !!open + '">' + (open ? 'Chiudi' : c ? 'Correggi' : 'Scegli') + '</button></p>';
   if (open) {
@@ -236,7 +241,7 @@ function auPaList(text) {
   var hit = nq ? all.filter(function (x) { return L.norm(x[1]).indexOf(nq) === 0; }).concat(all.filter(function (x) { return L.norm(x[1]).indexOf(nq) > 0; }))
     : ['IT', 'FR', 'GB', 'US', 'DE', 'ES', 'RU', 'JP'].map(function (c) { return [c, wdCName(c)]; });
   el.innerHTML = hit.slice(0, 8).map(function (x) {
-    return '<button type="button" class="pk-o" role="option" data-aup="' + x[0] + '"><span aria-hidden="true">' + wdFlag(x[0]) + '</span><span>' + esc(x[1]) + '</span></button>';
+    return '<button type="button" class="pk-o" role="option" data-aup="' + x[0] + '"><span aria-hidden="true">' + wdFlagImg(x[0]) + '</span><span>' + esc(x[1]) + '</span></button>';
   }).join('') || '<p class="msg">Nessun paese con questo nome.</p>';
 }
 function auPaSet(code) {
@@ -282,7 +287,7 @@ function wdStatsHTML() {
   var note = [st.it || st.ext ? 'Autori italiani: <b>' + libri(st.it) + '</b> · stranieri: <b>' + libri(st.ext) + '</b>' : '', st.none && !left ? 'paese non trovato: ' + libri(st.none) : ''].filter(Boolean).join(' · ');
   return '<section class="st-sec" id="stPaesi"><h3>Paesi degli autori</h3>' +
     (st.items.length ? '<div class="bars">' + st.items.slice(0, 12).map(function (x) {
-      return '<button class="bar-row" data-sf="pa" data-sv="' + x.c + '" title="Mostra questi libri"><span class="bl">' + esc(x.k) + '</span><span class="bt"><span class="bf" style="width:' + Math.max(2, Math.round(x.n / max * 100)) + '%"></span></span><span class="bv">' + x.n + '</span></button>';
+      return '<button class="bar-row" data-sf="pa" data-sv="' + x.c + '" title="Mostra questi libri"><span class="bl">' + wdCLabelH(x.c) + '</span><span class="bt"><span class="bf" style="width:' + Math.max(2, Math.round(x.n / max * 100)) + '%"></span></span><span class="bv">' + x.n + '</span></button>';
     }).join('') + '</div>' + (st.items.length > 12 ? '<p class="msg">E altri ' + (st.items.length - 12) + ' paesi: li trovi tutti nei Filtri.</p>' : '') : '') +
     (note ? '<p class="msg st-pa-note">' + note + '</p>' : '') +
     (left ? '<p class="msg st-pa-wait"><span class="spin" aria-hidden="true"></span>Sto cercando su Wikipedia il paese di ' + (left === 1 ? 'un autore' : left + ' autori') + '…</p>' : '') + '</section>';
@@ -298,8 +303,8 @@ function paDrawerHTML() {
   if (!f.items.length && !paFlt) return '';
   var MAXP = 8, open = drawerMore.pa || f.items.length <= MAXP + 2, shown = open ? f.items : f.items.slice(0, MAXP);
   if (!open && paFlt && paFlt !== NONE && !shown.some(function (x) { return x.c === paFlt; })) { var cur = f.items.find(function (x) { return x.c === paFlt; }); if (cur) shown = shown.concat([cur]); }
-  var pill = function (v, label, n, cls) { return '<button type="button" class="dpill' + (cls || '') + '" data-g="pa" data-v="' + esc(v) + '" aria-pressed="' + (paFlt === v ? 'true' : 'false') + '">' + esc(label) + '<span class="n">' + n + '</span></button>'; };
-  return '<h3>Paese dell\'autore</h3><div class="dpills">' + shown.map(function (x) { return pill(x.c, x.k, x.n); }).join('') +
+  var pill = function (v, html, n, cls) { return '<button type="button" class="dpill' + (cls || '') + '" data-g="pa" data-v="' + esc(v) + '" aria-pressed="' + (paFlt === v ? 'true' : 'false') + '">' + html + '<span class="n">' + n + '</span></button>'; };
+  return '<h3>Paese dell\'autore</h3><div class="dpills">' + shown.map(function (x) { return pill(x.c, wdCLabelH(x.c), x.n); }).join('') +
     (f.none ? pill(NONE, 'Non trovato', f.none, ' none-sh') : '') +
     (open ? '' : '<button type="button" class="dpill more" data-g="more" data-v="pa">Altri ' + (f.items.length - shown.length) + '…</button>') + '</div>';
 }
@@ -323,12 +328,25 @@ function filmOne(f) {
   var extra = [f.y || '', f.d || ''].filter(Boolean).join(', ');
   return (f.u ? '<a href="' + esc(f.u) + '" target="_blank" rel="noopener">' + esc(f.t) + '</a>' : '<span class="fm-t">' + esc(f.t) + '</span>') + (extra ? ' <span class="fm-x">(' + esc(extra) + ')</span>' : '');
 }
-function filmInner(b) {
+function filmDir(d) {                                     // «Luchino Visconti» -> «L. Visconti»
+  var w = String(d || '').trim().split(/\s+/).filter(Boolean);
+  if (w.length < 2) return w.join(' ');
+  var last = w.pop();
+  while (w.length && /^(de|di|da|del|della|van|von|der|le|la)$/i.test(w[w.length - 1])) last = w.pop() + ' ' + last;
+  return w.map(function (x) { return x.split('-').map(function (y) { return y.charAt(0).toUpperCase() + '.'; }).join('-'); }).join(' ') + ' ' + last;   // «Jean-Jacques» -> «J.-J.»
+}
+function filmLine(f) {                                    // «🎬 Il Gattopardo — film, 1963 · regia di L. Visconti ›»: il tocco apre Wikipedia (giro 5)
+  var what = (f.s ? 'serie TV' : 'film') + (f.y ? ', ' + f.y : '') + (f.d ? ' · regia di ' + filmDir(f.d) : '');
+  var inner = '<span class="fl-e" aria-hidden="true">' + (f.s ? '📺' : '🎬') + '</span><span class="fl-m"><b>' + esc(f.t) + '</b> <span class="fm-x">— ' + esc(what) + '</span></span>';
+  return f.u ? '<a class="fl-row" href="' + esc(f.u) + '" target="_blank" rel="noopener" title="Apri su Wikipedia">' + inner + '<span class="fl-go" aria-hidden="true">›</span></a>'
+    : '<div class="fl-row">' + inner + '</div>';
+}
+function filmInner(b) {                                   // sezione «Dal libro»: prima i film, poi le serie, in ordine di anno
   var fs = wdFilms(b);
   if (!fs.length) return '';
-  var mv = fs.filter(function (f) { return !f.s; }), tv = fs.filter(function (f) { return f.s; });
-  var line = function (lab, a) { return a.length ? '<p><b>' + lab + '</b> ' + a.slice(0, 4).map(filmOne).join(' · ') + (a.length > 4 ? ' <span class="fm-x">e altri ' + (a.length - 4) + '</span>' : '') + '</p>' : ''; };
-  return '<span class="fm-ico">' + FILM_ICO + '</span><div class="fm-b">' + line('Al cinema:', mv) + line('Serie TV:', tv) + '</div>';
+  var by = function (x, y) { return (x.y || 9999) - (y.y || 9999); };
+  var all = fs.filter(function (f) { return !f.s; }).sort(by).concat(fs.filter(function (f) { return f.s; }).sort(by)), MAX = 6;
+  return '<p class="fl-h">Dal libro</p>' + all.slice(0, MAX).map(filmLine).join('') + (all.length > MAX ? '<p class="fl-more fm-x">e altri ' + (all.length - MAX) + '</p>' : '');
 }
 function filmHTML(b, off) {                               // riga nella scheda del libro; vuota finche' non si trova un film
   if (off || !b.t) return '';

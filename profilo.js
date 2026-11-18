@@ -178,7 +178,7 @@ function statsHTML(st, own) {
   if (st.y === y) row('Nel ' + y, nf(st.ly), st.pgy ? nf(st.pgy) + ' pagine' : '');
   if (st.au) row('Autore più letto', esc(st.au), st.aun + (st.aun === 1 ? ' libro' : ' libri'));
   if (st.ge) row('Genere più letto', esc(st.ge), st.gen + (st.gen === 1 ? ' libro' : ' libri'));
-  if ((st.pa || []).length && NL.wdFlag) row('Paesi dei libri letti', '<span class="pf-flags">' + st.pa.filter(function (c) { return /^[A-Z]{2}$/.test(c); }).map(function (c) { return '<span title="' + esc(NL.wdCName ? NL.wdCName(c) : c) + '">' + NL.wdFlag(c) + '</span>'; }).join(' ') + '</span>');
+  if ((st.pa || []).length && NL.wdFlag) row('Paesi dei libri letti', '<span class="pf-flags">' + st.pa.filter(function (c) { return /^[A-Z]{2}$/.test(c); }).map(function (c) { return '<span title="' + esc(NL.wdCName ? NL.wdCName(c) : c) + '">' + (NL.wdFlagImg ? NL.wdFlagImg(c) : NL.wdFlag(c)) + '</span>'; }).join(' ') + '</span>');
   row('Libri prestati', nf(st.pr), st.pr ? 'adesso' : '');
   return '<section class="fr-sec"><h3 class="fr-h">' + (own ? 'I tuoi numeri' : 'I suoi numeri') + '</h3><dl class="pf-dl">' + r.join('') + '</dl></section>';
 }
