@@ -4,7 +4,8 @@
 const COPIA = (self.registration.scope.match(/\/next-libris-([a-z]+)\//) || [])[1] || '';
 const CACHE = (COPIA ? COPIA + '-' : '') + 'catalogo-libri-v104';
 const MINE = (k) => (COPIA ? k.startsWith(COPIA + '-') : !/^[a-z]+-catalogo-libri-/.test(k));
-const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app.js', 'lib.js', 'manifest.json',
+const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app.js', 'app-aggiungi.js', 'app-vista.js', 'app-scheda.js', 'app-per-te.js', 'app-elenco.js', 'app-finestre.js', 'app-filtri.js', 'app-strumenti.js', 'app-wiki.js', 'app-avvio.js',   // app.js divisa in parti (17/11/2026)
+  'lib.js', 'manifest.json',
   'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/fonts/bricolage-latin.woff2', 'vendor/fonts/plex-latin-400.woff2', 'vendor/fonts/plex-latin-500.woff2', 'vendor/fonts/plex-latin-600.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md',
   'wrap.js', 'wrap.css',   // modulo: riepilogo ogni tre mesi
   'layout.js', 'layout.css',   // modulo: disposizione dello schermo

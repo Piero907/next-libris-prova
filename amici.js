@@ -404,7 +404,7 @@ async function openGuest(id) {
 var entering = false;
 function guestBar() {
   var g = NL.guest && NL.guest(), bar = document.getElementById('guestBar');
-  if (!g) { if (bar) bar.hidden = true; ['guestKey', 'guestSwap', 'guestDrop'].forEach(function (i) { var k0 = document.getElementById(i); if (k0) k0.hidden = true; }); var m0 = document.querySelector('header.top .top-meta'); if (m0) m0.style.paddingRight = ''; return; }
+  if (!g) { if (bar) bar.hidden = true; ['guestKey', 'guestSwap', 'guestDrop'].forEach(function (i) { var k0 = document.getElementById(i); if (k0) k0.hidden = true; }); ownKeyIco(); return; }
   if (!bar) {
     var top = document.querySelector('header.top'); if (!top) return;
     bar = document.createElement('section'); bar.id = 'guestBar'; bar.className = 'guest-bar';
@@ -412,7 +412,7 @@ function guestBar() {
     bar.addEventListener('click', function (e) {
       var b = e.target.closest('[data-g]'); if (!b) return;
       if (b.dataset.g === 'back') NL.guestExit();
-      else if (b.dataset.g === 'notmine') NL.setFlt(NL.flt() === 'notmine' ? '' : 'notmine'), guestBar();
+      else if (b.dataset.g === 'notmine' || b.dataset.g === 'common') NL.setFlt(NL.flt() === b.dataset.g ? '' : b.dataset.g), guestBar();   // una esclude l'altra
       else if (b.dataset.g === 'more') openFriend(gId);
       else if (b.dataset.g === 'ff') openFF(gId);
       else if (b.dataset.g === 'key') keySheet(gId);
@@ -440,7 +440,8 @@ function guestBar() {
   h += '<div class="tabs gb-tabs" role="tablist" aria-label="Libri di ' + gn + '"><button type="button" role="tab" data-g="tab" data-t="lib" aria-selected="' + (t !== 'wish') + '">Libreria <span class="cnt">' + lib.length + '</span></button>' +
     '<button type="button" role="tab" data-g="tab" data-t="wish" aria-selected="' + (t === 'wish') + '">Desideri <span class="cnt">' + nW + '</span></button></div>';
   var own = ownKeys(), out = outKey(gId), fromHim = keys.filter(function (k) { return k.a === uid() && k.da === gId; })[0], b0 = borrowed();
-  h += '<div class="chips gb-chips">' + (lib.length && t !== 'wish' ? '<button type="button" class="chip todo" data-g="notmine" aria-pressed="' + (NL.flt() === 'notmine') + '">Solo quelli che non hai</button>' : '') +
+  h += '<div class="chips gb-chips">' + (lib.length && t !== 'wish' ? '<button type="button" class="chip todo" data-g="notmine" aria-pressed="' + (NL.flt() === 'notmine') + '">Solo quelli che non hai</button>' +
+      (inComune ? '<button type="button" class="chip todo" data-g="common" aria-pressed="' + (NL.flt() === 'common') + '">In comune</button>' : '') : '') +
     (fromHim && !(b0 && b0.da === gId) ? '<button type="button" class="chip todo" data-g="usekey">Usa la sua chiave</button>' : '') + '</div>';
   bar.innerHTML = h;
   /* icone in alto a destra, sulla riga «Libreria di …»: ⇄ prestiti e regali tra voi, poi chiave Google e worker (Piero, 17/11/2026) */
@@ -473,8 +474,26 @@ function guestBar() {
     dr.hidden = false; dr.title = dl; dr.setAttribute('aria-label', dl);
     dr.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1M16 11h6"/></svg>';
   }
+  var ok0 = document.getElementById('ownKey'); if (ok0) ok0.hidden = true;
   if (meta && box) meta.style.paddingRight = (box.offsetWidth + 8) + 'px';   // il nome dell'amico va a capo, non sotto le icone
 }
+/* nella propria libreria (e nei Desideri): icona della chiave sempre in alto a destra sulla riga «Libreria di …»; apre la finestra della chiave,
+   accesa se hai chiave o worker (tuoi o prestati). Senza chiave: la finestra porta alla guida «Crea la tua chiave Google» (giro 1, 18/11/2026) */
+function ownKeyIco() {
+  var meta = document.querySelector('header.top .top-meta'); if (!meta) return;
+  var box = document.getElementById('guestIcos');
+  if (!box) { box = document.createElement('span'); box.id = 'guestIcos'; box.className = 'gb-icos'; meta.appendChild(box); }
+  var kb = document.getElementById('ownKey');
+  if (!kb) { kb = document.createElement('button'); kb.type = 'button'; kb.id = 'ownKey'; kb.className = 'ico gb-key'; kb.addEventListener('click', function () { keyWin(); }); }
+  if (kb.parentNode !== box) box.appendChild(kb);
+  var own = ownKeys(), b = borrowed(), on = !!(own.gb || own.sbn || (b && (b.gb || b.sbn)));
+  var tl = on ? 'Chiave Google e worker' : 'Chiave Google e worker: crea la tua chiave, è gratis';
+  kb.hidden = false; kb.classList.toggle('on', on); kb.title = tl; kb.setAttribute('aria-label', tl);
+  kb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></svg>';
+  meta.style.paddingRight = (box.offsetWidth + 8) + 'px';
+}
+function okRefresh() { if (!(NL.guest && NL.guest())) ownKeyIco(); }
+NL.on('keys', okRefresh); NL.on('optclose', okRefresh);
 NL.on('guest', function (name) { if (!name && entering) return; if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
 /* le info della libreria aperta (amici in comune): le passa openGuest prima di entrare */
 var _enter = NL.guestEnter;
@@ -1103,7 +1122,7 @@ S.onAuth(function () {
 });
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && uid() && Date.now() - lastLoad > 60000) load(true); });
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
-paintTop();
+paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
 window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();

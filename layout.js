@@ -27,7 +27,9 @@ var I = {
   stats: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   out: '<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M5 19h14"/>',
   cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
-  next: '<path d="M5 6h14M5 12h9M5 18h6"/><path d="M17 15l3 3-3 3"/>'
+  next: '<path d="M5 6h14M5 12h9M5 18h6"/><path d="M17 15l3 3-3 3"/>',
+  film: '<rect x="3" y="9" width="18" height="11" rx="2"/><path d="M3 9l1-4 16.5-2.2.8 3.6L3 9zM8 4.4l2.6 3.5M13 3.7l2.6 3.5"/>',
+  pen: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-3.6 3.4-5.5 7-5.5s6.4 1.9 7 5.5"/>'
 };
 function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
 
@@ -49,7 +51,8 @@ function build() {
     '<button type="button" class="lay-big pri" data-l="scan">' + NL.icon('scan') + '<b>Scansiona</b><small>il codice a barre: il modo più preciso</small></button>' +
     '<button type="button" class="lay-big" data-l="photo">' + NL.icon('cam') + '<b>Foto</b><small>della copertina</small></button>' +
     '<button type="button" class="lay-big" data-l="type">' + NL.icon('key') + '<b>Digita</b><small>titolo o ISBN</small></button>' +
-    '<button type="button" class="lay-big" data-l="check">' + NL.icon('check') + '<b>Ce l\'ho già?</b><small>controlla in libreria</small></button></div>' +
+    '<button type="button" class="lay-big" data-l="check">' + NL.icon('check') + '<b>Ce l\'ho già?</b><small>controlla in libreria</small></button>' +
+    '<button type="button" class="lay-big lay-wide" data-l="author">' + svg(I.pen, 26) + '<span><b>Per autore</b><small>le sue opere, da Wikipedia</small></span></button></div>' +
     '<div class="row-btns"><button type="button" class="btn" data-l="close">Chiudi</button></div></div></div>'));
   document.body.appendChild(el('<div class="sheet" id="layYou" hidden><div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="layYouH">' +
     '<h2 id="layYouH">Per te</h2><div class="dlist dmenu" id="layYouList"></div>' +
@@ -60,6 +63,8 @@ function youItems() {
   var out = [{ l: 'sugg', i: I.next, t: 'Suggerimenti', s: 'Cosa leggere dopo e libri da scoprire' }];
   var W = window.NLWrap; if (W && W.cfg().on && W.quarters().length) out.push({ l: 'wrap', i: I.cal, t: 'La tua stagione in libri', s: 'Il riepilogo di ogni stagione' });
   var nq = NL.nQuotes();
+  var nf = NL.films ? NL.films().length : 0;        // film e serie TV tratti dai tuoi libri (giro 2, 18/11/2026)
+  if (nf) out.push({ l: 'films', i: I.film, t: 'Dai tuoi libri al cinema', s: nf === 1 ? '1 film o serie tratto dai tuoi libri' : nf + ' film e serie tratti dai tuoi libri' });
   if (nq) out.push({ l: 'quotes', i: I.quote, t: 'Tutte le citazioni', s: nq === 1 ? '1 citazione salvata' : nq + ' citazioni salvate' });
   out.push({ l: 'stats', i: I.stats, t: 'Statistiche', s: 'Libri, valore, pagine e letture' });
   out.push({ l: 'export', i: I.out, t: 'Backup ed esportazione', s: 'Backup, Excel, PDF' });
@@ -89,6 +94,8 @@ function act(l) {
   else if (l === 'photo') $('#btnPhoto').click();
   else if (l === 'type') $('#btnType').click();
   else if (l === 'check') $('#btnCheck').click();
+  else if (l === 'author') NL.openWorks();
+  else if (l === 'films') NL.openFilms();
   else if (l === 'sugg') NL.openSugg('next');
   else if (l === 'wrap') { if (window.NLWrap) window.NLWrap.open(); }
   else if (l === 'quotes') NL.openQuotes();

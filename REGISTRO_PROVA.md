@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.2 · 18/11/2026 07:46
+- **Da Wikipedia e Wikidata**: paese degli autori (Info Autore con correzione a mano, Raggruppa per Paese con la bandiera, filtro, Statistiche, Stagione in libri), film e serie TV tratti dai libri (riga nella scheda e «Dai tuoi libri al cinema» in Per te), opere di un autore («Le sue opere» in Info Autore e «Per autore» nel +)
+- **Libreria**: serie e copie accorpate in una copertina con il bollino, autori con nomi simili uniti nei gruppi, dimensione delle copertine (due dita o cursore in Aspetto), l'app ricorda l'ultima vista e l'ultimo ordine
+- «In comune» nella libreria di un amico; «Da verificare» con un tocco dall'elenco; icona della chiave nella tua libreria; «Chi è» diventa «Info Autore»
+- app.js diviso in 11 file (stesso codice)
+
 ## Prova 104.1 · 17/11/2026 15:42
 - Uguale alla versione vera 104
 
