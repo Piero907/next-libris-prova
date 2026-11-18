@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 104.6 · 18/11/2026 11:39
+- Giro 6: **profilo dell'amico** (Libreria, Desideri, copertine in fila, citazioni in evidenza, numeri), **«Lo consiglio»** con la coccarda, **puntine** sulle citazioni, **«Ce l'ha già…»** sui desideri, avviso **«trovato»** nella campanella
+
 ## Prova 104.5 · 18/11/2026 10:58
 - Giro 5: **X nella ricerca**, **bandiere come immagini**, **«Dal libro»** con i film, **Ricerca dei libri** con Google sopra il worker e sezioni richiudibili, **chiave coperta**, **guida di 8 schermate**
 

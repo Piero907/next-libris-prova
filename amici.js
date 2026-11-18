@@ -53,7 +53,7 @@ async function load(force) {
   loading = (async function () {
     try {
       var p;
-      var cols = ['utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits', 'utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
+      var cols = ['utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits,p_let,p_pref,p_cons', 'utente,nome,desideri,libreria,amici,regali,creato,foto,cit,p_cit,p_stat,p_cits', 'utente,nome,desideri,libreria,amici,regali', 'utente,nome,desideri,libreria,amici', 'utente,nome,desideri,libreria'];   // database senza 016 o 015
       for (var ci = 0; ci < cols.length; ci++) {
         try { p = await S.call('/rest/v1/profili?select=' + cols[ci] + '&id=eq.' + encodeURIComponent(uid()), { user: true }); break; }
         catch (e0) { if ((e0 && e0.code === 'net') || ci === cols.length - 1) throw e0; }
@@ -108,11 +108,11 @@ function sheet() {
   el.addEventListener('submit', onSubmit);
   el.addEventListener('input', function (e) { if (e.target.id === 'friLibQ') { libsQ = e.target.value; libsShow = 30; var l = document.getElementById('friLibList'); if (l) l.innerHTML = libList(); } });
   el.addEventListener('change', async function (e) {
-    var k = { friWish: 'desideri', friLib: 'libreria', friAmici: 'amici', friRegali: 'regali', friPCit: 'p_cit', friPStat: 'p_stat', friPCits: 'p_cits' }[e.target.id] || ''; if (!k) return;
+    var k = { friWish: 'desideri', friLib: 'libreria', friAmici: 'amici', friRegali: 'regali', friPCit: 'p_cit', friPStat: 'p_stat', friPCits: 'p_cits', friPLet: 'p_let', friPPref: 'p_pref', friPCons: 'p_cons' }[e.target.id] || ''; if (!k) return;
     var on = e.target.checked, body = { id: uid() }; body[k] = on; e.target.disabled = true;
     try { await S.call('/rest/v1/profili?on_conflict=id', { method: 'POST', user: true, prefer: 'resolution=merge-duplicates,return=minimal', body: body });
       me[k] = on;
-      NL.toast(k === 'p_cit' ? (on ? 'Gli amici ora vedono la tua citazione preferita.' : 'La citazione preferita ora è solo tua.') : k === 'p_stat' ? (on ? 'Gli amici ora vedono i tuoi numeri.' : 'I tuoi numeri ora sono solo tuoi.') : k === 'p_cits' ? (on ? 'Gli amici ora vedono le tue citazioni.' : 'Le tue citazioni ora sono solo tue.') : k === 'regali' ? (on ? 'Gli amici ora vedono i regali che prenoti.' : 'Gli amici ora vedono solo «Regalo prenotato».') : k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
+      NL.toast(k === 'p_let' ? (on ? 'Gli amici ora vedono cosa stai leggendo.' : 'Cosa stai leggendo ora è solo tuo.') : k === 'p_pref' ? (on ? 'Gli amici ora vedono i tuoi preferiti.' : 'I tuoi preferiti ora sono solo tuoi.') : k === 'p_cons' ? (on ? 'Gli amici ora vedono i libri che consigli.' : 'I libri che consigli ora non si vedono nel profilo.') : k === 'p_cit' ? (on ? 'Gli amici ora vedono le tue citazioni in evidenza.' : 'Le citazioni in evidenza ora sono solo tue.') : k === 'p_stat' ? (on ? 'Gli amici ora vedono i tuoi numeri.' : 'I tuoi numeri ora sono solo tuoi.') : k === 'p_cits' ? (on ? 'Gli amici ora vedono le tue citazioni.' : 'Le tue citazioni ora sono solo tue.') : k === 'regali' ? (on ? 'Gli amici ora vedono i regali che prenoti.' : 'Gli amici ora vedono solo «Regalo prenotato».') : k === 'desideri' ? (on ? 'I tuoi amici ora vedono i tuoi desideri.' : 'I tuoi desideri ora sono solo tuoi.') : k === 'amici' ? (on ? 'I tuoi amici ora vedono chi sono i tuoi amici.' : 'I tuoi amici ora vedono solo gli amici in comune.') : (on ? 'I tuoi amici ora vedono la tua libreria.' : 'La tua libreria ora è solo tua.'));
       if (on) S.run && S.run(false); NL.emit && NL.emit('privacy', k); }
     catch (x) { e.target.checked = !on; NL.toast(nice(x)); }
     e.target.disabled = false;
@@ -188,7 +188,7 @@ function paint() {
       var nn = nums[x.id] || {}, info = [];
       if (nn.comuni != null) info.push(nn.comuni + (nn.comuni === 1 ? ' amico' : ' amici') + ' in comune');
       if (nn.libri != null) info.push(nn.libri + (nn.libri === 1 ? ' libro' : ' libri') + ' in comune');
-      return '<li class="fr-row fr-go fr-av">' + (window.NLProfilo ? window.NLProfilo.avatar(x.id, x.utente || x.nome) : '') + '<button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + esc(info.join(' · ') || 'Guarda la sua libreria') + '</small></button>' +
+      return '<li class="fr-row fr-go fr-av">' + (window.NLProfilo ? window.NLProfilo.avatar(x.id, x.utente || x.nome) : '') + '<button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + esc(info.join(' · ') || 'Guarda il suo profilo') + '</small></button>' +
         ('segue' in x ? '<button class="fr-fol" type="button" data-f="segui" data-id="' + esc(x.id) + '" aria-pressed="' + !!x.segue + '" title="' + (x.segue ? 'Segui i suoi desideri: tocca per smettere' : 'Segui i suoi desideri: un riassunto al giorno') + '">' + (x.segue ? 'Segui ✓' : 'Segui') + '</button>' : '') + '<span class="n" aria-hidden="true">›</span></li>';
     }).join('') + '</ul>' + (fr.some(function (x) { return 'segue' in x; }) ? '<p class="fr-small">«Segui»: un avviso al giorno quando aggiunge dei desideri, se li mostra agli amici. Non viene a saperlo.</p>' : '') : '<p class="fr-small">Ancora nessuno: cercalo per nome qui sotto, oppure mandagli il tuo invito.</p>';
     h += '</section>';
@@ -230,7 +230,7 @@ async function onClick(e) {
   if (a === 'ask-drop') { confirmId = id; paint(); return; }
   if (a === 'opts') { opts = true; view = null; paint(); var si0 = document.querySelector('#friSheet .sheet-in'); if (si0) si0.scrollTop = 0; return; }
   if (a === 'optsback') { opts = false; paint(); return; }
-  if (a === 'friend') { close(); openGuest(id); return; }
+  if (a === 'friend') { close(); if (window.NLProfilo && window.NLProfilo.open) window.NLProfilo.open(id); else openGuest(id); return; }   // il nome apre il profilo; da lì Libreria e Desideri (giro 6)
   if (a === 'tipwish' || a === 'tipdrop') { tipAct(a, id); return; }
   if (a === 'keyshare') { keySheet(id); return; }
   if (a === 'keyuse' || a === 'keyoff') { keyAct(a, id); return; }
@@ -679,6 +679,48 @@ function whoActs(el) {
   });
 }
 
+/* ---------- «Ce l'ha già Marta» (giro 6): aggiungi un desiderio e un amico che mostra la libreria ha già quel libro.
+   Avvisa soltanto: il libro resta nei Desideri. Stesso libro = stesso ISBN, oppure stesso titolo e autore (lo decide il database, chi_ha). ---------- */
+var wishSeen = null, wishWait = {}, wishT = 0;
+function wishList() { return mine().filter(function (b) { return b.w; }); }
+function wishBase() { wishSeen = {}; wishList().forEach(function (b) { wishSeen[b.id] = 1; }); }
+try { wishBase(); } catch (e) { wishSeen = null; }
+function wishCheck() {
+  if (!wishSeen) { wishBase(); return; }
+  var now = Date.now(), ospite = !!(NL.guest && NL.guest());
+  wishList().forEach(function (b) {
+    if (wishSeen[b.id]) return;
+    wishSeen[b.id] = 1;
+    if (!ospite && now - (Number(b.ts) || 0) < 600000) wishWait[b.id] = now;      // solo i desideri appena aggiunti, non quelli presi dalla libreria di un amico
+  });
+  if (!uid() || !list || !list.some(function (x) { return x.stato === 'amici'; })) { wishWait = {}; return; }
+  var ids = Object.keys(wishWait); if (!ids.length) return;
+  if (ids.length > 3) { wishWait = {}; return; }                                   // tanti insieme: arrivano da un altro telefono o da un file
+  var again = false;
+  ids.forEach(function (id) {
+    var b = NL.get(id);
+    if (!b || !b.w) { delete wishWait[id]; return; }
+    if (!b.t && now - wishWait[id] < 20000) { again = true; return; }             // sta ancora cercando il titolo: aspetto un po'
+    delete wishWait[id];
+    if (b.t || b.i) wishAsk(b);
+  });
+  if (again) { clearTimeout(wishT); wishT = setTimeout(wishCheck, 5000); }
+}
+async function wishAsk(b) {
+  var r;
+  try { r = (await rpc('chi_ha', { titolo: b.t || '', autore: b.a || '', isbn: b.i || '' })) || []; } catch (e) { return; }   // senza rete o database senza la 019: niente avviso
+  var by = {}, nomi = [];
+  r.forEach(function (x) { if (!by[x.amico]) { by[x.amico] = x; nomi.push(x.utente || 'un amico'); } });
+  if (!nomi.length || !NL.get(b.id) || !NL.get(b.id).w) return;
+  if (nomi.length === 1) {
+    var x = r[0], gia = asks.some(function (q) { return q.da === uid() && q.a === x.amico && q.libro_id === x.libro_id && q.stato === 'attesa'; });
+    NL.toast('Ce l\'ha già ' + nomi[0] + (x.fuori ? ' (adesso è in prestito)' : '') + '. Resta nei tuoi Desideri.', x.fuori || gia ? undefined : { label: 'Me lo presti?', fn: async function () {
+      try { await rpc('chiedi_prestito', { amico: x.amico, libro_id: x.libro_id }); asks = (await rpc('mie_richieste')) || []; NL.toast('Richiesta mandata a ' + nomi[0] + '.'); } catch (e) { NL.toast(nice(e)); }
+    }  }, 6000);
+  } else NL.toast('Ce l\'hanno già ' + nomi[0] + ' e ' + (nomi.length === 2 ? nomi[1] : 'altri ' + (nomi.length - 1) + ' amici') + '. Resta nei tuoi Desideri.');
+}
+NL.on('saved', function () { clearTimeout(wishT); wishT = setTimeout(wishCheck, 1500); });
+
 /* ---------- Impostazioni degli amici: nome, chi vede cosa, chiave e worker ---------- */
 function optsView() {
   var h = '<button class="link fr-back" type="button" data-f="optsback">‹ Amici</button>';
@@ -688,7 +730,10 @@ function optsView() {
     '<label class="check fr-wish"><input type="checkbox" id="friRegali"' + (me.regali !== false ? ' checked' : '') + '><span>Gli amici vedono i regali che prenoto<small>Quando dici «Te lo regalo io», gli altri amici vedono il tuo nome. Se la togli vedono solo «Regalo prenotato». Il festeggiato non lo vede mai.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friAmici"' + (me.amici !== false ? ' checked' : '') + '><span>Gli amici vedono i miei amici<small>Solo i nomi, così trovate altri amici e possono chiedervi l\'amicizia. Se la togli, vedono solo gli amici che avete in comune.</small></span></label></div></section>';
   if ('p_cit' in me) h += '<section class="fr-sec"><h3 class="fr-h">Nel tuo profilo</h3><div class="fr-share"><p class="fr-small">La tua foto la vedono solo gli amici. Il resto, solo se lo scegli qui.</p>' +
-    '<label class="check fr-wish"><input type="checkbox" id="friPCit"' + (me.p_cit ? ' checked' : '') + '><span>Gli amici vedono la mia citazione preferita<small>Quella che scegli nel tuo profilo, con titolo e autore del libro.</small></span></label>' +
+    ('p_let' in me ? '<label class="check fr-wish"><input type="checkbox" id="friPLet"' + (me.p_let !== false ? ' checked' : '') + '><span>Gli amici vedono cosa sto leggendo<small>I libri «In lettura». Solo se vedono anche la libreria.</small></span></label>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friPPref"' + (me.p_pref !== false ? ' checked' : '') + '><span>Gli amici vedono i miei preferiti<small>I libri con la stella. Solo se vedono anche la libreria.</small></span></label>' +
+    '<label class="check fr-wish"><input type="checkbox" id="friPCons"' + (me.p_cons !== false ? ' checked' : '') + '><span>Gli amici vedono i libri che consiglio<small>Quelli con la coccarda «Lo consiglio». Solo se vedono anche la libreria.</small></span></label>' : '') +
+    '<label class="check fr-wish"><input type="checkbox" id="friPCit"' + (me.p_cit ? ' checked' : '') + '><span>Gli amici vedono le mie citazioni in evidenza<small>Quelle con la puntina (fino a 3), con titolo e autore del libro.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friPStat"' + (me.p_stat ? ' checked' : '') + '><span>Gli amici vedono i miei numeri<small>Libri e pagine lette, autore e genere più letti, paesi, libri prestati. Solo se vedono anche la libreria.</small></span></label>' +
     '<label class="check fr-wish"><input type="checkbox" id="friPCits"' + (me.p_cits ? ' checked' : '') + '><span>Gli amici vedono tutte le mie citazioni<small>Il testo, la pagina e il libro. Mai gli appunti né le foto delle pagine.</small></span></label></div></section>';
   h += keysHTML(true);
@@ -720,7 +765,7 @@ function ffView() {
   var com = all.filter(function (x) { return x.comune; }), oth = all.filter(function (x) { return !x.comune; });
   h += '<section class="fr-sec"><h3 class="fr-h">In comune' + (com.length ? ' <span class="fr-n">' + com.length + '</span>' : '') + '</h3>';
   h += com.length ? '<ul class="fr-list fr-box">' + com.map(function (x) {
-    return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>Guarda la sua libreria</small></button><span class="n" aria-hidden="true">›</span></li>';
+    return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-f="friend" data-id="' + esc(x.id) + '">' + nameOf(x) + '<small>' + (window.NLProfilo ? 'Guarda il suo profilo' : 'Guarda la sua libreria') + '</small></button><span class="n" aria-hidden="true">›</span></li>';
   }).join('') + '</ul>' : '<p class="fr-small">Nessun amico in comune.</p>';
   h += '</section>';
   if (ff.visibili) {
@@ -1156,5 +1201,7 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
+window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, swapSheet: swapSheet, keySheet: keySheet, dropSheet: dropSheet, nums: function (id) { return nums[id] || null; },
+  acts: function (id) { var own = ownKeys(); return { swap: swapsWith(id).length > 0, key: !!(own.gb || own.sbn), lent: outKey(id) ? lentLabel(outKey(id)) : '' }; },   // icone del profilo dell'amico (giro 6)
+  guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, tips: tips, keys: keys, who: who }; } };   // per le prove
 })();

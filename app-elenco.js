@@ -152,6 +152,7 @@ function rowHTML(b, dups, ex) {
       ? act('tolib', 'tolib', 'Libreria', 'Sposta in Libreria (l\'ho comprato)', ' move')
       : act('towish', 'towish', 'Desideri', 'Sposta nei Desideri', ' move')) : '';
     var favBtn = !busy && hasData(b) ? act('fav', 'fav', 'Preferito', b.fav ? 'È tra i preferiti: tocca per toglierlo' : 'Metti tra i preferiti', b.fav ? ' fav on' : ' fav') : '';
+    var lcBtn = !busy && hasData(b) && !b.w ? act('lc', 'award', 'Lo consiglio', b.lc ? 'Lo consigli: tocca per toglierlo' : 'Lo consiglio: gli amici lo vedono nel tuo profilo', b.lc ? ' lc on' : ' lc') : '';   // giro 6
     var kdp = kdpHint(b, busy);                  // pubblicazione Amazon non trovata: «Cerca sul web» sta nel suo riquadro
     var webBtn = !kdp && !busy && (b.t || b.i) ? act('websearch', 'search', 'Cerca sul web', 'Cerca questo libro su Google: prezzo, recensioni, dove comprarlo') : '';
     var shareBtn = !busy && (b.t || L.toIsbn13(b.i)) ? act('share', 'share', 'Condividi', 'Manda questo libro a un amico') : '';
@@ -160,7 +161,7 @@ function rowHTML(b, dups, ex) {
 
 
         '';
-    body = (openCard ? '<div class="card-top"><span class="top-acts"><span class="acts-main">' + loanBtn + moveBtn + favBtn + webBtn + delBtn + '</span><span class="acts-win">' +
+    body = (openCard ? '<div class="card-top"><span class="top-acts"><span class="acts-main">' + loanBtn + moveBtn + favBtn + lcBtn + webBtn + delBtn + '</span><span class="acts-win">' +
         '<button class="chev-btn" data-act="toggle" aria-expanded="true" aria-label="Chiudi la scheda" title="Chiudi la scheda">' + icon('chev') + '</button></span></span>' +
         '<span class="flags">' + flagsHTML(b, dups) + '</span></div>' + kdp : '') +
       '<div class="head">' + thumb + ta('t', 'Titolo', b.t, 'Titolo') + ta('a', 'Autore', b.a, 'Autore') + '</div>' +
@@ -172,7 +173,7 @@ function rowHTML(b, dups, ex) {
       '<div class="foot">' + inp('i', 'ISBN', b.i, 'numeric', 'ISBN', 13) +
       (openCard ? (moreActs ? '<div class="tail">' + moreActs + '</div>' : '') :
         '<div class="tail"><span class="flags">' + flagsHTML(b, dups) + '</span>' +
-        (ex ? '<span class="tag">Esempio</span>' : moreActs + favBtn + moveBtn + loanBtn + delBtn) + '</div>') +
+        (ex ? '<span class="tag">Esempio</span>' : moreActs + favBtn + lcBtn + moveBtn + loanBtn + delBtn) + '</div>') +
       '</div>';
   }
   return '<article class="' + cls + '" data-id="' + b.id + '"' + (ex ? ' data-ex="1"' : '') + '>' + status + body + '</article>';

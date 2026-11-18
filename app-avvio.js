@@ -124,6 +124,8 @@ list.addEventListener('click', function (e) {
   else if (act === 'facet') applyFacet(btn.dataset.f, btn.dataset.v, btn.dataset.name);
   else if (act === 'towish') moveToWish(id);
   else if (act === 'fav') toggleFav(id);
+  else if (act === 'lc') toggleLc(id);
+  else if (act === 'quotepin') togglePin(id, +btn.dataset.i);
   else if (act === 'share') { var sb = get(id); if (sb) openShare([sb], { kind: 'book' }); }
   else if (act === 'tolib') moveToLib(id);
   else if (act === 'addcopy') addCopy(id);
@@ -937,6 +939,7 @@ window.NL = {
   quota: function () { rollQuota(); return { d: quota.d, ds: quota.ds, g: quota.g, s: quota.s }; },   // contatore condiviso (modulo ricerche.js)
   setShared: function (k, n, day) { if (k === 'g') { shared.g = n; shared.d = day; } else { shared.s = n; shared.ds = day; } if (!$('#optSheet').hidden) updateQuotaInfo(); },
   svc: function () { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl }; }, contactURL: function () { return contactURL(); }, backupCfg: function () { return backupCfg(); }, openOptions: function (sec) { openOptions(sec); }, svcFold: function (k, o) { svcFold(k, o); },
+  togglePin: function (id, i) { return togglePin(id, i); }, pinned: function () { return pinned(); }, PIN_MAX: PIN_MAX,   // citazioni in evidenza (giro 6)
   fields: FIELDS, clean: function (x) { return cleanBook(x); }, stored: function () { return storable(); }, save: function () { touch(); }   // per la sincronizzazione (modulo social)
 };
 window.__ped = { st: function () { return ped; }, handles: function (o) { return pedHandles(o); }, stickers: function () { return pedStickers(); } };

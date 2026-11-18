@@ -527,11 +527,21 @@ function quotesBody(b) {
   return (qs.length ? '<ul class="qlist">' + qs.map(function (c, i) {
     return '<li class="qcard"><button type="button" class="qitem' + (qPhs(c).length ? ' has-ph' + (c.x ? '' : ' only-ph') : '') + '" data-act="quoteedit" data-i="' + i + '" title="Tocca per modificare">' + qThumb(c) +
       (c.x ? '<span class="qt">' + esc(c.x) + '</span>' : '<span class="qt q-only">Foto della pagina</span>') + (c.pg ? '<span class="qp">p. ' + esc(c.pg) + '</span>' : '') + '</button>' +
-      '<span class="qbtns"><button type="button" class="qshare" data-act="quoteshare" data-i="' + i + '" aria-label="Condividi questa citazione">' + icon('share') + 'Condividi</button>' +
+      '<span class="qbtns">' + (c.x ? '<button type="button" class="qpin' + (c.pin ? ' on' : '') + '" data-act="quotepin" data-i="' + i + '" aria-pressed="' + !!c.pin + '" aria-label="' + (c.pin ? 'In evidenza nel profilo: tocca per togliere la puntina' : 'Metti in evidenza nel profilo') + '" title="' + (c.pin ? 'In evidenza nel profilo: tocca per togliere la puntina' : 'Metti in evidenza nel profilo') + '">' + icon('pin') + '</button>' : '') + '<button type="button" class="qshare" data-act="quoteshare" data-i="' + i + '" aria-label="Condividi questa citazione">' + icon('share') + 'Condividi</button>' +
       '<button type="button" class="qdel" data-act="quotedel" data-i="' + i + '" aria-label="Elimina questa citazione" title="Elimina">' + icon('x') + '</button></span></li>';
   }).join('') + '</ul>' : '<p class="desc-none">Passaggi da ricordare, frasi sottolineate, appunti di lettura.</p>') +
     '<div class="desc-acts"><button type="button" class="link" data-act="quoteadd">+ Aggiungi una citazione o un appunto</button>' +
     (qs.length ? '<button type="button" class="link" data-act="quoteshareall">' + (qs.length === 1 ? 'Condividi' : 'Condividi tutte (' + qs.length + ')') + '</button>' : '') + '</div>';
+}
+/* citazioni in evidenza (giro 6): la puntina, al massimo PIN_MAX tra tutti i libri; gli amici le vedono nel profilo solo se lo scegli */
+var PIN_MAX = 3;
+function pinned() { var out = []; myBooks().forEach(function (b) { (b.qs || []).forEach(function (c, i) { if (c && c.pin && c.x) out.push({ b: b, c: c, i: i }); }); }); return out; }
+function togglePin(id, i) {
+  var b = get(id), c = b && b.qs && b.qs[i]; if (!c || !c.x) return false;
+  if (!c.pin && pinned().length >= PIN_MAX) { toast('In evidenza ne stanno ' + PIN_MAX + ': prima togli la puntina a un\'altra.'); return false; }
+  c.pin = c.pin ? 0 : 1; touch(); paintQuotes(id); emit('pins');
+  toast(c.pin ? 'In evidenza nel tuo profilo (' + pinned().length + ' di ' + PIN_MAX + ').' : 'Puntina tolta.');
+  return true;
 }
 function quotesHTML(b, off) {
   if (off || !hasData(b)) return '';

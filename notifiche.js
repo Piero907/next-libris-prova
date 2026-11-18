@@ -60,13 +60,26 @@ function text(x) {
     case 'consiglio': return who(x) + ' ti consiglia ' + book(x);
     case 'chiavi': return who(x) + ' condivide con te la sua chiave per cercare i libri';
     case 'desideri': var nd = Number(x.rif) || 1; return who(x) + (nd === 1 ? ' ha un nuovo desiderio: ' : ' ha ' + nd + ' nuovi desideri: ') + '<b>' + esc(x.titolo || '') + '</b>' + (nd > 3 ? ' e altri' : '');   // riassunto del giorno di un amico che segui (giro 3)
+    case 'trovato': var nt = trovN(x); return '📚 ' + who(x) + ' ha aggiunto <b>' + esc(x.titolo || 'un libro') + '</b>' + (nt > 3 ? ' e altri' : '') + (nt === 1 ? ', che è nei tuoi Desideri' : ', che sono nei tuoi Desideri');   // un tuo desiderio è entrato nella libreria di un amico (giro 6)
     case 'limite': return x.titolo ? 'La chiave Google di <b>' + esc(x.titolo) + '</b> ha finito le ricerche di oggi: <b>creane una tua, è gratis</b>'
       : 'La tua chiave Google ha finito le ricerche di oggi: torna domattina';
   }
   return who(x);
 }
 var KIND = { amicizia: 'fr', amico: 'fr', prestito: 'bk', regalo: 'gift', reso: 'bk', reso_ok: 'bk', reso_no: 'bk', chiuso: 'bk',
-  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim', desideri: 'gift' };
+  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim', desideri: 'gift', trovato: 'bk' };
+/* «trovato»: rif = quanti:id del libro dell'amico (il primo) */
+function trovN(x) { return Number(String(x.rif || '').split(':')[0]) || 1; }
+function trovId(x) { var r = String(x.rif || ''), i = r.indexOf(':'); return i < 0 ? '' : r.slice(i + 1); }
+function asked(x) { var A = amici(), q = (A && A.state && A.state().asks) || []; return q.some(function (r) { return r.da === uid() && r.a === x.da && r.libro_id === trovId(x) && r.stato === 'attesa'; }); }
+var sent = {};
+async function ask(id, btn) {
+  var x = items.filter(function (y) { return y.id === id; })[0], A = amici(); if (!x || !A || !A.rpc) return;
+  btn.disabled = true;
+  try { await A.rpc('chiedi_prestito', { amico: x.da, libro_id: trovId(x) }); sent[id] = 1; NL.toast('Richiesta mandata a ' + (x.nome || 'un amico') + '.'); if (A.load) A.load(true); }
+  catch (e) { NL.toast(/libro non trovato/.test(String(e && e.message)) ? 'Il libro non è più nella sua libreria.' : (e && e.code === 'net' ? e.message : 'Non riesco a mandare la richiesta. Riprova tra poco.')); }
+  paint();
+}
 function ago(t) {
   var d = new Date(t), s = (Date.now() - d.getTime()) / 1000;
   if (!(s >= 0)) s = 0;
@@ -106,6 +119,7 @@ function sheet() {
   document.body.appendChild(el);
   el.addEventListener('click', function (e) {
     if (e.target === el) return close();
+    var ak = e.target.closest('[data-ask]'); if (ak) { ask(ak.dataset.ask, ak); return; }
     var it = e.target.closest('[data-n]'); if (it) go(it.dataset.n);
   });
   el.querySelector('#ntClose').addEventListener('click', close);
@@ -130,7 +144,7 @@ function paint() {
     return '<li><button type="button" class="nt-item' + (fresh[x.id] ? ' nt-new' : '') + '" data-n="' + esc(x.id) + '">' +
       '<span class="nt-ico nt-' + (KIND[x.tipo] || 'fr') + '" aria-hidden="true">' + (x.tipo === 'limite' ? '!' : esc(((x.nome || '?').trim()[0] || '?').toUpperCase())) + '</span>' +
       '<span class="nt-t"><span class="nt-txt">' + text(x) + '</span><small>' + esc(ago(x.creata)) + (fresh[x.id] ? ' · <span class="nt-dot">nuova</span>' : '') + '</small></span>' +
-      '</button></li>';
+      '</button>' + (x.tipo === 'trovato' && trovN(x) === 1 && trovId(x) && x.da ? (sent[x.id] || asked(x) ? '<span class="nt-asked">Richiesta mandata</span>' : '<button type="button" class="btn nt-lend" data-ask="' + esc(x.id) + '">Me lo presti?</button>') : '') + '</li>';
   }).join('') + '</ul>';
 }
 
@@ -146,6 +160,10 @@ function go(id) {
     if (b && NL.showBook && NL.showBook(b.id)) return;
   }
   if (x.tipo === 'desideri' && A && A.guest && x.da) { setTimeout(function () { Promise.resolve(A.guest(x.da)).then(function () { if (NL.guest && NL.guest()) NL.setTab('wish'); }); }, 60); return; }   // i suoi desideri
+  if (x.tipo === 'trovato' && A && A.guest && x.da) {     // la sua libreria, aperta su quel libro (lì c'è anche «Me lo presti?»)
+    setTimeout(function () { Promise.resolve(A.guest(x.da)).then(function () { if (!(NL.guest && NL.guest())) return; NL.setTab('lib'); var bid = trovId(x); if (bid && NL.get(bid)) NL.openCard(bid); }); }, 60);
+    return;
+  }
   if (A) setTimeout(function () { A.open(x.tipo === 'chiavi'); }, 60);
 }
 

@@ -176,3 +176,7 @@ header.top .top-meta .gb-icos{position:absolute;right:max(4px,env(safe-area-inse
 html:not(.guest) header.top .top-meta{position:relative}
 html:not(.guest) header.top .top-meta .gb-icos{top:-8px;margin-top:0}
 .fri .kw-intro{color:var(--ink);font-size:14px}
+
+/* togli dagli amici: in rosso, nella libreria dell'amico e nel suo profilo (Piero, giro 6) */
+.gb-key.gb-drop{color:var(--bad)}
+.gb-key.gb-drop:hover,.gb-key.gb-drop:focus-visible{background:var(--bad-bg)}

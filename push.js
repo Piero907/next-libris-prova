@@ -21,7 +21,7 @@ var KEY = VAPID[NL.COPIA] || '';
 var TIPI = [
   ['amicizie', 'Amicizie', 'Richieste di amicizia e amicizie accettate'],
   ['prestiti', 'Libri in prestito', 'Prestiti, regali, restituzioni e «Me lo presti?»'],
-  ['consigli', 'Consigli e desideri', 'Libri che un amico ti consiglia e desideri degli amici che segui'],
+  ['consigli', 'Consigli e desideri', 'Libri consigliati, desideri degli amici che segui, tuoi desideri che un amico ha in libreria'],
   ['chiavi', 'Chiavi condivise', 'Chiave Google e worker prestati da un amico']];
 var ALL = TIPI.map(function (t) { return t[0]; });
 var st = rd() || {};                    // on (interruttore, acceso di partenza), asked (riga dopo l'accesso già vista), prefs

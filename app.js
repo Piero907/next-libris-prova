@@ -60,6 +60,8 @@ var ICON = {
   key: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   redo: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
+  award: '<circle cx="12" cy="9" r="5.5"/><path d="M8.7 13.5L7.2 21l4.8-2.7 4.8 2.7-1.5-7.5"/>',   // coccarda: «Lo consiglio» (scelta di Piero, giro 6)
+  pin: '<path d="M9 3.5h6l-.9 6.2 3.4 3.3H6.5l3.4-3.3z"/><path d="M12 13v7.5"/>',   // puntina: citazione in evidenza (giro 6)
   fav: '<path d="M12 3.3l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.7l6-.9z"/>',   // stella (prima segnalibro: si confondeva, Piero 16/11/2026)
   share: '<circle cx="6" cy="12" r="2.5"/><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.1-4.1M8.2 13.2l7.1 4.1"/>',
   pricetag: '<path d="M3.5 12V5a1.5 1.5 0 0 1 1.5-1.5h7l8.5 8.5a1.5 1.5 0 0 1 0 2.1l-6.4 6.4a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8.2" cy="8.2" r="1.5"/>',
@@ -124,7 +126,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 104, date: '2026-11-17', note: 'Foto degli autori dal nuovo indirizzo di Wikipedia (Flaiano), titolare della privacy' };
-var BUILD = {"t": "2026-11-18 10:58", "n": "104.5", "note": "Giro 5: X nella ricerca, bandiere come immagini, «Dal libro» con i film, Ricerca dei libri"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-18 11:39", "n": "104.6", "note": "Giro 6: profilo dell'amico (Libreria, Desideri, copertine in fila, citazioni in evidenza, "};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -301,11 +303,11 @@ function inTab(b) { return !!b.w === (tab === 'wish'); }
 function tabBooks() { return state.books.filter(inTab); }
 function blankBook(o) {
   var b = Object.assign({ id: newId(), t: '', a: '', e: '', y: '', c: null, i: '', g: [], img: '', nf: false, ts: Date.now(),
-    sh: '', n: '', gen: '', pg: '', p: '', pd: '', w: tab === 'wish', rs: '', rt: 0, rd: '', pp: '', ppd: '', cp: false, ck: '', nb: false, xs: '', xd: '', xa: '', sx: '', sk: '', sda: '', fav: false, fr: '', fl: '', ds: '', dsf: '', dsl: '', dsn: 0, dsq: 0, se: '', sn: '', sq: '', qs: [] }, o || {});
+    sh: '', n: '', gen: '', pg: '', p: '', pd: '', w: tab === 'wish', rs: '', rt: 0, rd: '', pp: '', ppd: '', cp: false, ck: '', nb: false, xs: '', xd: '', xa: '', sx: '', sk: '', sda: '', fav: false, lc: false, fr: '', fl: '', ds: '', dsf: '', dsl: '', dsn: 0, dsq: 0, se: '', sn: '', sq: '', qs: [] }, o || {});
   if (!b.w && !(o && o.rs != null)) b.rs = 'da';        // un libro appena entrato in libreria e' da leggere
   return b;
 }
-var FIELDS = ['id', 't', 'a', 'e', 'y', 'c', 'i', 'g', 'img', 'imgL', 'nf', 'ts', 'sh', 'n', 'gen', 'pg', 'p', 'pd', 'w', 'rs', 'rt', 'rd', 'pp', 'ppd', 'cp', 'ck', 'nb', 'xs', 'xd', 'xa', 'fav', 'fr', 'fl', 'ds', 'dsf', 'dsl', 'dsn', 'dsq', 'se', 'sn', 'sq', 'qs', 'sx', 'sk', 'sda'];
+var FIELDS = ['id', 't', 'a', 'e', 'y', 'c', 'i', 'g', 'img', 'imgL', 'nf', 'ts', 'sh', 'n', 'gen', 'pg', 'p', 'pd', 'w', 'rs', 'rt', 'rd', 'pp', 'ppd', 'cp', 'ck', 'nb', 'xs', 'xd', 'xa', 'fav', 'lc', 'fr', 'fl', 'ds', 'dsf', 'dsl', 'dsn', 'dsq', 'se', 'sn', 'sq', 'qs', 'sx', 'sk', 'sda'];
 function isBusy(b) { var st = (S[b.id] || {}).st; return st === 'queued' || st === 'reading' || st === 'lookup' || st === 'search'; }
 function cleanBook(x) {
   if (!x || typeof x !== 'object') return null;
@@ -338,11 +340,12 @@ function cleanBook(x) {
     sx: /^[0-9a-f-]{36}$/.test(L.str(x.sx)) ? x.sx : '',                 // prestito o regalo tra amici dell'app (modulo amici, 16/11/2026)
     sk: ['p', 'q', 'r'].indexOf(x.sk) >= 0 ? x.sk : '', sda: L.str(x.sda).slice(0, 30),   // q: prestito ricevuto che hai restituito, da confermare da chi l'ha prestato;   // ricevuto: in prestito (p) o in regalo (r), da chi
     fav: !!x.fav,                                   // preferito
+    lc: !!x.lc && !x.w,                             // «Lo consiglio» (giro 6): gli amici lo vedono nel profilo; solo libri della Libreria
     fr: L.str(x.fr).slice(0, 30), fl: L.str(x.fl).slice(0, 40),     // ricevuto da (nome) e da quale lista
     ds: L.str(x.ds).slice(0, L.DESC_MAX + 1), dsf: x.dsf === 'g' || x.dsf === 'o' ? x.dsf : '',   // descrizione e fonte (Google, Open Library)
     dsl: /^[a-z]{2}$/.test(L.str(x.dsl)) ? x.dsl : '', dsn: Number(x.dsn) || 0, dsq: x.dsq ? 1 : 0,                     // lingua; quando non e' stata trovata
     se: L.str(x.se).slice(0, 80), sn: L.str(x.sn).replace(/\D/g, '').slice(0, 3), sq: L.str(x.sq).replace(/\D/g, '').slice(0, 3),   // serie, volume, di quanti
-    qs: (Array.isArray(x.qs) ? x.qs : []).map(function (c) { return c && typeof c === 'object' ? { x: L.str(c.x).slice(0, 1500).trim(), pg: L.str(c.pg).replace(/\D/g, '').slice(0, 5), d: Number(c.d) || 0, phs: (Array.isArray(c.phs) ? c.phs : c.ph ? [c.ph] : []).map(L.str).filter(function (k) { return /^q:[\w-]{4,40}$/.test(k); }).slice(0, 10) } : null; })
+    qs: (Array.isArray(x.qs) ? x.qs : []).map(function (c) { return c && typeof c === 'object' ? { x: L.str(c.x).slice(0, 1500).trim(), pg: L.str(c.pg).replace(/\D/g, '').slice(0, 5), d: Number(c.d) || 0, pin: c.pin ? 1 : 0, phs: (Array.isArray(c.phs) ? c.phs : c.ph ? [c.ph] : []).map(L.str).filter(function (k) { return /^q:[\w-]{4,40}$/.test(k); }).slice(0, 10) } : null; })
       .filter(function (c) { return c && (c.x || c.phs.length); }).slice(0, 200)                                      // citazioni e appunti
   };
 }

@@ -50,6 +50,13 @@ function toggleFav(id) {
   if (flt === 'fav' && !b.fav) { renderList(); updateSummary(); }
   toast(b.fav ? 'Tra i preferiti. Li trovi in Filtri › Preferiti: da lì puoi anche condividerli.' : 'Tolto dai preferiti.');
 }
+/* «Lo consiglio» (giro 6, scelta di Piero: coccarda accanto alla stella): gli amici lo vedono tra i Consigliati del profilo */
+function toggleLc(id) {
+  var b = get(id);
+  if (!b || b.w) return;
+  b.lc = !b.lc; touch(); refreshRow(id); emit('lc');
+  toast(b.lc ? 'Lo consigli: gli amici lo vedono nel tuo profilo.' : 'Non lo consigli più.');
+}
 var shareCtx = null;
 /* books: cosa mando; ctx.kind: book / fav / wish / list; ctx.title: nome proposto per la lista */
 function openShare(books, ctx) {

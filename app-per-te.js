@@ -323,6 +323,7 @@ function renderAllQuotes() {
       '<ul class="qlist">' + groups[b.id].map(function (x) {
         return '<li><div class="qitem aq-q' + (qPhs(x.c).length ? ' has-ph' + (x.c.x ? '' : ' only-ph') : '') + '">' + (qPhs(x.c).length ? '<button type="button" class="qimg-btn" data-ph="' + esc(qPhs(x.c).join(' ')) + '" data-cap="' + esc(b.t || '') + '" aria-label="Ingrandisci le foto">' + qThumb(x.c) + '</button>' : '') +
           (x.c.x ? '<span class="qt">' + esc(x.c.x) + '</span>' : '<span class="qt q-only">Foto della pagina</span>') + '<span class="qp">' + (x.c.pg ? 'p. ' + esc(x.c.pg) : '') +
+          (x.c.x ? '<button type="button" class="qpin' + (x.c.pin ? ' on' : '') + '" data-pin="' + b.id + '" data-i="' + x.i + '" aria-pressed="' + !!x.c.pin + '" aria-label="' + (x.c.pin ? 'In evidenza nel profilo: tocca per togliere la puntina' : 'Metti in evidenza nel profilo') + '" title="' + (x.c.pin ? 'In evidenza nel profilo: tocca per togliere la puntina' : 'Metti in evidenza nel profilo') + '">' + icon('pin') + '</button>' : '') +
           '<button type="button" class="link" data-copy="' + b.id + '" data-i="' + x.i + '">Condividi</button></span></div></li>';
       }).join('') + '</ul></li>';
   }).join('');
@@ -387,5 +388,6 @@ $('#allqSheet').addEventListener('click', function (e) {
   var o = e.target.closest('[data-open]'); if (o) { goToQuotes(o.dataset.open); return; }
   var ph = e.target.closest('[data-ph]'); if (ph) { openPhs(ph.dataset.ph.split(' ').map(function (k) { return qphURL[k]; }).filter(Boolean), 0, ph.dataset.cap); return; }
   var al = e.target.closest('[data-all]'); if (al) { shareAllQuotes(al.dataset.all); return; }
+  var pn = e.target.closest('[data-pin]'); if (pn) { togglePin(pn.dataset.pin, +pn.dataset.i); renderAllQuotes(); return; }
   var c = e.target.closest('[data-copy]'); if (c) shareQuote(c.dataset.copy, +c.dataset.i);
 });

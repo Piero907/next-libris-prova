@@ -102,7 +102,7 @@ function doD(card, id) {
 }
 function dActs(card) {                            // in alto, solo icone: preferito, desideri, condividi, elimina; in fondo, con la scritta: presta, cerca sul web
   var main = q(card, '.acts-main'); if (!main) return;
-  var share = q(card, '.foot .tail [data-act="share"]'), del = q(main, '[data-act="del"]'), move = q(main, '[data-act="towish"], [data-act="tolib"]'), fav = q(main, '[data-act="fav"]');
+  var share = q(card, '.foot .tail [data-act="share"]'), del = q(main, '[data-act="del"]'), move = q(main, '[data-act="towish"], [data-act="tolib"]'), fav = q(main, '[data-act="lc"]') || q(main, '[data-act="fav"]');   // stella, coccarda, desideri (giro 6)
   if (move) main.insertBefore(move, fav ? fav.nextSibling : main.firstChild);
   if (share) main.insertBefore(share, del || null);
   var id = card.dataset.id, b = NL.get(id);

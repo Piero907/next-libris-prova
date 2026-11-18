@@ -1028,6 +1028,17 @@ body.welcome-on .tip{display:none}
 .tag.from{background:var(--surface);border-style:dashed;color:var(--ink)}
 .ico.act.fav.on{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent)}
 .ico.act.fav.on svg{color:var(--accent);fill:currentColor}
+/* «Lo consiglio» (coccarda accanto alla stella) e puntina delle citazioni in evidenza (giro 6) */
+.ico.act.lc.on{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent)}
+.ico.act.lc.on svg circle{fill:currentColor;fill-opacity:.28}
+.qpin{display:grid;place-items:center;width:34px;height:30px;padding:0;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer}
+.qpin svg{width:17px;height:17px}
+.qpin.on{color:var(--accent)}
+.qpin.on svg path:first-child{fill:currentColor;fill-opacity:.28}
+.qpin:hover,.qpin:focus-visible{background:var(--accent-soft)}
+.qpin:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.aq-q .qp .qpin{margin-left:auto}
+.aq-q .qp .qpin + .link{margin-left:0}
 .opt-h3{margin:8px 0 0;font:600 17px/1.2 var(--font-display)}
 .share-prev{margin:0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--ink);font-size:14.5px;font-weight:600;overflow-wrap:anywhere}
 #shareWhat{color:var(--ink);font-size:15px;overflow-wrap:anywhere}
