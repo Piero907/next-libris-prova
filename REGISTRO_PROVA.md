@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 109.3 · 19/11/2026 12:07
+- **Scheda del libro uguale per tutti**: anche un libro con solo l'ISBN si apre con la pagina del libro; negli amici niente più campi da riempire
+
 ## Prova 109.2 · 19/11/2026 12:02
 - **Copertine: la scritta sotto resta sempre**: anche da 4 per riga in su, nome e numero dei libri sotto ogni copertina (autori e libri)
 
