@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 108.1 · 19/11/2026 10:47
+- Uguale alla versione vera 108
+
 ## Prova 107.8 · 19/11/2026 10:40
 - **iPhone**: in Safari si chiede prima di metterla nella schermata Home (passi per iOS 26), campi che non ingrandiscono la pagina, link di riserva per Accedi con Google, luce e pizzico
 
