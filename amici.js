@@ -992,6 +992,12 @@ function askHTML(own) {
         (askedLately(x.id) ? '<span class="kw-asked">Richiesta mandata</span>' : '<button class="btn" type="button" data-f="keyask" data-id="' + esc(x.id) + '">Chiedimela</button>') + '</span></li>';
     }).join('') + '</ul>';
 }
+/* «Chiedimela» anche nel profilo dell'amico (Piero, 19/11/2026): null se non serve (hai già una chiave, o l'amico non ne ha una sua) */
+function askState(id) {
+  if (!uid() || !list || ownKeys().gb || keys.some(function (k) { return k.a === uid() && k.gb_key; })) return null;
+  if (!askable().some(function (x) { return x.id === id; })) return null;
+  return { asked: askedLately(id) };
+}
 async function askKey(id, btn) {
   if (btn) btn.disabled = true;
   try {
@@ -1356,7 +1362,7 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lends: function (id) { return !!outKey(id); }, hasOwn: function () { var o = ownKeys(); return !!(o.gb || o.sbn); }, hasAny: function () { var o = ownKeys(), b = borrowed(); return !!(o.gb || (b && b.gb)); }, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, swapSheet: swapSheet, keySheet: keySheet, dropSheet: dropSheet, nums: function (id) { return nums[id] || null; },
+window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, askState: askState, ask: askKey, lends: function (id) { return !!outKey(id); }, hasOwn: function () { var o = ownKeys(); return !!(o.gb || o.sbn); }, hasAny: function () { var o = ownKeys(), b = borrowed(); return !!(o.gb || (b && b.gb)); }, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, swapSheet: swapSheet, keySheet: keySheet, dropSheet: dropSheet, nums: function (id) { return nums[id] || null; },
   acts: function (id) { var own = ownKeys(); return { swap: swapsWith(id).length > 0, key: !!(own.gb || own.sbn), lent: outKey(id) ? lentLabel(outKey(id)) : '' }; },   // icone del profilo dell'amico (giro 6)
   guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, keys: keys, who: who }; } };   // per le prove
 })();

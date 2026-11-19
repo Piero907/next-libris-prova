@@ -532,3 +532,9 @@ html[data-look="nuovo"][data-theme="dark"] .guida{background:var(--bg)}
 html[data-look="nuovo"][data-theme="dark"] .guida .gd-try{color:var(--accent)}
 @media (prefers-color-scheme:dark){html[data-look="nuovo"]:not([data-theme="light"]) .guida{background:var(--bg)}html[data-look="nuovo"]:not([data-theme="light"]) .guida .gd-try{color:var(--accent)}}
 html[data-look="nuovo"] .sheet #donOpt{background:var(--warn-bg);color:var(--warn)}
+
+/* ---------- 17. «Chiedimela» nel profilo dell'amico (Piero, 19/11/2026): avviso in pagina ---------- */
+html[data-look="nuovo"] .prof .pf-ask{display:grid;gap:10px;padding:14px;border:0;border-radius:var(--c-r);background:var(--accent-soft)!important;color:var(--ink)}
+html[data-look="nuovo"] .prof .pf-ask p{margin:0;font-size:14.5px;line-height:1.45}
+html[data-look="nuovo"] .prof .pf-ask .btn{justify-self:end;min-height:40px;padding:6px 18px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:700}
+html[data-look="nuovo"] .prof .pf-ask .pf-asked{justify-self:end;color:var(--accent);font:700 14px/1.2 var(--font-body)}

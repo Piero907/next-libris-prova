@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.10 · 19/11/2026 16:34
+- **«Chiedimela» anche nel profilo dell'amico**: se non hai una chiave Google tua e l'amico ne ha una, sotto il suo profilo c'è un avviso con «Chiedimela».
+
 ## Prova 110.9 · 19/11/2026 16:22
 - **Restyle «C · Schede» completo**: caratteri Bricolage Grotesque e IBM Plex Sans, riquadri bianchi arrotondati, tasti tondi, barra in basso sospesa; librerie e profili (tuoi e degli amici) con lo stesso aspetto.
 - **Scheda del libro a pagina intera**: ‹ per tornare e ⋯ con «Cerca sul web»; copertina al centro, pillole dei dati, tasti tondi; riquadri Lettura, Descrizione, Dal libro, Citazioni (la prima in vista), Prestito, Nota, «Vedi tutti i libri di».

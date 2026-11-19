@@ -357,8 +357,11 @@ function paint() {
       (acts.swap ? icoBtn('swap', ' gb-swap', 'Prestiti e regali tra te e ' + name, I_SWAP) : '') +
       (acts.key ? icoBtn('key', acts.lent ? ' on' : '', acts.lent ? acts.lent + ' ' + aNome(name) : 'Presta la tua chiave Google o il worker ' + aNome(name), I_KEY + (acts.lent ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '')) : '') +
       icoBtn('drop', ' gb-drop', 'Togli ' + name + ' dagli amici', I_DROP) + '</span></div>';                       // Libreria e Desideri ci sono sempre, anche se il profilo non si carica
-    if (!data) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section><p class="msg">Un momento…</p>';
-    else if (data.err) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section><p class="msg">' + esc(data.err) + '</p>';
+    var ks = A().askState && A().askState(cur), ask = !ks ? '' :          // «Chiedimela» (Piero, 19/11/2026): solo se tu non hai una chiave e l'amico ne ha una sua
+      '<section class="fr-sec pf-ask"><p><span aria-hidden="true">🔑 </span><b>' + esc(name) + '</b> ha una chiave Google Libri sua. Se te la presta, la tua ricerca trova molti più libri, con copertine e descrizioni.</p>' +
+      (ks.asked ? '<span class="pf-asked">Richiesta mandata</span>' : '<button class="btn primary" type="button" data-p="ask">Chiedimela</button>') + '</section>';
+    if (!data) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section>' + ask + '<p class="msg">Un momento…</p>';
+    else if (data.err) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section>' + ask + '<p class="msg">' + esc(data.err) + '</p>';
     else if (mode === 'cits') {
       h = '<button class="link fr-back" type="button" data-p="back">‹ Profilo</button><div class="pf-qlist">' + (data.cits || []).map(quoteHTML).join('') + '</div>';
     } else {
@@ -367,6 +370,7 @@ function paint() {
       h = '<section class="pf-card">' + head(cur, data.utente || name, since(data.creato));   // riquadro in cima (stile C, 19/11/2026)
       if (data.stat) h += numsLine(data.stat);
       h += go + '</section>';
+      h += ask;
       if (data.desideri) h += '<section class="fr-sec pf-fol"><button class="btn' + (data.segue ? '' : ' primary') + '" type="button" data-p="segui" aria-pressed="' + !!data.segue + '">' + (data.segue ? 'Stai seguendo i suoi Desideri ✓' : 'Segui i suoi Desideri') + '</button>' +
         '<p class="fr-small">' + (data.segue ? 'Ti scriviamo al massimo una volta al giorno, solo quando c\'è qualcosa di nuovo. ' + esc(name) + ' non lo sa. Tocca per smettere.'
           : esc(name) + ' ti mostra già i suoi Desideri: seguili e scopri cosa sogna di leggere. Magari ci trovi il regalo giusto, o il tuo prossimo libro. Ti scriviamo al massimo una volta al giorno, solo quando c\'è qualcosa di nuovo, e ' + esc(name) + ' non lo saprà.') + '</p></section>';
@@ -472,6 +476,7 @@ async function onClick(e) {
   else if ((a === 'lib' || a === 'wish') && id) { close(); goGuest(id, a); }
   else if (a === 'book') { var bid = b.dataset.id; close(); if (id) goGuest(id, 'lib', bid); else if (NL.showBook) NL.showBook(bid); }
   else if (a === 'chat' && id && window.NLChat) { var cn = (data && data.utente) || A().friendName(id); close(); setTimeout(function () { window.NLChat.to(id, cn); }, 60); }   // Scrivi (giro 9b)
+  else if (a === 'ask' && id && A().ask) { await A().ask(id, b); paint(); }   // «Chiedimela»
   else if (a === 'swap' && id && A().swapSheet) A().swapSheet(id);
   else if (a === 'key' && id && A().keySheet) A().keySheet(id);
   else if (a === 'drop' && id && A().dropSheet) A().dropSheet(id);
