@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.6 · 19/11/2026 13:18
+- **Modifica del libro nella pagina del libro**: la matita rende scrivibili i dati nel loro posto (via la vecchia scheda a campi); i dati incerti hanno «da verificare» piccolo accanto, il tocco lo conferma.
+
 ## Prova 110.5 · 19/11/2026 13:03
 - **ISBN sconosciuti**: i libri completati a mano vanno all'archivio comune dopo il controllo in **Amministrazione › Archivio › Da controllare**; messaggio per i 979-8 dopo la scansione
 
