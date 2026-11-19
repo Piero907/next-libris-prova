@@ -938,7 +938,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
    Un modulo si toglie cancellando i suoi file e le sue righe in index.html e sw.js (vedi togli_modulo.py nel ramo prove). ---- */
 window.NL = {
   openPh: function (src, cap) { openPh(src, cap); },   // foto dell'amico a tutto schermo (giro 10)
-  inst: { standalone: isStandalone, kind: browserKind, go: doInstall, ios: function () { return /^ios/.test(browserKind()); } },   // per la guida (giro 10)
+  inst: { standalone: isStandalone, kind: browserKind, go: doInstall, ios: function () { return /^ios/.test(browserKind()); }, can: function () { return !!deferred; } },   // can: il browser offre «Installa» (schede di benvenuto)   // per la guida (giro 10)
   setKey: function (v) { setSvc('key', v); }, svcAll: function () { return svcAll(); }, svcPurge: function (v) { svcPurge(v); }, openDon: function () { openDon(); },   // dalla guida dell’API (18/11/2026)
   ownKey: function () { return mine('key'); },
   qThumb: function (c) { return qThumb(c); },   // miniatura della foto di una citazione (profilo, 18/11/2026)   // la TUA chiave, anche mentre usi quella di un amico (giro 8)

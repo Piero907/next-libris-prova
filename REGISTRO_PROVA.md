@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.14 · 19/11/2026 23:35
+- **Schede di benvenuto nuove** («Fondo Bosco»): 4 schede al posto della guida, anche in Menu › Come si usa; poi «Entra con Google», «Come ti chiami?» in verde e il percorso dal passo 2
+
 ## Prova 110.13 · 19/11/2026 20:43
 - **Amici di nuovo raggiungibile:** tasto 👥 in testata (tra chat e ingranaggio) e riquadro «Amici › I tuoi amici» nel tuo Profilo
 

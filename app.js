@@ -127,7 +127,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 110, date: '2026-11-19', note: 'Scheda del libro uguale per tutti; scritta sotto le copertine sempre' };
-var BUILD = {"t": "2026-11-19 20:43", "n": "110.13", "note": "Amici di nuovo raggiungibile"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-19 23:35", "n": "110.14", "note": "Schede di benvenuto nuove («Fondo Bosco»)"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }

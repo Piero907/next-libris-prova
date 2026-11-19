@@ -121,14 +121,17 @@ async function askName() {
   if (!uid() || me.utente) { askOpen = false; return; }
   var v = proposal(full) || proposal(me.nome || '') || proposal(NL.name() || '');
   var d = document.createElement('div'); d.className = 'nm-ask'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-labelledby', 'nmAskH');
-  d.innerHTML = '<form class="nm-box" id="nmAskF" novalidate><h2 id="nmAskH">Come ti troveranno gli amici?</h2>' +
-    '<label class="field"><span>Il tuo nome</span><input type="text" id="nmAskU" autocomplete="nickname" spellcheck="false" enterkeyhint="done" maxlength="20" required value="' + esc(v) + '"></label>' +
-    '<p class="fr-small">Con questo nome gli amici ti cercano e ti riconoscono. Puoi cambiarlo quando vuoi dal profilo. ' + RULES + '</p>' +
-    '<p class="msg bad" id="nmAskE" hidden></p>' +
-    '<button class="btn primary" type="submit" id="nmAskB">Conferma</button></form>';
+  /* grafica delle schede di benvenuto (Piero, 19/11/2026): fondo verde, iniziale e «Ciao, …», «Come ti chiami?» */
+  d.innerHTML = '<form class="nm-box" id="nmAskF" novalidate><div class="nm-art" aria-hidden="true"><span class="nm-ini" id="nmAskI">' + esc((v.trim().charAt(0) || '?').toUpperCase()) + '</span>' +
+    '<span class="nm-hi" id="nmAskC"' + (v ? '' : ' hidden') + '>Ciao, ' + esc(v) + '</span></div>' +
+    '<h2 id="nmAskH">Come ti chiami?</h2><p class="nm-sub">È il nome con cui gli amici ti troveranno.</p>' +
+    '<label class="nm-lab" for="nmAskU">Il tuo nome</label><input type="text" id="nmAskU" autocomplete="nickname" spellcheck="false" enterkeyhint="done" maxlength="20" required value="' + esc(v) + '">' +
+    '<p class="nm-err" id="nmAskE" hidden></p>' +
+    '<button class="nm-btn" type="submit" id="nmAskB">Continua</button></form>';
   document.body.appendChild(d);
   var inp = d.querySelector('#nmAskU'), eb = d.querySelector('#nmAskE'), btn = d.querySelector('#nmAskB');
-  function bad(m) { eb.textContent = m; eb.hidden = false; btn.disabled = false; btn.textContent = 'Conferma'; inp.focus(); }
+  function bad(m) { eb.textContent = m; eb.hidden = false; btn.disabled = false; btn.textContent = 'Continua'; inp.focus(); }
+  inp.addEventListener('input', function () { var t = tidy(inp.value), c = d.querySelector('#nmAskC'); d.querySelector('#nmAskI').textContent = (t.charAt(0) || '?').toUpperCase(); c.textContent = 'Ciao, ' + t; c.hidden = !t; });
   d.querySelector('#nmAskF').addEventListener('submit', async function (e) {
     e.preventDefault();
     var n = tidy(inp.value);
