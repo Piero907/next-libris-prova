@@ -126,7 +126,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 110, date: '2026-11-19', note: 'Scheda del libro uguale per tutti; scritta sotto le copertine sempre' };
-var BUILD = {"t": "2026-11-19 13:01", "n": "110.4", "note": "ISBN sempre visibile nella scheda del libro (anche amici e chat); Amministrazione › Archiv"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-19 13:03", "n": "110.5", "note": "ISBN sconosciuti"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -357,9 +357,11 @@ function lookupOpts() { return { gbKey: settings.gbKey, sbnUrl: settings.sbnUrl 
 /* ricerca per ISBN: prima l'archivio comune (modulo ricerche.js: libri gia' cercati da altri, senza Google), poi le banche dati; il risultato va nell'archivio */
 async function findIsbn(code) {
   var A = window.NL && window.NL.archive;
-  if (A && A.get) { try { var hit = await A.get(code); if (hit) return hit; } catch (e) { nlErr(e); } }
+  var hit = null;
+  if (A && A.get) { try { hit = await A.get(code); if (hit && !hit.part) return hit; } catch (e) { nlErr(e); } }
   var res = await L.lookupIsbn(code, lookupOpts());
   if (res && A && A.put) { try { A.put(code, res); } catch (e) { nlErr(e); } }
+  if (!res && hit) { delete hit.part; return hit; }   // solo l'archivio lo conosce (es. libro scritto a mano e approvato, 029)
   return res;
 }
 function hasData(b) { return !!(b.t || b.a || b.e || b.y || b.i || b.c != null || b.n); }

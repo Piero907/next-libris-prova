@@ -104,6 +104,20 @@ function applyResult(b, r, code) {
 var KDP_E = 'Amazon (pubblicazione in proprio)';
 function isKdp(b) { return /^9798/.test(L.toIsbn13(b && b.i) || ''); }
 function markKdp(b) { if (b && b.nf && !b.t && !b.e && isKdp(b)) { b.e = KDP_E; b.g = b.g.filter(function (k) { return k !== 'e'; }); return true; } return false; }
+/* 029 (Piero, 19/11/2026): libro che nessuna banca dati conosce, completato a mano (titolo e autore) o riconosciuto dalla foto:
+   si propone all'archivio comune dopo una pausa; entra solo quando l'amministratore lo approva */
+var propT = {}, proposed = {};
+function proposeLater(b) {
+  var code = L.toIsbn13(b && b.i);
+  if (guest || !code || !b.t || !b.a || !b.nf || !window.NL || !NL.archive || !NL.archive.propose) return;
+  clearTimeout(propT[b.id]);
+  propT[b.id] = setTimeout(async function () {
+    delete propT[b.id];
+    var x = get(b.id); if (!x || !x.t || !x.a || L.toIsbn13(x.i) !== code) return;
+    var r = await NL.archive.propose(code, x);
+    if (r === 'ok' && !proposed[code]) { proposed[code] = 1; toast('Grazie! Controlliamo i dati: poi chi cerca questo libro lo troverà già pronto.'); }
+  }, 4000);
+}
 function guessEditor(b) {
   if (b.e) return false;
   var g = L.guessPublisher(b.i, state.books);
@@ -285,6 +299,7 @@ function applyCandidate(id, c) {
   if (!b.img && s.big && !coverURL[id]) saveCoverData(id, s.big);
   b.g = (keep ? ['y'] : ['e', 'y', 'i']).filter(function (k) { return b[k] && !(k === 'e' && b.e === KDP_E); });
   if (s.price != null && b.c == null) b.c = s.price;
+  if (keep) proposeLater(b);                       // riconosciuto dalla foto ma il suo ISBN non lo conosce nessuno (029)
   b.nf = false;
   ['st', 'cands', 'lines', 'price', 'err', 'retry', 'keep'].forEach(function (k) { delete s[k]; });
   touch(); refreshRow(id); updateSummary();
@@ -815,7 +830,7 @@ function onScanned(code) {
   if (settings.price) { priceTarget = book.id; priceBar(PRICE_HINT); }
   res.done.then(function () {
     if (!scanning) return;
-    scanMsg(book.t ? '✓ ' + book.t : (book.nf ? 'Non trovato nelle banche dati: lo completi dopo.' : 'Titolo da completare più tardi.'));
+    scanMsg(book.t ? '✓ ' + book.t : (book.nf ? (isKdp(book) ? 'Pubblicato in proprio su Amazon: non è nelle banche dati. Aprilo e fotografa la copertina.' : 'Non trovato nelle banche dati: lo completi dopo.') : 'Titolo da completare più tardi.'));
   });
 }
 /* ---------- «Ce l'ho già?»: controlla senza aggiungere ---------- */

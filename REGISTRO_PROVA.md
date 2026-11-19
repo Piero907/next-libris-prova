@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.5 · 19/11/2026 13:03
+- **ISBN sconosciuti**: i libri completati a mano vanno all'archivio comune dopo il controllo in **Amministrazione › Archivio › Da controllare**; messaggio per i 979-8 dopo la scansione
+
 ## Prova 110.4 · 19/11/2026 13:01
 - **ISBN sempre visibile** nella scheda del libro (anche amici e chat); **Amministrazione › Archivio**: tasto lente che non esce dal bordo
 

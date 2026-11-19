@@ -38,6 +38,7 @@ list.addEventListener('change', function (e) {
   if (!b) return;
   if (el.dataset.k === 'se' || el.dataset.k === 'sn' || el.dataset.k === 'sq') seriesChanged(b, row, el.dataset.k);
   if (el.dataset.k === 'c') el.value = b.c == null ? '' : L.fmtNum(b.c);
+  if (['t', 'a', 'e', 'y', 'pg'].indexOf(el.dataset.k) >= 0) proposeLater(b);   // non trovato e completato a mano: all'archivio comune (029)
   if (el.dataset.k === 'i') {
     var code = L.toIsbn13(b.i);
     if (code) {

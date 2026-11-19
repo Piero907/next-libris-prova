@@ -68,8 +68,9 @@ NL.archive = {
     if (!uid() || !/^97[89]\d{10}$/.test(isbn || '') || navigator.onLine === false) return null;
     var d = null;
     try { d = await within(rpc('da_archivio', { isbn: isbn }), 2500); } catch (e) { return null; }
-    if (!d || typeof d !== 'object' || !d.t || !d.a || !(d.e || d.y)) return null;   // incompleto: si cerca come sempre (e si completa l'archivio)
+    if (!d || typeof d !== 'object' || !d.t) return null;
     var r = { i: isbn, src: 'Archivio comune' };
+    if (!d.a || !(d.e || d.y)) r.part = 1;      // incompleto: si cerca come sempre (e si completa l'archivio); se non lo trova nessuno vale questo (029)
     KEEP.forEach(function (k) { if (d[k]) r[k] = String(d[k]); });
     if (r.imgL && NL.L.badBigCover && NL.L.badBigCover(r.imgL)) delete r.imgL;   // zoom=0 di Google: non e' la copertina (17/11/2026)
     return r;
@@ -80,6 +81,13 @@ NL.archive = {
     if (o.imgL && NL.L.badBigCover && NL.L.badBigCover(o.imgL)) delete o.imgL;
     rpc('archivia', { isbn: isbn, dati: o }).catch(function () {});
   }
+};
+/* 029 (Piero, 19/11/2026): un libro che nessuna banca dati conosce, completato a mano, si propone all'archivio comune;
+   entra solo dopo il controllo dell'amministratore (Amministrazione › Archivio › Da controllare) */
+NL.archive.propose = async function (isbn, r) {
+  if (!uid() || !r || !r.t || !r.a || !/^97[89]\d{10}$/.test(isbn || '') || navigator.onLine === false) return '';
+  var o = {}; ['t', 'a', 'e', 'y', 'pg', 'gen', 'se', 'sn', 'img'].forEach(function (k) { if (r[k] != null && r[k] !== '') o[k] = String(r[k]); });
+  try { return String(await rpc('proponi_archivio', { isbn: isbn, dati: o }) || ''); } catch (e) { return ''; }
 };
 NL.on('bigCover', function (x) { if (x && x.t && x.imgL) NL.archive.put(x.i, { t: x.t, imgL: x.imgL }); });   // la copertina grande trovata dopo
 
