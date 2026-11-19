@@ -59,6 +59,7 @@ function text(x) {
     case 'richiesta_no': return who(x) + ' ora non può prestarti ' + book(x);
     case 'consiglio': return who(x) + ' ti consiglia ' + book(x);
     case 'chiavi': return who(x) + ' condivide con te la sua chiave per cercare i libri';
+    case 'chiedi_chiavi': return who(x) + ' ti chiede in prestito la chiave Google Libri';   // «Chiedimela» (giro 12)
     case 'desideri': var nd = Number(x.rif) || 1; return who(x) + (nd === 1 ? ' ha un nuovo desiderio: ' : ' ha ' + nd + ' nuovi desideri: ') + '<b>' + esc(x.titolo || '') + '</b>' + (nd > 3 ? ' e altri' : '');   // riassunto del giorno di un amico che segui (giro 3)
     case 'trovato': var nt = trovN(x); return '📚 ' + who(x) + ' ha aggiunto <b>' + esc(x.titolo || 'un libro') + '</b>' + (nt > 3 ? ' e altri' : '') + (nt === 1 ? ', che è nei tuoi Desideri' : ', che sono nei tuoi Desideri');   // un tuo desiderio è entrato nella libreria di un amico (giro 6)
     case 'avviso': return '<b>' + esc(x.rif || 'Avviso di Next Libris') + '</b><br>' + esc(x.titolo || '');   // avviso importante di Next Libris (giro 8): rif = titolo, titolo = testo, tutto in vista
@@ -73,7 +74,7 @@ function text(x) {
   return who(x);
 }
 var KIND = { amicizia: 'fr', amico: 'fr', prestito: 'bk', regalo: 'gift', reso: 'bk', reso_ok: 'bk', reso_no: 'bk', chiuso: 'bk',
-  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', limite: 'lim', desideri: 'gift', trovato: 'bk', avviso: 'av', messaggi: 'msg', segnalazione: 'lim' };
+  richiesta: 'ask', richiesta_si: 'ask', richiesta_no: 'ask', consiglio: 'tip', chiavi: 'key', chiedi_chiavi: 'key', limite: 'lim', desideri: 'gift', trovato: 'bk', avviso: 'av', messaggi: 'msg', segnalazione: 'lim' };
 /* «trovato»: rif = quanti:id del libro dell'amico (il primo) */
 function trovN(x) { return Number(String(x.rif || '').split(':')[0]) || 1; }
 function trovId(x) { var r = String(x.rif || ''), i = r.indexOf(':'); return i < 0 ? '' : r.slice(i + 1); }
@@ -126,6 +127,7 @@ function sheet() {
   el.addEventListener('click', function (e) {
     if (e.target === el) return close();
     var ak = e.target.closest('[data-ask]'); if (ak) { ask(ak.dataset.ask, ak); return; }
+    var lk = e.target.closest('[data-lendkey]'); if (lk) { lendKeyGo(lk.dataset.lendkey); return; }
     var it = e.target.closest('[data-n]'); if (it) go(it.dataset.n);
   });
   el.querySelector('#ntClose').addEventListener('click', close);
@@ -150,16 +152,34 @@ function paint() {
     return '<li><button type="button" class="nt-item' + (fresh[x.id] ? ' nt-new' : '') + '" data-n="' + esc(x.id) + '">' +
       '<span class="nt-ico nt-' + (KIND[x.tipo] || 'fr') + '" aria-hidden="true">' + (x.tipo === 'limite' || x.tipo === 'segnalazione' ? '!' : x.tipo === 'avviso' ? 'NL' : x.tipo === 'messaggi' && !x.da ? '…' : esc(((x.nome || '?').trim()[0] || '?').toUpperCase())) + '</span>' +
       '<span class="nt-t"><span class="nt-txt">' + text(x) + '</span><small>' + esc(ago(x.creata)) + (fresh[x.id] ? ' · <span class="nt-dot">nuova</span>' : '') + '</small></span>' +
-      '</button>' + (x.tipo === 'trovato' && trovN(x) === 1 && trovId(x) && x.da ? (sent[x.id] || asked(x) ? '<span class="nt-asked">Richiesta mandata</span>' : '<button type="button" class="btn nt-lend" data-ask="' + esc(x.id) + '">Me lo presti?</button>') : '') + '</li>';
+      '</button>' + (x.tipo === 'trovato' && trovN(x) === 1 && trovId(x) && x.da ? (sent[x.id] || asked(x) ? '<span class="nt-asked">Richiesta mandata</span>' : '<button type="button" class="btn nt-lend" data-ask="' + esc(x.id) + '">Me lo presti?</button>') : '') + lendKey(x) + '</li>';
   }).join('') + '</ul>';
 }
 
+/* «Chiedimela» (giro 12): sotto l'avviso il tasto «Prestala»; se gliela presti già, «Gliela presti ✓» */
+function lendKey(x) {
+  if (x.tipo !== 'chiedi_chiavi' || !x.da) return '';
+  var A = amici();
+  if (A && A.lends && A.lends(x.da)) return '<span class="nt-asked">Gliela presti ✓</span>';
+  return '<button type="button" class="btn nt-lend" data-lendkey="' + esc(x.da) + '">Prestala</button>';
+}
+function lendKeyGo(da) {
+  close();
+  var A = amici(); if (!A) return;
+  setTimeout(function () {
+    if (A.hasOwn && !A.hasOwn()) {   // niente di suo da prestare: la guida per creare la chiave (gratis)
+      NL.toast('Non hai ancora una chiave tua: creala, è gratis, e poi potrai prestarla.');
+      if (window.NLRicerche && window.NLRicerche.guide) window.NLRicerche.guide(); else if (A.keys) A.keys();
+    } else if (A.keySheet) A.keySheet(da);
+  }, 60);
+}
 /* ---------- tocco: il libro o la finestra Amici ---------- */
 function go(id) {
   var x = items.filter(function (y) { return y.id === id; })[0]; if (!x) return;
   if (x.tipo === 'avviso') return;
   if (x.tipo === 'messaggi') { close(); if (window.NLChat) setTimeout(function () { window.NLChat.open(); }, 60); return; }   // la chat (giro 9b)
   if (x.tipo === 'segnalazione') { close(); if (window.NLAdmin) setTimeout(function () { window.NLAdmin.open(x.rif); }, 60); return; }   // pannello: giro 9e                       // l'avviso si legge tutto qui: il tocco non porta altrove
+  if (x.tipo === 'chiedi_chiavi' && x.da) { lendKeyGo(x.da); return; }   // «Chiedimela»: apre «Presta a …»
   close();
   var A = amici();
   if (x.tipo === 'limite') { if (window.NLRicerche) setTimeout(function () { window.NLRicerche.guide(x.titolo); }, 60); return; }   // guida: crea la tua chiave, è gratis

@@ -42,6 +42,7 @@ function nice(e) {
   if (/duplicate|unique|23505/.test(m) || (e && e.code === 409)) return 'Questo nome è già usato da un altro: aggiungi un\'iniziale o un numero (es. «Piero R.»).';
   if (/check|23514/.test(m)) return RULES;
   if (/troppe richieste/.test(m)) return 'Hai già tante richieste in attesa: aspetta che qualcuno risponda.';
+  if (/non amici/.test(m)) return 'Non siete più amici su Next Libris.';
   if (/non tua/.test(m)) return 'Questa chiave o questo worker te li ha prestati un amico: puoi prestare solo i tuoi.';
   if (/worker non valido|chiave non valida|niente da prestare/.test(m)) return 'Puoi prestare solo una chiave o un worker tuoi.';
   return 'Non ci riesco (' + m + '). Riprova tra poco.';
@@ -66,6 +67,8 @@ async function load(force) {
       try { swaps = (await rpc('miei_scambi')) || []; await applySwaps(); } catch (e) { if (window.console) console.warn('scambi', e); }
       try { asks = (await rpc('mie_richieste')) || []; await loadWho(); seenAnswers(); } catch (e) { if (window.console) console.warn('richieste', e); }
       try { keys = (await rpc('chiavi_mie')) || []; checkKeys(); await ownCheck(); } catch (e) { if (window.console) console.warn('chiavi', e); }
+      try { var fk = {}; ((await rpc('amici_chiavi')) || []).forEach(function (x) { fk[x.id] = x; }); fkeys = fk; } catch (e) { if (window.console) console.warn('chiavi degli amici', e); }   // giro 12: chi ha una chiave sua
+      declareKeys();
       lastLoad = Date.now(); err = '';
       if (me.utente && NL.name() !== me.utente) { syncing = true; NL.setName(me.utente); syncing = false; }   // il nome per gli amici vale anche nell'app
     } catch (e) { err = nice(e); }
@@ -75,6 +78,7 @@ async function load(force) {
   return loading;
 }
 var loaded = [];
+var fkeys = {};                          // giro 12 (030): per ogni amico { gb, sbn, chiesta }: ha una chiave o un worker suoi, e quando gliel'ho chiesta
 /* amici sempre in ordine alfabetico, in tutte le finestre (Piero, 17/11/2026 sera) */
 function abc(a) { return (a || []).slice().sort(function (x, y) { return String(x.utente || x.nome || '').localeCompare(String(y.utente || y.nome || ''), 'it', { sensitivity: 'base' }); }); }
 function friends() { return (list || []).filter(function (x) { return x.stato === 'amici'; }); }
@@ -284,6 +288,7 @@ async function onClick(e) {
   if (a === 'chat') { close(); if (window.NLChat) { var cu = b.dataset.u; setTimeout(function () { window.NLChat.to(id, cu); }, 60); } return; }   // Scrivi (giro 9b)
   if (a === 'blocked') { if (window.NLChat) window.NLChat.blocked(); return; }
   if (a === 'keyshare') { keySheet(id); return; }
+  if (a === 'keyask') { askKey(id, b); return; }   // «Chiedimela» (giro 12)
   if (a === 'keyuse' || a === 'keyoff') { keyAct(a, id); return; }
   if (a === 'askyes' || a === 'askno') { askAnswer(id, a === 'askyes'); return; }
   if (a === 'back') { view = null; wishes = null; libs = null; confirmId = ''; paint(); return; }
@@ -567,6 +572,7 @@ function ownKeyIco() {
 }
 function okRefresh() { ownKeyIco(); }
 NL.on('keys', okRefresh); NL.on('optclose', okRefresh);
+NL.on('keys', declareKeys); NL.on('optclose', declareKeys);   // chiave messa o tolta: il sì/no arriva al server (giro 12)
 NL.on('guest', function (name) { if (!name && entering) return; if (!name) { window.__guestInfo = null; } guestBar(); if (!name) { gId = null; gMeta = {}; load(true); } });
 /* le info della libreria aperta (amici in comune): le passa openGuest prima di entrare */
 var _enter = NL.guestEnter;
@@ -955,7 +961,47 @@ function paintKw() {
     if (!h) h = '<p class="fr-small">Non hai ancora una chiave Google o un worker SBN tuoi. Se un amico ti presta i suoi, li trovi qui.</p>';
   }
   if (!own.gb) h += kwRow('guide', 'Crea la tua chiave Google', 'È gratis: 1.000 ricerche al giorno solo per te.');
+  h += askHTML(own);
   body.innerHTML = intro + h;
+}
+/* ---------- «Chiedila a un amico» (giro 12, 19/11/2026; database 030) ----------
+   Ogni telefono dice al server solo un sì/no: «ho una chiave mia», «ho un worker mio» (declareKeys; la chiave resta sul telefono).
+   Chi non ha una chiave vede gli amici che ne hanno una, con «Chiedimela»: all'amico arriva un avviso con «Prestala».
+   Una richiesta allo stesso amico ogni 7 giorni (lo decide il server); chi la riceve può anche ignorarla. */
+var K_SAID = 'catalogo-libri-amici-chiavi-dette', saying = false;
+function declareKeys() {
+  if (!uid() || saying) return;
+  var o = ownKeys(), sig = uid() + ':' + (o.gb ? 1 : 0) + (o.sbn ? 1 : 0);
+  if (rd(K_SAID) === sig) return;
+  saying = true;
+  rpc('chiavi_dichiara', { gb: !!o.gb, sbn: !!o.sbn }).then(function () { wr(K_SAID, sig); }).catch(function (e) { if (window.console) console.warn('chiavi_dichiara', e); }).then(function () { saying = false; });
+}
+var WEEK = 7 * 864e5;
+function askedLately(id) { var f = fkeys[id]; return !!(f && f.chiesta && Date.now() - Date.parse(f.chiesta) < WEEK); }
+function askable() {   // amici con una chiave Google loro, che non te la prestano già
+  return friends().filter(function (x) { var f = fkeys[x.id]; return f && f.gb && !keys.some(function (k) { return k.da === x.id && k.a === uid(); }); });
+}
+function askHTML(own) {
+  if (!uid() || !list || own.gb || keys.some(function (k) { return k.a === uid() && k.gb_key; })) return '';
+  var h = '<h3 class="fr-h kw-askh">Chiedila a un amico</h3>', can = askable();
+  if (!friends().length) return h + '<p class="fr-small">Quando avrai un amico su Next Libris con una chiave sua, potrai chiedergliela da qui.</p>' + kwRow('friends', 'Aggiungi un amico', 'Cercalo per nome o mandagli il tuo invito.');
+  if (!can.length) return h + '<p class="fr-small">Nessuno dei tuoi amici ha ancora una chiave sua. Quando un amico la crea, lo trovi qui.</p>';
+  return h + '<p class="fr-small">Questi amici hanno una chiave loro. Prestartela non costa niente: la chiave resta sul server e tu cerchi e basta.</p><ul class="fr-list fr-box kw-ask">' +
+    can.map(function (x) {
+      return '<li class="fr-row"><span class="fr-who">' + nameOf(x) + '</span><span class="fr-act">' +
+        (askedLately(x.id) ? '<span class="kw-asked">Richiesta mandata</span>' : '<button class="btn" type="button" data-f="keyask" data-id="' + esc(x.id) + '">Chiedimela</button>') + '</span></li>';
+    }).join('') + '</ul>';
+}
+async function askKey(id, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    var r = await rpc('chiedi_chiavi', { a: id }), n = friendName(id);
+    if (r === 'ok' || r === 'presto') { fkeys[id] = Object.assign({}, fkeys[id], { chiesta: (r === 'ok' || !(fkeys[id] || {}).chiesta) ? new Date().toISOString() : fkeys[id].chiesta }); NL.toast(r === 'ok' ? 'Richiesta mandata a ' + n + '.' : 'L\'hai già chiesta a ' + n + ' da poco: puoi riprovare tra qualche giorno.'); }
+    else if (r === 'gia') { NL.toast(n + ' te la presta già.'); load(true); }
+    else if (r === 'troppe') NL.toast('Per oggi hai mandato tante richieste: riprova domani.');
+    else { if (fkeys[id]) fkeys[id].gb = false; NL.toast(n + ' non ha più una chiave sua.'); }
+  } catch (e) { NL.toast(nice(e)); }
+  paintKw();
 }
 function keyWin() {
   var el = kwSheet(); document.body.appendChild(el); el.hidden = false; paintKw();
@@ -1310,7 +1356,7 @@ document.addEventListener('visibilitychange', function () { if (document.visibil
 setInterval(function () { if (document.visibilityState === 'visible' && uid() && !loading && Date.now() - lastLoad > 170000) load(true); }, 60000);   // richieste e avvisi senza chiudere l'app
 paintTop(); okRefresh();
 if (uid()) setTimeout(function () { load(true); }, 1500);
-window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, swapSheet: swapSheet, keySheet: keySheet, dropSheet: dropSheet, nums: function (id) { return nums[id] || null; },
+window.NLAmici = { ownPart: ownPart, open: open, ff: openFF, keys: keyWin, lends: function (id) { return !!outKey(id); }, hasOwn: function () { var o = ownKeys(); return !!(o.gb || o.sbn); }, hasAny: function () { var o = ownKeys(), b = borrowed(); return !!(o.gb || (b && b.gb)); }, lentCount: function () { return uid() && list ? lentCount() : -1; }, lentText: lentText, offers: function () { var b = borrowed(); return keys.filter(function (k) { return k.a === uid() && !(b && b.da === k.da); }).map(function (k) { return { nome: k.nome, gb: !!k.gb_key, sbn: !!k.sbn }; }); }, load: load, onLoad: function (fn) { loaded.push(fn); }, friend: openFriend, guest: openGuest, swapSheet: swapSheet, keySheet: keySheet, dropSheet: dropSheet, nums: function (id) { return nums[id] || null; },
   acts: function (id) { var own = ownKeys(); return { swap: swapsWith(id).length > 0, key: !!(own.gb || own.sbn), lent: outKey(id) ? lentLabel(outKey(id)) : '' }; },   // icone del profilo dell'amico (giro 6)
   guestId: function () { return NL.guest && NL.guest() ? gId : null; }, follow: follow, friendName: friendName, rpc: rpc, uid: uid, state: function () { return { me: me, list: list, invite: invite, swaps: swaps, asks: asks, keys: keys, who: who }; } };   // per le prove
 })();

@@ -1,7 +1,7 @@
 /* Next Libris · modulo «Come si usa»: guida di primo avvio e libreria di esempio (giro 4, 18/11/2026).
    Modulo a parte: usa solo window.NL. Per toglierlo: cancellare guida.js e guida.css e le loro righe in index.html e in SHELL di sw.js
    (togli_modulo.py, nel ramo prove). Dati suoi: 'catalogo-libri-guida' ({ seen: 1 } quando la guida è stata vista).
-   - Otto schermate da sfogliare col dito, con un tocco ai lati dello schermo o con i tasti; «Salta» sempre in vista. Si apre da sola una volta,
+   - Undici schermate (giro 12; «Installala» solo nel browser) da sfogliare col dito, con un tocco ai lati dello schermo o con i tasti; «Salta» sempre in vista. Si apre da sola una volta,
      ai nuovi e a chi usa già l'app (al primo avvio dopo l'aggiornamento: cfg.v < GV). Si riapre da Menu › Info e aiuto › Come si usa.
    - «Prova adesso» apre la parte vera dell'app; nelle schermate 4, 5 e 6 apre la libreria di esempio.
    - Libreria di esempio: la modalità ospite dell'app (NL.guestEnter con info.esempio): solo da guardare, niente salvataggi né sincronizzazione,
@@ -14,21 +14,32 @@ var NL = window.NL;
 if (!NL || !NL.guestEnter) return;
 var L = NL.L, esc = NL.esc, $ = NL.$;
 var LS = 'catalogo-libri-guida';
-var GV = 3;                                               // versione della guida: 2 = otto schermate (giro 5); chi ha visto una versione più vecchia la rivede una volta
+var GV = 4;                                               // versione della guida: 2 = otto schermate (giro 5), 4 = ordine nuovo e «Chiavi in prestito» (giro 12); chi ha visto una versione più vecchia la rivede una volta
 var cfg = {};
 try { cfg = JSON.parse(NL.ls.get(LS) || '{}') || {}; } catch (e) { cfg = {}; }
 function save() { NL.ls.set(LS, JSON.stringify(cfg)); }
 
-/* ---------- le nove schermate (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova; giro 7: Prestiti e Desideri separati) ---------- */
+/* ---------- le schermate, nell'ordine del giro 12 (19/11/2026): installazione → accesso e nome → chiave tua o in prestito → libri.
+   Undici in tutto; «Installala» si vede solo nel browser (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova; giro 7: Prestiti e Desideri separati) ---------- */
 var S = [
   { ico: 'tolib', h: 'Benvenuto',
     p: ['Next Libris è la tua libreria in tasca: i libri che hai, quelli che leggi e quelli che desideri.', 'È gratuita; se ti piace, puoi sostenerla.'] },
+  { ico: 'tolib', h: 'Installala sul telefono', go: 'inst', btn: 'Installa', inst: true,   // giro 10: solo nel browser, se non è installata
+    p: ['Metti Next Libris tra le app del telefono: si apre con un tocco, come le altre, e funziona anche senza internet.'],
+    ios: ['Metti Next Libris tra le app del telefono: si apre con un tocco, come le altre, e funziona anche senza internet.', 'In Safari tocca <b>···</b> in basso e poi <b>Condividi</b> (o il tasto <b>Condividi</b>, se lo vedi), poi <b>Aggiungi alla schermata Home</b> e <b>Aggiungi</b>. Da lì in poi apri Next Libris dall\'icona.'] },
+  { ico: 'user', h: 'Accedi e scegli il nome', go: 'friends', mod: 'NLAmici',
+    p: ['Con <b>Accedi con Google</b> i tuoi libri si salvano anche online; scegli il <b>nome</b> con cui gli amici ti trovano e cercali per nome. Guarda le loro librerie, chiedi <b>Me lo presti?</b> e segui i loro desideri.',
+      'La <b>campanella</b> ti avvisa delle novità; con il <b>fumetto</b> 💬 scrivi agli amici, anche in gruppo, e vi mandate i libri. Tocca il tuo nome in alto per vedere il tuo <b>profilo</b>, con i numeri del tuo anno da condividere come immagine.'] },
+  { ico: 'gear', h: 'Trova più libri (facoltativo)', go: 'key', btn: 'Crea la chiave',   // schermata nuova: chiave e worker (giro 5)
+    p: ['Next Libris cerca i libri in archivi gratuiti. Se vuoi trovarne di più, con copertine e descrizioni, puoi creare gratis una <b>chiave Google Libri</b>: ci vogliono 5 minuti e ti guidiamo passo passo (dal computer è ancora più comodo).',
+      'Se un amico ti presta la sua, non devi crearla.'] },   // giro 10: niente parole tecniche (via il worker),
+  { ico: 'gear', h: 'Chiavi in prestito', go: 'keys', mod: 'NLAmici',   // schermata nuova (giro 12): testo approvato da Piero il 19/11/2026
+    p: ['Un amico che ha la sua chiave Google Libri può prestartela con un tocco. La chiave resta sul server: tu non la vedi e non devi fare niente, cerchi e basta.',
+      'Con la sua chiave hai fino a <b>300 ricerche al giorno</b>, con il suo worker 3.000. A lui non costa niente e può smettere quando vuole.',
+      'Nessun amico te l\'ha prestata? Tocca <b>Chiedimela</b> accanto al suo nome.'] },
   { ico: 'scan', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',   // testo riscritto (giro 5)
     p: ['Tocca il <b>+</b> in basso e scegli come: <b>Scansiona</b> il codice a barre sul retro, <b>Fotografa</b> la copertina o <b>Digita</b> il titolo.',
       'Con <b>Per autore</b> trovi tutti i libri di uno scrittore. In negozio, <b>Ce l\'ho già?</b> ti dice se un libro ce l\'hai già.'] },
-  { ico: 'gear', h: 'Trova più libri (facoltativo)', go: 'key', btn: 'Crea la chiave',   // schermata nuova: chiave e worker (giro 5)
-    p: ['Next Libris cerca i libri in archivi gratuiti. Se vuoi trovarne di più, con copertine e descrizioni, puoi creare gratis una <b>chiave Google Libri</b>: ci vogliono 5 minuti e ti guidiamo passo passo (dal computer è ancora più comodo).',
-      'Se un amico ti presta la sua, non devi crearla.'] },   // giro 10: niente parole tecniche (via il worker)
   { ico: 'fav', h: 'La pagina del libro', go: 'book',
     p: ['Tocca un libro per aprirlo. Segna se lo stai leggendo o l\'hai già letto, dagli un voto con i <b>libricini</b> e tieni il segno con il <b>segnalibro</b>. Con la <b>stella</b> dici che lo consigli: gli amici lo vedono nel tuo profilo.',
       'La <b>matita</b> serve a correggere i dati. Tocca <b>Descrizione</b> per leggere di cosa parla. Se dal libro hanno tratto un film o una serie, lo trovi qui.'] },
@@ -40,12 +51,6 @@ var S = [
     p: ['Tieni il conto dei libri che presti e di quelli che ti prestano. Quando ridai un libro a un amico, tocca <b>Restituiscilo</b>; quando un tuo libro torna a casa, tocca <b>È tornato</b>.'] },
   { ico: 'towish', h: 'Desideri', go: 'wish',
     p: ['Metti nei <b>Desideri</b> i libri che vorresti leggere. Gli amici possono vederli e trovare l\'idea giusta per un regalo. Se un amico ce l\'ha già, te lo diciamo: magari ve lo prestate.'] },
-  { ico: 'user', h: 'Amici e profilo', go: 'friends', mod: 'NLAmici',
-    p: ['Con <b>Accedi con Google</b> i tuoi libri si salvano anche online; scegli il <b>nome</b> con cui gli amici ti trovano e cercali per nome. Guarda le loro librerie, chiedi <b>Me lo presti?</b> e segui i loro desideri.',
-      'La <b>campanella</b> ti avvisa delle novità; con il <b>fumetto</b> 💬 scrivi agli amici, anche in gruppo, e vi mandate i libri. Tocca il tuo nome in alto per vedere il tuo <b>profilo</b>, con i numeri del tuo anno da condividere come immagine.'] },
-  { ico: 'tolib', h: 'Installala sul telefono', go: 'inst', btn: 'Installa', inst: true,   // giro 10: solo nel browser, se non è installata
-    p: ['Metti Next Libris tra le app del telefono: si apre con un tocco, come le altre, e funziona anche senza internet.'],
-    ios: ['Metti Next Libris tra le app del telefono: si apre con un tocco, come le altre, e funziona anche senza internet.', 'In Safari tocca <b>···</b> in basso e poi <b>Condividi</b> (o il tasto <b>Condividi</b>, se lo vedi), poi <b>Aggiungi alla schermata Home</b> e <b>Aggiungi</b>. Da lì in poi apri Next Libris dall\'icona.'] },
   { ico: 'chart', h: 'Per te', go: 'don', btn: 'Sostieni Next Libris',   // Sostieni (Piero, 18/11/2026)
    
     p: ['Suggerimenti sui tuoi autori, novità, film tratti dai tuoi libri, statistiche e <b>La tua stagione in libri</b>.', 'Ogni tanto ti ricordiamo di fare una <b>copia di sicurezza</b> dei tuoi libri: con un tocco la mandi su Drive, WhatsApp o email, foto comprese.', 'Next Libris è gratis per tutti: se ti piace, puoi sostenerla.'],
@@ -106,6 +111,7 @@ function paint() {
 }
 function go(i) { if (i < 0 || i >= screens().length) return; G.i = i; paint(); }
 function open(i) {
+  trying = false; pathHide();
   if (NL.guest && NL.guest()) NL.guestExit();
   if (pillShown() && !P.want) pillOff();
   build();
@@ -122,6 +128,7 @@ function close(fromPop, keepFocus) {
   G.el.hidden = true; document.body.classList.remove('guida-open');
   if (G.pushed) { G.pushed = false; if (!fromPop) { try { history.back(); } catch (e) { if (window.nlErr) nlErr(e); } } }
   if (!keepFocus) { try { if (G.back) G.back.focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } }
+  if (!trying) pathSoon(500);   // chi installa da zero: finita la guida, il percorso (giro 12)
 }
 window.addEventListener('popstate', function () { if (G.el && !G.el.hidden) { G.pushed = false; close(true); } });
 window.addEventListener('keydown', function (e) {
@@ -136,12 +143,13 @@ var fromGuide = -1;
 function tryIt(what) {
   if (what === 'inst') { close(); if (NL.inst) NL.inst.go(); return; }   // giro 10: installa e chiude la guida
   var at = G.i;
+  trying = true;
   close(false, true);
-  var real = what === 'add' || what === 'key' || what === 'friends' || what === 'don';
+  var real = what === 'add' || what === 'key' || what === 'keys' || what === 'friends' || what === 'don';
   setTimeout(function () {
-    if (what === 'key' || what === 'don' || what === 'friends') enter(at, '');   // dietro c'è l'esempio, non la tua libreria (Piero, 18/11/2026)
+    if (what === 'key' || what === 'keys' || what === 'don' || what === 'friends') enter(at, '');   // dietro c'è l'esempio, non la tua libreria (Piero, 18/11/2026)
     if (real) pillOn(at); else pillOn(at, true);      // anche nell'esempio Indietro riporta alla guida (posto {gdp} senza pillola: c'è «‹ Guida»)
-    if (real) setTimeout(function () { watch({ add: '#layAdd', key: '#kgSheet', don: '#donSheet', friends: '#friSheet' }[what]); }, 120);
+    if (real) setTimeout(function () { watch({ add: '#layAdd', key: '#kgSheet', keys: '#kwSheet', don: '#donSheet', friends: '#friSheet' }[what]); }, 120);
     if (what === 'add') {
       var plus = document.querySelector('#layNav [data-l="add"]');
       if (plus && plus.getClientRects().length) plus.click();
@@ -149,6 +157,8 @@ function tryIt(what) {
     } else if (what === 'key') {
       if (window.NLRicerche && window.NLRicerche.guide) window.NLRicerche.guide();
       else if (NL.openOptions) NL.openOptions('search');
+    } else if (what === 'keys') {
+      if (window.NLAmici && window.NLAmici.keys) window.NLAmici.keys();
     } else if (what === 'don') {
       if (NL.openDon) NL.openDon();
     } else if (what === 'friends') {
@@ -201,7 +211,7 @@ function pillShown() { return P.on; }   // attiva anche senza pillola in vista (
 function back(go) { if (!pillShown()) return; P.want = true; P.quiet = !go; try { history.back(); } catch (e) { if (window.nlErr) nlErr(e); reopen(); } }
 function reopen() {
   var at = P.at, quiet = P.quiet; pillOff();
-  if (quiet) return;
+  if (quiet) { trying = false; pathSoon(800); return; }
   if (document.querySelector('.sheet:not([hidden]), .lightbox:not([hidden])')) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));   // finestre senza cronologia (+, amici, chiave)
   setTimeout(function () { if (document.querySelector('.sheet:not([hidden])')) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); open(at < 0 ? 0 : at); }, 30);
 }
@@ -219,8 +229,90 @@ NL.on('guest', function () {
   var ex = NL.esempio && NL.esempio();
   if (P.el) { P.el.hidden = P.silent || !!ex; document.body.classList.toggle('gd-pill-on', !P.el.hidden); }   // nell'esempio basta «‹ Guida» nella striscia
   if (NL.guest && NL.guest() && !ex) pillOff();      // la libreria di un amico vero: niente più ritorno alla guida
-  else if (!ex && P.silent) pillOff();               // «Esci» dall'esempio
+  else if (!ex && P.silent) { pillOff(); trying = false; pathSoon(800); }   // «Esci» dall'esempio
 });
+
+
+/* ---------- percorso del primo avvio (giro 12, 19/11/2026) ----------
+   Solo per chi installa da zero (NL.firstRun), dopo la guida: tre passi a schermo intero, con la grafica della guida.
+   1 Accedi con Google (poi il nome, che chiede amici.js) · 2 la chiave (crea la tua o chiedila a un amico) · 3 il primo libro.
+   Accesso e chiave si saltano con «Più tardi». cfg.path = passo da mostrare (0 o assente = finito): resta salvato, così il
+   percorso riprende alla prossima apertura (anche dopo il giro di Google). Un passo già fatto si salta da solo. */
+var trying = false;
+var PT = { el: null, t: 0 };
+if (cfg.path == null && !cfg.seen && NL.firstRun && NL.firstRun()) { cfg.path = 1; save(); }
+function ptLogged() { var so = window.NLSocial; return !!(so && so.auth && so.auth()); }
+function ptKey() { var A = window.NLAmici, st = NL.settings || {}; return !!st.gbKey || !!(A && A.hasAny && A.hasAny()); }
+function ptBooks() { try { return (NL.myBooks ? NL.myBooks() : NL.books()).length; } catch (e) { return 0; } }
+function pathStep() {
+  var n = cfg.path || 0; if (!n) return 0;
+  if (n === 1 && (ptLogged() || !window.NLSocial)) n = 2;
+  if (n === 2 && ptKey()) n = 3;
+  if (n >= 3 && ptBooks()) n = 0;
+  if (n > 3) n = 0;
+  if (n !== cfg.path) { cfg.path = n; save(); }
+  return n;
+}
+function pathHide() { if (PT.el) PT.el.hidden = true; document.body.classList.remove('guida-open'); }
+function pathBusy() {
+  return (G.el && !G.el.hidden) || pillShown() || (NL.guest && NL.guest()) || document.getElementById('iosGate') || document.querySelector('.nm-ask') ||
+    document.querySelector('.sheet:not([hidden]), .lightbox:not([hidden])') || document.body.classList.contains('scanning');
+}
+function pathSoon(ms) { if (!cfg.path) return; clearTimeout(PT.t); PT.t = setTimeout(pathShow, ms || 600); }
+function pathShow() {
+  if (!cfg.path) return;
+  if (pathBusy()) { pathSoon(700); return; }
+  var n = pathStep(); if (!n) { pathHide(); return; }
+  if (!PT.el) {
+    var el = document.createElement('div');
+    el.id = 'percorso'; el.className = 'guida gd-path'; el.hidden = true;
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Primi passi con Next Libris');
+    el.innerHTML = '<div class="gd-top"><div class="gd-prog" id="ptProg" aria-hidden="true"></div><span class="gd-n" id="ptN"></span></div><div class="gd-stage" id="ptStage" aria-live="polite"></div>';
+    document.body.appendChild(el); PT.el = el;
+    el.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) pathDo(b.dataset.pt); });
+  }
+  var T = {
+    1: { ico: 'user', h: 'Accedi con Google', p: ['Con l\'account i tuoi libri si salvano anche online e trovi gli amici: vi guardate le librerie, vi prestate i libri e puoi chiedere in prestito una chiave.', 'Ti chiediamo solo il nome con cui gli amici ti troveranno.'],
+      b: [['login', 'Accedi con Google']] },
+    2: { ico: 'gear', h: 'Trova più libri', p: ['Con una chiave Google Libri l\'app trova molti più libri, con copertine e descrizioni.'],
+      b: [['make', 'Crea la tua (gratis)']].concat(ptLogged() && window.NLAmici && window.NLAmici.keys ? [['askf', 'Chiedila a un amico']] : []) },
+    3: { ico: 'scan', h: 'Aggiungi il primo libro', p: ['Inquadra il codice a barre sul retro, fotografa la copertina o scrivi il titolo.', 'La guida la rivedi quando vuoi: Menu › Info e aiuto › <b>Come si usa</b>.'],
+      b: [['add', 'Aggiungi un libro']] }
+  }[n];
+  $('#ptProg').innerHTML = [1, 2, 3].map(function (k) { return '<span class="' + (k <= n ? 'on' : '') + '"></span>'; }).join('');
+  $('#ptN').textContent = 'Passo ' + n + ' di 3';
+  $('#ptStage').innerHTML = '<div class="gd-slide" data-ps="' + n + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(T.ico) + '</span><h2 class="gd-h">' + esc(T.h) + '</h2>' +
+    T.p.map(function (t) { return '<p class="gd-p">' + t + '</p>'; }).join('') +
+    '<div class="gd-acts gd-pacts">' + T.b.map(function (b, k) { return '<button type="button" class="btn primary gd-try' + (k ? ' gd-try2' : '') + '" data-pt="' + b[0] + '">' + esc(b[1]) + '</button>'; }).join('') + '</div>' +
+    '<button type="button" class="gd-later" data-pt="later">Più tardi</button></div>';
+  PT.el.hidden = false; document.body.classList.add('guida-open');
+}
+function pathDo(a) {
+  var n = cfg.path || 0;
+  if (a === 'later') {
+    cfg.path = n >= 3 ? 0 : n + 1; save(); pathHide();
+    if (cfg.path) pathShow(); else NL.toast('La guida la rivedi quando vuoi: Menu › Info e aiuto › Come si usa.');
+    return;
+  }
+  pathHide();
+  if (a === 'login') { if (window.NLSocial) window.NLSocial.open(); pathWatch('#accSheet'); }
+  else if (a === 'make') { if (window.NLRicerche && window.NLRicerche.guide) window.NLRicerche.guide(); else if (NL.openOptions) NL.openOptions('search'); pathWatch('#kgSheet'); }
+  else if (a === 'askf') { window.NLAmici.keys(); pathWatch('#kwSheet'); }
+  else if (a === 'add') {
+    cfg.path = 0; save();
+    var plus = document.querySelector('#layNav [data-l="add"]');
+    if (plus && plus.getClientRects().length) plus.click();
+    else { var d = document.getElementById('btnScan'); if (d) { d.scrollIntoView({ block: 'center' }); try { d.focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } } }
+  }
+}
+/* chiusa la finestra aperta dal passo, il percorso riprende da dove serve (pathShow aspetta se c'è un'altra finestra o la domanda del nome) */
+function pathWatch(sel) {
+  setTimeout(function () {
+    var w = document.querySelector(sel); if (!w || w.hidden) { pathSoon(600); return; }
+    var mo = new MutationObserver(function () { if (!w.hidden) return; mo.disconnect(); pathSoon(500); });
+    mo.observe(w, { attributes: true, attributeFilter: ['hidden'] });
+  }, 200);
+}
 
 /* ---------- la libreria di esempio ---------- */
 var D = '2026-';
@@ -349,7 +441,9 @@ menu();
 /* prima apertura in assoluto: la guida si apre da sola (dopo la schermata d'apertura) */
 /* si apre da sola una volta: ai nuovi e, dal giro 5, anche a chi usa già l'app, al primo avvio dopo l'aggiornamento (GV = versione della guida) */
 function due() { return !cfg.seen || (cfg.v || 1) < GV; }
-if (due() && !/[?&]amico=|#k=/.test(location.search + location.hash)) setTimeout(function () { if (due() && !(NL.guest && NL.guest())) open(0); }, 900);
+var invited = /[?&]amico=|#k=/.test(location.search + location.hash);
+if (due() && !invited) setTimeout(function () { if (due() && !(NL.guest && NL.guest())) open(0); }, 900);
+else if (!due() && !invited) pathSoon(1200);   // percorso rimasto a metà (giro 12)
 
-window.NLGuida = { open: open, close: close, esempio: function (what) { enter(-1, what || ''); }, screens: function () { return screens().map(function (s) { return { h: s.h, go: s.go || '', sel: s.sel || '', mod: s.mod || '' }; }); } };
+window.NLGuida = { open: open, close: close, path: function () { return cfg.path || 0; }, pathShow: pathShow, esempio: function (what) { enter(-1, what || ''); }, screens: function () { return screens().map(function (s) { return { h: s.h, go: s.go || '', sel: s.sel || '', mod: s.mod || '' }; }); } };
 })();

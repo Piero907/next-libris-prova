@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.8 · 19/11/2026 14:34
+- **Numeri del profilo con il layout nuovo**: tessere sulla pagina, paesi con il solo bordo, «Da sempre» in elenco. **Giro 12**: percorso del primo avvio, guida riordinata, «Chiedimela» per la chiave.
+
 ## Prova 110.7 · 19/11/2026 13:24
 - **Nazionalità degli autori** nella pagina del libro: bandiera e paese accanto a ogni autore (da Wikidata, se si conosce).
 

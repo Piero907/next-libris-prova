@@ -71,3 +71,11 @@ body:has(.sheet:not([hidden])) .gd-pill,body:has(.lay-sheet:not([hidden])) .gd-p
 /* Menu › Info e aiuto: riga dell'indirizzo ufficiale (18/11/2026) */
 .gd-uff{margin:2px 16px 12px;font-size:13.5px;line-height:1.4;color:var(--muted)}
 .gd-uff b{color:var(--ink)}
+
+/* ---------- percorso del primo avvio (giro 12): la grafica della guida, con i tasti del passo e «Più tardi» ---------- */
+.gd-path .gd-top{min-height:44px}
+.gd-path .gd-pacts{display:grid;gap:10px;grid-template-columns:minmax(0,1fr);max-width:340px}
+.guida .gd-try.gd-try2{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.75)}
+html[data-theme="dark"] .guida .gd-try.gd-try2{color:#fff}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .guida .gd-try.gd-try2{color:#fff}}
+.gd-later{display:block;min-height:48px;margin:14px 0 0;padding:0 6px;border:0;background:none;color:#fff;font:600 16px/1 var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer;opacity:.92}

@@ -196,7 +196,7 @@ function numsLine(st) {
   var np = (st.pa || []).length; if (np) p.push('<b>' + np + '</b> ' + (np === 1 ? 'paese' : 'paesi'));
   return '<p class="pf-nums">' + p.join(' · ') + '</p>';
 }
-/* ---------- i numeri (giro 11C, 19/11/2026, scelte di Piero): stile «Tessere», schede colorate di misure diverse su fondo scuro,
+/* ---------- i numeri (giro 11C, 19/11/2026, scelte di Piero; layout rifatto il 19/11: tessere direttamente sulla pagina, paesi con il solo bordo, «Da sempre» in elenco),
    numero grande in Bricolage Grotesque, colori della stagione di oggi (gli stessi dell'immagine da condividere, da wrap.js).
    In cima la tessera grande dell'anno (con l'obiettivo, facoltativo); poi pagine, autore e paesi dell'anno; poi «Da sempre».
    Aprendo il profilo i numeri salgono e la barra dell'obiettivo si riempie. Nel tuo profilo «Condividi i tuoi numeri»
@@ -240,46 +240,44 @@ function yearTiles(st, own, name) {
   if (pgy) h += tess(1, two ? '' : 'wide', 'Pagine dell\'anno', num(pgy), pileTxt(pgy, ly));
   if (st.auy && st.y === y) h += tess(2, two ? '' : 'wide', own ? 'Il tuo autore dell\'anno' : 'Il suo autore dell\'anno', esc(st.auy), plur(st.auyn, 'libro', 'libri'), true);
   var py = (st.pay || []).filter(function (c) { return /^[A-Z]{2}$/.test(c); });
-  if (py.length) h += tess(pgy && st.auy ? 1 : 2, 'wide', (own ? 'Quest\'anno hai viaggiato in' : 'Quest\'anno ha viaggiato in'), plur(py.length, 'paese', 'paesi'), flags(py, 24));
+  if (py.length) h += '<div class="pf-t pf-out wide"><span class="pf-big pf-mid">' + num(py.length) + ' <small>' + (py.length === 1 ? 'paese visitato' : 'paesi visitati') + ' leggendo</small></span><span class="pf-ts">' + flags(py, 24) + '</span></div>';   // riquadro con il solo bordo (19/11/2026)
   return h;
 }
+/* «Da sempre» in elenco (19/11/2026, scelta di Piero): nome a sinistra, valore a destra, linea sottile tra le righe */
+function row(k, v) { return '<div class="pf-r"><dt>' + k + '</dt><dd>' + v + '</dd></div>'; }
 function statsHTML(st, own, rel) {
   var t = [], P = pal(), year = '';
-  function add(size, kick, big, sub, isVal) { t.push({ size: size, kick: kick, big: big, sub: sub, val: isVal }); }
+  function add(k, v) { t.push(row(k, v)); }
+  function sm(x) { return ' <small>' + x + '</small>'; }
   if (st) {
     year = yearTiles(st, own, own ? '' : (cur && A() && A().friendName ? A().friendName(cur) : ''));
-    add('', '', num(st.n), st.n === 1 ? 'libro in libreria' : 'libri in libreria');
-    add('', '', num(st.pg), 'pagine lette' + (st.l ? ' · ' + plur(st.l, 'libro', 'libri') : ''));
-    if (st.au) add(st.au.length > 18 ? 'wide' : '', 'Autore più letto', esc(st.au), plur(st.aun, 'libro', 'libri'), true);
-    if (st.ge) add(st.ge.length > 18 ? 'wide' : '', 'Genere più letto', esc(st.ge), plur(st.gen, 'libro', 'libri'), true);
-    if (st.ul && st.ul.t) add('wide', 'Ultimo libro letto', '«' + esc(st.ul.t) + '»', st.ul.a ? esc(st.ul.a) : '', true);
-    if (st.lu && st.lu.t) add('wide', 'Il più lungo', '«' + esc(st.lu.t) + '»', st.lu.pg ? nf(st.lu.pg) + ' pagine' : '', true);
+    add('Libri in libreria', num(st.n));
+    add('Pagine lette', num(st.pg));
+    if (st.au) add('Autore più letto', esc(st.au) + sm('· ' + nf(st.aun)));
+    if (st.ge) add('Genere più letto', esc(st.ge) + sm('· ' + nf(st.gen)));
+    if (st.ul && st.ul.t) add('Ultimo letto', '«' + esc(st.ul.t) + '»');
+    if (st.lu && st.lu.t) add('Il più lungo', '«' + esc(st.lu.t) + '»' + (st.lu.pg ? sm('· ' + nf(st.lu.pg) + ' pag.') : ''));
     var pa = (st.pa || []).filter(function (c) { return /^[A-Z]{2}$/.test(c); });
-    if (pa.length) add('wide', 'Paesi degli autori letti', plur(pa.length, 'paese', 'paesi'), flags(pa, 60));
-    add('', '', num(st.pr), st.pr === 1 ? 'libro prestato adesso' : 'libri prestati adesso');
+    if (pa.length) add('Paesi degli autori', num(pa.length));
+    add('Prestati adesso', num(st.pr));
   }
   if (rel) {
     if (rel.comuni != null) {
       var pc = st && st.n ? Math.min(100, Math.round(rel.comuni / st.n * 100)) : 0;
-      add('', 'In comune con te', num(rel.comuni), (rel.comuni === 1 ? 'libro' : 'libri') + (rel.comuni && pc ? ' · il ' + pc + '% dei suoi' : ''));
+      add('In comune con te', num(rel.comuni) + (rel.comuni && pc ? sm('· il ' + pc + '% dei suoi') : ''));
     }
     var d = Number(rel.tra && rel.tra.dati) || 0, v = Number(rel.tra && rel.tra.avuti) || 0;
-    if (d + v) add('', 'Prestiti tra voi', num(d + v), nf(d) + ' da te, ' + nf(v) + ' a te');
+    if (d + v) add('Prestiti tra voi', num(d + v) + sm(nf(d) + ' da te, ' + nf(v) + ' a te'));
   }
   if (!t.length && !year) return '';
-  var half = 0; t.forEach(function (x, i) {                  // niente buco: una mezza rimasta sola diventa larga
-    if (x.size) { if (half % 2) t[i - 1].size = 'wide'; half = 0; } else half++;
-  });
-  if (half % 2) t[t.length - 1].size = 'wide';
-  var tiles = t.map(function (x, i) { return tess(i % 3, x.size, x.kick, x.big, x.sub, x.val); }).join('');
-  var vars = '--pf-bg:' + P.bg + ';' + P.t.map(function (c, i) { return '--pf-c' + i + ':' + c + ';--pf-i' + i + ':' + P.ink[i]; }).join(';');
+  var vars = P.t.map(function (c, i) { return '--pf-c' + i + ':' + c + ';--pf-i' + i + ':' + P.ink[i]; }).join(';');
   var sh = '';
   if (own && cur !== 'esempio' && st && window.NLWrap && window.NLWrap.shareCard) {
     sh = shareOpen ? '<div class="pf-share"><span>Condividi i tuoi numeri:</span><button class="btn" type="button" data-p="shs">Storia</button><button class="btn" type="button" data-p="shq">Quadrata</button></div>'
       : '<div class="pf-share"><button class="btn" type="button" data-p="share">Condividi i tuoi numeri</button></div>';
   }
   return '<section class="fr-sec pf-num"><h3 class="fr-h">' + (own ? 'I tuoi numeri' : 'I suoi numeri') + '</h3><div class="pf-board" style="' + vars + '">' +
-    (year ? '<div class="pf-grid">' + year + '</div>' : '') + (tiles ? '<p class="pf-sep">Da sempre</p><div class="pf-grid">' + tiles + '</div>' : '') + '</div>' + sh + '</section>';
+    (year ? '<div class="pf-grid">' + year + '</div>' : '') + (t.length ? '<p class="pf-sep">Da sempre</p><dl class="pf-list">' + t.join('') + '</dl>' : '') + '</div>' + sh + '</section>';
 }
 /* i numeri salgono e la barra si riempie, una volta per apertura del profilo (non a ogni aggiornamento) */
 function animate(body) {
