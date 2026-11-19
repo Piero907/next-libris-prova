@@ -398,6 +398,7 @@ function paint() {
         (qs.length ? '<p class="pf-acts"><button class="link" type="button" data-p="pick">' + (pins.length ? 'Cambia' : 'Scegli le citazioni') + '</button></p>' : '') + '</section>';
       if (qs.length) h += '<ul class="fr-list fr-box"><li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="allq">Tutte le citazioni<small>' + qs.length + (qs.length === 1 ? ' citazione' : ' citazioni') + '</small></button><span class="n" aria-hidden="true">›</span></li></ul>';
       h += statsHTML(st, true);
+      h += friRow();      // «I tuoi amici» anche dal profilo (Piero, 19/11/2026: Amici non era più raggiungibile dalla Libreria)
       h += setRows(me);   // scorciatoie alle impostazioni personali (Piero, 18/11/2026)
     }
   }
@@ -407,6 +408,12 @@ function paint() {
 /* ---------- scorciatoie alle impostazioni personali (Piero, 18/11/2026): Account, Amici e privacy, Notifiche, API Google e worker.
    La finestra si apre sopra e, quando si chiude, torna il profilo. ---------- */
 function setRow(k, t, sub) { return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="' + k + '">' + t + '<small>' + esc(sub) + '</small></button><span class="n" aria-hidden="true">›</span></li>'; }
+function friRow() {
+  if (!A() || !A().open) return '';
+  var st = A().state ? A().state() : null, n = ((st && st.list) || []).filter(function (x) { return x.stato === 'amici'; }).length;
+  var sub = !uid() ? 'Entra con l\'account per aggiungere amici' : n ? (n === 1 ? '1 amico' : n + ' amici') + ' · cerca, invita, scrivi' : 'Cerca e invita i tuoi amici';
+  return '<section class="fr-sec pf-fri"><h3 class="fr-h">Amici</h3><ul class="fr-list fr-box">' + setRow('fri', 'I tuoi amici', sub) + '</ul></section>';
+}
 function setRows(me) {
   var r = '', S = window.NLSocial, au = S && S.auth && S.auth();
   if (S && S.open) r += setRow('acc', 'Account e sincronizzazione', au ? (au.email || 'Entrato con Google') : 'Entra per salvare i libri online');
@@ -424,7 +431,7 @@ function setRows(me) {
   r += setRow('menu', 'Menu', 'Le altre impostazioni e le info');
   return '<section class="fr-sec pf-set"><h3 class="fr-h">Impostazioni</h3><ul class="fr-list fr-box">' + r + '</ul></section>';
 }
-var RET_WIN = { acc: '#accSheet', privacy: '#friSheet', push: '#optSheet', keys: '#kwSheet' };
+var RET_WIN = { fri: '#friSheet', acc: '#accSheet', privacy: '#friSheet', push: '#optSheet', keys: '#kwSheet' };
 function via(k, fn) {          // chiude il profilo, apre la finestra e, quando quella si chiude, riapre il profilo
   close(); fn();
   setTimeout(function () {
@@ -465,6 +472,7 @@ async function onClick(e) {
   else if (a === 'pick' || a === 'cits') { mode = a; paint(); var si = document.querySelector('#profSheet .sheet-in'); if (si) si.scrollTop = 0; }
   else if (a === 'pin') { if (NL.togglePin) NL.togglePin(b.dataset.b, Number(b.dataset.i)); paint(); }
   else if (a === 'allq') { close(); NL.openQuotes(); }
+  else if (a === 'fri') via('fri', function () { A().open(); });
   else if (a === 'privacy') via('privacy', function () { A().open(true); });
   else if (a === 'keys') via('keys', function () { A().keys(); });
   else if (a === 'acc') via('acc', function () { window.NLSocial.open(); });

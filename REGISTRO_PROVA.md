@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.13 · 19/11/2026 20:43
+- **Amici di nuovo raggiungibile:** tasto 👥 in testata (tra chat e ingranaggio) e riquadro «Amici › I tuoi amici» nel tuo Profilo
+
 ## Prova 110.12 · 19/11/2026 20:30
 - Guida e percorso verdi: fondo verde Bosco, una riga per frase con l'icona dell'app, tutto in verdi
 
