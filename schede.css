@@ -30,6 +30,7 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
 .cv-ht h3.cv-not{color:var(--muted);font-style:italic}
 .cv-au{margin:0;font-size:16px;color:var(--ink)}
 .cv-meta{margin:6px 0 0;font-size:14px;line-height:1.4;color:var(--muted)}
+.cv-meta.cv-isbn{margin-top:2px;font-variant-numeric:tabular-nums}
 .cv-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
 .cv-au .au-name{padding:0;border:0;background:none;color:var(--ink);font:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
 .cv-au .au-sep{color:var(--muted)}

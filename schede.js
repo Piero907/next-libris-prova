@@ -30,7 +30,7 @@ function doD(card, id) {
   dActs(card);
   /* senza titolo: la stessa pagina di tutti i libri (Piero, 19/11/2026: niente piu' i campi da riempire, nemmeno negli amici); si completa con la matita */
   if (editing[id]) { card.classList.add('cv-edit'); addDone(card, id); return; }
-  var tit = b.t || 'Senza titolo', img = NL.bigImg(b), dati = [b.e, b.y, b.pg ? b.pg + ' pagine' : '', b.t ? '' : (b.i ? 'ISBN ' + b.i : '')].filter(Boolean);
+  var tit = b.t || 'Senza titolo', img = NL.bigImg(b), dati = [b.e, b.y, b.pg ? b.pg + ' pagine' : ''].filter(Boolean);
   var names = NL.authorsOf(b);
   var v = document.createElement('div'); v.className = 'cv-page';
   /* copertina: toccandola si ingrandisce (come nella scheda classica); senza copertina, la cerca online o la fotografi */
@@ -38,7 +38,7 @@ function doD(card, id) {
       '<button type="button" class="cv-cov cv-ph" data-act="coverphoto" style="--h:' + NL.hue(b.t + b.a + b.i) + '" title="Cerca la copertina online; se non c\'è, la fotografi" aria-label="Aggiungi la copertina"><span>' + esc(b.t.slice(0, 1)) + '</span><small>' + NL.icon('cam') + 'Copertina</small></button>') +
     '<div class="cv-ht"><h3' + (b.t ? '' : ' class="cv-not"') + '>' + esc(tit) + '</h3>' +
     (names.length ? '<p class="cv-au">' + names.map(function (n) { return '<button type="button" class="au-name" data-act="auinfo" data-n="' + esc(n) + '" title="Info Autore: ' + esc(n) + '">' + esc(n) + '</button>'; }).join('<span class="au-sep">, </span>') + '</p>' : '') +
-    (dati.length ? '<p class="cv-meta">' + esc(dati.join(' · ')) + '</p>' : '') + '</div></div>' +
+    (dati.length ? '<p class="cv-meta">' + esc(dati.join(' · ')) + '</p>' : '') + (b.i ? '<p class="cv-meta cv-isbn">ISBN ' + esc(b.i) + '</p>' : '') + '</div></div>' +   /* ISBN sempre visibile, su una riga sua (Piero, 19/11/2026) */
     '<div class="cv-chips"></div>' +
     (b.n ? '<p class="cv-note">' + esc(b.n) + '</p>' : '');
   /* etichette = filtri, come nella scheda classica: gli stessi pulsanti di «Vedi tutti i libri di» (autore, editore, genere, scaffale) e la serie */

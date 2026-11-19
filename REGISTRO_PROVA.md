@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.4 · 19/11/2026 13:01
+- **ISBN sempre visibile** nella scheda del libro (anche amici e chat); **Amministrazione › Archivio**: tasto lente che non esce dal bordo
+
 ## Prova 110.3 · 19/11/2026 12:40
 - **Film dal più recente** con «Mostra altri»; **«Ce l'ho già?» segnala un'altra edizione**
 

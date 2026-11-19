@@ -770,7 +770,7 @@ function bookCard(id) {
   var el = document.createElement('div'); el.className = 'sheet ch-menu ch-bk'; el.id = 'chBk';
   el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-label="' + esc(L.t || 'Libro') + '"><div class="ch-bkc">' +
     (img ? '<img src="' + esc(img) + '" alt="" referrerpolicy="no-referrer">' : '<span class="ch-bimg" aria-hidden="true">📚</span>') +
-    '<div><b>' + esc(L.t || 'Un libro') + '</b>' + (L.a ? '<span>' + esc(L.a) + '</span>' : '') + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div></div>' +
+    '<div><b>' + esc(L.t || 'Un libro') + '</b>' + (L.a ? '<span>' + esc(L.a) + '</span>' : '') + (sub ? '<small>' + esc(sub) + '</small>' : '') + (L.i ? '<small>ISBN ' + esc(L.i) + '</small>' : '') + '</div></div>' +
     (have ? '<p class="ch-bks ok">✓ Ce l\'hai già nella Libreria</p>' : wish ? '<p class="ch-bks ok">★ È già nei tuoi Desideri</p>' : '') +
     '<div class="ch-bkb">' + (have || wish ? '' : '<button type="button" class="btn primary" data-i="wish">Aggiungi ai Desideri</button>') + '<button type="button" class="btn" data-i="x">Chiudi</button></div></div>';
   document.body.appendChild(el);

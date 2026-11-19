@@ -286,7 +286,7 @@ function numHTML() {
 /* Archivio comune */
 function arHTML() {
   var h = '<p class="ad-sub">I libri salvati per ISBN da chi li ha cercati per primo. Correggi quelli sbagliati o toglili: chi li cerca dopo li ritrova giusti.</p>' +
-    '<form class="ad-arf" id="adArF"><input id="adArQ" type="search" enterkeyhint="search" value="' + esc(arQ) + '" placeholder="Titolo, autore o ISBN" aria-label="Cerca nell\'archivio" autocomplete="off"><button class="btn primary" type="submit">Cerca</button></form>';
+    '<form class="ad-arf" id="adArF"><input id="adArQ" type="search" enterkeyhint="search" value="' + esc(arQ) + '" placeholder="Titolo, autore o ISBN" aria-label="Cerca nell\'archivio" autocomplete="off"><button class="btn primary ad-arb" type="submit" aria-label="Cerca">' + NL.icon('search') + '</button></form>';
   if (arRes === 'load') return h + '<p class="ch-empty">Un momento…</p>';
   if (!arRes) return h;
   if (!arRes.length) return h + '<p class="ch-empty">Nessun libro trovato.</p>';
