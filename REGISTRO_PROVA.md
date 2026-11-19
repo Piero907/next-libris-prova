@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.16 · 20/11/2026 00:57
+- Stile G: in Aspetto **«Nastro e linguette a sinistra»**, per chi tiene il telefono con la sinistra
+
 ## Prova 110.15 · 20/11/2026 00:49
 - **Stile G «Pagina con l’Indice»**: la tua libreria come un libro aperto (testatina, nastro con il numero dei libri, una frase con la capolettera), linguette sul bordo destro al posto della barra in basso, «+ Aggiungi», Indice a capitoli al posto del Menu, ex libris nel profilo; si adatta a telefoni da 360 a 430 px, tablet e PC
 

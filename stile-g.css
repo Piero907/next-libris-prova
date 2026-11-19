@@ -167,3 +167,23 @@ html.g-look .g-ics .ico{position:relative!important;top:auto!important;right:aut
   html.g-look main{max-width:640px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}
   html.g-look .g-add{left:calc(50vw - 320px + var(--g-pad))}
 }
+
+/* ---------- G11. «Nastro e linguette a sinistra» (Aspetto, Piero 20/11/2026) ---------- */
+html.g-look.g-left body{padding-right:0;padding-left:calc(var(--g-tab) + var(--g-r))}
+html.g-look.g-left .g-tabs{right:auto;left:var(--g-r);align-items:flex-start}
+html.g-look.g-left .g-tabs .g-edge{border-left:0;border-right:1px solid var(--line)}
+html.g-look.g-left .g-tabs button{border-radius:0 12px 12px 0}
+html.g-look.g-left .g-tabs button span{transform:none}
+html.g-look.g-left .g-rib{right:auto;left:0}
+html.g-look.g-left .g-run{margin-left:52px}
+html.g-look.g-left .g-ics{margin-right:0}
+html.g-look.g-left header.top h1{padding-right:0;padding-left:56px}
+html.g-look.g-left .g-add{left:calc(var(--g-tab) + var(--g-r) + var(--g-pad))}
+html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left .drawer{right:0!important;left:calc(var(--g-tab) + var(--g-r))!important}
+@media (max-width:379.98px){html.g-look.g-left .g-run{margin-left:42px}html.g-look.g-left header.top h1{padding-left:44px}}
+@media (min-width:700px){
+  html.g-look.g-left body{padding-left:0}
+  html.g-look.g-left .g-add{left:calc(50vw - 320px + var(--g-pad))}
+  html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left .drawer{left:0!important}
+}
+html.g-look.g-left:has(#chSheet:not([hidden])[data-v="conv"]) #chSheet{left:0!important}

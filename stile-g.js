@@ -131,13 +131,28 @@ function shortGrp() {
   if (s !== t) g.textContent = s;
 }
 
+/* ---------- Aspetto › «Nastro e linguette a sinistra» (Piero, 20/11/2026): per chi tiene il telefono con la sinistra ---------- */
+function side() {
+  var st = NL.settings || {};
+  document.documentElement.classList.toggle('g-left', !!st.gLeft);
+  var cols = document.querySelector('fieldset.cols-opt'), x = $('#optGLeft');
+  if (!x && cols) {
+    var f = document.createElement('fieldset'); f.className = 'choice g-side-opt';
+    f.innerHTML = '<legend>Linguette</legend><label class="check"><input type="checkbox" id="optGLeft"><span>Nastro e linguette a sinistra<small>Per chi tiene il telefono con la sinistra.</small></span></label>';
+    cols.parentNode.insertBefore(f, cols.nextSibling);
+    x = $('#optGLeft');
+    x.addEventListener('change', function () { st.gLeft = x.checked; if (NL.saveSettings) NL.saveSettings(); side(); if (NL.toast) NL.toast(x.checked ? 'Linguette a sinistra.' : 'Linguette a destra.'); });
+  }
+  if (x) x.checked = !!st.gLeft;
+}
+
 /* ---------- avvio e aggiornamenti ---------- */
 var pend = 0;
 function soon() { if (pend) return; pend = setTimeout(function () { pend = 0; try { paintHead(); paintTabs(); shortGrp(); indice(); } catch (e) { if (window.nlErr) nlErr(e); } }, 40); }
 function start() {
   if (window.NL_NO_G) return;   // solo nelle prove di prima (prove/_harness.js)
   document.documentElement.classList.add('g-look');
-  tabs(); head(); soon();
+  tabs(); head(); side(); soon();
   var mo = new MutationObserver(soon);
   ['#list', '#summary', '#cntLoan', '#grpPick'].forEach(function (s) { var e = $(s); if (e) mo.observe(e, { childList: true, characterData: true, subtree: true }); });
   var mo2 = new MutationObserver(soon);
