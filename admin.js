@@ -287,7 +287,7 @@ function numHTML() {
     t('📚', n(nums.libri), 'libri online', n(nums.archivio) + ' nell\'archivio comune' + (Number(nums.proposte) ? ' · ' + n(nums.proposte) + ' da controllare' : '')) +
     '<div class="ad-tile ad-full"><span class="ad-ico" aria-hidden="true">💾</span><b>' + mb(sp) + ' su ' + mb(max) + '</b><span>spazio del database</span>' +
       '<span class="ad-bar' + (pc >= 80 ? ' bad' : '') + '"><i style="width:' + Math.max(1, pc) + '%"></i></span><small>' + pc + '% usato · messaggi della chat ' + mb(nums.messaggi_spazio) + '</small></div>' +
-    t('🔎', n(rq), 'ricerche Google oggi', rmax ? 'la chiave più usata: ' + n(rmax) + ' su 1.000' : '') +
+    t('🔎', n(rq), 'ricerche Google oggi', rmax ? 'l’API più usata: ' + n(rmax) + ' su 1.000' : '') +
     t('💬', n(nums.chat), 'chat', n(nums.messaggi) + ' messaggi') +
     t('🚩', n(nums.segnalazioni), 'segnalazioni aperte', '') +
     t('⛔', n(nums.sospesi), 'fermi o sospesi', '') +

@@ -291,7 +291,7 @@ function backupName() {
 }
 function coverIds() { return Object.keys(coverURL).filter(function (id) { return !!get(id); }).concat(quotePhKeys().filter(function (k) { return !!qphURL[k]; })); }
 /* Senza foto tue il backup e' pronto subito; con le foto va preparato prima (si leggono dal telefono), cosi' la condivisione parte al tocco. */
-/* nel backup vanno anche worker SBN e chiave Google (in uso e salvati): ripristinando su un altro telefono tornano anche loro */
+/* nel backup vanno anche worker SBN e API Google (in uso e salvati): ripristinando su un altro telefono tornano anche loro */
 function backupCfg() { return { sbnUrl: mine('sbn'), gbKey: mine('key'), saved: { sbn: saved.sbn.slice(), key: saved.key.slice() } }; }
 function backupData() { return coverIds().length ? backupReady : JSON.stringify({ app: 'catalogo-libri', v: 4, books: storable(), cfg: backupCfg() }); }
 async function buildBackup() {
@@ -414,7 +414,7 @@ function restoreCfg(c) {
   ls.set(LS_SAVED, JSON.stringify(saved));
   var w = okW(c.sbnUrl), k2 = okK(c.gbKey);
   if (w && !settings.sbnUrl) { setSvc('sbn', w); put.push('il worker SBN'); }
-  if (k2 && !settings.gbKey) { setSvc('key', k2); put.push('la chiave Google'); }
+  if (k2 && !settings.gbKey) { setSvc('key', k2); put.push('l’API Google'); }
   renderSvc();
   return put.join(' e ');
 }

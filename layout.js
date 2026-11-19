@@ -80,7 +80,7 @@ var MI = {
 function menuIco(b) {
   var id = b.id || '', sec = b.getAttribute('data-sec') || '', t = (b.querySelector('b') || b).textContent.toLowerCase();
   var k = { goFilters: 'filt', goSugg: 'spark', goQuotes: 'quote', goStats: 'chart' }[id] || { fix: 'tools', export: 'down', search: 'search', cards: 'plus', look: 'palette', share: 'share', app: 'phone', privacy: 'shield', contact: 'mail' }[sec];
-  if (!k) k = /amici e privacy/.test(t) ? 'eye' : /amic/.test(t) ? 'users' : /chiave/.test(t) ? 'key' : /account/.test(t) ? 'user' : /notific/.test(t) ? 'bell' : /come si usa|guida/.test(t) ? 'info' : /esempio/.test(t) ? 'books' : /amministra/.test(t) ? 'shield' : /citazion/.test(t) ? 'quote' : /statist/.test(t) ? 'chart' : /backup/.test(t) ? 'down' : 'dot';
+  if (!k) k = /amici e privacy/.test(t) ? 'eye' : /amic/.test(t) ? 'users' : /chiave|api google/.test(t) ? 'key' : /account/.test(t) ? 'user' : /notific/.test(t) ? 'bell' : /come si usa|guida/.test(t) ? 'info' : /esempio/.test(t) ? 'books' : /amministra/.test(t) ? 'shield' : /citazion/.test(t) ? 'quote' : /statist/.test(t) ? 'chart' : /backup/.test(t) ? 'down' : 'dot';
   return '<span class="dico" aria-hidden="true">' + svg(MI[k], 20) + '</span>';
 }
 function menuIcons() {

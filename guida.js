@@ -14,47 +14,37 @@ var NL = window.NL;
 if (!NL || !NL.guestEnter) return;
 var L = NL.L, esc = NL.esc, $ = NL.$;
 var LS = 'catalogo-libri-guida';
-var GV = 4;                                               // versione della guida: 2 = otto schermate (giro 5), 4 = ordine nuovo e «Chiavi in prestito» (giro 12); chi ha visto una versione più vecchia la rivede una volta
+var GV = 5;   // 5 = guida asciutta (19/11/2026)                                               // versione della guida: 2 = otto schermate (giro 5), 4 = ordine nuovo e «API in prestito» (giro 12); chi ha visto una versione più vecchia la rivede una volta
 var cfg = {};
 try { cfg = JSON.parse(NL.ls.get(LS) || '{}') || {}; } catch (e) { cfg = {}; }
 function save() { NL.ls.set(LS, JSON.stringify(cfg)); }
 
-/* ---------- le schermate, nell'ordine del giro 12 (19/11/2026): installazione → accesso e nome → chiave tua o in prestito → libri.
+/* ---------- le schermate, nell'ordine del giro 12 (19/11/2026): installazione → accesso e nome → API tua o in prestito → libri.
    Undici in tutto; «Installala» si vede solo nel browser (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova; giro 7: Prestiti e Desideri separati) ---------- */
+/* Guida asciutta (Piero, 19/11/2026): otto schermate (sette con l'app installata), frasi brevi una per riga, il prestito dell’API a passi.
+   p: righe (con «~» davanti: riga secondaria, grigia); two: due strade numerate; steps: passi numerati; note: riquadro sotto i passi. */
 var S = [
   { ico: 'tolib', h: 'Benvenuto',
-    p: ['Next Libris è la tua libreria in tasca: i libri che hai, quelli che leggi e quelli che desideri.', 'È gratuita; se ti piace, puoi sostenerla.'] },
-  { ico: 'tolib', h: 'Installala sul telefono', go: 'inst', btn: 'Installa', inst: true,   // giro 10: solo nel browser, se non è installata
-    p: ['Metti Next Libris tra le app del telefono: si apre con un tocco, come le altre, e funziona anche senza internet.'],
-    ios: ['Metti Next Libris tra le app del telefono: si apre con un tocco, come le altre, e funziona anche senza internet.', 'In Safari tocca <b>···</b> in basso e poi <b>Condividi</b> (o il tasto <b>Condividi</b>, se lo vedi), poi <b>Aggiungi alla schermata Home</b> e <b>Aggiungi</b>. Da lì in poi apri Next Libris dall\'icona.'] },
-  { ico: 'user', h: 'Accedi e scegli il nome', go: 'friends', mod: 'NLAmici',
-    p: ['Con <b>Accedi con Google</b> i tuoi libri si salvano anche online; scegli il <b>nome</b> con cui gli amici ti trovano e cercali per nome. Guarda le loro librerie, chiedi <b>Me lo presti?</b> e segui i loro desideri.',
-      'La <b>campanella</b> ti avvisa delle novità; con il <b>fumetto</b> 💬 scrivi agli amici, anche in gruppo, e vi mandate i libri. Tocca il tuo nome in alto per vedere il tuo <b>profilo</b>, con i numeri del tuo anno da condividere come immagine.'] },
-  { ico: 'gear', h: 'Trova più libri (facoltativo)', go: 'key', btn: 'Crea la chiave',   // schermata nuova: chiave e worker (giro 5)
-    p: ['Next Libris cerca i libri in archivi gratuiti. Se vuoi trovarne di più, con copertine e descrizioni, puoi creare gratis una <b>chiave Google Libri</b>: ci vogliono 5 minuti e ti guidiamo passo passo (dal computer è ancora più comodo).',
-      'Se un amico ti presta la sua, non devi crearla.'] },   // giro 10: niente parole tecniche (via il worker),
-  { ico: 'gear', h: 'Chiavi in prestito', go: 'keys', mod: 'NLAmici',   // schermata nuova (giro 12): testo approvato da Piero il 19/11/2026
-    p: ['Un amico che ha la sua chiave Google Libri può prestartela con un tocco. La chiave resta sul server: tu non la vedi e non devi fare niente, cerchi e basta.',
-      'Con la sua chiave hai fino a <b>300 ricerche al giorno</b>, con il suo worker 3.000. A lui non costa niente e può smettere quando vuole.',
-      'Nessun amico te l\'ha prestata? Tocca <b>Chiedimela</b> accanto al suo nome.'] },
-  { ico: 'scan', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',   // testo riscritto (giro 5)
-    p: ['Tocca il <b>+</b> in basso e scegli come: <b>Scansiona</b> il codice a barre sul retro, <b>Fotografa</b> la copertina o <b>Digita</b> il titolo.',
-      'Con <b>Per autore</b> trovi tutti i libri di uno scrittore. In negozio, <b>Ce l\'ho già?</b> ti dice se un libro ce l\'hai già.'] },
-  { ico: 'fav', h: 'La pagina del libro', go: 'book',
-    p: ['Tocca un libro per aprirlo. Segna se lo stai leggendo o l\'hai già letto, dagli un voto con i <b>libricini</b> e tieni il segno con il <b>segnalibro</b>. Con la <b>stella</b> dici che lo consigli: gli amici lo vedono nel tuo profilo.',
-      'La <b>matita</b> serve a correggere i dati. Tocca <b>Descrizione</b> per leggere di cosa parla. Se dal libro hanno tratto un film o una serie, lo trovi qui.'] },
-  { ico: 'search', h: 'Trova e ordina', go: 'sort', sel: '#q, #sortBar',
-    p: ['Cerca per titolo o autore, usa i <b>Filtri</b> e <b>Ordina · Raggruppa</b> (per autore, genere, paese…). Scegli tra copertine ed elenco.',
-      'Le copertine partono da <b>3 per riga</b>: allarga o stringi <b>due dita</b> sulle copertine per farle più grandi o più piccole (da 2 a 5 per riga). Lo trovi anche in Menu › Aspetto.',
-      'Serie e copie dello stesso libro stanno insieme. Tocca il nome di un autore per <b>Info Autore</b>.'] },
-  { ico: 'loan', h: 'Prestiti', go: 'loan',   // giro 7: Prestiti e Desideri in due schermate (testi approvati da Piero il 18/11/2026)
-    p: ['Tieni il conto dei libri che presti e di quelli che ti prestano. Quando ridai un libro a un amico, tocca <b>Restituiscilo</b>; quando un tuo libro torna a casa, tocca <b>È tornato</b>.'] },
-  { ico: 'towish', h: 'Desideri', go: 'wish',
-    p: ['Metti nei <b>Desideri</b> i libri che vorresti leggere. Gli amici possono vederli e trovare l\'idea giusta per un regalo. Se un amico ce l\'ha già, te lo diciamo: magari ve lo prestate.'] },
-  { ico: 'chart', h: 'Per te', go: 'don', btn: 'Sostieni Next Libris',   // Sostieni (Piero, 18/11/2026)
-   
-    p: ['Suggerimenti sui tuoi autori, novità, film tratti dai tuoi libri, statistiche e <b>La tua stagione in libri</b>.', 'Ogni tanto ti ricordiamo di fare una <b>copia di sicurezza</b> dei tuoi libri: con un tocco la mandi su Drive, WhatsApp o email, foto comprese.', 'Next Libris è gratis per tutti: se ti piace, puoi sostenerla.'],
-    end: 'Rivedi questa guida quando vuoi: Menu › Info e aiuto › <b>Come si usa</b>.' }
+    p: ['La tua libreria in tasca.', 'I libri che hai, che leggi e che desideri.', '~Gratis e senza pubblicità.'] },
+  { ico: 'down', h: 'Installala', go: 'inst', btn: 'Installa', inst: true,   // solo nel browser, se non è installata
+    p: ['Mettila tra le app del telefono.', 'Si apre con un tocco.', '~Funziona anche senza internet.'],
+    ios: ['Mettila tra le app del telefono.', 'In Safari tocca <b>···</b>, poi <b>Condividi</b>.', 'Poi <b>Aggiungi alla schermata Home</b>.', '~Da lì la apri dall\'icona.'] },
+  { ico: 'user', h: 'Accedi', go: 'friends', mod: 'NLAmici',
+    p: ['Entra con Google.', 'I tuoi libri si salvano online.', 'Scegli un nome: gli amici ti trovano così.'] },
+  { ico: 'apikey', h: 'L’API Google Libri', go: 'key', btn: 'Crea la tua API', info: 1,   // nome «API» e «è gratis» in evidenza (Piero, 19/11/2026)
+    p: ['Con un’API l\'app trova più libri, con copertine e descrizioni.', '<b>È gratis</b>: crearla non costa nulla, né oggi né dopo.', '~Hai due strade:'],
+    two: ['Creala tu: 5 minuti, ti guidiamo.', 'Fattela prestare da un amico.'],
+    note: 'Con la tua API aiuti <b>Next Libris a crescere</b>: puoi prestarla agli amici.' },
+  { ico: 'swap', h: 'Il prestito dell’API', go: 'keys', mod: 'NLAmici', info: 1,
+    steps: ['L\'amico ha un’API sua.', 'Tu tocchi <b>Chiedimela</b> nel suo profilo.', 'Lui tocca <b>Prestala</b>.', 'Tu cerchi: fino a 300 ricerche al giorno.'],
+    note: 'L’API resta sul server: <b>nessuno la vede</b>. Prestarla è gratis e aiuta l’app a crescere.' },
+  { ico: 'scan', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',
+    p: ['Tocca <b>+</b> in basso.', 'Inquadra il codice a barre sul retro.', '~Oppure fotografa la copertina o scrivi il titolo.'] },
+  { ico: 'fav', h: 'Il libro', go: 'book',
+    p: ['Tocca un libro per aprirlo.', 'Segna se lo leggi e dagli un voto.', 'Con la <b>stella</b> lo consigli agli amici.'] },
+  { ico: 'user', h: 'Gli amici', go: 'friends', mod: 'NLAmici',
+    p: ['Guardate le vostre librerie.', 'Prestatevi i libri e scrivetevi.', 'Seguite i loro Desideri.'],
+    end: 'Rivedi la guida da Menu › <b>Come si usa</b>. Ti piace? <button type="button" class="gd-link" data-gd="try" data-go="don">Sostienila 🍺</button>' }
 ];
 /* per la prova e2e123: ogni schermata dice quale parte dell'app deve esistere */
 function screens() { return S.filter(function (s) { return (!s.mod || window[s.mod]) && (!s.inst || (NL.inst && !NL.inst.standalone())); }); }
@@ -79,6 +69,7 @@ function build() {
     else if (a === 'prev') go(G.i - 1);
     else if (a === 'next') { if (G.i >= screens().length - 1) close(); else go(G.i + 1); }
     else if (a === 'try') tryIt(b.dataset.go);
+    else if (a === 'info') info();
   });
   /* sfogliare col dito, come «La tua stagione in libri» */
   var x0 = null, y0 = 0;
@@ -96,6 +87,28 @@ function build() {
   });
   el.addEventListener('pointercancel', function () { x0 = null; });
 }
+/* «Scopri di più» sull'API (Piero, 19/11/2026): finestra breve sopra la guida */
+function info() {
+  var el = document.getElementById('gdInfo');
+  if (!el) {
+    el = document.createElement('div'); el.className = 'sheet gd-infosheet'; el.id = 'gdInfo'; el.hidden = true;
+    el.innerHTML = '<div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="gdInfoH"><h2 id="gdInfoH">Cos’è l’API Google Libri</h2><ul class="gd-ilist">' +
+      '<li>È un permesso di Google per cercare libri: <b>1.000 ricerche al giorno</b>.</li>' +
+      '<li><b>È gratis</b>: crearla non costa nulla, né oggi né dopo.</li>' +
+      '<li>Si crea in 5 minuti; ti guidiamo passo passo.</li>' +
+      '<li>Resta tua: puoi toglierla quando vuoi.</li>' +
+      '<li>Prestandola agli amici aiuti <b>Next Libris a crescere</b>.</li></ul>' +
+      '<div class="row-btns"><button type="button" class="btn primary" data-gi="make">Crea la tua API</button><button type="button" class="btn" data-gi="close">Chiudi</button></div></div>';
+    document.body.appendChild(el);
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-gi]'); if (e.target === el || (b && b.dataset.gi === 'close') || e.target.closest('.sh-x')) { el.hidden = true; return; }
+      if (b && b.dataset.gi === 'make') { el.hidden = true; tryIt('key'); }
+    });
+  }
+  el.hidden = false;
+  setTimeout(function () { try { el.querySelector('[data-gi="make"]').focus({ preventScroll: true }); } catch (x) {} }, 30);
+}
+function lines(a) { return a && a.length ? '<div class="gd-lines">' + a.map(function (t) { return t.charAt(0) === '~' ? '<p class="gd-p gd-m">' + t.slice(1) + '</p>' : '<p class="gd-p">' + t + '</p>'; }).join('') + '</div>' : ''; }
 function paint() {
   var list = screens(), s = list[G.i], n = list.length;
   $('#gdProg').innerHTML = list.map(function (x, k) { return '<span class="' + (k <= G.i ? 'on' : '') + (k === G.i ? ' cur' : '') + '"></span>'; }).join('');   // cur: il puntino lungo (restyle pezzo 4)
@@ -103,9 +116,13 @@ function paint() {
   var more = s.more ? '<p class="gd-more">' + esc(s.more.t) + ' <button type="button" class="gd-link" data-gd="try" data-go="' + s.more.go + '">Prova adesso ›</button></p>' : '';
   var ex = /^(book|sort|wish|loan)$/.test(s.go || '') ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
   $('#gdStage').innerHTML = '<div class="gd-slide" data-gs="' + G.i + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(s.ico) + '</span>' +
-    '<h2 class="gd-h">' + esc(s.h) + '</h2>' + (ios(s) ? s.ios : s.p).map(function (t) { return '<p class="gd-p">' + t + '</p>'; }).join('') +
+    '<h2 class="gd-h">' + esc(s.h) + '</h2>' + lines(ios(s) ? s.ios : s.p) +
+    (s.two ? '<div class="gd-two">' + s.two.map(function (t, k) { return '<p><span aria-hidden="true">' + (k + 1) + '</span>' + t + '</p>'; }).join('') + '</div>' : '') +
+    (s.steps ? '<ol class="gd-steps">' + s.steps.map(function (t) { return '<li><span>' + t + '</span></li>'; }).join('') + '</ol>' : '') +
+    (s.note ? '<p class="gd-note">' + s.note + '</p>' : '') +
+    (s.info ? '<p class="gd-info"><button type="button" class="gd-link" data-gd="info">Scopri di più ›</button></p>' : '') +
     more + (tries ? '<div class="gd-acts">' + tries + '</div>' + ex : '') + (s.end ? '<p class="gd-end">' + s.end + '</p>' : '') + '</div>';
-  $('#gdN').textContent = (G.i + 1) + ' di ' + n;
+  $('#gdN').textContent = (G.i + 1) + ' di ' + n;   // «N DI 8» in maiuscolo dallo stile
   G.el.querySelector('[data-gd="prev"]').disabled = G.i === 0;
   var nx = G.el.querySelector('[data-gd="next"]'); nx.textContent = G.i >= n - 1 ? 'Inizia' : 'Avanti ›';
 }
@@ -133,6 +150,7 @@ function close(fromPop, keepFocus) {
 window.addEventListener('popstate', function () { if (G.el && !G.el.hidden) { G.pushed = false; close(true); } });
 window.addEventListener('keydown', function (e) {
   if (!G.el || G.el.hidden) return;
+  var gi = document.getElementById('gdInfo'); if (gi && !gi.hidden && e.key === 'Escape') { e.stopImmediatePropagation(); e.preventDefault(); gi.hidden = true; return; }
   if (e.key === 'Escape') { e.stopImmediatePropagation(); e.preventDefault(); close(); }
   else if (e.key === 'ArrowRight') { e.stopImmediatePropagation(); go(G.i + 1); }
   else if (e.key === 'ArrowLeft') { e.stopImmediatePropagation(); go(G.i - 1); }
@@ -235,7 +253,7 @@ NL.on('guest', function () {
 
 /* ---------- percorso del primo avvio (giro 12, 19/11/2026) ----------
    Solo per chi installa da zero (NL.firstRun), dopo la guida: tre passi a schermo intero, con la grafica della guida.
-   1 Accedi con Google (poi il nome, che chiede amici.js) · 2 la chiave (crea la tua o chiedila a un amico) · 3 il primo libro.
+   1 Accedi con Google (poi il nome, che chiede amici.js) · 2 l’API (crea la tua o chiedila a un amico) · 3 il primo libro.
    Accesso e chiave si saltano con «Più tardi». cfg.path = passo da mostrare (0 o assente = finito): resta salvato, così il
    percorso riprende alla prossima apertura (anche dopo il giro di Google). Un passo già fatto si salta da solo. */
 var trying = false;
@@ -271,18 +289,18 @@ function pathShow() {
     document.body.appendChild(el); PT.el = el;
     el.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) pathDo(b.dataset.pt); });
   }
-  var T = {
-    1: { ico: 'user', h: 'Accedi con Google', p: ['Con l\'account i tuoi libri si salvano anche online e trovi gli amici: vi guardate le librerie, vi prestate i libri e puoi chiedere in prestito una chiave.', 'Ti chiediamo solo il nome con cui gli amici ti troveranno.'],
+  var T = {   // testi brevi (Piero, 19/11/2026)
+    1: { ico: 'user', h: 'Accedi con Google', p: ['I tuoi libri si salvano online.', 'Trovi gli amici e ti fai prestare un’API.', '~Ti chiediamo solo un nome.'],
       b: [['login', 'Accedi con Google']] },
-    2: { ico: 'gear', h: 'Trova più libri', p: ['Con una chiave Google Libri l\'app trova molti più libri, con copertine e descrizioni.'],
+    2: { ico: 'apikey', h: 'Trova più libri', p: ['Con un’API Google Libri l\'app trova più libri, con copertine e descrizioni.', '<b>È gratis</b>: crearla non costa nulla.', '~Creala tu o chiedila a un amico.'],
       b: [['make', 'Crea la tua (gratis)']].concat(ptLogged() && window.NLAmici && window.NLAmici.keys ? [['askf', 'Chiedila a un amico']] : []) },
-    3: { ico: 'scan', h: 'Aggiungi il primo libro', p: ['Inquadra il codice a barre sul retro, fotografa la copertina o scrivi il titolo.', 'La guida la rivedi quando vuoi: Menu › Info e aiuto › <b>Come si usa</b>.'],
+    3: { ico: 'scan', h: 'Aggiungi il primo libro', p: ['Inquadra il codice a barre sul retro.', '~Oppure fotografa la copertina o scrivi il titolo.'],
       b: [['add', 'Aggiungi un libro']] }
   }[n];
   $('#ptProg').innerHTML = [1, 2, 3].map(function (k) { return '<span class="' + (k <= n ? 'on' : '') + (k === n ? ' cur' : '') + '"></span>'; }).join('');
   $('#ptN').textContent = 'Passo ' + n + ' di 3';
-  $('#ptStage').innerHTML = '<div class="gd-slide" data-ps="' + n + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(T.ico) + '</span><h2 class="gd-h">' + esc(T.h) + '</h2>' +
-    T.p.map(function (t) { return '<p class="gd-p">' + t + '</p>'; }).join('') +
+  $('#ptStage').innerHTML = '<div class="gd-slide" data-ps="' + n + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(T.ico) + '</span><p class="gd-pn">Passo ' + n + ' di 3</p><h2 class="gd-h">' + esc(T.h) + '</h2>' +
+    lines(T.p) +
     '<div class="gd-acts gd-pacts">' + T.b.map(function (b, k) { return '<button type="button" class="btn primary gd-try' + (k ? ' gd-try2' : '') + '" data-pt="' + b[0] + '">' + esc(b[1]) + '</button>'; }).join('') + '</div>' +
     '<button type="button" class="gd-later" data-pt="later">Più tardi</button></div>';
   PT.el.hidden = false; document.body.classList.add('guida-open');
@@ -430,7 +448,7 @@ function menu() {
   b.innerHTML = '<span><b>Guarda una libreria di esempio</b><small>Prova l\'app senza i tuoi libri</small></span><span class="n" aria-hidden="true">›</span>';
   // indirizzo ufficiale (Piero, 18/11/2026): contro le copie dell'app ad altri indirizzi
   var u = document.createElement('p'); u.className = 'gd-uff'; u.id = 'nlUfficiale';
-  u.innerHTML = 'Next Libris è solo su <b>nextlibris.github.io</b>. Una copia a un altro indirizzo non è nostra: non darle la tua chiave né i tuoi dati.';
+  u.innerHTML = 'Next Libris è solo su <b>nextlibris.github.io</b>. Una copia a un altro indirizzo non è nostra: non darle la tua API né i tuoi dati.';
   list.insertBefore(b, list.firstChild); list.insertBefore(a, b); list.appendChild(u);   // giro 10: la frase sull'indirizzo in fondo a Info e aiuto
   a.addEventListener('click', function () { NL.fromMenu(function () { open(0); }); });
   b.addEventListener('click', function () { NL.fromMenu(function () { enter(-1, ''); }); });

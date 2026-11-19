@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.11 · 19/11/2026 17:11
+- **Guida nuova, asciutta**: 8 schermate con frasi brevi; l'API Google spiegata in due schermate (due strade, il prestito in 4 passi) con «È gratis» e «Scopri di più».
+- **Parte alta della Libreria più sobria**: titolo grande, numeri sotto, tasti tondi con il boccale di Sostieni, pillole leggere su una riga, avvisi bassi.
+- **Si chiama «API Google Libri»** in tutta l'app (anche negli avvisi e nelle notifiche).
+
 ## Prova 110.10 · 19/11/2026 16:34
 - **«Chiedimela» anche nel profilo dell'amico**: se non hai una chiave Google tua e l'amico ne ha una, sotto il suo profilo c'è un avviso con «Chiedimela».
 

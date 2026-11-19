@@ -340,7 +340,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
     <h2 id="newsH">Novità dei tuoi autori</h2>
     <p class="msg" id="newsMsg" aria-live="polite"></p>
     <ul class="news" id="newsList"></ul>
-    <label class="check small"><input type="checkbox" id="newsAuto"><span>Controlla da solo ogni due settimane (serve la chiave Google)</span></label>
+    <label class="check small"><input type="checkbox" id="newsAuto"><span>Controlla da solo ogni due settimane (serve l’API Google)</span></label>
     <div class="row-btns">
       <button class="btn" type="button" id="newsAgain">Cerca di nuovo</button>
       <button class="btn" type="button" id="newsClose">Chiudi</button>
@@ -624,8 +624,8 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       </fieldset>
     </section>
     <section class="opt-sec" data-sec="search" data-title="Ricerca dei libri">
-      <p class="hint">Chiave e worker sono facoltativi: servono a trovare più libri e ad avere dati più precisi.</p>
-      <button class="btn primary" id="svcRestore" type="button" hidden>Rimetti chiave e worker salvati</button>
+      <p class="hint">API e worker sono facoltativi: servono a trovare più libri e ad avere dati più precisi.</p>
+      <button class="btn primary" id="svcRestore" type="button" hidden>Rimetti API e worker salvati</button>
 
       <div class="svc svc-fold" id="svcKey">   <!-- sezioni richiudibili, Google sopra il worker (giro 5) -->
         <button type="button" class="svc-h svc-tog" aria-expanded="false" aria-controls="svcKeyB">
@@ -633,29 +633,29 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
           <span class="svc-st" id="gbSt"></span>
           <span class="svc-chev" aria-hidden="true"></span>
         </button>
-        <p class="hint svc-desc">Trova titoli, copertine e descrizioni nell'archivio di Google. Senza chiave l'app usa solo Open Library e trova meno libri.</p>
-        <button class="btn svc-guide" type="button" data-guide="key" id="gbGuide">Come si crea la chiave (gratis)</button>
+        <p class="hint svc-desc">Trova titoli, copertine e descrizioni nell'archivio di Google. Senza API l'app usa solo Open Library e trova meno libri.</p>
+        <button class="btn svc-guide" type="button" data-guide="key" id="gbGuide">Come si crea l’API (gratis)</button>
         <div class="svc-b" id="svcKeyB" hidden>
         <p class="svc-count" id="gbCount" aria-live="polite"></p>
         <div class="svc-row">
-          <label class="sr" for="gbKey">Chiave API di Google Libri</label>
-          <input type="text" id="gbKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla la chiave (inizia con AIza)">
+          <label class="sr" for="gbKey">API Google Libri (la chiave che inizia con AIza)</label>
+          <input type="text" id="gbKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla l’API (inizia con AIza)">
           <button class="btn svc-show" type="button" id="gbShow" aria-pressed="false" hidden>Mostra</button>
         </div>
-        <p class="hint svc-uff">Incolla la chiave solo in Next Libris, su nextlibris.github.io. Non te la chiederemo mai per email o messaggio.</p>
+        <p class="hint svc-uff">Incolla l’API solo in Next Libris, su nextlibris.github.io. Non te la chiederemo mai per email o messaggio.</p>
         <div class="svc-acts">
           <button class="btn svc-clear" id="gbClear" type="button" hidden>Cancella</button>
           <div class="svc-saved" id="gbSaved" hidden></div>
         </div>
-        <button class="link svc-leak" id="gbLeak" type="button" hidden>La mia chiave è finita in giro</button>
+        <button class="link svc-leak" id="gbLeak" type="button" hidden>La mia API è finita in giro</button>
         <details class="svc-how">
-          <summary>Come si crea la chiave (gratis, una volta sola)</summary>
+          <summary>Come si crea l’API (gratis, una volta sola)</summary>
           <ol class="hint keysteps">
           <li>Apri <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com</a> con il tuo account Google e crea un progetto.</li>
           <li>Apri <a href="https://console.cloud.google.com/apis/library/books.googleapis.com" target="_blank" rel="noopener">Books API</a> e premi «Abilita».</li>
           <li>Vai in <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credenziali</a> › «Crea credenziali» › «Chiave API».</li>
-          <li>Limita la chiave: in «Restrizioni API» scegli solo <b>Books API</b>. La fatturazione non va attivata (di partenza è già spenta, non devi fare niente): così non si paga mai niente, qualunque cosa succeda.</li>
-          <li>Copia la chiave e incollala qui sopra.</li>
+          <li>Limita l’API: in «Restrizioni API» scegli solo <b>Books API</b>. La fatturazione non va attivata (di partenza è già spenta, non devi fare niente): così non si paga mai niente, qualunque cosa succeda.</li>
+          <li>Copia l’API e incollala qui sopra.</li>
         </ol>
         </details>
         </div>
@@ -838,7 +838,7 @@ html[data-splash] #splash{position:fixed;top:0;left:0;right:0;bottom:auto;height
       <div class="dlist dmenu dset">
         <button type="button" class="dopt dset-t" id="goSettings" aria-expanded="false" aria-controls="setList"><span class="dset-i" aria-hidden="true"></span><span><b>Impostazioni</b><small>Account, amici, ricerca, aspetto</small></span><span class="n dset-c" aria-hidden="true">›</span></button>
         <div class="dsub" id="setList" hidden>
-        <button type="button" class="dopt" data-sec="search"><span><b>Ricerca dei libri</b><small>Chiave Google, worker, SBN</small></span><span class="n" aria-hidden="true">›</span></button>
+        <button type="button" class="dopt" data-sec="search"><span><b>Ricerca dei libri</b><small>API Google, worker, SBN</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="cards"><span><b>Aggiunta dei libri</b><small>Prezzo, suoni, fotocamera</small></span><span class="n" aria-hidden="true">›</span></button>
         <button type="button" class="dopt" data-sec="look"><span><b>Aspetto</b><small>Tema, colori, caratteri</small></span><span class="n" aria-hidden="true">›</span></button>
         </div>

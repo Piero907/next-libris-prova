@@ -355,10 +355,10 @@ function paint() {
     var go = '<div class="pf-go"><button class="btn" type="button" data-p="lib">Libreria</button><button class="btn" type="button" data-p="wish">Desideri</button>' +
       (window.NLChat ? '<button class="btn pf-chat" type="button" data-p="chat">Scrivi</button>' : '') + '<span class="pf-icos">' +   // chat (giro 9b)
       (acts.swap ? icoBtn('swap', ' gb-swap', 'Prestiti e regali tra te e ' + name, I_SWAP) : '') +
-      (acts.key ? icoBtn('key', acts.lent ? ' on' : '', acts.lent ? acts.lent + ' ' + aNome(name) : 'Presta la tua chiave Google o il worker ' + aNome(name), I_KEY + (acts.lent ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '')) : '') +
+      (acts.key ? icoBtn('key', acts.lent ? ' on' : '', acts.lent ? acts.lent + ' ' + aNome(name) : 'Presta la tua API Google o il worker ' + aNome(name), I_KEY + (acts.lent ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '')) : '') +
       icoBtn('drop', ' gb-drop', 'Togli ' + name + ' dagli amici', I_DROP) + '</span></div>';                       // Libreria e Desideri ci sono sempre, anche se il profilo non si carica
-    var ks = A().askState && A().askState(cur), ask = !ks ? '' :          // «Chiedimela» (Piero, 19/11/2026): solo se tu non hai una chiave e l'amico ne ha una sua
-      '<section class="fr-sec pf-ask"><p><span aria-hidden="true">🔑 </span><b>' + esc(name) + '</b> ha una chiave Google Libri sua. Se te la presta, la tua ricerca trova molti più libri, con copertine e descrizioni.</p>' +
+    var ks = A().askState && A().askState(cur), ask = !ks ? '' :          // «Chiedimela» (Piero, 19/11/2026): solo se tu non hai un’API e l'amico ne ha una sua
+      '<section class="fr-sec pf-ask"><p><span aria-hidden="true">🔑 </span><b>' + esc(name) + '</b> ha un’API Google Libri sua. Se te la presta, la tua ricerca trova molti più libri, con copertine e descrizioni.</p>' +
       (ks.asked ? '<span class="pf-asked">Richiesta mandata</span>' : '<button class="btn primary" type="button" data-p="ask">Chiedimela</button>') + '</section>';
     if (!data) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section>' + ask + '<p class="msg">Un momento…</p>';
     else if (data.err) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section>' + ask + '<p class="msg">' + esc(data.err) + '</p>';
@@ -404,7 +404,7 @@ function paint() {
   body.innerHTML = h;
   animate(body); fitCovers(body);
 }
-/* ---------- scorciatoie alle impostazioni personali (Piero, 18/11/2026): Account, Amici e privacy, Notifiche, Chiave Google e worker.
+/* ---------- scorciatoie alle impostazioni personali (Piero, 18/11/2026): Account, Amici e privacy, Notifiche, API Google e worker.
    La finestra si apre sopra e, quando si chiude, torna il profilo. ---------- */
 function setRow(k, t, sub) { return '<li class="fr-row fr-go"><button class="fr-who fr-open" type="button" data-p="' + k + '">' + t + '<small>' + esc(sub) + '</small></button><span class="n" aria-hidden="true">›</span></li>'; }
 function setRows(me) {
@@ -420,7 +420,7 @@ function setRows(me) {
     r += setRow('privacy', 'Amici e privacy', uid() ? 'Gli amici vedono la foto' + (vis.length ? ', ' + vis.join(', ') : ' e nient\'altro') : 'Con l\'account scegli cosa vedono gli amici');
   }
   if (window.NLPush && document.getElementById('goPush')) r += setRow('push', 'Notifiche', (document.getElementById('goPushTxt') || {}).textContent || 'Avvisi anche ad app chiusa');
-  if (A() && A().keys) r += setRow('keys', 'Chiave Google e worker', 'Per trovare più libri, anche agli amici');
+  if (A() && A().keys) r += setRow('keys', 'API Google e worker', 'Per trovare più libri, anche agli amici');
   r += setRow('menu', 'Menu', 'Le altre impostazioni e le info');
   return '<section class="fr-sec pf-set"><h3 class="fr-h">Impostazioni</h3><ul class="fr-list fr-box">' + r + '</ul></section>';
 }

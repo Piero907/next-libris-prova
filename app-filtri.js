@@ -435,7 +435,7 @@ async function loadPrivacy() {
 }
 function closeOptions(fromPop) {
   if (!optOpen) return;
-  $('#optSheet').hidden = true; optOpen = false; emit('optclose');   // i moduli si aggiornano (icona della chiave, giro 1)
+  $('#optSheet').hidden = true; optOpen = false; emit('optclose');   // i moduli si aggiornano (icona dell’API, giro 1)
   if (optPushed && !fromPop) { optPushed = false; try { history.back(); } catch (e) { nlErr(e); } }
   else optPushed = false;
 }

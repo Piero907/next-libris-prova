@@ -538,3 +538,89 @@ html[data-look="nuovo"] .prof .pf-ask{display:grid;gap:10px;padding:14px;border:
 html[data-look="nuovo"] .prof .pf-ask p{margin:0;font-size:14.5px;line-height:1.45}
 html[data-look="nuovo"] .prof .pf-ask .btn{justify-self:end;min-height:40px;padding:6px 18px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:700}
 html[data-look="nuovo"] .prof .pf-ask .pf-asked{justify-self:end;color:var(--accent);font:700 14px/1.2 var(--font-body)}
+
+/* ---------- 18. guida asciutta (Piero, 19/11/2026): icona piccola, frasi brevi una per riga, passi numerati ---------- */
+html[data-look="nuovo"] .guida .gd-stage{align-items:flex-start;padding-top:28px}
+html[data-look="nuovo"] .guida .gd-slide{max-width:460px}
+html[data-look="nuovo"] .guida .gd-ico{width:52px;height:52px;margin:0 0 22px;border-radius:16px;background:var(--accent-soft);color:var(--accent);box-shadow:none;display:grid;place-items:center;overflow:visible}
+html[data-look="nuovo"] .guida .gd-ico::before,html[data-look="nuovo"] .guida .gd-ico::after{display:none}
+html[data-look="nuovo"] .guida .gd-ico svg{width:26px;height:26px;padding:0;border-radius:0;background:none;color:inherit;transform:none;box-shadow:none}
+html[data-look="nuovo"] .guida .gd-h{margin:0 0 16px;font:800 28px/1.1 var(--font-display)}
+html[data-look="nuovo"] .guida .gd-lines{display:grid;gap:10px}
+html[data-look="nuovo"] .guida .gd-lines .gd-p{margin:0;font-size:17px;line-height:1.4;color:var(--ink)}
+html[data-look="nuovo"] .guida .gd-lines .gd-p.gd-m{font-size:15px;color:var(--muted)}
+html[data-look="nuovo"] .guida .gd-two{display:grid;gap:10px;margin-top:16px}
+html[data-look="nuovo"] .guida .gd-two p{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:center;margin:0;padding:12px 14px;border-radius:14px;background:var(--surface);box-shadow:var(--c-sh);font-size:16px;line-height:1.35}
+html[data-look="nuovo"] .guida .gd-two p span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font:700 14px/1 var(--font-body)}
+html[data-look="nuovo"] .guida .gd-steps{list-style:none;counter-reset:gd;margin:4px 0 0;padding:0;display:grid;gap:14px}
+html[data-look="nuovo"] .guida .gd-steps li{counter-increment:gd;display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;font-size:16.5px;line-height:1.35}
+html[data-look="nuovo"] .guida .gd-steps li::before{content:counter(gd);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font:700 14px/1 var(--font-body)}
+html[data-look="nuovo"] .guida .gd-steps li span{padding-top:4px}
+html[data-look="nuovo"] .guida .gd-note{margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--surface);box-shadow:var(--c-sh);font-size:14.5px;line-height:1.4;color:var(--muted)}
+html[data-look="nuovo"] .guida .gd-note b{color:var(--ink)}
+html[data-look="nuovo"] .guida .gd-acts{margin-top:22px}
+html[data-look="nuovo"] .guida .gd-end{margin-top:18px;font-size:13.5px;color:var(--muted)}
+html[data-look="nuovo"] .guida .gd-end .gd-link{font-size:13.5px}
+html[data-look="nuovo"] .guida .gd-pn{margin:0 0 8px;font:700 12px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+html[data-look="nuovo"] .guida.gd-path .gd-top .gd-n{display:none}
+html[data-look="nuovo"] .guida .gd-pacts{display:grid;gap:10px;margin-top:24px}
+html[data-look="nuovo"] .guida .gd-pacts .gd-try{width:100%;min-height:50px;justify-content:center}
+html[data-look="nuovo"] .guida .gd-pacts .gd-try:first-child{background:var(--accent);color:var(--accent-ink)}
+html[data-look="nuovo"] .guida .gd-pacts .gd-try::after,html[data-look="nuovo"] .guida .gd-pacts .gd-try:first-child::after{content:none}
+html[data-look="nuovo"] .guida .gd-later{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);font:600 14px/1 var(--font-body)}
+
+/* ---------- 19. testata sobria (Piero, 19/11/2026): titolo grande, numeri sotto, tasti tondi a destra ---------- */
+/* titolo «Libreria» / «Desideri» (app-strumenti.js renderOwner); foto e nome stanno nel Profilo; Amici nel Profilo e nel Menu */
+html[data-look="nuovo"] body header.top{align-items:flex-start;gap:6px;margin:0 0 16px;padding-top:4px!important}
+html[data-look="nuovo"] body header.top h1{order:1;flex:1 1 auto;display:block;font:800 30px/1.05 var(--font-display);letter-spacing:-.02em;padding-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-look="nuovo"] body header.top h1.h1-long{font-size:23px;padding-top:7px}
+html[data-look="nuovo"] body header.top h1 .prova-tag{display:inline-block;vertical-align:6px;margin-left:2px}
+html[data-look="nuovo"] body header.top>.ico:not(.beer-pill){width:36px;height:36px;min-width:36px;min-height:36px}
+html[data-look="nuovo"] body header.top>.ico:not(.beer-pill) svg{width:19px;height:19px}
+html[data-look="nuovo"] body header.top>.fri-top{display:none!important}
+html[data-look="nuovo"] body header.top>.nt-top{order:3}
+html[data-look="nuovo"] body header.top>.ch-top{order:4}
+html[data-look="nuovo"] body header.top>#btnOpts{order:5}
+/* Sostieni: tasto tondo col boccale, nel colore caldo */
+html[data-look="nuovo"] body header.top .beer-top.beer-pill{order:2;width:36px;min-width:36px;height:36px;min-height:36px;margin:0;padding:0;display:grid;place-items:center;border-radius:50%;background:var(--warn-bg);color:var(--warn)}
+html[data-look="nuovo"] body header.top .beer-top.beer-pill .beer-t{display:none}
+html[data-look="nuovo"] body header.top .beer-top.beer-pill svg{width:19px;height:19px}
+/* sotto il titolo solo i numeri; nome e foto si vedono nella libreria di un amico e nell'esempio? no: il titolo li dice già */
+html[data-look="nuovo"] body header.top .top-meta{order:10;flex:1 1 100%;margin:2px 0 0!important;font-size:14px;color:var(--muted)}
+html[data-look="nuovo"] body header.top .top-meta .owner{display:none}
+html[data-look="nuovo"] body header.top .top-meta .summary{font-size:14px}
+@media (max-width:380px){
+  html[data-look="nuovo"] body header.top h1{font-size:26px}
+  html[data-look="nuovo"] body header.top h1.h1-long{font-size:20px}
+  html[data-look="nuovo"] body header.top>.ico:not(.beer-pill),html[data-look="nuovo"] body header.top .beer-top.beer-pill{width:34px;height:34px;min-width:34px;min-height:34px}
+}
+/* pillole: una riga sola, leggere (solo il bordo), scorrono di lato se non entrano */
+html[data-look="nuovo"] .sortbar{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;gap:6px;margin:0 -16px 12px;padding:0 16px}
+html[data-look="nuovo"] .sortbar::-webkit-scrollbar{display:none}
+html[data-look="nuovo"] .sortbar .dpick,html[data-look="nuovo"] .sortbar #btnFilters,html[data-look="nuovo"][data-layout="a"] .sortbar #btnFilters{flex:none;min-height:32px;height:32px;padding:0 11px;background:transparent;box-shadow:inset 0 0 0 1px var(--line);font-size:13px;white-space:nowrap}
+html[data-look="nuovo"] .sortbar #btnFilters[aria-pressed="true"],html[data-look="nuovo"] .sortbar #btnFilters:has(.badge:not([hidden])){box-shadow:none}
+html[data-look="nuovo"] .sortbar .dpick svg,html[data-look="nuovo"] .sortbar #btnFilters svg{width:15px;height:15px;color:var(--muted)}
+html[data-look="nuovo"] .chips .chip.share,html[data-look="nuovo"] .chips #btnNews{min-height:32px;background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font-weight:500;font-size:13px}
+/* avvisi: una riga sottile (al massimo due righe di testo) */
+html[data-look="nuovo"] #notice{margin:0 0 14px;padding:8px 6px 8px 12px;gap:8px;border:0;border-radius:14px;font-size:13.5px;line-height:1.3}
+html[data-look="nuovo"] #notice #noticeTxt{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
+html[data-look="nuovo"] #notice #noticeBtn{min-height:32px;padding:0 4px;text-decoration:none;font-size:13px}
+html[data-look="nuovo"] #notice #noticeBtn::after{content:" ›"}
+html[data-look="nuovo"] #notice .x{min-width:32px;min-height:32px;font-size:20px}
+html[data-look="nuovo"] body header.top h1{flex:1 1 0}
+html[data-look="nuovo"] .grp-tools{gap:14px;justify-content:flex-end;margin:0 4px 10px}
+html[data-look="nuovo"] .grp-tools .gx{min-height:30px;padding:0;border:0;background:none;box-shadow:none;color:var(--accent);font:600 13px/1 var(--font-body)}
+html[data-look="nuovo"] .grp-tools .gx:disabled{color:var(--muted);opacity:.6}
+/* pallini degli avvisi in fila con il testo, a destra: l'avviso resta basso */
+html[data-look="nuovo"] #notice.lay-has-dots{padding-bottom:8px!important}
+html[data-look="nuovo"] #notice .lay-more{position:static;transform:none;order:5;padding:6px 4px;gap:5px}
+html[data-look="nuovo"] #notice .lay-more i{width:6px;height:6px}
+html[data-look="nuovo"] #notice #noticeX{order:6}
+html[data-look="nuovo"]:is(.guest,.esempio) body header.top h1 .prova-tag{display:none}
+html[data-look="nuovo"] .guida .gd-slide{margin:0 auto}
+html[data-look="nuovo"].guest body header.top h1{cursor:pointer}
+/* «Scopri di più» sull'API: finestra sopra la guida */
+html[data-look="nuovo"] .gd-info{margin:12px 0 0}
+.gd-infosheet{z-index:70}
+html[data-look="nuovo"] .gd-ilist{margin:0;padding:14px 16px 14px 34px;border-radius:var(--c-r);background:var(--surface);box-shadow:var(--c-sh);display:grid;gap:10px;font-size:15px;line-height:1.4}
+html[data-look="nuovo"] .gd-ilist li::marker{color:var(--accent)}

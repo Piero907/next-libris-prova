@@ -1,7 +1,7 @@
 /* Next Libris · modulo «Notifiche» (16/11/2026, nella copia di prova). Scelte di Piero del 16/11/2026.
    Campanella in alto, accanto all'icona Amici, con il numero delle notifiche non lette. Dentro: richieste e amicizie accettate,
    prestiti e regali ricevuti, restituzioni (segnalate, confermate, non ancora ricevute), «Me lo presti?» e le risposte,
-   libri consigliati, chiave e worker condivisi, chiave Google arrivata al limite (guida per crearne una gratis, ricerche.js). Aprendo la campanella si segnano tutte lette (le nuove restano evidenziate).
+   libri consigliati, chiave e worker condivisi, API Google arrivata al limite (guida per crearne una gratis, ricerche.js). Aprendo la campanella si segnano tutte lette (le nuove restano evidenziate).
    Toccandone una si apre il libro o la finestra Amici.
    Le notifiche le scrive il database (trigger, supabase/011_notifiche.sql nel ramo prove): «letto» vale su tutti i dispositivi,
    si tengono 30 giorni. Si leggono insieme agli amici (apertura, ritorno all'app, ogni ~3 minuti) e quando arriva un push (push.js).
@@ -58,8 +58,8 @@ function text(x) {
     case 'richiesta_si': return who(x) + ' ti presta ' + book(x);
     case 'richiesta_no': return who(x) + ' ora non può prestarti ' + book(x);
     case 'consiglio': return who(x) + ' ti consiglia ' + book(x);
-    case 'chiavi': return who(x) + ' condivide con te la sua chiave per cercare i libri';
-    case 'chiedi_chiavi': return who(x) + ' ti chiede in prestito la chiave Google Libri';   // «Chiedimela» (giro 12)
+    case 'chiavi': return who(x) + ' condivide con te la sua API per cercare i libri';
+    case 'chiedi_chiavi': return who(x) + ' ti chiede in prestito l’API Google Libri';   // «Chiedimela» (giro 12)
     case 'desideri': var nd = Number(x.rif) || 1; return who(x) + (nd === 1 ? ' ha un nuovo desiderio: ' : ' ha ' + nd + ' nuovi desideri: ') + '<b>' + esc(x.titolo || '') + '</b>' + (nd > 3 ? ' e altri' : '');   // riassunto del giorno di un amico che segui (giro 3)
     case 'trovato': var nt = trovN(x); return '📚 ' + who(x) + ' ha aggiunto <b>' + esc(x.titolo || 'un libro') + '</b>' + (nt > 3 ? ' e altri' : '') + (nt === 1 ? ', che è nei tuoi Desideri' : ', che sono nei tuoi Desideri');   // un tuo desiderio è entrato nella libreria di un amico (giro 6)
     case 'avviso': return '<b>' + esc(x.rif || 'Avviso di Next Libris') + '</b><br>' + esc(x.titolo || '');   // avviso importante di Next Libris (giro 8): rif = titolo, titolo = testo, tutto in vista
@@ -68,8 +68,8 @@ function text(x) {
         : '<b>' + esc(x.titolo || 'Alcune persone') + '</b> vogliono scriverti: hai ' + mr + ' richieste di messaggio';
       return (mn === 1 ? 'Un messaggio nuovo' : mn + ' messaggi nuovi') + ' da <b>' + esc(x.titolo || x.nome || 'un amico') + '</b>' + (mr ? (mr === 1 ? ' e una richiesta di messaggio' : ' e ' + mr + ' richieste di messaggio') : '');
     case 'segnalazione': return 'Nuova segnalazione nella chat' + (x.titolo ? ' su <b>' + esc(x.titolo) + '</b>' : '') + ': controlla nel pannello Amministrazione';
-    case 'limite': return x.titolo ? 'La chiave Google di <b>' + esc(x.titolo) + '</b> ha finito le ricerche di oggi: <b>creane una tua, è gratis</b>'
-      : 'La tua chiave Google ha finito le ricerche di oggi: torna domattina';
+    case 'limite': return x.titolo ? 'L’API Google di <b>' + esc(x.titolo) + '</b> ha finito le ricerche di oggi: <b>creane una tua, è gratis</b>'
+      : 'La tua API Google ha finito le ricerche di oggi: torna domattina';
   }
   return who(x);
 }
@@ -167,8 +167,8 @@ function lendKeyGo(da) {
   close();
   var A = amici(); if (!A) return;
   setTimeout(function () {
-    if (A.hasOwn && !A.hasOwn()) {   // niente di suo da prestare: la guida per creare la chiave (gratis)
-      NL.toast('Non hai ancora una chiave tua: creala, è gratis, e poi potrai prestarla.');
+    if (A.hasOwn && !A.hasOwn()) {   // niente di suo da prestare: la guida per creare l’API (gratis)
+      NL.toast('Non hai ancora un’API tua: creala, è gratis, e poi potrai prestarla.');
       if (window.NLRicerche && window.NLRicerche.guide) window.NLRicerche.guide(); else if (A.keys) A.keys();
     } else if (A.keySheet) A.keySheet(da);
   }, 60);
@@ -182,7 +182,7 @@ function go(id) {
   if (x.tipo === 'chiedi_chiavi' && x.da) { lendKeyGo(x.da); return; }   // «Chiedimela»: apre «Presta a …»
   close();
   var A = amici();
-  if (x.tipo === 'limite') { if (window.NLRicerche) setTimeout(function () { window.NLRicerche.guide(x.titolo); }, 60); return; }   // guida: crea la tua chiave, è gratis
+  if (x.tipo === 'limite') { if (window.NLRicerche) setTimeout(function () { window.NLRicerche.guide(x.titolo); }, 60); return; }   // guida: crea la tua API, è gratis
   if (/^(prestito|regalo|reso|reso_ok|reso_no|chiuso)$/.test(x.tipo) && x.rif) {
     var mine = NL.myBooks ? NL.myBooks() : NL.books();
     var b = mine.filter(function (y) { return y.sx === x.rif; })[0];

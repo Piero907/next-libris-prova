@@ -2,7 +2,7 @@
    Paese degli autori (statistiche, filtro, Raggruppa per, Stagione in libri), film e serie TV tratti dai libri
    (riga nella scheda, «Dai tuoi libri al cinema» in «Per te»), opere di un autore («Le sue opere» in Info Autore, «Per autore» nel +).
    Script classico come le altre parti: usa le loro funzioni globali e viene prima di app-avvio.js.
-   Tutto gratis e senza chiave: it.wikipedia.org (auLookup, per trovare la voce) e query.wikidata.org (una domanda per autore, salvata sul telefono). */
+   Tutto gratis e senza API: it.wikipedia.org (auLookup, per trovare la voce) e query.wikidata.org (una domanda per autore, salvata sul telefono). */
 'use strict';
 var WD_LS = 'catalogo-libri-auwd', WD_RETRY = 30 * 864e5, WD_V = 3, WD_API = 'https://query.wikidata.org/sparql?format=json&query=';
 var wdo = null, wdBusy = false, wdFails = 0, wdTimer = 0, wdPaintT = 0, wdNames = {}, wdCodes = {}, wdDN = null;
