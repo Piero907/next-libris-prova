@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.3 · 19/11/2026 12:40
+- **Film dal più recente** con «Mostra altri»; **«Ce l'ho già?» segnala un'altra edizione**
+
 ## Prova 110.2 · 19/11/2026 12:28
 - **Anteprima prima di condividere**: Storia e Quadrata aprono l'immagine grande, con Condividi e Salva
 

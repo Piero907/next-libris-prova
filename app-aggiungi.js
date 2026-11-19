@@ -833,6 +833,19 @@ function ppInfo(b) {
 function shelfLine(b) {
   return [b.a, b.sh ? 'Scaffale: ' + b.sh : '', readLabel(b)].filter(Boolean).join(' · ');
 }
+/* stesso libro in un'altra edizione: stesso titolo (senza sottotitolo) e un cognome dell'autore in comune (Piero, 19/11/2026) */
+function edKey(t) { return L.norm(String(t || '').split(/\s[:\-–—]\s|[:.(]/)[0]).replace(/[^a-z0-9]+/g, ' ').trim(); }
+function edAut(a) { return L.norm(a).split(/[^a-z]+/).filter(function (w) { return w.length > 2; }); }
+function otherEdition(info, code) {
+  if (!info || !info.t) return null;
+  var k = edKey(info.t), au = edAut(info.a);
+  if (!k) return null;
+  return state.books.find(function (x) {
+    if (x.w || x.xs || L.toIsbn13(x.i) === code || edKey(x.t) !== k) return false;
+    if (!au.length) return true;
+    var xa = edAut(x.a); return !xa.length || au.some(function (w) { return xa.indexOf(w) >= 0; });
+  }) || null;
+}
 function showRes(code, kind, book, info) {
   resCode = code; resKind = kind;
   var o = '';
@@ -849,7 +862,9 @@ function showRes(code, kind, book, info) {
       '<div class="res-b"><button class="btn primary" data-act="bought">L\'ho comprato: spostalo in Libreria</button></div>';
   } else if (kind === 'no') {
     var t = info === undefined ? 'Cerco il titolo…' : info ? info.t : (info === null ? 'Titolo sconosciuto alle banche dati' : 'Titolo non disponibile (connessione)');
-    o = '<p class="res-h no">✗ Non ce l\'hai</p><p class="res-t">' + esc(t) + '</p>' +
+    var oe = otherEdition(info, code);
+    o = (oe ? '<p class="res-h ed">≈ Ce l\'hai in un\'altra edizione</p><p class="res-s">' + esc([oe.e, oe.y].filter(Boolean).join(', ') || ('ISBN ' + (oe.i || '—'))) + (shelfLine(oe) ? ' · ' + esc(shelfLine(oe)) : '') + '</p><p class="res-s">Questa edizione:</p>'
+      : '<p class="res-h no">✗ Non ce l\'hai</p>') + '<p class="res-t">' + esc(t) + '</p>' +
       (info && info.a ? '<p class="res-s">' + esc(info.a) + '</p>' : '') + '<p class="res-s">ISBN ' + esc(code) + '</p>' +
       '<div class="res-b"><button class="btn primary" data-act="addlib">Aggiungi alla Libreria</button><button class="btn" data-act="addwish">Aggiungi ai Desideri</button></div>';
   } else {
