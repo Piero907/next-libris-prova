@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.12 · 19/11/2026 20:30
+- Guida e percorso verdi: fondo verde Bosco, una riga per frase con l'icona dell'app, tutto in verdi
+
 ## Prova 110.11 · 19/11/2026 17:11
 - **Guida nuova, asciutta**: 8 schermate con frasi brevi; l'API Google spiegata in due schermate (due strade, il prestito in 4 passi) con «È gratis» e «Scopri di più».
 - **Parte alta della Libreria più sobria**: titolo grande, numeri sotto, tasti tondi con il boccale di Sostieni, pillole leggere su una riga, avvisi bassi.

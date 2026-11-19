@@ -23,29 +23,44 @@ function save() { NL.ls.set(LS, JSON.stringify(cfg)); }
    Undici in tutto; «Installala» si vede solo nel browser (testi approvati da Piero il 18/11/2026; giro 5: «Aggiungi i libri» riscritta e «Trova più libri» nuova; giro 7: Prestiti e Desideri separati) ---------- */
 /* Guida asciutta (Piero, 19/11/2026): otto schermate (sette con l'app installata), frasi brevi una per riga, il prestito dell’API a passi.
    p: righe (con «~» davanti: riga secondaria, grigia); two: due strade numerate; steps: passi numerati; note: riquadro sotto i passi. */
+/* Guida verde (Piero, 19/11/2026): fondo verde Bosco, una riga per frase con l'icona dell'app accanto (riga = [icona, testo]; «~» davanti al testo: riga secondaria). */
 var S = [
   { ico: 'tolib', h: 'Benvenuto',
-    p: ['La tua libreria in tasca.', 'I libri che hai, che leggi e che desideri.', '~Gratis e senza pubblicità.'] },
+    p: [['books', 'La tua libreria in tasca.'], ['heart', 'I libri che hai, che leggi e che desideri.'], ['spark', '~Gratis e senza pubblicità.']] },
   { ico: 'down', h: 'Installala', go: 'inst', btn: 'Installa', inst: true,   // solo nel browser, se non è installata
-    p: ['Mettila tra le app del telefono.', 'Si apre con un tocco.', '~Funziona anche senza internet.'],
-    ios: ['Mettila tra le app del telefono.', 'In Safari tocca <b>···</b>, poi <b>Condividi</b>.', 'Poi <b>Aggiungi alla schermata Home</b>.', '~Da lì la apri dall\'icona.'] },
+    p: [['phone', 'Mettila tra le app del telefono.'], ['ok', 'Si apre con un tocco.'], ['down', '~Funziona anche senza internet.']],
+    ios: [['phone', 'Mettila tra le app del telefono.'], ['share', 'In Safari tocca <b>···</b>, poi <b>Condividi</b>.'], ['plus', 'Poi <b>Aggiungi alla schermata Home</b>.'], ['ok', '~Da lì la apri dall\'icona.']] },
   { ico: 'user', h: 'Accedi', go: 'friends', mod: 'NLAmici',
-    p: ['Entra con Google.', 'I tuoi libri si salvano online.', 'Scegli un nome: gli amici ti trovano così.'] },
+    p: [['user', 'Entra con Google.'], ['books', 'I tuoi libri si salvano online.'], ['users', 'Scegli un nome: gli amici ti trovano così.']] },
   { ico: 'apikey', h: 'L’API Google Libri', go: 'key', btn: 'Crea la tua API', info: 1,   // nome «API» e «è gratis» in evidenza (Piero, 19/11/2026)
-    p: ['Con un’API l\'app trova più libri, con copertine e descrizioni.', '<b>È gratis</b>: crearla non costa nulla, né oggi né dopo.', '~Hai due strade:'],
-    two: ['Creala tu: 5 minuti, ti guidiamo.', 'Fattela prestare da un amico.'],
-    note: 'Con la tua API aiuti <b>Next Libris a crescere</b>: puoi prestarla agli amici.' },
+    p: [['search', 'Con un’API l\'app trova più libri, con copertine e descrizioni.'], ['spark', '<b>È gratis</b>: crearla non costa nulla, né oggi né dopo.']],
+    lab: 'Hai due strade',
+    two: [['apikey', 'Creala tu: 5 minuti, ti guidiamo.'], ['users', 'Fattela prestare da un amico.']],
+    note: ['award', 'Con la tua API aiuti <b>Next Libris a crescere</b>: puoi prestarla agli amici.'] },
   { ico: 'swap', h: 'Il prestito dell’API', go: 'keys', mod: 'NLAmici', info: 1,
-    steps: ['L\'amico ha un’API sua.', 'Tu tocchi <b>Chiedimela</b> nel suo profilo.', 'Lui tocca <b>Prestala</b>.', 'Tu cerchi: fino a 300 ricerche al giorno.'],
-    note: 'L’API resta sul server: <b>nessuno la vede</b>. Prestarla è gratis e aiuta l’app a crescere.' },
-  { ico: 'scan', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',
-    p: ['Tocca <b>+</b> in basso.', 'Inquadra il codice a barre sul retro.', '~Oppure fotografa la copertina o scrivi il titolo.'] },
+    steps: [['users', 'L\'amico ha un’API sua.'], ['apikey', 'Tu tocchi <b>Chiedimela</b> nel suo profilo.'], ['ok', 'Lui tocca <b>Prestala</b>.'], ['search', 'Tu cerchi: fino a 300 ricerche al giorno.']],
+    note: ['shield', 'L’API resta sul server: <b>nessuno la vede</b>. Prestarla è gratis e aiuta l’app a crescere.'] },
+  { ico: 'plus', h: 'Aggiungi i libri', go: 'add', sel: '#layNav [data-l="add"], #btnScan',
+    p: [['plus', 'Tocca <b>+</b> in basso.'], ['scan', 'Inquadra il codice a barre sul retro.'], ['cam', '~Oppure fotografa la copertina o scrivi il titolo.']] },
   { ico: 'fav', h: 'Il libro', go: 'book',
-    p: ['Tocca un libro per aprirlo.', 'Segna se lo leggi e dagli un voto.', 'Con la <b>stella</b> lo consigli agli amici.'] },
-  { ico: 'user', h: 'Gli amici', go: 'friends', mod: 'NLAmici',
-    p: ['Guardate le vostre librerie.', 'Prestatevi i libri e scrivetevi.', 'Seguite i loro Desideri.'],
+    p: [['books', 'Tocca un libro per aprirlo.'], ['ok', 'Segna se lo leggi e dagli un voto.'], ['fav', 'Con la <b>stella</b> lo consigli agli amici.']] },
+  { ico: 'users', h: 'Gli amici', go: 'friends', mod: 'NLAmici',
+    p: [['books', 'Guardate le vostre librerie.'], ['chat', 'Prestatevi i libri e scrivetevi.'], ['heart', 'Seguite i loro Desideri.']],
     end: 'Rivedi la guida da Menu › <b>Come si usa</b>. Ti piace? <button type="button" class="gd-link" data-gd="try" data-go="don">Sostienila 🍺</button>' }
 ];
+/* icone dell'app che NL.icon non ha (le stesse di barra in basso, Menu e chat) */
+var GI = {
+  books: '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16.5 5l3.5-.8 2.6 15.4-3.5.8z"/>',
+  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.2-5.5 6.5-5.5s5.9 2 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .8 3.2 2.6 3.5 5.2"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  shield: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/>',
+  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/>',
+  ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
+};
+function gi(n) { return GI[n] ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + GI[n] + '</svg>' : NL.icon(n); }
 /* per la prova e2e123: ogni schermata dice quale parte dell'app deve esistere */
 function screens() { return S.filter(function (s) { return (!s.mod || window[s.mod]) && (!s.inst || (NL.inst && !NL.inst.standalone())); }); }
 function ios(s) { return s.inst && NL.inst && NL.inst.kind() === 'ios'; }
@@ -108,18 +123,24 @@ function info() {
   el.hidden = false;
   setTimeout(function () { try { el.querySelector('[data-gi="make"]').focus({ preventScroll: true }); } catch (x) {} }, 30);
 }
-function lines(a) { return a && a.length ? '<div class="gd-lines">' + a.map(function (t) { return t.charAt(0) === '~' ? '<p class="gd-p gd-m">' + t.slice(1) + '</p>' : '<p class="gd-p">' + t + '</p>'; }).join('') + '</div>' : ''; }
+function row(r, k) {   // una riga: icona nel quadratino, numero (passi e strade), testo; «~» = riga secondaria
+  if (typeof r === 'string') r = ['dot', r];
+  var t = r[1], m = t.charAt(0) === '~'; if (m) t = t.slice(1);
+  return '<p class="gd-r' + (m ? ' gd-m' : '') + '"><span class="gd-sq" aria-hidden="true">' + gi(r[0]) + '</span>' + (k ? '<span class="gd-k" aria-hidden="true">' + k + '</span>' : '') + '<span class="gd-t">' + t + '</span></p>';
+}
+function lines(a) { return a && a.length ? '<div class="gd-card gd-lines">' + a.map(function (r) { return row(r); }).join('') + '</div>' : ''; }
 function paint() {
   var list = screens(), s = list[G.i], n = list.length;
   $('#gdProg').innerHTML = list.map(function (x, k) { return '<span class="' + (k <= G.i ? 'on' : '') + (k === G.i ? ' cur' : '') + '"></span>'; }).join('');   // cur: il puntino lungo (restyle pezzo 4)
   var tries = s.go && !ios(s) ? '<button type="button" class="btn primary gd-try" data-gd="try" data-go="' + s.go + '">' + esc(s.btn || 'Prova adesso') + '</button>' : '';
   var more = s.more ? '<p class="gd-more">' + esc(s.more.t) + ' <button type="button" class="gd-link" data-gd="try" data-go="' + s.more.go + '">Prova adesso ›</button></p>' : '';
   var ex = /^(book|sort|wish|loan)$/.test(s.go || '') ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
-  $('#gdStage').innerHTML = '<div class="gd-slide" data-gs="' + G.i + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(s.ico) + '</span>' +
+  $('#gdStage').innerHTML = '<div class="gd-slide" data-gs="' + G.i + '"><span class="gd-ico" aria-hidden="true">' + gi(s.ico) + '</span>' +
     '<h2 class="gd-h">' + esc(s.h) + '</h2>' + lines(ios(s) ? s.ios : s.p) +
-    (s.two ? '<div class="gd-two">' + s.two.map(function (t, k) { return '<p><span aria-hidden="true">' + (k + 1) + '</span>' + t + '</p>'; }).join('') + '</div>' : '') +
-    (s.steps ? '<ol class="gd-steps">' + s.steps.map(function (t) { return '<li><span>' + t + '</span></li>'; }).join('') + '</ol>' : '') +
-    (s.note ? '<p class="gd-note">' + s.note + '</p>' : '') +
+    (s.lab ? '<p class="gd-lab">' + esc(s.lab) + '</p>' : '') +
+    (s.two ? '<div class="gd-card gd-two">' + s.two.map(function (r, k) { return row(r, k + 1); }).join('') + '</div>' : '') +
+    (s.steps ? '<div class="gd-card gd-steps" role="list">' + s.steps.map(function (r, k) { return row(r, k + 1).replace('<p ', '<p role="listitem" '); }).join('') + '</div>' : '') +
+    (s.note ? '<p class="gd-note"><span aria-hidden="true">' + gi(s.note[0]) + '</span><span>' + s.note[1] + '</span></p>' : '') +
     (s.info ? '<p class="gd-info"><button type="button" class="gd-link" data-gd="info">Scopri di più ›</button></p>' : '') +
     more + (tries ? '<div class="gd-acts">' + tries + '</div>' + ex : '') + (s.end ? '<p class="gd-end">' + s.end + '</p>' : '') + '</div>';
   $('#gdN').textContent = (G.i + 1) + ' di ' + n;   // «N DI 8» in maiuscolo dallo stile
@@ -290,16 +311,16 @@ function pathShow() {
     el.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) pathDo(b.dataset.pt); });
   }
   var T = {   // testi brevi (Piero, 19/11/2026)
-    1: { ico: 'user', h: 'Accedi con Google', p: ['I tuoi libri si salvano online.', 'Trovi gli amici e ti fai prestare un’API.', '~Ti chiediamo solo un nome.'],
+    1: { ico: 'user', h: 'Accedi con Google', p: [['books', 'I tuoi libri si salvano online.'], ['users', 'Trovi gli amici e ti fai prestare un’API.'], ['user', '~Ti chiediamo solo un nome.']],
       b: [['login', 'Accedi con Google']] },
-    2: { ico: 'apikey', h: 'Trova più libri', p: ['Con un’API Google Libri l\'app trova più libri, con copertine e descrizioni.', '<b>È gratis</b>: crearla non costa nulla.', '~Creala tu o chiedila a un amico.'],
+    2: { ico: 'apikey', h: 'Trova più libri', p: [['search', 'Con un’API Google Libri l\'app trova più libri, con copertine e descrizioni.'], ['spark', '<b>È gratis</b>: crearla non costa nulla.'], ['users', '~Creala tu o chiedila a un amico.']],
       b: [['make', 'Crea la tua (gratis)']].concat(ptLogged() && window.NLAmici && window.NLAmici.keys ? [['askf', 'Chiedila a un amico']] : []) },
-    3: { ico: 'scan', h: 'Aggiungi il primo libro', p: ['Inquadra il codice a barre sul retro.', '~Oppure fotografa la copertina o scrivi il titolo.'],
+    3: { ico: 'scan', h: 'Aggiungi il primo libro', p: [['scan', 'Inquadra il codice a barre sul retro.'], ['cam', '~Oppure fotografa la copertina o scrivi il titolo.']],
       b: [['add', 'Aggiungi un libro']] }
   }[n];
   $('#ptProg').innerHTML = [1, 2, 3].map(function (k) { return '<span class="' + (k <= n ? 'on' : '') + (k === n ? ' cur' : '') + '"></span>'; }).join('');
   $('#ptN').textContent = 'Passo ' + n + ' di 3';
-  $('#ptStage').innerHTML = '<div class="gd-slide" data-ps="' + n + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(T.ico) + '</span><p class="gd-pn">Passo ' + n + ' di 3</p><h2 class="gd-h">' + esc(T.h) + '</h2>' +
+  $('#ptStage').innerHTML = '<div class="gd-slide" data-ps="' + n + '"><span class="gd-ico" aria-hidden="true">' + gi(T.ico) + '</span><p class="gd-pn">Passo ' + n + ' di 3</p><h2 class="gd-h">' + esc(T.h) + '</h2>' +
     lines(T.p) +
     '<div class="gd-acts gd-pacts">' + T.b.map(function (b, k) { return '<button type="button" class="btn primary gd-try' + (k ? ' gd-try2' : '') + '" data-pt="' + b[0] + '">' + esc(b[1]) + '</button>'; }).join('') + '</div>' +
     '<button type="button" class="gd-later" data-pt="later">Più tardi</button></div>';

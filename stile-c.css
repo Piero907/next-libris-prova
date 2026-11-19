@@ -624,3 +624,47 @@ html[data-look="nuovo"] .gd-info{margin:12px 0 0}
 .gd-infosheet{z-index:70}
 html[data-look="nuovo"] .gd-ilist{margin:0;padding:14px 16px 14px 34px;border-radius:var(--c-r);background:var(--surface);box-shadow:var(--c-sh);display:grid;gap:10px;font-size:15px;line-height:1.4}
 html[data-look="nuovo"] .gd-ilist li::marker{color:var(--accent)}
+
+/* ---------- 19. guida e percorso verdi (Piero, 19/11/2026): fondo verde Bosco, icona grande verde chiaro,
+   una riga per frase con l'icona dell'app nel quadratino, tutto in verdi (nessun altro colore) ---------- */
+html[data-look="nuovo"] .guida{--gv-ink:#172420;--gv-lite:#8FD1AE;--gv-pale:#CFE6D8;background:linear-gradient(170deg,#24563F,#173A2A);color:#fff}
+html[data-look="nuovo"][data-theme="dark"] .guida{background:linear-gradient(170deg,#1B4230,#0E241A)}
+@media (prefers-color-scheme:dark){html[data-look="nuovo"]:not([data-theme="light"]) .guida{background:linear-gradient(170deg,#1B4230,#0E241A)}}
+html[data-look="nuovo"] .guida .gd-prog span,html[data-look="nuovo"] .guida .gd-prog span.on{background:rgba(207,230,216,.32)}
+html[data-look="nuovo"] .guida .gd-prog span.cur,html[data-look="nuovo"] .guida .gd-prog span[aria-current]{background:var(--gv-lite)}
+html[data-look="nuovo"] .guida .gd-skip{color:var(--gv-pale)}
+html[data-look="nuovo"] .guida .gd-stage{padding-top:18px}
+html[data-look="nuovo"] .guida .gd-ico{width:60px;height:60px;margin:0 0 14px;border-radius:18px;background:var(--gv-pale);color:#173A2A}
+html[data-look="nuovo"] .guida .gd-ico svg{width:30px;height:30px}
+html[data-look="nuovo"] .guida .gd-h{margin:0 0 14px;color:#fff;font:800 27px/1.12 var(--font-display)}
+html[data-look="nuovo"] .guida .gd-pn{color:var(--gv-lite)}
+html[data-look="nuovo"] .guida .gd-card{display:block;margin:0;padding:2px 14px;border-radius:20px;background:#fff;color:var(--gv-ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+html[data-look="nuovo"] .guida .gd-card+.gd-card{margin-top:12px}
+html[data-look="nuovo"] .guida .gd-r{display:flex;align-items:center;gap:12px;margin:0;padding:11px 0;border-bottom:1px solid #E3E9E5;font-size:16px;line-height:1.35;color:var(--gv-ink)}
+html[data-look="nuovo"] .guida .gd-r:last-child{border-bottom:0}
+html[data-look="nuovo"] .guida .gd-r.gd-m .gd-t{color:#58665F;font-size:15px}
+html[data-look="nuovo"] .guida .gd-r b{color:#173A2A}
+html[data-look="nuovo"] .guida .gd-sq{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#E0ECE5;color:#24563F}
+html[data-look="nuovo"] .guida .gd-k{flex:none;display:grid;place-items:center;width:22px;height:22px;margin-left:-4px;border-radius:50%;background:#24563F;color:#fff;font:700 12px/1 var(--font-body)}
+html[data-look="nuovo"] .guida .gd-two,html[data-look="nuovo"] .guida .gd-steps{display:block;gap:0;margin-top:0}
+html[data-look="nuovo"] .guida .gd-lab{margin:16px 4px 8px;font:700 12px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--gv-lite)}
+html[data-look="nuovo"] .guida .gd-note{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border-radius:16px;background:rgba(143,209,174,.16);box-shadow:none;color:#E2F1E8;font-size:14.5px;line-height:1.4}
+html[data-look="nuovo"] .guida .gd-note>span:first-child{flex:none;color:var(--gv-lite);margin-top:1px}
+html[data-look="nuovo"] .guida .gd-note b{color:#fff}
+html[data-look="nuovo"] .guida .gd-link{color:var(--gv-lite)}
+html[data-look="nuovo"] .guida .gd-info{margin:12px 0 0}
+html[data-look="nuovo"] .guida .gd-ex,html[data-look="nuovo"] .guida .gd-end{color:#C9D9D0}
+html[data-look="nuovo"] .guida .gd-acts{margin-top:16px}
+html[data-look="nuovo"] .guida .gd-try,html[data-look="nuovo"][data-theme="dark"] .guida .gd-try{width:100%;min-height:48px;border-radius:14px;background:var(--gv-lite);color:#0B2016;box-shadow:none;font-weight:700}
+@media (prefers-color-scheme:dark){html[data-look="nuovo"]:not([data-theme="light"]) .guida .gd-try{color:#0B2016}}
+html[data-look="nuovo"] .guida .gd-pacts .gd-try:first-child{background:var(--gv-lite);color:#0B2016}
+html[data-look="nuovo"] .guida .gd-try.gd-try2,html[data-look="nuovo"] .guida .gd-pacts .gd-try.gd-try2{background:rgba(255,255,255,.12);color:#fff;border:0}
+html[data-look="nuovo"] .guida .gd-later{color:var(--gv-pale)}
+html[data-look="nuovo"] .guida .gd-btn{color:#E2F1E8}
+html[data-look="nuovo"] .guida .gd-btn.gd-next{background:var(--gv-lite);color:#0B2016}
+html[data-look="nuovo"] .guida .gd-n{color:var(--gv-lite)}
+html[data-look="nuovo"] .guida :focus-visible{outline:2px solid var(--gv-lite)}
+html[data-look="nuovo"] .guida .gd-two .gd-r{display:flex;grid-template-columns:none;padding:11px 0;border-radius:0;background:none;box-shadow:none;font-size:16px}
+html[data-look="nuovo"] .guida .gd-two .gd-r span{width:auto;height:auto;border-radius:0;background:none;color:inherit;font:inherit;display:inline}
+html[data-look="nuovo"] .guida .gd-two .gd-r .gd-sq{display:grid;width:38px;height:38px;border-radius:12px;background:#E0ECE5;color:#24563F}
+html[data-look="nuovo"] .guida .gd-two .gd-r .gd-k{display:grid;width:22px;height:22px;border-radius:50%;background:#24563F;color:#fff;font:700 12px/1 var(--font-body)}
