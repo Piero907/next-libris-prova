@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 107.5 · 19/11/2026 08:06
+- **Backup sistemato:** si manda come .txt (Chrome rifiutava il .json)
+
 ## Prova 107.4 · 19/11/2026 08:03
 - **Backup:** se non parte, il messaggio dice perché (per trovare l'errore)
 

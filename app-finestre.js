@@ -336,7 +336,8 @@ async function shareBackup(lite) {
     return;
   }
   try {
-    var cands = [new File([data], base + '.json', { type: 'application/json' }), new File([data], base + '.txt', { type: 'text/plain' })];
+    // prima il .txt (19/11/2026): Chrome 157 su Android dice sì al .json in canShare, ma poi la condivisione lo rifiuta (NotAllowedError: Permission denied)
+    var cands = [new File([data], base + '.txt', { type: 'text/plain' })];
     for (var i = 0; i < cands.length && !file; i++) if (navigator.canShare && navigator.canShare({ files: [cands[i]] })) file = cands[i];
   } catch (e) { file = null; }
   if (!file || !navigator.share) { bkFail('Questo telefono non permette di inviare il file da qui.', false, false); return; }
