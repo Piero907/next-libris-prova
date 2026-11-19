@@ -4,7 +4,7 @@
    Script classico come le altre parti: usa le loro funzioni globali e viene prima di app-avvio.js.
    Tutto gratis e senza chiave: it.wikipedia.org (auLookup, per trovare la voce) e query.wikidata.org (una domanda per autore, salvata sul telefono). */
 'use strict';
-var WD_LS = 'catalogo-libri-auwd', WD_RETRY = 30 * 864e5, WD_V = 2, WD_API = 'https://query.wikidata.org/sparql?format=json&query=';
+var WD_LS = 'catalogo-libri-auwd', WD_RETRY = 30 * 864e5, WD_V = 3, WD_API = 'https://query.wikidata.org/sparql?format=json&query=';
 var wdo = null, wdBusy = false, wdFails = 0, wdTimer = 0, wdPaintT = 0, wdNames = {}, wdCodes = {}, wdDN = null;
 var WD_ISO = ('AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ ' +
   'DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP ' +
@@ -134,7 +134,7 @@ async function wdSameRows(qid, auTitle) {                // le righe dei film om
       r.k = 'f'; out.push(r); out.push({ k: 'w', w: r.w, wl: r.wl });
     });
     return out;
-  } catch (e) { if (navigator.onLine === false) throw e; return []; }   // senza rete si riprova; un servizio lento o che risponde male non ferma il resto
+  } catch (e) { if (!e || !e.status || e.status === 429 || e.status >= 500) throw e; return []; }   // rete, lentezza o «troppe domande» (rilettura di tanti autori): l'autore si riprova dopo 5 minuti, mai salvato senza i film
 }
 /* film o serie TV? Dipende dal tipo dell'opera derivata (film, film d'animazione, miniserie… ma anche videogiochi, opere liriche, altri libri).
    I tipi piu' comuni sono gia' scritti qui (letti da Wikidata il 18/11/2026); per quelli nuovi una domanda piccola, e la risposta resta salvata. */

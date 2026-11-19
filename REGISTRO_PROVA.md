@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 108.3 · 19/11/2026 11:20
+- **Film omonimi: se Wikidata risponde «troppe domande» l'autore si riprova** invece di restare senza film; gli autori si rileggono di nuovo
+
 ## Prova 108.2 · 19/11/2026 10:56
 - **Film tratti dai libri anche senza «tratto da» su Wikidata** (es. Io speriamo che me la cavo, 1992): film omonimi confermati da Wikipedia e «opera derivata» del libro; gli autori si rileggono una volta
 
