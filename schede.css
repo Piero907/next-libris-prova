@@ -146,3 +146,5 @@ html[data-card]:not([data-card="attuale"]) .row.open .facets .fchip{min-height:3
   html[data-card="d"] .cv-ed .cv-page>.cv-ex,html[data-card="d"] .cv-ed .cv-page>.cv-adds{grid-column:1}
   html[data-card="d"] .cv-ed .cv-in-t{font-size:26px}
 }
+.cv-nat{display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:13px;color:var(--muted);white-space:nowrap;vertical-align:1px}
+.cv-nat .cv-flag{width:18px;height:auto;border-radius:2px;box-shadow:0 0 0 1px #0001}

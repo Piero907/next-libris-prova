@@ -953,7 +953,7 @@ window.NL = {
   setFlt: function (v) { flt = v; collapseCards(); renderList(); updateSummary(); if (typeof updateActiveFilters === 'function') updateActiveFilters(); }, flt: function () { return flt; }, goal: function () { return settings.goal || 0; },
   closeDrawer: function () { closeDrawer(); }, fromMenu: fromMenu, refresh: function () { renderList(); updateSummary(); },
   icon: icon, setTab: function (t) { setTab(t); }, openMenu: function () { openDrawer('opt'); }, openSugg: function (t) { openSugg(t); },
-  wdBookCountry: wdBookCountry, wdFlag: wdFlag, wdFlagImg: wdFlagImg, wdCName: wdCName, films: function () { return filmsMine(); }, openFilms: function () { openFilms(); }, openWorks: function () { openWorks('', '', true); },   // Wikidata (giro 2)
+  wdBookCountry: wdBookCountry, wdCountry: wdCountry, wdFlag: wdFlag, wdFlagImg: wdFlagImg, wdCName: wdCName, films: function () { return filmsMine(); }, openFilms: function () { openFilms(); }, openWorks: function () { openWorks('', '', true); },   // Wikidata (giro 2)
   openQuotes: function () { openAllQuotes(); }, openStats: function () { openStats(); }, openExport: function () { openExport(); }, nQuotes: function () { return allQuotes().length; },
   updateStick: function () { updateStick(); }, summary: function () { updateSummary(); }, autosize: function (el) { autosizeAll(el); },
   rdLong: function (v) { return rdLong(v); }, get: function (id) { return get(id); }, itDate: function (d) { return L.itDate(d); }, refreshRow: function (id) { refreshRow(id); },

@@ -40,7 +40,7 @@ function doD(card, id) {
   v.innerHTML = '<div class="cv-hero">' + (img ? '<button type="button" class="cv-cov" data-act="zoom" aria-label="Ingrandisci la copertina" title="Ingrandisci la copertina"><img src="' + esc(img) + '" alt="" referrerpolicy="no-referrer"></button>' :
       '<button type="button" class="cv-cov cv-ph" data-act="coverphoto" style="--h:' + NL.hue(b.t + b.a + b.i) + '" title="Cerca la copertina online; se non c\'è, la fotografi" aria-label="Aggiungi la copertina"><span>' + esc(b.t.slice(0, 1)) + '</span><small>' + NL.icon('cam') + 'Copertina</small></button>') +
     '<div class="cv-ht"><h3' + (b.t ? '' : ' class="cv-not"') + '>' + esc(tit) + gm('t') + '</h3>' +
-    (names.length ? '<p class="cv-au">' + names.map(function (n) { return '<button type="button" class="au-name" data-act="auinfo" data-n="' + esc(n) + '" title="Info Autore: ' + esc(n) + '">' + esc(n) + '</button>'; }).join('<span class="au-sep">, </span>') + gm('a') + '</p>' : '') +
+    (names.length ? '<p class="cv-au">' + names.map(function (n) { return '<button type="button" class="au-name" data-act="auinfo" data-n="' + esc(n) + '" title="Info Autore: ' + esc(n) + '">' + esc(n) + '</button>' + nat(n); }).join('<span class="au-sep">, </span>') + gm('a') + '</p>' : '') +
     (dati.length ? '<p class="cv-meta">' + dati.join(' · ') + '</p>' : '') + (b.i ? '<p class="cv-meta cv-isbn">ISBN ' + esc(b.i) + '</p>' : '') + '</div></div>' +   /* ISBN sempre visibile, su una riga sua (Piero, 19/11/2026) */
     '<div class="cv-chips"></div>' +
     (b.n ? '<p class="cv-note">' + esc(b.n) + '</p>' : '');
@@ -131,6 +131,11 @@ function dActs(card) {                            // in alto, solo icone: prefer
   card.appendChild(row);                          // in fondo alla scheda
 }
 /* «da verificare» accanto a un dato: un tocco lo segna come controllato (solo quel dato) */
+/* nazionalita' accanto a ogni autore: bandiera e nome del paese, da Wikidata come «Raggruppa per paese»; se non si conosce, niente (Piero, 19/11/2026) */
+function nat(n) {
+  var c = NL.wdCountry ? NL.wdCountry(n) : ''; if (!c) return '';
+  var nm = NL.wdCName(c); return nm ? '<span class="cv-nat">' + NL.wdFlagImg(c, 'cv-flag') + esc(nm) + '</span>' : '';
+}
 function verifyK(id, k) {
   var b = NL.get(id); if (!b || !b.g) return;
   var snap = b.g.slice();
