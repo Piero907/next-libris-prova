@@ -343,8 +343,8 @@ function paint() {
   if (cur === 'esempio') {                             /* ----- profilo della libreria di esempio: solo da guardare ----- */
     document.getElementById('profH').textContent = 'Profilo di esempio';
     var est = stats(), els = lists(), eq = myPins();
-    h = head('esempio', EX_NAME, 'novembre 2026') + numsLine(est) +
-      '<div class="pf-go"><button class="btn" type="button" data-p="lib">Libreria</button><button class="btn" type="button" data-p="wish">Desideri</button></div>' +
+    h = '<section class="pf-card">' + head('esempio', EX_NAME, 'novembre 2026') + numsLine(est) +
+      '<div class="pf-go"><button class="btn" type="button" data-p="lib">Libreria</button><button class="btn" type="button" data-p="wish">Desideri</button></div></section>' +
       strip('In lettura', els.let) + strip('Consigliati', els.cons);   // via i Preferiti (Piero, 18/11/2026)
     if (eq.length) h += '<section class="fr-sec"><h3 class="fr-h">Citazioni in evidenza</h3><div class="pf-qlist">' + eq.map(quoteHTML).join('') + '</div></section>';
     h += statsHTML(est, true) + '<p class="fr-small">È un profilo inventato: il tuo lo trovi nel Menu, con la tua foto e i tuoi numeri.</p>';
@@ -357,16 +357,16 @@ function paint() {
       (acts.swap ? icoBtn('swap', ' gb-swap', 'Prestiti e regali tra te e ' + name, I_SWAP) : '') +
       (acts.key ? icoBtn('key', acts.lent ? ' on' : '', acts.lent ? acts.lent + ' ' + aNome(name) : 'Presta la tua chiave Google o il worker ' + aNome(name), I_KEY + (acts.lent ? '<span class="gk-ok" aria-hidden="true">✓</span>' : '')) : '') +
       icoBtn('drop', ' gb-drop', 'Togli ' + name + ' dagli amici', I_DROP) + '</span></div>';                       // Libreria e Desideri ci sono sempre, anche se il profilo non si carica
-    if (!data) h = head(cur, name, '') + go + '<p class="msg">Un momento…</p>';
-    else if (data.err) h = head(cur, name, '') + go + '<p class="msg">' + esc(data.err) + '</p>';
+    if (!data) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section><p class="msg">Un momento…</p>';
+    else if (data.err) h = '<section class="pf-card">' + head(cur, name, '') + go + '</section><p class="msg">' + esc(data.err) + '</p>';
     else if (mode === 'cits') {
       h = '<button class="link fr-back" type="button" data-p="back">‹ Profilo</button><div class="pf-qlist">' + (data.cits || []).map(quoteHTML).join('') + '</div>';
     } else {
       var nn = (A().nums && A().nums(cur)) || {};
       var ev = data.evid || (data.cit && data.cit.x ? [data.cit] : []);          // database senza la 019: la vecchia preferita
-      h = head(cur, data.utente || name, since(data.creato));
+      h = '<section class="pf-card">' + head(cur, data.utente || name, since(data.creato));   // riquadro in cima (stile C, 19/11/2026)
       if (data.stat) h += numsLine(data.stat);
-      h += go;
+      h += go + '</section>';
       if (data.desideri) h += '<section class="fr-sec pf-fol"><button class="btn' + (data.segue ? '' : ' primary') + '" type="button" data-p="segui" aria-pressed="' + !!data.segue + '">' + (data.segue ? 'Stai seguendo i suoi Desideri ✓' : 'Segui i suoi Desideri') + '</button>' +
         '<p class="fr-small">' + (data.segue ? 'Ti scriviamo al massimo una volta al giorno, solo quando c\'è qualcosa di nuovo. ' + esc(name) + ' non lo sa. Tocca per smettere.'
           : esc(name) + ' ti mostra già i suoi Desideri: seguili e scopri cosa sogna di leggere. Magari ci trovi il regalo giusto, o il tuo prossimo libro. Ti scriviamo al massimo una volta al giorno, solo quando c\'è qualcosa di nuovo, e ' + esc(name) + ' non lo saprà.') + '</p></section>';
@@ -384,10 +384,10 @@ function paint() {
       h = '<button class="link fr-back" type="button" data-p="back">‹ Profilo</button><p class="fr-small">Tocca una citazione per metterla in evidenza o toglierla: al massimo ' + PINS + '. In evidenza: <b>' + pins.length + ' di ' + PINS + '</b>.</p><div class="pf-qlist">' +
         qs.slice(0, 300).map(function (q) { return '<button type="button" class="pf-qpick" data-p="pin" data-b="' + esc(q.b) + '" data-i="' + q.i + '" aria-pressed="' + q.pin + '">' + quoteHTML(q) + '</button>'; }).join('') + '</div>';
     } else {
-      h = head(null, nm, since((me && me.creato) || firstTs()));
+      h = '<section class="pf-card">' + head(null, nm, since((me && me.creato) || firstTs()));   // riquadro in cima (stile C, 19/11/2026)
       if (photoOpen) h += '<div class="pf-photo"><button class="btn" type="button" data-p="file">Dalla galleria</button><button class="btn" type="button" data-p="cam">Fotocamera</button>' + (uid() ? '<button class="btn" type="button" data-p="google">Usa quella di Google</button>' : '') +
         (my.foto ? '<button class="link" type="button" data-p="nofoto">Togli la foto</button>' : '') + '<p class="fr-small">' + (uid() ? 'La vedono solo i tuoi amici.' : 'Resta su questo telefono: con l\'account la vedono i tuoi amici.') + '</p></div>';
-      h += numsLine(st);
+      h += numsLine(st) + '</section>';
       h += strip('In lettura', ls.let) + strip('Consigliati', ls.cons, 'Nella pagina di un libro tocca la stella: «Lo consiglio».');
       h += '<section class="fr-sec"><h3 class="fr-h">Citazioni in evidenza' + (pins.length ? ' <span class="fr-n">' + pins.length + '</span>' : '') + '</h3>' +
         (pins.length ? '<div class="pf-qlist">' + pins.map(quoteHTML).join('') + '</div>' : '<p class="fr-small">' + (qs.length ? 'Scegli fino a ' + PINS + ' citazioni da mettere in evidenza con la puntina.' : 'Quando salvi una citazione da un libro, con la puntina puoi metterla in evidenza qui (fino a ' + PINS + ').') + '</p>') +
@@ -490,7 +490,7 @@ NL.on('privacy', function () { if (!cur) paint(); });
 NL.on('pins', function () { if (my.cit) { my.cit = null; my.t = Date.now(); save(); push(); } if (!cur) paint(); });   // scelte le puntine, la vecchia preferita non serve più
 NL.on('lc', function () { if (!cur) paint(); });
 NL.on('keys', function () { if (cur && data && !data.err && !mode) paint(); });
-window.NLProfilo = { open: open, avatar: avatar, stats: stats, lists: lists, pins: myPins, state: function () { return { my: my, pics: pics, cur: cur, data: data, mode: mode }; }, push: push };   // per amici.js e le prove
+window.NLProfilo = { open: open, close: close, avatar: avatar, stats: stats, lists: lists, pins: myPins, state: function () { return { my: my, pics: pics, cur: cur, data: data, mode: mode }; }, push: push };   // per amici.js e le prove
 if (NL.renderOwner) NL.renderOwner();      // il nome in testata diventa il tasto del profilo
 /* giro 7 (in prova): «Il mio profilo» in cima al Menu, con la tua foto */
 (function menu() {

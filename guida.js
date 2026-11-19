@@ -98,7 +98,7 @@ function build() {
 }
 function paint() {
   var list = screens(), s = list[G.i], n = list.length;
-  $('#gdProg').innerHTML = list.map(function (x, k) { return '<span class="' + (k <= G.i ? 'on' : '') + '"></span>'; }).join('');
+  $('#gdProg').innerHTML = list.map(function (x, k) { return '<span class="' + (k <= G.i ? 'on' : '') + (k === G.i ? ' cur' : '') + '"></span>'; }).join('');   // cur: il puntino lungo (restyle pezzo 4)
   var tries = s.go && !ios(s) ? '<button type="button" class="btn primary gd-try" data-gd="try" data-go="' + s.go + '">' + esc(s.btn || 'Prova adesso') + '</button>' : '';
   var more = s.more ? '<p class="gd-more">' + esc(s.more.t) + ' <button type="button" class="gd-link" data-gd="try" data-go="' + s.more.go + '">Prova adesso ›</button></p>' : '';
   var ex = /^(book|sort|wish|loan)$/.test(s.go || '') ? '<p class="gd-ex">Si apre una libreria di esempio: solo da guardare.</p>' : '';
@@ -279,7 +279,7 @@ function pathShow() {
     3: { ico: 'scan', h: 'Aggiungi il primo libro', p: ['Inquadra il codice a barre sul retro, fotografa la copertina o scrivi il titolo.', 'La guida la rivedi quando vuoi: Menu › Info e aiuto › <b>Come si usa</b>.'],
       b: [['add', 'Aggiungi un libro']] }
   }[n];
-  $('#ptProg').innerHTML = [1, 2, 3].map(function (k) { return '<span class="' + (k <= n ? 'on' : '') + '"></span>'; }).join('');
+  $('#ptProg').innerHTML = [1, 2, 3].map(function (k) { return '<span class="' + (k <= n ? 'on' : '') + (k === n ? ' cur' : '') + '"></span>'; }).join('');
   $('#ptN').textContent = 'Passo ' + n + ' di 3';
   $('#ptStage').innerHTML = '<div class="gd-slide" data-ps="' + n + '"><span class="gd-ico" aria-hidden="true">' + NL.icon(T.ico) + '</span><h2 class="gd-h">' + esc(T.h) + '</h2>' +
     T.p.map(function (t) { return '<p class="gd-p">' + t + '</p>'; }).join('') +

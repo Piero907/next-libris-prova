@@ -126,7 +126,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 110, date: '2026-11-19', note: 'Scheda del libro uguale per tutti; scritta sotto le copertine sempre' };
-var BUILD = {"t": "2026-11-19 14:34", "n": "110.8", "note": "Numeri del profilo con il layout nuovo"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-19 16:22", "n": "110.9", "note": "Restyle «C · Schede» completo"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -151,7 +151,7 @@ var S = {};                                  // stato di sessione per riga: st, 
 var settings = { gbKey: '', price: true, extra: true, lastBackup: 0, snooze: 0, view: 'grid', viewDef: 'grid', openAll: false, sbnUrl: '', loanSnooze: 0, look: 'nuovo', theme: 'light', pal: 'bosco', ft: 'literata', fb: 'plex' };
 var GRP_TXT = { aut: 'per autore', gen: 'per genere', genaut: 'per genere e autore', read: 'per lettura', pae: 'per paese' };   // «Raggruppa per» (17/11/2026)
 var PALS = { inchiostro: ['#EDF0F5', '#10141D'], bordeaux: ['#F2EFEE', '#161112'], bosco: ['#EEF1EE', '#0F1513'] };
-var FONTS_T = ['literata', 'garamond', 'playfair', 'lora', 'merriweather', 'montserrat', 'roboto'], FONTS_B = ['plex', 'roboto', 'lato', 'atkinson', 'lora'];
+var FONTS_T = ['bricolage', 'literata', 'lora', 'roboto'], FONTS_B = ['plex', 'atkinson', 'roboto'];   // restyle «C · Schede» (19/11/2026): Bricolage + Plex di partenza, poche alternative
 var openState = {}, autoOpened = {};
 function collapseCards() { if (!settings.openAll) openState = {}; if (cardPushed) { cardPushed = null; try { history.back(); } catch (e) { nlErr(e); } } }   // quando si filtra l'elenco torna compatto   // schede aperte/chiuse in questa sessione (true/false); se manca vale la regola di isOpen
 var SORTS = ['recent', 'titolo', 'autore', 'editore', 'anno', 'scaffale', 'voto', 'letti'];
@@ -484,7 +484,9 @@ function showBook(id) {
   if (b.w !== (tab === 'wish')) setTab(b.w ? 'wish' : 'lib');
   if (!visible().some(function (x) { return x.id === id; })) clearFilters();
   if (settings.view === 'grid') { openFromGrid(id); return true; }
+  if (!settings.openAll) state.books.forEach(function (x) { if (x.id !== id) openState[x.id] = false; });   // una scheda alla volta: dal restyle e' una pagina intera (19/11/2026)
   openState[id] = true; renderList();
+  if (!settings.openAll) { try { if (cardPushed) history.replaceState({ card: id }, ''); else history.pushState({ card: id }, ''); cardPushed = id; } catch (e) { nlErr(e); } }   // Indietro la chiude
   var el = rowEl(id); if (el) el.scrollIntoView({ block: 'start' });
   return true;
 }
@@ -537,8 +539,10 @@ function loadAll() {
     settings.themeV2 = true;
     settings.pal = s.palV2 && PALS[s.pal] ? s.pal : 'bosco';   // da questa versione il verde (Bosco) e' la palette principale
     settings.palV2 = true;
-    settings.ft = FONTS_T.indexOf(s.ft) >= 0 ? s.ft : 'literata';
+    // restyle (19/11/2026, Piero): tutti a Bricolage + Plex, una volta sola; chi aveva scelto Lora o Roboto li tiene (Literata era la partenza di prima)
+    settings.ft = s.ftV3 ? (FONTS_T.indexOf(s.ft) >= 0 ? s.ft : 'bricolage') : (s.ft === 'lora' || s.ft === 'roboto' ? s.ft : 'bricolage');
     settings.fb = FONTS_B.indexOf(s.fb) >= 0 ? s.fb : 'plex';
+    settings.ftV3 = true;
     settings.installed = s.installed === true && s.instScope === location.pathname.replace(/[^/]*$/, '');   // installata a questo indirizzo (non a uno vecchio)
     settings.instScope = settings.installed ? s.instScope : '';
     settings.name = L.str(s.name).replace(/\s+/g, ' ').trim().slice(0, 30);

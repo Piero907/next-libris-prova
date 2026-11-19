@@ -2,6 +2,12 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.9 · 19/11/2026 16:22
+- **Restyle «C · Schede» completo**: caratteri Bricolage Grotesque e IBM Plex Sans, riquadri bianchi arrotondati, tasti tondi, barra in basso sospesa; librerie e profili (tuoi e degli amici) con lo stesso aspetto.
+- **Scheda del libro a pagina intera**: ‹ per tornare e ⋯ con «Cerca sul web»; copertina al centro, pillole dei dati, tasti tondi; riquadri Lettura, Descrizione, Dal libro, Citazioni (la prima in vista), Prestito, Nota, «Vedi tutti i libri di».
+- **Menu a pagina intera** con le icone e i gruppi Impostazioni e Info e aiuto sempre aperti; **finestre dal basso** nuove (campi, interruttori, pulsanti); finestra del **+** con tre tasti tondi.
+- **Per te, I tuoi amici e Chat a pagina intera** (Per te con la stagione in libri in cima); fumetti della chat nuovi; **guida e percorso** su fondo chiaro.
+
 ## Prova 110.8 · 19/11/2026 14:34
 - **Numeri del profilo con il layout nuovo**: tessere sulla pagina, paesi con il solo bordo, «Da sempre» in elenco. **Giro 12**: percorso del primo avvio, guida riordinata, «Chiedimela» per la chiave.
 

@@ -41,7 +41,7 @@ function doD(card, id) {
       '<button type="button" class="cv-cov cv-ph" data-act="coverphoto" style="--h:' + NL.hue(b.t + b.a + b.i) + '" title="Cerca la copertina online; se non c\'è, la fotografi" aria-label="Aggiungi la copertina"><span>' + esc(b.t.slice(0, 1)) + '</span><small>' + NL.icon('cam') + 'Copertina</small></button>') +
     '<div class="cv-ht"><h3' + (b.t ? '' : ' class="cv-not"') + '>' + esc(tit) + gm('t') + '</h3>' +
     (names.length ? '<p class="cv-au">' + names.map(function (n) { return '<button type="button" class="au-name" data-act="auinfo" data-n="' + esc(n) + '" title="Info Autore: ' + esc(n) + '">' + esc(n) + '</button>' + nat(n); }).join('<span class="au-sep">, </span>') + gm('a') + '</p>' : '') +
-    (dati.length ? '<p class="cv-meta">' + dati.join(' · ') + '</p>' : '') + (b.i ? '<p class="cv-meta cv-isbn">ISBN ' + esc(b.i) + '</p>' : '') + '</div></div>' +   /* ISBN sempre visibile, su una riga sua (Piero, 19/11/2026) */
+    (dati.length || b.gen ? '<p class="cv-meta">' + dati.concat(b.gen ? [esc(b.gen)] : []).map(function (x) { return '<span class="cv-pill">' + x + '</span>'; }).join('<span class="cv-dot"> · </span>') + '</p>' : '') + (b.i ? '<p class="cv-meta cv-isbn">ISBN ' + esc(b.i) + '</p>' : '') + '</div></div>' +   /* ISBN sempre visibile, su una riga sua (Piero, 19/11/2026) */
     '<div class="cv-chips"></div>' +
     (b.n ? '<p class="cv-note">' + esc(b.n) + '</p>' : '');
   /* etichette = filtri, come nella scheda classica: gli stessi pulsanti di «Vedi tutti i libri di» (autore, editore, genere, scaffale) e la serie */
@@ -96,14 +96,89 @@ function doD(card, id) {
     var hero = q(v, '.cv-hero'); hero.parentNode.insertBefore(rd, hero.nextSibling);
   }
   qa(v, '.cv-guess').forEach(function (x) { x.addEventListener('click', function (e) { e.stopPropagation(); verifyK(id, x.dataset.gk); }); });
-  if (ed) { editPage(card, v, b, id, gm); return; }
+  if (ed) editPage(card, v, b, id, gm);
   /* etichette-filtro: in fondo, prima di Presta e Cerca sul web */
-  if (chips.parentNode) {
+  else if (chips.parentNode) {
     var tags = document.createElement('div'); tags.className = 'cv-tags';
     tags.innerHTML = '<span class="cv-tags-h">' + NL.icon('filt') + 'Vedi tutti i libri di</span>';
     tags.appendChild(chips);
     card.insertBefore(tags, q(card, '.cv-acts2'));
   }
+  try { cPage(card, v, b, id); } catch (e) { if (window.nlErr) nlErr(e); }
+}
+/* restyle «C · Schede», pezzo 2 (Piero, 19/11/2026): la scheda e' una pagina intera, come il profilo.
+   In alto ‹ (chiude, come la freccetta) e ⋯ (Cerca sul web, Cerca di nuovo); copertina al centro, titolo, autore, pillole dei dati,
+   tasti tondi; poi riquadri: lettura, Descrizione, Dal libro, Citazioni (la prima in vista, «Tutte ›»), Prestito, Nota, «Vedi tutti i libri di». */
+var qAll = {}, pgTop = {}, lastOpen = null;
+function cPage(card, v, b, id) {
+  if (!card.classList.contains('has-top')) return;          // schede sempre aperte (openAll): restano nell'elenco
+  card.classList.add('cv-full');
+  var top = q(card, '.card-top'), main = q(card, '.acts-main'), chev = q(card, '.chev-btn'), low = q(card, '.cv-acts2');
+  /* barra in alto */
+  var bar = document.createElement('div'); bar.className = 'cv-bar';
+  bar.innerHTML = '<button type="button" class="cv-rb cv-back" aria-label="Torna indietro" title="Torna indietro">' + NL.icon('left') + '</button><span class="cv-bt"></span>';
+  q(bar, '.cv-back').addEventListener('click', function (e) { e.stopPropagation(); if (chev) chev.click(); });
+  var extra = low ? qa(low, '[data-act="websearch"], [data-act="lookup"]') : [];
+  if (extra.length) {
+    var mb = document.createElement('button'); mb.type = 'button'; mb.className = 'cv-rb cv-morebtn'; mb.setAttribute('aria-label', 'Altro'); mb.title = 'Altro'; mb.setAttribute('aria-expanded', 'false');
+    mb.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+    var pop = document.createElement('div'); pop.className = 'cv-pop'; pop.hidden = true;
+    extra.forEach(function (x) { x.classList.add('cv-popi'); pop.appendChild(x); x.addEventListener('click', function () { pop.hidden = true; mb.setAttribute('aria-expanded', 'false'); }); });
+    mb.addEventListener('click', function (e) { e.stopPropagation(); pop.hidden = !pop.hidden; mb.setAttribute('aria-expanded', pop.hidden ? 'false' : 'true'); });
+    bar.appendChild(mb); bar.appendChild(pop);
+  }
+  card.insertBefore(bar, card.firstChild);
+  /* tasti tondi sotto il titolo; stato (prestito escluso) in pillole sopra la copertina */
+  var hero = q(v, '.cv-hero');
+  if (main) v.insertBefore(main, hero.nextSibling);
+  var kdp = q(card, '.kdp-hint'); if (kdp) v.insertBefore(kdp, (main || hero).nextSibling);
+  /* lettura: «Letto il» dentro il suo riquadro */
+  var rd = q(v, '.cv-readbox'), rdm = q(v, '.cv-rdmeta');
+  if (rd && rdm) rd.appendChild(rdm);
+  /* Dal libro e Citazioni dentro la pagina, dopo la descrizione */
+  var after = q(v, '.cv-ex') ? (q(v, '.cv-adds') || q(v, '.cv-ex')) : (q(v, '.cv-desc') || rd || main || hero);
+  function put(el) { if (!el) return; v.insertBefore(el, after.nextSibling); after = el; }
+  if (q(v, '.cv-ex')) put(q(v, '.cv-desc'));
+  put(q(card, '.filmbox'));
+  var qd = q(card, 'details.quotes');
+  if (qd) {
+    put(qd); qd.open = true; qd.classList.add('cv-q');
+    var n = (b.qs || []).length, sm = q(qd, 'summary'), h = q(qd, '.desc-h'); if (h) h.textContent = 'Citazioni';
+    qd.classList.toggle('cv-qall', n < 2 || !!qAll[id]);
+    if (sm && n > 1) {
+      var tb = document.createElement('span'); tb.className = 'cv-qmore'; tb.textContent = qAll[id] ? 'Mostra meno' : 'Tutte ›'; sm.appendChild(tb);
+    }
+    if (sm) sm.addEventListener('click', function (e) {
+      e.preventDefault();
+      if ((b.qs || []).length < 2) return;
+      qAll[id] = !qAll[id]; qd.classList.toggle('cv-qall', !!qAll[id]);
+      var t = q(qd, '.cv-qmore'); if (t) t.textContent = qAll[id] ? 'Mostra meno' : 'Tutte ›';
+    });
+  }
+  /* Prestito: stato del prestito e «Presta, vendi o regala ›» */
+  var loan = low && q(low, '[data-act="loan"]'), st = top ? qa(top, '.flags .tag.loan, .flags .tag.gone, .flags .ret-btn') : [];
+  if (loan || st.length) {
+    var lb = document.createElement('div'); lb.className = 'cv-loan';
+    lb.innerHTML = '<h4 class="cv-h">Prestito</h4>';
+    if (st.length) { var sw = document.createElement('div'); sw.className = 'cv-lst'; st.forEach(function (x) { sw.appendChild(x); }); lb.appendChild(sw); }
+    if (loan) {
+      loan.classList.add('cv-lrow');
+      var al = q(loan, '.al'); if (al) al.insertAdjacentHTML('afterend', '<small class="cv-lsub">' + (loan.classList.contains('on') ? 'Tocca per cambiare' : 'Tieni il conto di a chi l\'hai dato') + '</small>');
+      loan.insertAdjacentHTML('beforeend', '<span class="cv-chev" aria-hidden="true">›</span>');
+      lb.appendChild(loan);
+    }
+    put(lb);
+  }
+  if (low && !low.children.length) low.remove();
+  var note = q(v, '.cv-note'); if (note) put(note);
+  var tags = q(card, '.cv-tags'); if (tags) put(tags);
+  if (top && !q(top, '.flags *')) top.classList.add('cv-empty');
+  /* lo scorrimento della pagina resta dov'era quando la scheda si ridisegna (voto, stato, preferito…) */
+  if (lastOpen !== id) { lastOpen = id; pgTop[id] = 0; }
+  var y = pgTop[id] || 0;
+  card.scrollTop = y; requestAnimationFrame(function () { card.scrollTop = y; });
+  card.addEventListener('scroll', function () { pgTop[id] = card.scrollTop; bar.classList.toggle('cv-sc', card.scrollTop > 8); }, { passive: true });
+  if (document.activeElement && card.contains(document.activeElement) && document.activeElement.classList.contains('chev-btn')) { try { q(bar, '.cv-back').focus({ preventScroll: true }); } catch (e) {} }
 }
 function dActs(card) {                            // in alto, solo icone: preferito, desideri, condividi, elimina; in fondo, con la scritta: presta, cerca sul web
   var main = q(card, '.acts-main'); if (!main) return;
@@ -212,6 +287,7 @@ function editPage(card, v, b, id, gm) {
   NL.autosize(v);
 }
 function decorate(el) {
+  if (!document.querySelector('.row.cv-full')) lastOpen = null;   // nessuna pagina aperta: la prossima riparte dall'alto
   if (cur === 'attuale' || !el) return;
   var cards = el.matches && el.matches('.row.open.has-top') ? [el] : qa(el, '.row.open.has-top');
   cards.forEach(function (card) {
