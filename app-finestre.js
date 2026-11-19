@@ -398,7 +398,7 @@ function checkBackupNag() {
   if (!backupDue()) { if (noticeKind === 'backup') { $('#notice').hidden = true; noticeKind = ''; } return; }
   if (noticeKind === 'backup' || !$('#notice').hidden) return;
   warmBackup();
-  notice('Ultimo backup: ' + L.agoText(settings.lastBackup) + '. I ' + n + ' libri sono salvati solo su questo telefono: se cambi telefono o cancelli i dati di Chrome li perdi. Mandalo su Drive, WhatsApp o email con un tocco.',
+  notice('Ultimo backup: ' + L.agoText(settings.lastBackup) + '. I ' + n + ' libri sono salvati solo su questo telefono: se cambi telefono o cancelli i dati del browser li perdi. Mandalo su Drive, WhatsApp o email con un tocco.',
     'Fai il backup', backupTap, function () { settings.snooze = Date.now(); saveSettings(); }, 'backup');
 }
 /* dal backup: worker e chiave tornano tra i salvati; se qui mancano, li rimette in uso. Restituisce cosa ha rimesso. */

@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 107.8 · 19/11/2026 10:40
+- **iPhone**: in Safari si chiede prima di metterla nella schermata Home (passi per iOS 26), campi che non ingrandiscono la pagina, link di riserva per Accedi con Google, luce e pizzico
+
 ## Prova 107.7 · 19/11/2026 10:09
 - **Avvisi della chat subito**: una notifica per ogni giro di messaggi non letti (nei gruppi al massimo una ogni 30 minuti finché non leggi), niente notifica con la chat aperta
 

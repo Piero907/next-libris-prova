@@ -126,7 +126,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 107, date: '2026-11-18', note: 'Chiave e worker solo tuoi: il worker prestato passa dal server' };
-var BUILD = {"t": "2026-11-19 10:09", "n": "107.7", "note": "Avvisi della chat subito"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-19 10:40", "n": "107.8", "note": "iPhone"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -541,6 +541,7 @@ function loadAll() {
     settings.instScope = settings.installed ? s.instScope : '';
     settings.name = L.str(s.name).replace(/\s+/g, ' ').trim().slice(0, 30);
     settings.instSnooze = Number(s.instSnooze) || 0;
+    settings.iosWeb = s.iosWeb === true;                                           // iPhone: ha scelto «Continua nel browser» (giro 11F)
     settings.goal = Math.max(0, Math.min(999, parseInt(s.goal, 10) || 0));          // obiettivo di lettura
     settings.newsAuto = s.newsAuto !== false;                                       // novita' degli autori: controllo automatico
     settings.sumEur = s.sumEur === true;                                            // riepilogo in alto: valore in euro (spento di predefinito)
