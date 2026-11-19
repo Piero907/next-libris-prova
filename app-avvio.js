@@ -136,6 +136,7 @@ list.addEventListener('click', function (e) {
   else if (act === 'quoteshare') shareQuote(id, +btn.dataset.i);
   else if (act === 'quotedel') { var qb = get(id), qi = +btn.dataset.i; if (qb && qb.qs && qb.qs[qi]) { var qold = qb.qs.splice(qi, 1)[0]; touch(); paintQuotes(id); toast('Citazione eliminata.', { label: 'Annulla', fn: function () { var x = get(id); if (x) { x.qs.splice(Math.min(qi, x.qs.length), 0, qold); touch(); paintQuotes(id); } } }); } }
   else if (act === 'quoteedit') openQuote(id, +btn.dataset.i);
+  else if (act === 'descfind') { loadDesc(id); }
   else if (act === 'descmore') { descFull[id] = true; paintDesc(id); }
   else if (act === 'descdel') { var dd = get(id); if (dd) { dd.ds = ''; dd.dsf = ''; dd.dsl = ''; dd.dsn = Date.now(); touch(); paintDesc(id); toast('Descrizione rimossa'); } }
   else if (act === 'rs' || act === 'rt') setRead(id, act, btn.dataset.v);

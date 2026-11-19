@@ -1803,7 +1803,7 @@ html[data-look="nuovo"] .gc-face.sm .gc-ph::before,html[data-look="nuovo"] .gc-f
 .au-cut .auc-auto{display:block;margin:4px 10px 6px;padding:0}
 /* dimensione delle copertine (giro 1, 18/11/2026): N per riga sul telefono, stessa grandezza sugli schermi larghi; due dita sulle copertine */
 @media (max-width:699px){ body.cols #list .grid{grid-template-columns:repeat(var(--cols),minmax(0,1fr))} }
-@media (min-width:700px){ body.cols #list .grid{grid-template-columns:repeat(auto-fill,minmax(calc(600px / var(--cols)),1fr))} }
+@media (min-width:700px){ body.cols #list .grid{grid-template-columns:repeat(auto-fill,minmax(calc(480px / var(--cols)),1fr))} }   /* tablet e PC (giro 11D): copertine non più grandi di un telefono */
 body.cols-sm #list .grid{gap:12px 8px}
 body.cols-sm #list .cover .cap{font-size:12px}
 body.cols-sm #list .cover .ph{padding:6px 5px}

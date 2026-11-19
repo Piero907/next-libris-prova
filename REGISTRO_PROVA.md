@@ -2,6 +2,11 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 107.6 · 19/11/2026 09:17
+- **Ricerca:** prima Open Library e biblioteche, Google solo se manca il libro o la copertina; la descrizione si cerca toccando il riquadro; novità degli autori a gruppi (giro 11B)
+- **Numeri del profilo a tessere** con i colori della stagione e numeri che salgono; **Condividi i tuoi numeri** e la stagione in libri come immagine, storia o quadrata (giro 11C)
+- **Tablet e PC:** copertine non più grandi che sul telefono (giro 11D)
+
 ## Prova 107.5 · 19/11/2026 08:06
 - **Backup sistemato:** si manda come .txt (Chrome rifiutava il .json)
 
