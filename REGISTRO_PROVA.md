@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 108.4 · 19/11/2026 11:44
+- **Nome utente obbligatorio**: subito dopo l'accesso con Google (e a ogni apertura finché manca) una finestra chiede il nome con cui ti trovano gli amici, già scritto come «Nome I.»
+
 ## Prova 108.3 · 19/11/2026 11:20
 - **Film omonimi: se Wikidata risponde «troppe domande» l'autore si riprova** invece di restare senza film; gli autori si rileggono di nuovo
 
