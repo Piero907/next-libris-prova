@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.1 · 19/11/2026 12:16
+- Uguale alla vera 110
+
 ## Prova 109.3 · 19/11/2026 12:07
 - **Scheda del libro uguale per tutti**: anche un libro con solo l'ISBN si apre con la pagina del libro; negli amici niente più campi da riempire
 
