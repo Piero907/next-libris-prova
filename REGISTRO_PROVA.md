@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 107.4 · 19/11/2026 08:03
+- **Backup:** se non parte, il messaggio dice perché (per trovare l'errore)
+
 ## Prova 107.3 · 18/11/2026 23:21
 - **Worker prestato: al massimo 3.000 ricerche al giorno per amico**, poi un avviso e fino a domattina si cerca senza worker
 

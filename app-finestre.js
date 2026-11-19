@@ -340,6 +340,12 @@ async function shareBackup(lite) {
     for (var i = 0; i < cands.length && !file; i++) if (navigator.canShare && navigator.canShare({ files: [cands[i]] })) file = cands[i];
   } catch (e) { file = null; }
   if (!file || !navigator.share) { bkFail('Questo telefono non permette di inviare il file da qui.', false, false); return; }
+  var diag = '';                       // per capire perché non parte (Piero, 19/11/2026): si vede nel messaggio
+  try {
+    var ua = navigator.userActivation, cv = (navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1];
+    diag = ' [tocco ' + (ua ? (ua.isActive ? 'sì' : 'no') : '?') + ' · ' + file.name.split('.').pop() + ' ' + (file.type || '-') + ' · ' + bkMB(file.size) +
+      ' · ' + (matchMedia('(display-mode: standalone)').matches ? 'app installata' : 'browser') + (cv ? ' · Chrome ' + cv : '') + ']';
+  } catch (e2) { diag = ''; }
   try {
     await navigator.share({ files: [file] });
     if (!lite) markBackup(); $('#bkFailSheet').hidden = true;
@@ -347,7 +353,7 @@ async function shareBackup(lite) {
   } catch (e) {
     if (e && e.name === 'AbortError') { toast('Invio annullato: il backup non è stato salvato.'); return; }
     var big = !lite && coverIds().length && data.length > 8 * 1048576;
-    bkFail('Il telefono non ha aperto la condivisione' + (e && e.name ? ' (' + e.name + ')' : '') + '.' + (big ? ' Il backup con le foto è di ' + bkMB(data.length) + ': forse è troppo grande, prova senza le foto.' : ' Di solito riprovando parte.'), true, !lite && coverIds().length > 0);
+    bkFail('Il telefono non ha aperto la condivisione' + (e && e.name ? ' (' + e.name + (e.message ? ': ' + String(e.message).slice(0, 80) : '') + ')' : '') + diag + '.' + (big ? ' Il backup con le foto è di ' + bkMB(data.length) + ': forse è troppo grande, prova senza le foto.' : ' Di solito riprovando parte.'), true, !lite && coverIds().length > 0);
   }
 }
 function bkFail(msg, retry, lite) {
