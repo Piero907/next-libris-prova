@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 115.3 · 21/11/2026 00:10
+- Privacy: anche il **titolo cercato** passa dal server; titoli SBN più puliti
+
 ## Prova 115.2 · 21/11/2026 00:06
 - **Ricerca per titolo con il catalogo SBN**: SBN e Open Library insieme, Google solo se manca un'edizione italiana; solo libri a stampa; edizioni senza ISBN in fondo
 

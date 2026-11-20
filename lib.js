@@ -322,6 +322,7 @@
     var m = au.match(/^([^,]+),\s*(.+)$/);
     if (m) au = m[2].trim() + ' ' + m[1].trim();
     if (!au && parts[1]) au = sbnClean(parts[1].split(' ; ')[0]).replace(/^(a cura di|di)\s+/i, '');
+    if (m && title.indexOf(m[1].trim() + ', ' + m[2].trim() + '. ') === 0) title = title.slice((m[1].trim() + ', ' + m[2].trim() + '. ').length);   // «Buzzati, Dino. Il deserto dei tartari»
     var pub = str(r.pubblicazione || full.pubblicazione), first = pub.split(/\s;\s/)[0];
     var e = sbnClean((first.split(/\s:\s/)[1] || '').replace(/,[^,]*\d{4}[^,]*$/, '').replace(/[\[\]]/g, ''));
     if (/^s\.?\s?n\.?$/i.test(e)) e = '';
