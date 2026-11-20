@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 113.2 · 20/11/2026 21:35
+- **Freccia ‹ nella libreria di un amico**, tasti **Accetta e Chiedi l'amicizia** pieni, pillole **BETA** e **prova** in testatina, «Vedi tutti i libri di» dentro la pagina
+
 ## Prova 113.1 · 20/11/2026 17:23
 - Uguale alla vera 113
 
