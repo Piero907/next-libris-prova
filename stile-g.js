@@ -53,6 +53,7 @@ function closeAll() {
   if ((document.documentElement.classList.contains('drawer-open') || vis('#drawer')) && window.__app && window.__app.closeDrawer) window.__app.closeDrawer();
   var open = document.querySelector('.row.open.cv-full .chev-btn'); if (open) open.click();
   var wr = $('#wrap'); if (wr && !wr.hidden && window.NLWrap && window.NLWrap.close) window.NLWrap.close();
+  ['#lbClose', '#phClose'].forEach(function (q) { var b = $(q); if (b && b.closest('[hidden]') === null && b.offsetParent) b.click(); });   // copertina o foto ingrandite
   /* le finestre dal basso aperte sopra la pagina (Statistiche, Suggerimenti, Aspetto…): si chiudono passando a un'altra linguetta */
   Array.prototype.forEach.call(document.querySelectorAll('.sheet:not([hidden])'), function (e) {
     if (/^(profSheet|friSheet|chSheet|layYou|layAdd)$/.test(e.id)) return;

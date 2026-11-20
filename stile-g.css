@@ -5,7 +5,7 @@
    Tablet e PC: colonna larga al massimo 600 px, linguette sul suo bordo. Regole in claude/stile-base.md (sezione «Stile G»). */
 
 /* ---------- G1. misure ---------- */
-html.g-look{--g-tab:46px;--g-pad:20px;--g-h1:40px;--g-r:max(0px,calc(50vw - 300px - var(--g-tab) - 24px))}
+html.g-look{--g-tab:46px;--g-pad:20px;--g-h1:40px;--g-r:max(0px,calc(50% - 300px - var(--g-tab) - 24px))}
 @media (max-width:379.98px){html.g-look{--g-tab:36px;--g-pad:14px;--g-h1:32px}}
 html.g-look body{background:var(--surface);padding-right:calc(var(--g-tab) + var(--g-r))}
 @media (min-width:700px){html.g-look body{padding-right:0}}
@@ -85,7 +85,7 @@ html.g-look .g-tabs button:focus-visible{outline:2px solid var(--accent);outline
 /* conversazione aperta: niente linguette, serve il campo */
 
 /* ---------- G7. «+ Aggiungi» che galleggia ---------- */
-html.g-look .g-add{position:fixed;left:max(var(--g-pad),calc(50vw - 300px));bottom:calc(20px + env(safe-area-inset-bottom));z-index:19;height:52px;padding:0 20px;border:0;border-radius:16px;
+html.g-look .g-add{position:fixed;left:max(var(--g-pad),calc(50% - 300px));bottom:calc(20px + env(safe-area-inset-bottom));z-index:19;height:52px;padding:0 20px;border:0;border-radius:16px;
   background:var(--accent);color:var(--accent-ink);font:700 15px/1 var(--font-body);display:flex;align-items:center;gap:8px;box-shadow:0 8px 18px color-mix(in srgb,var(--accent) 35%,transparent);cursor:pointer}
 html.g-look.g-page .g-add,html.g-look.drawer-open .g-add,html.g-look:has(.sheet:not([hidden])) .g-add,html.g-look:has(.row.open.cv-full) .g-add,html.g-look.g-guest .g-add{display:none}
 @media (max-width:379.98px){html.g-look .g-add{height:46px;padding:0 16px}}
@@ -158,9 +158,9 @@ html.g-look header.top>.g-head{display:flex!important}
 html.g-look .g-ics .ico{position:relative!important;top:auto!important;right:auto!important;left:auto!important;margin:0!important;order:0!important}
 /* tablet e PC: colonna di 640 px al centro, linguette sul suo bordo */
 @media (min-width:700px){
-  html.g-look{--g-r:calc(50vw - 320px - var(--g-tab))}
+  html.g-look{--g-r:calc(50% - 320px - var(--g-tab))}
   html.g-look main{max-width:640px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}
-  html.g-look .g-add{left:calc(50vw - 320px + var(--g-pad))}
+  html.g-look .g-add{left:calc(50% - 320px + var(--g-pad))}
 }
 
 /* ---------- G11. «Nastro e linguette a sinistra» (Aspetto, Piero 20/11/2026) ---------- */
@@ -178,7 +178,7 @@ html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g
 @media (max-width:379.98px){html.g-look.g-left .g-run{margin-left:42px}html.g-look.g-left header.top h1{padding-left:44px}}
 @media (min-width:700px){
   html.g-look.g-left body{padding-left:0}
-  html.g-look.g-left .g-add{left:calc(50vw - 320px + var(--g-pad))}
+  html.g-look.g-left .g-add{left:calc(50% - 320px + var(--g-pad))}
   html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left .drawer{left:0!important}
 }
 
@@ -257,8 +257,8 @@ html.g-look:has(#wrap:not([hidden])) .g-tabs{z-index:61}
 
 /* ---------- G20. tablet e PC (Piero, 20/11/2026): pagine intere nella colonna di 640 px, finestre al centro della colonna, segnalibri sempre visibili ---------- */
 @media (min-width:700px){
-  html.g-look .row.open.cv-full,html.g-look #profSheet,html.g-look #friSheet,html.g-look #chSheet,html.g-look #layYou,html.g-look #wrap,html.g-look .drawer{left:calc(50vw - 320px)!important;right:calc(var(--g-tab) + var(--g-r))!important}
-  html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left #wrap,html.g-look.g-left .drawer{left:calc(50vw - 320px)!important;right:calc(50vw - 320px)!important}
-  html.g-look .sheet:not(.gd-infosheet):not(#profSheet):not(#friSheet):not(#chSheet):not(#layYou){left:0!important;right:0!important;padding-left:calc(50vw - 320px)!important;padding-right:calc(50vw - 320px)!important}
-  html.g-look .g-tabs{z-index:31}
+  html.g-look .row.open.cv-full,html.g-look #profSheet,html.g-look #friSheet,html.g-look #chSheet,html.g-look #layYou,html.g-look #wrap,html.g-look .drawer{left:calc(50% - 320px)!important;right:calc(var(--g-tab) + var(--g-r))!important}
+  html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left #wrap,html.g-look.g-left .drawer{left:calc(50% - 320px)!important;right:calc(50% - 320px)!important}
+  html.g-look .sheet:not(.gd-infosheet):not(#profSheet):not(#friSheet):not(#chSheet):not(#layYou){left:0!important;right:0!important;padding-left:calc(50% - 320px)!important;padding-right:calc(50% - 320px)!important}
+  html.g-look .g-tabs{z-index:61}
 }

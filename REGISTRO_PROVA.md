@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.27 · 20/11/2026 10:24
+- **Tablet e PC**: tutte le finestre (anche «Cosa c'è di nuovo», Installazione, Sostieni, Registro, Backup non partito) **al centro della colonna** e con i **segnalibri visibili**; posizioni corrette anche con la barra di scorrimento del PC
+
 ## Prova 110.26 · 20/11/2026 10:17
 - **Tablet e PC**: pagine intere (Per te, Amici, Chat, profili, Indice, stagione in libri) nella colonna centrale accanto ai **segnalibri, che non spariscono più**; finestre come «Aggiungi un libro» **al centro** della colonna
 
