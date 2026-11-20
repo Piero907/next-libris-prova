@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.26 · 20/11/2026 10:17
+- **Tablet e PC**: pagine intere (Per te, Amici, Chat, profili, Indice, stagione in libri) nella colonna centrale accanto ai **segnalibri, che non spariscono più**; finestre come «Aggiungi un libro» **al centro** della colonna
+
 ## Prova 110.25 · 20/11/2026 10:03
 - **Ricerca per titolo**: risultati in ordine di vicinanza al titolo, poi editore o anno scritti accanto («l'isola del tesoro bur», «… 1996»), poi edizioni italiane con ISBN e copertina, dalla più recente; **segnalibri** anche nella conversazione aperta e nella «stagione in libri»
 

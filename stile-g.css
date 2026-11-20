@@ -254,3 +254,11 @@ html.g-look .g-tabs button:has(.g-tn:not([hidden])) svg{margin-top:12px}
 html.g-look #wrap{right:calc(var(--g-tab) + var(--g-r))!important}
 html.g-look.g-left #wrap{right:0!important;left:calc(var(--g-tab) + var(--g-r))!important}
 html.g-look:has(#wrap:not([hidden])) .g-tabs{z-index:61}
+
+/* ---------- G20. tablet e PC (Piero, 20/11/2026): pagine intere nella colonna di 640 px, finestre al centro della colonna, segnalibri sempre visibili ---------- */
+@media (min-width:700px){
+  html.g-look .row.open.cv-full,html.g-look #profSheet,html.g-look #friSheet,html.g-look #chSheet,html.g-look #layYou,html.g-look #wrap,html.g-look .drawer{left:calc(50vw - 320px)!important;right:calc(var(--g-tab) + var(--g-r))!important}
+  html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left #wrap,html.g-look.g-left .drawer{left:calc(50vw - 320px)!important;right:calc(50vw - 320px)!important}
+  html.g-look .sheet:not(.gd-infosheet):not(#profSheet):not(#friSheet):not(#chSheet):not(#layYou){left:0!important;right:0!important;padding-left:calc(50vw - 320px)!important;padding-right:calc(50vw - 320px)!important}
+  html.g-look .g-tabs{z-index:31}
+}
