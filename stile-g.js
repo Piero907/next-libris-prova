@@ -50,6 +50,11 @@ function closeAll() {
   ['#friSheet', '#chSheet', '#layYou', '#layAdd'].forEach(function (s) { var e = $(s); if (e && !e.hidden) { var x = e.querySelector('.sh-x, #friClose, #chClose, [data-close]'); if (x) x.click(); else e.hidden = true; } });
   if ((document.documentElement.classList.contains('drawer-open') || vis('#drawer')) && window.__app && window.__app.closeDrawer) window.__app.closeDrawer();
   var open = document.querySelector('.row.open.cv-full .chev-btn'); if (open) open.click();
+  /* le finestre dal basso aperte sopra la pagina (Statistiche, Suggerimenti, Aspetto…): si chiudono passando a un'altra linguetta */
+  Array.prototype.forEach.call(document.querySelectorAll('.sheet:not([hidden])'), function (e) {
+    if (/^(profSheet|friSheet|chSheet|layYou|layAdd)$/.test(e.id)) return;
+    var x = e.querySelector('[data-close], .sh-x, .x, button[aria-label^="Chiudi"]'); if (x) x.click(); if (!e.hidden) e.hidden = true;
+  });
 }
 function current() {
   if (vis('#chSheet') || vis('#friSheet')) return 'fri';
@@ -59,8 +64,12 @@ function current() {
   if (NL.guest && NL.guest()) return 'fri';
   return NL.tab && NL.tab() === 'wish' ? 'wish' : 'lib';
 }
+var lastTab = 'lib';
 function paintTabs() {
   var c = current();
+  /* con una finestra dal basso aperta (Statistiche, Suggerimenti…) resta accesa la linguetta da cui si è partiti */
+  if (c === 'lib' && lastTab !== 'lib' && document.querySelector('.sheet:not([hidden]):not(#layAdd):not(.gd-infosheet)')) c = lastTab;
+  lastTab = c;
   Array.prototype.forEach.call(document.querySelectorAll('#gTabs [data-g]'), function (b) { var on = b.dataset.g === c; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   document.documentElement.classList.toggle('g-conv', vis('#chSheet') && ($('#chSheet').dataset.v === 'conv'));
   document.documentElement.classList.toggle('g-page', c === 'you' || c === 'prof' || (c === 'fri' && !(NL.guest && NL.guest())));

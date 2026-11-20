@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.20 · 20/11/2026 09:15
+- **Linguette sempre visibili**: Statistiche, Suggerimenti, Dai tuoi libri al cinema, Aspetto e le altre finestre si aprono accanto alle linguette; resta accesa la linguetta da cui sei partito; toccando un'altra linguetta la finestra si chiude
+
 ## Prova 110.19 · 20/11/2026 09:04
 - **Linguette laterali come segnalibri**: lato dritto contro la pagina, parte tonda verso il bordo dello schermo (anche con le linguette a sinistra)
 

@@ -236,3 +236,8 @@ html.g-look .g-tabs{align-items:flex-start}
 html.g-look .g-tabs button{border-radius:0 12px 12px 0}
 html.g-look.g-left .g-tabs{align-items:flex-end}
 html.g-look.g-left .g-tabs button{border-radius:12px 0 0 12px}
+
+/* ---------- G16. linguette sempre visibili (Piero, 20/11/2026): anche le finestre dal basso (Statistiche, Suggerimenti, Citazioni, Aspetto…) si aprono accanto alle linguette, non sopra ---------- */
+html.g-look .sheet:not(.gd-infosheet){right:calc(var(--g-tab) + var(--g-r))!important}
+html.g-look.g-left .sheet:not(.gd-infosheet){right:0!important;left:calc(var(--g-tab) + var(--g-r))!important}
+html.g-look.g-conv .sheet:not(#chSheet){right:0!important;left:0!important}
