@@ -187,3 +187,34 @@ html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g
   html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left .drawer{left:0!important}
 }
 html.g-look.g-left:has(#chSheet:not([hidden])[data-v="conv"]) #chSheet{left:0!important}
+
+/* ---------- G12. Indice allineato (Piero 20/11/2026: riquadro per tutti i capitoli, nastrini tutti verdi) ---------- */
+html.g-look .drawer .dopt>.pf-menu-av{display:none!important}
+html.g-look #drawerOpts .dset .dset-t{padding:0!important;gap:10px!important;margin:0 0 2px!important}
+html.g-look #drawerOpts>h3:nth-of-type(n)::before{background:var(--accent)}
+html.g-look #drawerOpts>.dlist:not(.ddon):not(.dset),html.g-look #drawerOpts .dset .dsub{background:var(--surface)!important;border-radius:20px!important;
+  box-shadow:0 1px 2px rgba(0,0,0,.06),0 0 0 1px color-mix(in srgb,var(--line) 70%,transparent)!important;padding:2px 14px!important}
+html.g-look #drawerOpts>h3,html.g-look #drawerOpts .dset{margin-top:22px!important}
+html.g-look #drawerOpts>h3{margin-bottom:8px!important}
+html.g-look #drawerOpts>.ddon{margin:22px -12px 0!important}
+
+/* ---------- G13. coerenza di tutta l'app (controllo del 20/11/2026) ---------- */
+/* riquadri, tasti tondi e campi: sulla pagina bianca un filo sottile oltre all'ombra (uguale in chiaro e in scuro) */
+html.g-look{--c-sh:0 1px 2px rgba(0,0,0,.06),0 0 0 1px color-mix(in srgb,var(--line) 70%,transparent)}
+html.g-look #drawerOpts>.dlist:not(.ddon):not(.dset),html.g-look #drawerOpts .dset .dsub{box-shadow:var(--c-sh)!important}
+/* finestre dal basso: foglio bianco come le pagine */
+html.g-look .sheet>.sheet-in{background:var(--surface)}
+/* pagine intere: stesso titolo e stesso tasto tondo per chiudere o tornare */
+html.g-look :is(#layYou,#friSheet)>.sheet-in>h2,html.g-look .drawer-head h2,html.g-look #chSheet .ch-head h2{font:800 26px/1.15 var(--font-display)!important;letter-spacing:-.01em!important}
+html.g-look :is(#layYou,#friSheet,#profSheet)>.sheet-in>.sh-x,html.g-look .drawer-head .ico,html.g-look #chSheet .ch-head .ico,html.g-look .cv-rb{
+  width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;border:0!important;border-radius:50%!important;
+  background:var(--surface)!important;color:var(--ink)!important;box-shadow:var(--c-sh)!important;font-size:22px!important}
+/* pagina del libro: «Prestito» e «Vedi tutti i libri di» in grassetto come gli altri titoletti */
+html.g-look .cv-page .cv-h,html.g-look .cv-page .cv-tags-h{font:700 16px/1.25 var(--font-body)!important;letter-spacing:0!important;text-transform:none!important;color:var(--ink)!important}
+html.g-look .cv-page .cv-h::after,html.g-look .cv-page .cv-tags-h::after{display:none}
+html.g-look .cv-page .cv-tags-h svg{display:none}
+/* profilo: «I tuoi numeri» allineato alle altre sezioni */
+html.g-look #profSheet .fr-sec.pf-num{padding-left:14px!important;padding-right:14px!important}
+/* Indice: il pallino della sincronizzazione sta a sinistra del titolo (nel margine), così il titolo non va a capo a 360 px */
+html.g-look #goAcc.acc-on{position:relative}
+html.g-look #goAcc.acc-on b::after{position:absolute;left:12px;top:15px;margin:0}

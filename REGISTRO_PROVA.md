@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.17 · 20/11/2026 01:16
+- **Indice allineato** (tutti i capitoli nel riquadro, nastrini verdi, «Il mio profilo» allineato) e **stile G uguale in tutta l'app**: finestre dal basso su foglio bianco, riquadri e tasti con un filo sottile, stessi titoli e tasti tondi nelle pagine intere, «Prestito» e «Vedi tutti i libri di» in grassetto come gli altri titoletti, «I tuoi numeri» allineato nel profilo
+
 ## Prova 110.16 · 20/11/2026 00:57
 - Stile G: in Aspetto **«Nastro e linguette a sinistra»**, per chi tiene il telefono con la sinistra
 
