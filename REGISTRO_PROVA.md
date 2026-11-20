@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 112.3 · 20/11/2026 15:39
+- **Solo lo stile G**: tolto dall'app il codice delle vecchie disposizioni (vecchia testata e riepilogo, barra in basso, tasti nascosti, triangolino, opzioni «Riepilogo in alto»); titolo allineato al margine; avviso «Non riesco a salvare» solo quando serve
+
 ## Prova 112.2 · 20/11/2026 14:41
 - **Stile G sistemato**: niente più ridisegno continuo, «Chiudi» torna all'Indice, colore della barra in alto, titolo «Filtri», primo avvio con «+ Aggiungi», ore di silenzio su una riga, conto «In prestito» uguale al filtro
 

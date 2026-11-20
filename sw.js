@@ -8,7 +8,7 @@ const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app
   'lib.js', 'manifest.json', 'stile-c.css', 'stile-g.css', 'stile-g.js',   // stile «C · Schede» (restyle 19/11/2026)
   'icons/next-libris-192.png', 'icons/next-libris-512.png', 'vendor/zxing.min.js', 'vendor/fonts/literata-latin.woff2', 'vendor/fonts/bricolage-latin.woff2', 'vendor/fonts/plex-latin-400.woff2', 'vendor/fonts/plex-latin-500.woff2', 'vendor/fonts/plex-latin-600.woff2', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'REGISTRO_MODIFICHE.md',
   'wrap.js', 'wrap.css',   // modulo: riepilogo ogni tre mesi
-  'layout.js', 'layout.css',   // modulo: disposizione dello schermo
+  'layout.js', 'layout.css',   // modulo: finestra del +, Per te, avvisi in cima
   'schede.js', 'schede.css',   // modulo: aspetto della scheda aperta
   'social.js', 'social.css',   // modulo: account e sincronizzazione
   'profilo.js', 'profilo.css',   // modulo: profilo

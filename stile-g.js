@@ -1,8 +1,9 @@
 /* Next Libris · stile G «Pagina con l'Indice» (Piero, 20/11/2026; tela https://claude.ai/artifact/Tqa6XajvQCK2CVZdSSSimq, documento
    claude/nuovo-stile-proposte.md). L'app come un libro aperto: testatina in alto, nastro segnalibro con il numero dei libri, una frase
    in prosa, linguette laterali al posto della barra in basso (Libri · Desideri · Per te · Amici · Tu), «+ Aggiungi»
-   che galleggia, il Menu diventa l'«Indice» a capitoli. Le funzioni restano quelle di sempre: questo modulo aggiunge solo i pezzi nuovi
-   e li collega ai tasti che esistono già (che restano nella pagina, nascosti dallo stile). Le regole d'aspetto stanno in stile-g.css. */
+   che galleggia, il Menu diventa l'«Indice» a capitoli. Testatina, titolo, nastro e frase stanno in index.html; qui si disegnano le
+   linguette e «+ Aggiungi» e si collega tutto alle funzioni dell'app (NL, NLLayout). Le regole d'aspetto stanno in stile-g.css.
+   20/11/2026: tolti i tasti delle vecchie disposizioni, che questo modulo «premeva» di nascosto. */
 (function () {
 'use strict';
 var NL = window.NL;
@@ -17,14 +18,9 @@ var IC = {
   amici: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 5.5 5.4"/>',
   tu: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   chat: '<path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  indice: '<path d="M4 7h16M4 12h16M4 17h10"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>'
 };
-function act(l) {
-  var b = document.querySelector('#layNav [data-l="' + l + '"]'); if (b) { b.click(); return; }
-  if ((l === 'lib' || l === 'wish') && NL.setTab) { if (NL.guest && NL.guest() && NL.guestExit) NL.guestExit(); NL.setTab(l); window.scrollTo(0, 0); }   // senza la barra in basso (disposizione classica)
-  else if (l === 'prof' && window.NLProfilo) window.NLProfilo.open();
-}
+function act(l) { if (window.NLLayout) window.NLLayout.act(l); }
 function vis(sel) { var e = $(sel); return !!(e && !e.hidden); }
 /* hidden cambiato solo se serve: ogni scrittura sveglia gli osservatori (questo modulo e il ritorno all'Indice di app-filtri.js);
    prima si ridipingeva di continuo, ogni 40 ms, e «Chiudi» delle finestre dell'Indice non tornava all'Indice (20/11/2026) */
@@ -89,21 +85,10 @@ function paintTabs() {
 
 /* ---------- testatina, nastro, frase in prosa, «+ Aggiungi» ---------- */
 function head() {
-  var top = $('header.top'); if (!top || $('#gHead')) return;
-  var h = document.createElement('section'); h.id = 'gHead'; h.className = 'g-head';
-  h.innerHTML = '<button type="button" class="g-back" id="gBack" aria-label="Torna alla tua libreria" hidden>' + SV('<path d="M15 6l-6 6 6 6"/>', 20) + '</button><span class="g-run" id="gRun">Next Libris</span><span class="g-ics" id="gIcs"></span>';
-  top.insertBefore(h, top.firstChild);
-  ['#btnChat', '#btnBell'].forEach(function (s) { var b = $(s); if (b) $('#gIcs').appendChild(b); });
-  var v = $('#btnView'), sb = $('#sortBar'); if (v && sb) sb.appendChild(v);
-  var m = document.createElement('button'); m.type = 'button'; m.id = 'gMenu'; m.className = 'ico g-menu'; m.setAttribute('aria-label', 'Indice'); m.title = 'Indice'; m.innerHTML = SV(IC.indice, 22);
-  m.addEventListener('click', function () { var o = $('#btnOpts'); if (o) o.click(); });
-  $('#gIcs').appendChild(m);   // l'Indice (il Menu) si apre dalla testatina   // copertine/elenco nella riga dell'ordine
+  if (head.done || !$('#gHead')) return; head.done = true;
+  $('#gMenu').addEventListener('click', function () { NL.openMenu(true); });   // l'Indice si apre dalla testatina
   $('#gBack').addEventListener('click', function () { act('lib'); });
-  var r = document.createElement('div'); r.id = 'gRib'; r.className = 'g-rib'; r.setAttribute('aria-hidden', 'true');
-  top.appendChild(r);
-  var p = document.createElement('p'); p.id = 'gProse'; p.className = 'g-prose';
-  top.parentNode.insertBefore(p, top.nextSibling);
-  p.addEventListener('click', function (e) { if (e.target.closest('[data-gl="loan"]')) { var f = $('#fltLoan'); if (f) f.click(); } });
+  $('#gProse').addEventListener('click', function (e) { if (e.target.closest('[data-gl="loan"]')) NL.loanFilter(); });
   var a = document.createElement('button'); a.type = 'button'; a.id = 'gAdd'; a.className = 'g-add'; a.innerHTML = SV(IC.plus, 20) + '<span>Aggiungi</span>';
   a.addEventListener('click', function () { act('add'); });
   document.body.appendChild(a);
@@ -120,9 +105,8 @@ function paintHead() {
   run.textContent = guest ? (who || 'Libreria di un amico') : 'Next Libris';
   setHidden(bk, !guest);
   document.documentElement.classList.toggle('g-guest', !!guest);
-  var h1 = $('header.top h1');
-  if (h1 && !h1.querySelector('.g-t')) { var t = document.createElement('span'); t.className = 'g-t'; h1.insertBefore(t, h1.firstChild); }
-  if (h1) h1.querySelector('.g-t').textContent = guest ? (who ? 'Libreria di ' + who.split(' ')[0] : 'Libreria') : (wish ? 'Desideri' : 'Libreria');
+  var gt = $('header.top h1 .g-t'), tt = guest ? (who ? 'Libreria di ' + who.split(' ')[0] : 'Libreria') : (wish ? 'Desideri' : 'Libreria');
+  if (gt && gt.textContent !== tt) gt.textContent = tt;
   if (guest) { setHidden(pr, true); return; }
   var s = '';
   if (wish) {
@@ -131,7 +115,7 @@ function paintHead() {
     s = 'La tua libreria è vuota: tocca <b>Aggiungi</b> e inquadra il codice a barre di un libro.';
   } else {
     var rd = lib.filter(function (b) { return b.rs === 'in'; });
-    var lo = 0; try { lo = +(($('#cntLoan') || {}).textContent || 0) || 0; } catch (e) { lo = 0; }
+    var lo = NL.loans ? NL.loans() : 0;   // prestati e ricevuti, come il filtro
     s = rd.length === 1 ? 'Stai leggendo <b>' + esc(rd[0].t || 'un libro') + '</b>' : rd.length ? 'Stai leggendo <b>' + rd.length + ' libri</b>' : 'Hai <b>' + lib.length + ' ' + plural(lib.length, 'libro', 'libri') + '</b>';
     s += lo ? '; <button type="button" class="g-lk" data-gl="loan">' + lo + ' ' + plural(lo, 'è in prestito', 'sono in prestito') + '</button>.' : '.';
   }
@@ -179,14 +163,13 @@ function barColor() {
 var pend = 0;
 function soon() { if (pend) return; pend = setTimeout(function () { pend = 0; try { paintHead(); paintTabs(); shortGrp(); indice(); barColor(); } catch (e) { if (window.nlErr) nlErr(e); } }, 40); }
 function start() {
-  document.documentElement.classList.add('g-look');
   tabs(); head(); side(); soon();
   var mo = new MutationObserver(soon);
-  ['#list', '#summary', '#cntLoan', '#grpPick'].forEach(function (s) { var e = $(s); if (e) mo.observe(e, { childList: true, characterData: true, subtree: true }); });
+  ['#list', '#grpPick'].forEach(function (s) { var e = $(s); if (e) mo.observe(e, { childList: true, characterData: true, subtree: true }); });
   var mo2 = new MutationObserver(soon);
   mo2.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['hidden', 'data-v'] });
   new MutationObserver(soon).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-pal', 'data-splash'] });
-  if (NL.on) { NL.on('guest', soon); }
+  if (NL.on) { NL.on('guest', soon); NL.on('list', soon); }
   window.addEventListener('popstate', function () { setTimeout(soon, 80); });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

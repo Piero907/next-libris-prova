@@ -377,7 +377,6 @@ $('#donAskNever').addEventListener('click', function () {
 });
 $('#donMenu').addEventListener('click', function () { fromMenu(function () { openDon(); }); });
 $('#donOpt').addEventListener('click', function () { openDon(); });
-$('#btnBeer').addEventListener('click', function () { openDon(); });   // boccale nella testata (Piero, 17/11/2026)
 $('#donSheet').addEventListener('click', function (e) {
   if (e.target === e.currentTarget) { closeDon(); return; }
   var x = e.target.closest('.don-amt'); if (x) { donAmt = x.dataset.amt; paintDonAmt(); }

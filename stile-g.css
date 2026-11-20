@@ -22,7 +22,7 @@ html.g-look .g-back[hidden]{display:none}
 html.g-look header.top h1{order:1;flex:1 0 100%;margin:14px 0 4px!important;padding-right:58px;font-size:0!important;line-height:1!important}
 html.g-look header.top h1 .g-t{font:800 var(--g-h1)/1.02 var(--font-display);letter-spacing:-.02em;color:var(--ink);overflow-wrap:anywhere}
 html.g-look header.top h1 .prova-tag{font-size:10px!important;align-self:flex-start}
-html.g-look header.top .top-meta,html.g-look header.top #sync,html.g-look #btnBeer,html.g-look #btnFri,html.g-look #btnOpts,html.g-look header.top>.ico.gear{display:none!important}
+
 html.g-look .g-rib{position:absolute;top:calc(-1 * var(--g-top,10px));right:0;width:42px;height:104px;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1px;padding-bottom:20px;box-sizing:border-box;
   background:var(--accent);color:var(--accent-ink);clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%);pointer-events:none}
 html.g-look .g-rib b{font:800 16px/1 var(--font-display)}
@@ -40,9 +40,9 @@ html.g-look .g-lk{display:inline;padding:0;border:0;background:none;color:var(--
 
 /* ---------- G4. ricerca, ordine e gruppi, filtri, copertine/elenco ---------- */
 html.g-look #stick{background:var(--surface)!important;box-shadow:none!important;margin-left:calc(-1 * var(--g-pad));margin-right:calc(-1 * var(--g-pad));padding-left:var(--g-pad);padding-right:var(--g-pad)}
-html.g-look #stick .tabbar{display:none!important}
+
 html.g-look .tools{margin-top:10px!important}
-html.g-look .tools .acts{display:none!important}
+
 html.g-look .qwrap{display:block;width:100%}
 html.g-look #q{height:46px!important;border-radius:14px!important;border:1.5px solid var(--line)!important;background:var(--surface2)!important;box-shadow:none!important;font-size:16px!important}
 html.g-look #sortBar{display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:8px!important;margin:10px 0 2px!important;overflow:visible!important}
@@ -72,7 +72,7 @@ html.g-look #list .shelf-now .grid>*::after{content:"";position:absolute;top:0;r
 html.g-look #list .row:not(.open){background:none!important;box-shadow:none!important;border-radius:0!important}
 
 /* ---------- G6. linguette laterali ---------- */
-html.g-look #layNav,html.g-look .lay-nav{display:none!important}
+
 html.g-look .g-tabs{position:fixed;top:0;bottom:0;right:var(--g-r);width:var(--g-tab);z-index:25;display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:calc(118px + env(safe-area-inset-top));box-sizing:border-box;pointer-events:none}
 html.g-look .g-tabs .g-edge{position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--surface2) 0 2px,color-mix(in srgb,var(--line) 70%,var(--surface)) 2px 3px);border-left:1px solid var(--line);pointer-events:none}
 html.g-look .g-tabs button{position:relative;pointer-events:auto;width:calc(var(--g-tab) - 8px);height:82px;margin:0;padding:0;border:0;border-radius:12px 0 0 12px;background:var(--accent-soft);color:var(--accent);
@@ -128,7 +128,7 @@ html.g-look .drawer .dopt .n{order:2;color:var(--muted)}
 html.g-look .drawer .dopt .dico{display:none!important}
 html.g-look #sortBar{padding:0!important;margin-left:0!important;margin-right:0!important;width:100%;box-sizing:border-box}
 html.g-look #sortBar .dpick{flex:0 1 auto;min-width:0}
-html.g-look .edge-tab{display:none!important}
+
 /* correzioni dopo le prime foto (20/11/2026) */
 html.g-look header.top h1 .g-t{min-width:0;flex:1 1 auto}
 html.g-look.g-guest header.top h1 .g-t{font-size:calc(var(--g-h1) - 6px)}
@@ -289,3 +289,8 @@ html.g-look #drawerOpts>.ddon .don-menu>span>:is(b,small)::after{display:none}
    ma stile-c (.fri .fr-list overflow hidden) lo bloccava: si vedevano 3 amici e basta. Scelta di Piero: scorre SOLO il riquadro,
    non la pagina, così «Aggiungi un amico» resta sotto a portata. Le altre .fr-pick-list (es. «Presta, vendi o regala») restano come sono */
 #friSheet .fr-pick-list{max-height:min(330px,46vh)!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* ---------- G24. avviso «Non riesco a salvare» (20/11/2026): il testo si legge tutto, su una riga sua; sotto «Fai il backup», i pallini e la × ---------- */
+html.g-look #notice.nt-save{flex-wrap:wrap;padding:12px 8px 6px 14px}
+html.g-look #notice.nt-save #noticeTxt{flex:1 0 100%;display:block;overflow:visible;-webkit-line-clamp:unset;line-clamp:unset;padding-right:6px}
+html.g-look #notice.nt-save #noticeBtn{margin-right:auto;padding-left:0}

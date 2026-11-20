@@ -244,9 +244,7 @@ function tryIt(what) {
     if (real) setTimeout(function () { watch({ add: '#layAdd', key: '#kgSheet', keys: '#kwSheet', don: '#donSheet', friends: '#friSheet' }[what]); }, 120);
     if (what === 'add') {
       var plus = document.getElementById('gAdd');   // stile G: «+ Aggiungi» (20/11/2026: prima cercava la barra in basso, nascosta, e non si apriva niente)
-      if (!plus || !plus.getClientRects().length) plus = document.querySelector('#layNav [data-l="add"]');
       if (plus && plus.getClientRects().length) plus.click();
-      else { var d = document.getElementById('btnScan'); if (d) { d.scrollIntoView({ block: 'center' }); try { d.focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } } }   // disposizione «Classico»: Scansiona, Foto e Digita in basso
     } else if (what === 'key') {
       if (window.NLRicerche && window.NLRicerche.guide) window.NLRicerche.guide();
       else if (NL.openOptions) NL.openOptions('search');
@@ -394,9 +392,7 @@ function pathDo(a) {
   else if (a === 'add') {
     cfg.path = 0; save();
     var plus = document.getElementById('gAdd');   // stile G: «+ Aggiungi» (20/11/2026: prima cercava la barra in basso, nascosta, e non si apriva niente)
-      if (!plus || !plus.getClientRects().length) plus = document.querySelector('#layNav [data-l="add"]');
     if (plus && plus.getClientRects().length) plus.click();
-    else { var d = document.getElementById('btnScan'); if (d) { d.scrollIntoView({ block: 'center' }); try { d.focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } } }
   }
 }
 /* chiusa la finestra aperta dal passo, il percorso riprende da dove serve (pathShow aspetta se c'è un'altra finestra o la domanda del nome) */
