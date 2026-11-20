@@ -1,6 +1,6 @@
 /* Next Libris · stile G «Pagina con l'Indice» (Piero, 20/11/2026; tela https://claude.ai/artifact/Tqa6XajvQCK2CVZdSSSimq, documento
    claude/nuovo-stile-proposte.md). L'app come un libro aperto: testatina in alto, nastro segnalibro con il numero dei libri, una frase
-   in prosa con la capolettera, linguette laterali al posto della barra in basso (Libri · Desideri · Per te · Amici · Tu), «+ Aggiungi»
+   in prosa, linguette laterali al posto della barra in basso (Libri · Desideri · Per te · Amici · Tu), «+ Aggiungi»
    che galleggia, il Menu diventa l'«Indice» a capitoli. Le funzioni restano quelle di sempre: questo modulo aggiunge solo i pezzi nuovi
    e li collega ai tasti che esistono già (che restano nella pagina, nascosti dallo stile). Le regole d'aspetto stanno in stile-g.css. */
 (function () {
@@ -114,8 +114,7 @@ function paintHead() {
     s = rd.length === 1 ? 'Stai leggendo <b>' + esc(rd[0].t || 'un libro') + '</b>' : rd.length ? 'Stai leggendo <b>' + rd.length + ' libri</b>' : 'Hai <b>' + lib.length + ' ' + plural(lib.length, 'libro', 'libri') + '</b>';
     s += lo ? '; <button type="button" class="g-lk" data-gl="loan">' + lo + ' ' + plural(lo, 'è in prestito', 'sono in prestito') + '</button>.' : '.';
   }
-  var txt = s.replace(/^([^<A-Za-zÀ-ÿ]*)([A-Za-zÀ-ÿ])/, '$1<span class="g-dc" aria-hidden="true">$2</span><span class="sr">$2</span>');
-  pr.innerHTML = txt; pr.hidden = false;
+  pr.innerHTML = s; /* niente capolettera (Piero, 20/11/2026) */ pr.hidden = false;
 }
 
 /* ---------- Indice al posto del Menu ---------- */

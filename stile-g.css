@@ -1,5 +1,5 @@
 /* Next Libris · stile G «Pagina con l'Indice» (Piero, 20/11/2026). Caricato per ultimo, vale quando c'è html.g-look (lo mette stile-g.js).
-   Pagina bianca (--surface), testatina in alto, titolo Bricolage 40/800, frase in prosa con capolettera, nastro con il numero dei libri,
+   Pagina bianca (--surface), testatina in alto, titolo Bricolage 40/800, frase in prosa, fondo color carta (Avorio), nastro con il numero dei libri,
    linguette laterali a destra al posto della barra in basso, sezioni con l'etichetta maiuscola e la linea, Menu = «Indice».
    Funziona con tutte le tavolozze e con il tema scuro: solo variabili. Telefoni stretti (< 380 px): linguette e margini più stretti.
    Tablet e PC: colonna larga al massimo 600 px, linguette sul suo bordo. Regole in claude/stile-base.md (sezione «Stile G»). */
@@ -29,15 +29,14 @@ html.g-look .g-rib b{font:800 16px/1 var(--font-display)}
 html.g-look .g-rib small{font:600 9px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;opacity:.85}
 @media (max-width:379.98px){html.g-look .g-rib{width:36px;height:92px;padding-bottom:16px}html.g-look .g-rib b{font-size:14px}html.g-look .g-ics{margin-right:46px}html.g-look header.top h1{padding-right:46px}}
 
-/* ---------- G3. la frase in prosa con la capolettera ---------- */
+/* ---------- G3. la frase in prosa (senza capolettera dal 20/11/2026) ---------- */
 html.g-look .g-prose{margin:2px 0 4px;font:400 15px/1.5 var(--font-body);color:var(--ink)}
 html.g-look .g-prose[hidden]{display:none}
 html.g-look .g-prose::after{content:"";display:block;clear:both}
 html.g-look .g-prose b{font-weight:700;color:var(--accent)}
-html.g-look .g-prose .g-dc{float:left;margin:3px 8px 0 0;font:800 40px/.85 var(--font-display);color:var(--accent)}
 html.g-look .g-prose .sr,html.g-look .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 html.g-look .g-lk{display:inline;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-@media (max-width:379.98px){html.g-look .g-prose{font-size:14px}html.g-look .g-prose .g-dc{font-size:34px}}
+@media (max-width:379.98px){html.g-look .g-prose{font-size:14px}}
 
 /* ---------- G4. ricerca, ordine e gruppi, filtri, copertine/elenco ---------- */
 html.g-look #stick{background:var(--surface)!important;box-shadow:none!important;margin-left:calc(-1 * var(--g-pad));margin-right:calc(-1 * var(--g-pad));padding-left:var(--g-pad);padding-right:var(--g-pad)}
@@ -218,3 +217,16 @@ html.g-look #profSheet .fr-sec.pf-num{padding-left:14px!important;padding-right:
 /* Indice: il pallino della sincronizzazione sta a sinistra del titolo (nel margine), così il titolo non va a capo a 360 px */
 html.g-look #goAcc.acc-on{position:relative}
 html.g-look #goAcc.acc-on b::after{position:absolute;left:12px;top:15px;margin:0}
+/* Indice: la freccia ‹ accanto al titolo senza cerchio (Piero, 20/11/2026) */
+html.g-look .drawer-head #drawerX{background:none!important;box-shadow:none!important;border:0!important;outline:none!important;width:32px!important;min-width:32px!important;margin-left:-6px}
+html.g-look .drawer-head #drawerX:focus,html.g-look .drawer-head #drawerX:focus-visible{outline:none!important;box-shadow:none!important}
+html.g-look .drawer-head #drawerX{font-size:0!important;flex-direction:row}html.g-look .drawer-head #drawerX::before{font-size:30px!important;line-height:1}
+/* Indice senza cornici tonde (Piero, 20/11/2026): i gruppi di voci restano allineati ma senza riquadro */
+html.g-look #drawerOpts>.dlist:not(.ddon):not(.dset),html.g-look #drawerOpts .dset .dsub{background:none!important;box-shadow:none!important;border-radius:0!important}
+html.g-look #drawerOpts>.dlist:not(.ddon):not(.dset),html.g-look #drawerOpts .dset .dsub{padding:0!important}
+html.g-look #drawerOpts .dopt{padding-left:32px!important;padding-right:4px!important}
+html.g-look #goAcc.acc-on b::after{left:12px}
+
+/* ---------- G14. fondo color carta «A · Avorio» (Piero, 20/11/2026): solo nel tema chiaro, con ogni tavolozza; lo scuro resta com'è ---------- */
+@media (prefers-color-scheme:light){html.g-look:not([data-theme="dark"]){--bg:#F1ECE0;--surface:#FCF9F2;--surface2:#F4EFE3;--line:#E2D9C6}}
+@media (prefers-color-scheme:dark){html.g-look[data-theme="light"]{--bg:#F1ECE0;--surface:#FCF9F2;--surface2:#F4EFE3;--line:#E2D9C6}}
