@@ -506,6 +506,9 @@
     /* 20/11/2026 (Piero): se Google non risponde o non trova, si cerca in Open Library */
     try {
       var ol = parseOlSearch(await getJson(f, OL_SEARCH + encodeURIComponent(query), opts));
+      /* Open Library vuole tutte le parole: con l'editore aggiunto («l'isola del tesoro bur») puo' non trovare niente, si riprova senza l'ultima */
+      var words = String(query).trim().split(/\s+/);
+      if (!ol.length && words.length > 2) ol = parseOlSearch(await getJson(f, OL_SEARCH + encodeURIComponent(words.slice(0, -1).join(' ')), opts));
       if (ol.length) { ol.via = 'ol'; ol.gErr = gErr; return ol; }
     } catch (e2) { /* anche Open Library non risponde: vale l'errore di Google */ }
     if (gErr) throw { code: gErr };

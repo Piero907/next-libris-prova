@@ -83,8 +83,6 @@ html.g-look .g-tabs button:focus-visible{outline:2px solid var(--accent);outline
 @media (max-width:379.98px){html.g-look .g-tabs{padding-top:calc(100px + env(safe-area-inset-top));gap:4px}html.g-look .g-tabs button{height:70px;gap:4px}html.g-look .g-tabs button span{font-size:10.5px}html.g-look .g-tabs button svg{width:14px;height:14px}}
 @media (max-height:620px){html.g-look .g-tabs{padding-top:72px;gap:3px}html.g-look .g-tabs button{height:64px}}
 /* conversazione aperta: niente linguette, serve il campo */
-html.g-look.g-conv .g-tabs{display:none}
-html.g-look.g-conv #chSheet{right:0!important}
 
 /* ---------- G7. «+ Aggiungi» che galleggia ---------- */
 html.g-look .g-add{position:fixed;left:max(var(--g-pad),calc(50vw - 300px));bottom:calc(20px + env(safe-area-inset-bottom));z-index:19;height:52px;padding:0 20px;border:0;border-radius:16px;
@@ -132,8 +130,6 @@ html.g-look #sortBar{padding:0!important;margin-left:0!important;margin-right:0!
 html.g-look #sortBar .dpick{flex:0 1 auto;min-width:0}
 html.g-look .edge-tab{display:none!important}
 /* correzioni dopo le prime foto (20/11/2026) */
-html.g-look:has(#chSheet:not([hidden])[data-v="conv"]) .g-tabs{display:none!important}
-html.g-look:has(#chSheet:not([hidden])[data-v="conv"]) #chSheet{right:0!important}
 html.g-look header.top h1 .g-t{min-width:0;flex:1 1 auto}
 html.g-look.g-guest header.top h1 .g-t{font-size:calc(var(--g-h1) - 6px)}
 html.g-look #sortBar .dpick{max-width:none}
@@ -185,7 +181,6 @@ html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g
   html.g-look.g-left .g-add{left:calc(50vw - 320px + var(--g-pad))}
   html.g-look.g-left .row.open.cv-full,html.g-look.g-left #profSheet,html.g-look.g-left #friSheet,html.g-look.g-left #chSheet,html.g-look.g-left #layYou,html.g-look.g-left .drawer{left:0!important}
 }
-html.g-look.g-left:has(#chSheet:not([hidden])[data-v="conv"]) #chSheet{left:0!important}
 
 /* ---------- G12. Indice allineato (Piero 20/11/2026: riquadro per tutti i capitoli, nastrini tutti verdi) ---------- */
 html.g-look .drawer .dopt>.pf-menu-av{display:none!important}
@@ -240,7 +235,6 @@ html.g-look.g-left .g-tabs button{border-radius:12px 0 0 12px}
 /* ---------- G16. linguette sempre visibili (Piero, 20/11/2026): anche le finestre dal basso (Statistiche, Suggerimenti, Citazioni, Aspetto…) si aprono accanto alle linguette, non sopra ---------- */
 html.g-look .sheet:not(.gd-infosheet){right:calc(var(--g-tab) + var(--g-r))!important}
 html.g-look.g-left .sheet:not(.gd-infosheet){right:0!important;left:calc(var(--g-tab) + var(--g-r))!important}
-html.g-look.g-conv .sheet:not(#chSheet){right:0!important;left:0!important}
 
 /* ---------- G17. correzioni del 20/11/2026 (foto di Piero) ---------- */
 /* Libreria: la barra di ricerca e filtri che resta in alto ha un margine sotto e una linea sottile quando le copertine le scorrono sotto */
@@ -255,3 +249,8 @@ html.g-look .g-tabs .g-tn{position:absolute;top:4px;left:50%;transform:translate
 html.g-look .g-tabs .g-tn[hidden]{display:none}
 html.g-look .g-tabs button:has(.g-tn:not([hidden])) svg{margin-top:12px}
 @media (max-width:379.98px){html.g-look .g-tabs .g-tn{min-width:16px;height:16px;font-size:10px;line-height:16px;padding:0 4px}}
+
+/* ---------- G19. segnalibri anche nella conversazione aperta e nella «stagione in libri» (Piero, 20/11/2026: «devono persistere in tutte le schermate») ---------- */
+html.g-look #wrap{right:calc(var(--g-tab) + var(--g-r))!important}
+html.g-look.g-left #wrap{right:0!important;left:calc(var(--g-tab) + var(--g-r))!important}
+html.g-look:has(#wrap:not([hidden])) .g-tabs{z-index:61}

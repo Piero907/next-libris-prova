@@ -62,6 +62,31 @@ function olWhy(gErr) {
   if (gErr) return 'Google Libri non ha risposto: questi li trova Open Library. ';
   return 'Google Libri non ha trovato niente: questi li trova Open Library. ';
 }
+/* ordine dei risultati per titolo (20/11/2026, Piero): prima i titoli più vicini a quello scritto; poi chi corrisponde all'anno
+   o all'editore scritti accanto («l'isola del tesoro bur», «l'isola del tesoro 1996»); poi le edizioni italiane, quelle con ISBN e
+   copertina, e le più recenti */
+var STOPW = { l: 1, il: 1, lo: 1, la: 1, i: 1, gli: 1, le: 1, un: 1, una: 1, uno: 1, di: 1, del: 1, della: 1, dello: 1, dei: 1, degli: 1, delle: 1, e: 1, ed: 1, a: 1, al: 1, the: 1, of: 1, and: 1, d: 1 };
+function qParts(text) {
+  var m = String(text).match(/\b(1[4-9]\d\d|20\d\d)\b/), y = m ? m[1] : '';
+  var q = y ? String(text).replace(m[0], ' ').replace(/\s+/g, ' ').trim() : String(text).trim();
+  return { y: y, q: q || String(text).trim() };
+}
+function toks(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter(function (w) { return w && !STOPW[w]; });
+}
+function rankCands(qp, list) {
+  var qt = toks(qp.q);
+  return list.map(function (c, i) {
+    var tt = toks(c.t), inT = tt.filter(function (w) { return qt.indexOf(w) >= 0; }).length;
+    var fit = tt.length ? inT / tt.length : 0;                       // 1 = il titolo è fatto solo di parole scritte
+    var extra = qt.filter(function (w) { return tt.indexOf(w) < 0; });
+    var more = toks(c.e + ' ' + c.a), hit = extra.filter(function (w) { return more.indexOf(w) >= 0; }).length;   // editore o autore scritti
+    return { c: c, i: i, tier: fit >= 0.999 ? 2 : fit >= 0.6 ? 1 : 0, bonus: hit + (qp.y && c.y === qp.y ? 2 : 0),
+      it: c.lang === 'it' ? 1 : 0, full: (c.i && c.img) ? 1 : 0, y: Number(c.y) || 0 };
+  }).sort(function (a, b) {
+    return (b.tier - a.tier) || (b.bonus - a.bonus) || (b.it - a.it) || (b.full - a.full) || (b.y - a.y) || (a.i - b.i);
+  }).map(function (x) { return x.c; });
+}
 function looksLikeTitle(s) { return (String(s).replace(/isbn/ig, '').match(/[a-zàèéìòùç]/ig) || []).length >= 3; }
 function whereTxt() { return tab === 'wish' ? 'ai Desideri' : 'alla Libreria'; }
 async function searchTitle(text) {
@@ -74,7 +99,8 @@ async function searchTitle(text) {
   var asIs = $('#isbnAsIs');
   asIs.textContent = 'Aggiungi solo «' + (text.length > 40 ? text.slice(0, 38) + '…' : text) + '», senza cercare'; asIs.hidden = true;
   var res;
-  try { res = await L.searchText(text, lookupOpts()); }
+  var qp = qParts(text);
+  try { res = await L.searchText(qp.q, lookupOpts()); }
   catch (e) {
     if (my !== titleSeq) return;
     /* 20/11/2026 (Piero): senza API, o con l'API prestata tolta, non è «Google al limite»: si spiega come averne una */
@@ -88,9 +114,7 @@ async function searchTitle(text) {
   }
   if (my !== titleSeq || $('#isbnSheet').hidden) return;
   // prima le edizioni italiane, poi quelle con l'ISBN; per il resto l'ordine di Google
-  titleCands = res.map(function (c, i) { return { c: c, i: i }; }).sort(function (x, y) {
-    return ((y.c.lang === 'it') - (x.c.lang === 'it')) || ((!!y.c.i) - (!!x.c.i)) || (x.i - y.i);
-  }).map(function (x) { return x.c; }).slice(0, 8);
+  titleCands = rankCands(qp, res).slice(0, 10);
   $('#isbnRes').innerHTML = titleCands.map(function (c, i) {
     var have = (c.isbns || []).map(findByIsbn).filter(Boolean)[0];
     var badge = have ? '<span class="tag ' + (have.w ? 'loan' : 'warn') + '">' + (have.w ? 'Già nei Desideri' : 'Ce l\'hai già') + '</span>' : '';

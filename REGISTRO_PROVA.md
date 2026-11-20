@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.25 · 20/11/2026 10:03
+- **Ricerca per titolo**: risultati in ordine di vicinanza al titolo, poi editore o anno scritti accanto («l'isola del tesoro bur», «… 1996»), poi edizioni italiane con ISBN e copertina, dalla più recente; **segnalibri** anche nella conversazione aperta e nella «stagione in libri»
+
 ## Prova 110.24 · 20/11/2026 09:47
 - **Ricerca per titolo**: sopra i risultati di Open Library il motivo giusto (senza API, API prestata tolta, Google non risponde o non trova)
 

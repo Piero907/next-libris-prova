@@ -52,6 +52,7 @@ function closeAll() {
   ['#friSheet', '#chSheet', '#layYou', '#layAdd'].forEach(function (s) { var e = $(s); if (e && !e.hidden) { var x = e.querySelector('.sh-x, #friClose, #chClose, [data-close]'); if (x) x.click(); else e.hidden = true; } });
   if ((document.documentElement.classList.contains('drawer-open') || vis('#drawer')) && window.__app && window.__app.closeDrawer) window.__app.closeDrawer();
   var open = document.querySelector('.row.open.cv-full .chev-btn'); if (open) open.click();
+  var wr = $('#wrap'); if (wr && !wr.hidden && window.NLWrap && window.NLWrap.close) window.NLWrap.close();
   /* le finestre dal basso aperte sopra la pagina (Statistiche, Suggerimenti, Aspetto…): si chiudono passando a un'altra linguetta */
   Array.prototype.forEach.call(document.querySelectorAll('.sheet:not([hidden])'), function (e) {
     if (/^(profSheet|friSheet|chSheet|layYou|layAdd)$/.test(e.id)) return;
@@ -63,7 +64,7 @@ function current() {
   if (vis('#friSheet')) return 'fri';
   if (vis('#profSheet')) return (window.NLProfilo && window.NLProfilo.state && window.NLProfilo.state().cur) ? 'fri' : 'prof';
   if (document.documentElement.classList.contains('drawer-open') || vis('#drawer')) return 'prof';
-  if (vis('#layYou')) return 'you';
+  if (vis('#layYou') || vis('#wrap')) return 'you';
   if (NL.guest && NL.guest()) return 'fri';
   return NL.tab && NL.tab() === 'wish' ? 'wish' : 'lib';
 }
