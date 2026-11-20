@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 113.1 · 20/11/2026 17:23
+- Uguale alla vera 113
+
 ## Prova 112.5 · 20/11/2026 17:19
 - **Segnalibro Indice** in cima ai segnalibri (via ≡ dalla testatina); **avviso del libro** anche nella sua pagina, con il tasto al centro; messaggi con «Indice» al posto di «Menu»
 
