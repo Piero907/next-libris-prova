@@ -230,3 +230,9 @@ html.g-look #goAcc.acc-on b::after{left:12px}
 /* ---------- G14. fondo color carta «A · Avorio» (Piero, 20/11/2026): solo nel tema chiaro, con ogni tavolozza; lo scuro resta com'è ---------- */
 @media (prefers-color-scheme:light){html.g-look:not([data-theme="dark"]){--bg:#F1ECE0;--surface:#FCF9F2;--surface2:#F4EFE3;--line:#E2D9C6}}
 @media (prefers-color-scheme:dark){html.g-look[data-theme="light"]{--bg:#F1ECE0;--surface:#FCF9F2;--surface2:#F4EFE3;--line:#E2D9C6}}
+
+/* ---------- G15. linguette come segnalibri (Piero, 20/11/2026): lato dritto contro la pagina, parte tonda verso il bordo dello schermo ---------- */
+html.g-look .g-tabs{align-items:flex-start}
+html.g-look .g-tabs button{border-radius:0 12px 12px 0}
+html.g-look.g-left .g-tabs{align-items:flex-end}
+html.g-look.g-left .g-tabs button{border-radius:12px 0 0 12px}

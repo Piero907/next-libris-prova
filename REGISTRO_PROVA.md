@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.19 · 20/11/2026 09:04
+- **Linguette laterali come segnalibri**: lato dritto contro la pagina, parte tonda verso il bordo dello schermo (anche con le linguette a sinistra)
+
 ## Prova 110.18 · 20/11/2026 08:54
 - **Fondo color carta «Avorio»** nel tema chiaro (con ogni tavolozza), **niente lettera grande** all'inizio della frase della Libreria; **Indice** senza il cerchio della freccia e senza cornici, voci allineate ai capitoli
 
