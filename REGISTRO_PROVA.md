@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 111.2 · 20/11/2026 11:21
+- **Indice con i puntini** sulla riga sotto, dopo il sottotitolo; **I tuoi amici**: il riquadro scorre
+
 ## Prova 111.1 · 20/11/2026 10:54
 - Uguale alla vera **111**
 
