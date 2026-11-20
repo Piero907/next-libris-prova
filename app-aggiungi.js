@@ -189,11 +189,12 @@ async function doLookup(id) {
       s.retry = 'lookup';
       if (rate && s.tries > waits.length) {
         s.st = 'error'; heardFail(id);
-        s.err = settings.gbKey ? 'Google Libri ha raggiunto il limite di richieste della tua API. Riprova più tardi.'
-          : 'Google Libri rifiuta le richieste senza API (limite raggiunto). Soluzione stabile: inserisci la tua API gratuita in Menu › Impostazioni › Ricerca dei libri. Intanto puoi premere Riprova.';
+        s.err = e.nokey ? 'Open Library e le biblioteche non conoscono questo libro e l’API Google Libri che ti avevano prestato non c’è più. Con una tua API (è gratis) lo trovi: Indice › Ricerca dei libri. Intanto puoi premere Riprova o fotografare la copertina.'
+          : settings.gbKey ? 'Google Libri ha raggiunto il limite di richieste della tua API. Riprova più tardi.'
+          : 'Open Library e le biblioteche non conoscono questo libro e senza un’API Google Libri Google non risponde. Con la tua API (è gratis) lo trovi: Indice › Ricerca dei libri. Intanto puoi premere Riprova o fotografare la copertina.';
       } else {
         s.st = 'wait';
-        s.err = (rate ? (settings.gbKey && !googleLeft(false) ? 'Ricerche di oggi su Google quasi finite (' + quota.g + ' su 1.000): riprovo con le altre banche dati tra ' + when + ' (Google riparte verso le 9 del mattino)' : 'Google Libri è al limite di richieste' + (settings.gbKey ? '' : ' (senza API)')) : (navigator.onLine === false ? 'Senza connessione' : 'Connessione debole')) + (rate && settings.gbKey && !googleLeft(false) ? '.' : ': riprovo da solo tra ' + when + '.');
+        s.err = (rate ? (settings.gbKey && !googleLeft(false) ? 'Ricerche di oggi su Google quasi finite (' + quota.g + ' su 1.000): riprovo con le altre banche dati tra ' + when + ' (Google riparte verso le 9 del mattino)' : (e.nokey ? 'Non lo trovo nelle banche dati libere e l’API Google Libri che ti avevano prestato non c’è più' : settings.gbKey ? 'Google Libri è al limite di richieste' : 'Non lo trovo nelle banche dati libere e senza un’API Google Libri Google non risponde')) : (navigator.onLine === false ? 'Senza connessione' : 'Connessione debole')) + (rate && settings.gbKey && !googleLeft(false) ? '.' : ': riprovo da solo tra ' + when + '.');
         clearTimeout(s.timer);
         s.timer = setTimeout(function () { var x = S[id]; if (x && x.st === 'wait' && get(id)) { x.st = 'queued'; refreshRow(id); lookupPool(function () { return doLookup(id); }); } }, sec * 1000);
       }

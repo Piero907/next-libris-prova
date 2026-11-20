@@ -347,9 +347,10 @@
     var f = opts.fetch || (typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null);
     if (!f) throw { code: 'network', detail: ['nessun accesso a internet'] };
     var key = opts.gbKey ? '&key=' + encodeURIComponent(opts.gbKey) : '';
-    var errors = [], rate = false;
+    var errors = [], rate = false, nokey = false;
     function note(src, e) {
       if (e && e.status === 429) rate = true;
+      if (e && e.status === 403) nokey = true;   // API prestata tolta (20/11/2026)
       errors.push(src + ': ' + (e && e.local ? 'limite giornaliero raggiunto (richieste sospese fino a domani)' : e && e.status ? 'errore ' + e.status : (e && e.bad ? 'risposta non valida' : 'nessuna risposta')));
     }
     var got = { g: null, o: null, s: null, c: null };
@@ -413,7 +414,7 @@
     }
     var book = best();
     if (!book) {
-      if (gFailed || oFailed) throw { code: rate ? 'rate' : 'network', detail: errors };
+      if (gFailed || oFailed) throw { code: rate || nokey ? 'rate' : 'network', nokey: nokey, detail: errors };
       return null;
     }
     book.i = isbn;

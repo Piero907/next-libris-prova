@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.28 · 20/11/2026 10:38
+- **Pagina del libro su PC** di nuovo leggibile (prima il testo era schiacciato); **spazio uguale** sotto ordine e gruppi e sotto le pillole in Libreria, Desideri e libreria di un amico; **libro cercato per ISBN senza API**: non dice più «Google al limite» ma che Open Library e le biblioteche non lo conoscono e come avere l'API
+
 ## Prova 110.27 · 20/11/2026 10:24
 - **Tablet e PC**: tutte le finestre (anche «Cosa c'è di nuovo», Installazione, Sostieni, Registro, Backup non partito) **al centro della colonna** e con i **segnalibri visibili**; posizioni corrette anche con la barra di scorrimento del PC
 

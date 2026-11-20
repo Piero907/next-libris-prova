@@ -262,3 +262,11 @@ html.g-look:has(#wrap:not([hidden])) .g-tabs{z-index:61}
   html.g-look .sheet:not(.gd-infosheet):not(#profSheet):not(#friSheet):not(#chSheet):not(#layYou){left:0!important;right:0!important;padding-left:calc(50% - 320px)!important;padding-right:calc(50% - 320px)!important}
   html.g-look .g-tabs{z-index:61}
 }
+@media (min-width:700px){
+  /* la pagina del libro è già larga quanto la colonna: niente margini calcolati sullo schermo (Piero, 20/11/2026: «si apre malissimo su pc») */
+  html.g-look[data-look] .row.open.cv-full.cv-full.cv-full{width:auto!important;padding-left:var(--g-pad)!important;padding-right:var(--g-pad)!important}
+}
+
+/* ---------- G21. spazio sotto ordine e gruppi (Piero, 20/11/2026: libreria di un amico senza gruppi, copertine attaccate) ---------- */
+html.g-look #sortBar{margin-bottom:14px!important}
+html.g-look #stick > .chips:not([hidden]){margin-bottom:14px!important;margin-top:0!important}
