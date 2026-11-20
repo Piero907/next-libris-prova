@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 112.4 · 20/11/2026 16:35
+- **Pagina del libro**: tolta dal codice la vecchia scheda a campi; corretto il campo «+ Genere / Nota / Costo…» che spariva nei libri senza dati
+
 ## Prova 112.3 · 20/11/2026 15:39
 - **Solo lo stile G**: tolto dall'app il codice delle vecchie disposizioni (vecchia testata e riepilogo, barra in basso, tasti nascosti, triangolino, opzioni «Riepilogo in alto»); titolo allineato al margine; avviso «Non riesco a salvare» solo quando serve
 

@@ -1,21 +1,14 @@
-/* Next Libris · modulo «Scheda aperta del libro»: Classica oppure D, «Pagina del libro» (A, B e C provate e tolte il 15/11/2026).
-   Modulo a parte: usa solo window.NL (NL.on('rows') dopo ogni disegno delle schede). Si toglie con togli_modulo.py schede:
-   resta la scheda di sempre. La scelta sta in 'catalogo-libri-card'. */
+/* Next Libris · modulo «Pagina del libro»: la scheda aperta di un libro si legge come una pagina (copertina, dati in una riga,
+   descrizione, lettura; la matita apre i campi). Usa solo window.NL (NL.on('rows') dopo ogni disegno delle schede).
+   La scheda «Classica» (tutti i campi uno sotto l'altro) e la scelta tra le due non ci sono più (20/11/2026): prima restava
+   per le prove automatiche, che su localhost partivano da quella. */
 (function () {
 'use strict';
 var NL = window.NL;
 if (!NL) return;
 var $ = NL.$, esc = NL.esc;
-var LS = 'catalogo-libri-card';
-var STYLES = [
-  { k: 'attuale', t: 'Classica', d: 'Tutti i campi uno sotto l\'altro, da modificare subito.' },
-  { k: 'd', t: 'Pagina del libro', d: 'Si legge come una pagina: copertina, dati in una riga, descrizione, lettura. La matita in alto apre i campi.' }
-];
-/* la pagina del libro e' la scheda dell'app (Piero, 16/11/2026); la classica resta solo per le prove automatiche (localhost) */
-var DEF = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'attuale' : 'd';
-var cur = DEF;
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'attuale' && STYLES.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) { if (window.nlErr) nlErr(e); }   // fuori dalle prove: sempre la pagina del libro
-function save() { NL.ls.set(LS, JSON.stringify({ v: cur })); }
+NL.ls.del('catalogo-libri-card');   // la scelta della scheda, salvata dalle versioni vecchie
+var cur = 'd';
 var root = document.documentElement;
 var editing = {}, descExp = {}, hinted = false;                 // per libro: campi aperti, descrizione aperta
 
@@ -273,7 +266,9 @@ function editPage(card, v, b, id, gm) {
     var add = document.createElement('button'); add.type = 'button'; add.className = 'cv-add'; add.textContent = '+ ' + p[1].replace(' €', '');
     add.addEventListener('click', function (ev) {
       ev.stopPropagation();
-      var r = row(k, p[1]); ex.appendChild(r); add.remove(); if (!adds.children.length) adds.remove();
+      var r = row(k, p[1]); ex.appendChild(r);
+      if (!ex.parentNode && adds.parentNode) adds.parentNode.insertBefore(ex, adds);   // libro senza genere, scaffale, serie, nota e costo: il riquadro dei dati non era nella pagina e il campo appena aperto spariva (20/11/2026)
+      add.remove(); if (!adds.children.length) adds.remove();
       NL.autosize(r); var f = q(r, '[data-k="' + k + '"]'); if (f) f.focus();
     });
     adds.appendChild(add);
@@ -288,16 +283,15 @@ function editPage(card, v, b, id, gm) {
 }
 function decorate(el) {
   if (!document.querySelector('.row.cv-full')) lastOpen = null;   // nessuna pagina aperta: la prossima riparte dall'alto
-  if (cur === 'attuale' || !el) return;
+  if (!el) return;
   var cards = el.matches && el.matches('.row.open.has-top') ? [el] : qa(el, '.row.open.has-top');
   cards.forEach(function (card) {
     if (card.dataset.cv) return;
     card.dataset.cv = cur;
     var id = card.dataset.id;
-    try { if (cur === 'd') doD(card, id); } catch (e) { if (window.console) console.warn('schede', e); }
+    try { doD(card, id); } catch (e) { if (window.console) console.warn('schede', e); }
   });
 }
-function apply() { root.setAttribute('data-card', cur); NL.refresh(); }
 /* «Letto il»: la data scritta per esteso si aggiorna appena la scegli */
 function rdShow(e) {
   var t = e.target; if (!t || t.getAttribute('data-k') !== 'rd') return;
@@ -307,6 +301,5 @@ function rdShow(e) {
 document.addEventListener('input', rdShow, true); document.addEventListener('change', rdShow, true);
 NL.on('rows', decorate);
 root.setAttribute('data-card', cur);
-if (cur !== 'attuale') NL.refresh();
-window.NLCard = { get: function () { return cur; }, set: function (v) { cur = v; save(); apply(); }, list: STYLES };
+NL.refresh();
 })();
