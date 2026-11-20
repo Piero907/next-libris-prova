@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 114.2 · 20/11/2026 22:12
+- **Prima si installa, poi il benvenuto**: sui telefoni nel browser c'è solo la schermata d'installazione; 3 schede; scheda 3 e passo 2 senza un amico che non c'è; percorso con la grafica delle schede
+
 ## Prova 114.1 · 20/11/2026 21:36
 - Uguale alla **vera 114**
 
