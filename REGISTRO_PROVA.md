@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 111.3 · 20/11/2026 13:22
+- **Catalogo delle biblioteche (SBN) incluso per tutti**: non serve più il worker; tra amici si presta solo l'API
+
 ## Prova 111.2 · 20/11/2026 11:21
 - **Indice con i puntini** sulla riga sotto, dopo il sottotitolo; **I tuoi amici**: il riquadro scorre
 
