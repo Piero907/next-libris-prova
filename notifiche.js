@@ -99,15 +99,15 @@ function ago(t) {
   return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
 }
 
-/* ---------- campanella nella testatina, prima dell'Indice ---------- */
+/* ---------- campanella nella testatina ---------- */
 function paintTop() {
   var b = document.getElementById('btnBell');
   if (!uid()) { if (b) b.hidden = true; return; }
   if (!b) {
-    var next = document.getElementById('gMenu'); if (!next) return;
+    var box = document.getElementById('gIcs'); if (!box) return;
     b = document.createElement('button'); b.type = 'button'; b.id = 'btnBell'; b.className = 'ico nt-top'; b.title = 'Notifiche';
     b.innerHTML = BELL + '<span class="nt-badge" id="btnBellN" hidden></span>';
-    next.parentNode.insertBefore(b, next);
+    box.appendChild(b);
     b.addEventListener('click', open);
   }
   b.hidden = false;

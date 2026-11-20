@@ -18,7 +18,8 @@ var IC = {
   amici: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 5.5 5.4"/>',
   tu: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   chat: '<path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  indice: '<path d="M4 7h16M4 12h16M4 17h10"/>'
 };
 function act(l) { if (window.NLLayout) window.NLLayout.act(l); }
 function vis(sel) { var e = $(sel); return !!(e && !e.hidden); }
@@ -27,7 +28,7 @@ function vis(sel) { var e = $(sel); return !!(e && !e.hidden); }
 function setHidden(e, v) { if (e && e.hidden !== !!v) e.hidden = !!v; }
 
 /* ---------- linguette laterali ---------- */
-var TABS = [['lib', 'Libri', 'libri'], ['wish', 'Desideri', 'desideri'], ['you', 'Per te', 'perte'], ['fri', 'Amici', 'amici'], ['chat', 'Chat', 'chat'], ['prof', 'Tu', 'tu']]; /* Chat aggiunta da Piero il 20/11/2026 */
+var TABS = [['idx', 'Indice', 'indice'], ['lib', 'Libri', 'libri'], ['wish', 'Desideri', 'desideri'], ['you', 'Per te', 'perte'], ['fri', 'Amici', 'amici'], ['chat', 'Chat', 'chat'], ['prof', 'Tu', 'tu']]; /* Chat aggiunta da Piero il 20/11/2026; Indice in cima al posto del tasto ≡ della testatina (Piero, 20/11/2026) */
 function tabs() {
   if ($('#gTabs')) return;
   var n = document.createElement('nav'); n.id = 'gTabs'; n.className = 'g-tabs'; n.setAttribute('aria-label', 'Sezioni');
@@ -37,9 +38,10 @@ function tabs() {
   document.body.appendChild(n);
   n.addEventListener('click', function (e) {
     var b = e.target.closest('[data-g]'); if (!b) return;
-    var g = b.dataset.g;
+    var g = b.dataset.g, wasIdx = current() === 'idx';
     closeAll();
-    if (g === 'fri') { if (window.NLAmici && window.NLAmici.open) window.NLAmici.open(); }
+    if (g === 'idx') { if (!wasIdx) NL.openMenu(true); }   // un altro tocco sul segnalibro Indice lo richiude
+    else if (g === 'fri') { if (window.NLAmici && window.NLAmici.open) window.NLAmici.open(); }
     else if (g === 'chat') { if (window.NLChat && window.NLChat.open) window.NLChat.open(); }
     else act(g);
     setTimeout(paintTabs, 60);
@@ -63,7 +65,7 @@ function current() {
   if (vis('#chSheet')) return 'chat';
   if (vis('#friSheet')) return 'fri';
   if (vis('#profSheet')) return (window.NLProfilo && window.NLProfilo.state && window.NLProfilo.state().cur) ? 'fri' : 'prof';
-  if (document.documentElement.classList.contains('drawer-open') || vis('#drawer')) return 'prof';
+  if (document.documentElement.classList.contains('drawer-open') || document.body.classList.contains('drawer-open') || vis('#drawer')) return 'idx';
   if (vis('#layYou') || vis('#wrap')) return 'you';
   if (NL.guest && NL.guest()) return 'fri';
   return NL.tab && NL.tab() === 'wish' ? 'wish' : 'lib';
@@ -80,13 +82,12 @@ function paintTabs() {
   if (tb) { var tn = tb.querySelector('.g-tn'); if (!tn) { tn = document.createElement('b'); tn.className = 'g-tn'; tb.appendChild(tn); }
     var tx = nb && !nb.hidden ? (nb.textContent || '').trim() : ''; if (tn.textContent !== tx) tn.textContent = tx; setHidden(tn, !tx); tb.setAttribute('aria-label', 'Chat' + (tx ? ', ' + tx + ' da leggere' : '')); }
   document.documentElement.classList.toggle('g-conv', vis('#chSheet') && ($('#chSheet').dataset.v === 'conv'));
-  document.documentElement.classList.toggle('g-page', c === 'you' || c === 'prof' || c === 'chat' || (c === 'fri' && !(NL.guest && NL.guest())));
+  document.documentElement.classList.toggle('g-page', c === 'you' || c === 'prof' || c === 'idx' || c === 'chat' || (c === 'fri' && !(NL.guest && NL.guest())));
 }
 
 /* ---------- testatina, nastro, frase in prosa, «+ Aggiungi» ---------- */
 function head() {
   if (head.done || !$('#gHead')) return; head.done = true;
-  $('#gMenu').addEventListener('click', function () { NL.openMenu(true); });   // l'Indice si apre dalla testatina
   $('#gBack').addEventListener('click', function () { act('lib'); });
   $('#gProse').addEventListener('click', function (e) { if (e.target.closest('[data-gl="loan"]')) NL.loanFilter(); });
   var a = document.createElement('button'); a.type = 'button'; a.id = 'gAdd'; a.className = 'g-add'; a.innerHTML = SV(IC.plus, 20) + '<span>Aggiungi</span>';

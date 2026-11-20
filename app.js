@@ -119,7 +119,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 112, date: '2026-11-20', note: 'Catalogo delle biblioteche (SBN) incluso per tutti; si presta solo l\'API' };
-var BUILD = {"t": "2026-11-20 16:35", "n": "112.4", "note": "Pagina del libro"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-20 17:19", "n": "112.5", "note": "Segnalibro Indice in cima ai segnalibri (via ≡ dalla testatina); avviso del libro anche ne"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -135,7 +135,7 @@ function renderVersion() {
   } else if (latestVer) { st.textContent = '✓ È l\'ultima versione.'; st.className = 'ver-state ok'; up.hidden = true; }
   else if (navigator.onLine === false) { st.textContent = 'Senza rete: non posso controllare se ce n\'è una più nuova.'; st.className = 'ver-state'; up.hidden = true; }
   else { st.textContent = 'Controllo se ce n\'è una più nuova…'; st.className = 'ver-state'; up.hidden = true; }
-  $('#verApp').textContent = 'Versione ' + APP_VERSION.v + ' del ' + itLongDate(APP_VERSION.date) + (latestVer && latestVer.v > APP_VERSION.v ? ' (c\'è la ' + latestVer.v + ': aggiorna dal menu)' : '') + '.';
+  $('#verApp').textContent = 'Versione ' + APP_VERSION.v + ' del ' + itLongDate(APP_VERSION.date) + (latestVer && latestVer.v > APP_VERSION.v ? ' (c\'è la ' + latestVer.v + ': aggiorna dall\'Indice)' : '') + '.';
 }
 var state = { books: [], updated: 0 };
 var hooks = {};                              // moduli aggiuntivi (vedi window.NL in fondo): si agganciano dopo l'avvio

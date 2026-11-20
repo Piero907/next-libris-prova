@@ -82,10 +82,10 @@ function paintTop() {
   var b = $('btnChat');
   if (!uid()) { if (b) b.hidden = true; return; }
   if (!b) {
-    var next = $('btnBell') || $('gMenu'); if (!next) return;
+    var box = $('gIcs'); if (!box) return;
     b = document.createElement('button'); b.type = 'button'; b.id = 'btnChat'; b.className = 'ico ch-top'; b.title = 'Chat';
     b.innerHTML = CHAT + '<span class="nt-badge" id="btnChatN" hidden></span>';
-    next.parentNode.insertBefore(b, next);
+    box.insertBefore(b, $('btnBell'));   // prima della campanella, se c'è già
     b.addEventListener('click', function () { open(); });
   }
   b.hidden = false;

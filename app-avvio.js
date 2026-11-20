@@ -664,7 +664,7 @@ var INST_STEPS = {
     note: 'In alternativa apri il link in Chrome: lì basta premere «Installa».', copy: true },
   desktop: { lead: 'Sul computer si installa da Chrome o Edge.',
     steps: ['Nella barra dell\'indirizzo, a destra, clicca l\'icona <b>Installa</b>.', 'Se non c\'è: menu <b>⋮</b> › <b>Trasmetti, salva e condividi</b> › <b>Installa pagina come app</b>.', 'Conferma con <b>Installa</b>.'],
-    note: 'Sul telefono è più comoda: apri Menu › Info e aiuto › Condivisione e inquadra il QR code.' }
+    note: 'Sul telefono è più comoda: apri Indice › Info e aiuto › Condivisione e inquadra il QR code.' }
 };
 var instPushed = false;
 function openInstallHelp() {
@@ -696,7 +696,7 @@ async function doInstall() {
   d.prompt();
   try { out = await d.userChoice; } catch (e) { nlErr(e); }
   deferred = null;
-  if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Menu › Impostazioni › Installazione sul telefono.');
+  if (out && out.outcome === 'dismissed') toast('Va bene. Quando vuoi: Indice › Impostazioni › Installazione sul telefono.');
   updateInstallUi();
 }
 /* iPhone nel browser (giro 11F, Piero 19/11/2026): prima si mette nella schermata Home, poi si comincia.
@@ -736,7 +736,7 @@ $('#btnInstall').addEventListener('click', doInstall);
 $('#instGo').addEventListener('click', doInstall);
 $('#instLater').addEventListener('click', function () {
   settings.instSnooze = Date.now(); saveSettings(); updateInstallUi();
-  toast('Quando vuoi: Menu › Impostazioni › Installazione sul telefono.', { label: 'Annulla', fn: function () { settings.instSnooze = 0; saveSettings(); updateInstallUi(); } });
+  toast('Quando vuoi: Indice › Impostazioni › Installazione sul telefono.', { label: 'Annulla', fn: function () { settings.instSnooze = 0; saveSettings(); updateInstallUi(); } });
 });
 $('#instOk').addEventListener('click', function () { closeInstallHelp(); });
 $('#instSheet').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeInstallHelp(); });

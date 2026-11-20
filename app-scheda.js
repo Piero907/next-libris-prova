@@ -373,7 +373,7 @@ $('#donAskGo').addEventListener('click', function () { openDon(); });
 $('#donAskLater').addEventListener('click', function () { donSnooze(DON_SNOOZE); });
 $('#donAskNever').addEventListener('click', function () {
   settings.donNever = true; settings.donMs = Math.floor(donCount() / DON_STEP) * DON_STEP; saveSettings(); donPaint();
-  toast('Non te lo chiederò più a ogni traguardo. Resta «Sostieni Next Libris» nel menu.');
+  toast('Non te lo chiederò più a ogni traguardo. Resta «Sostieni Next Libris» nell\'Indice.');
 });
 $('#donMenu').addEventListener('click', function () { fromMenu(function () { openDon(); }); });
 $('#donOpt').addEventListener('click', function () { openDon(); });

@@ -1074,7 +1074,7 @@ function keySheet(id) {
     });
   }
   var cur = outKey(id), opt = function (iid, on, has, t, sub) {
-    return '<label class="check fr-wish"><input type="checkbox" id="' + iid + '"' + (has && on ? ' checked' : '') + (has ? '' : ' disabled') + '><span>' + t + '<small>' + (has ? sub : 'Non ce l\'hai: si imposta in Menu › Impostazioni › Ricerca dei libri.') + '</small></span></label>';
+    return '<label class="check fr-wish"><input type="checkbox" id="' + iid + '"' + (has && on ? ' checked' : '') + (has ? '' : ' disabled') + '><span>' + t + '<small>' + (has ? sub : 'Non ce l\'hai: si imposta in Indice › Impostazioni › Ricerca dei libri.') + '</small></span></label>';
   };
   document.body.appendChild(el);   // sopra la finestra da cui si apre
   document.getElementById('keyH').textContent = 'Presta a ' + friendName(id);

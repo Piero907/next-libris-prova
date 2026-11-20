@@ -382,7 +382,7 @@ function pathDo(a) {
   var n = cfg.path || 0;
   if (a === 'later') {
     cfg.path = n >= 3 ? 0 : n + 1; save(); pathHide();
-    if (cfg.path) pathShow(); else NL.toast('La guida la rivedi quando vuoi: Menu › Info e aiuto › Come si usa.');
+    if (cfg.path) pathShow(); else NL.toast('La guida la rivedi quando vuoi: Indice › Info e aiuto › Come si usa.');
     return;
   }
   pathHide();

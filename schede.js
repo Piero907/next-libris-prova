@@ -88,6 +88,10 @@ function doD(card, id) {
     if (rdf) { rdf.classList.add('cv-rdmeta'); var ht = q(v, '.cv-ht'), mt = q(ht, '.cv-meta'); ht.insertBefore(rdf, mt ? mt.nextSibling : null); }
     var hero = q(v, '.cv-hero'); hero.parentNode.insertBefore(rd, hero.nextSibling);
   }
+  /* avviso del libro («Senza connessione… Riprova ora», «Non ho trovato questo libro online», ricerca in corso): nella pagina sta subito
+     sotto titolo e ISBN, nel riquadro degli avvisi (proposta del 20/11/2026: prima nella pagina aperta era nascosto) */
+  var stt = q(card, '.status');
+  if (stt) { stt.classList.add('cv-status'); var hr = q(v, '.cv-hero'); hr.parentNode.insertBefore(stt, hr.nextSibling); }
   qa(v, '.cv-guess').forEach(function (x) { x.addEventListener('click', function (e) { e.stopPropagation(); verifyK(id, x.dataset.gk); }); });
   if (ed) editPage(card, v, b, id, gm);
   /* etichette-filtro: in fondo, prima di Presta e Cerca sul web */
