@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.24 · 20/11/2026 09:47
+- **Ricerca per titolo**: sopra i risultati di Open Library il motivo giusto (senza API, API prestata tolta, Google non risponde o non trova)
+
 ## Prova 110.23 · 20/11/2026 09:43
 - **Ricerca per titolo**: se Google Libri non risponde o non trova, cerca in **Open Library** (prima le edizioni italiane); senza API o con l'API prestata tolta non dice più «Google al limite» ma spiega come averla, con il tasto «Come avere l'API, gratis ›»
 

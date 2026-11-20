@@ -55,6 +55,13 @@ function openIsbnSheet() {
 }
 /* ---------- ricerca per titolo (per esempio un libro consigliato da un amico) ---------- */
 var titleSeq = 0, titleCands = [], titleText = '';
+/* perché i risultati vengono da Open Library (20/11/2026, Piero: senza API non è «Google non ha risposto») */
+function olWhy(gErr) {
+  if (gErr === 'nokey') return 'L’API Google Libri che ti avevano prestato non è più disponibile: questi li trova Open Library. ';
+  if (!settings.gbKey) return 'Senza un’API Google Libri cerco in Open Library: ecco cosa trova. ';
+  if (gErr) return 'Google Libri non ha risposto: questi li trova Open Library. ';
+  return 'Google Libri non ha trovato niente: questi li trova Open Library. ';
+}
 function looksLikeTitle(s) { return (String(s).replace(/isbn/ig, '').match(/[a-zàèéìòùç]/ig) || []).length >= 3; }
 function whereTxt() { return tab === 'wish' ? 'ai Desideri' : 'alla Libreria'; }
 async function searchTitle(text) {
@@ -92,7 +99,7 @@ async function searchTitle(text) {
   }).join('');
   var viaOl = res.via === 'ol';
   $('#isbnKey').hidden = !(viaOl && (!settings.gbKey || res.gErr === 'nokey'));
-  $('#isbnResMsg').textContent = titleCands.length ? (viaOl ? 'Google Libri non ha risposto: questi li trova Open Library. ' : '') + 'Tocca il libro giusto per aggiungerlo ' + whereTxt() + ':' : 'Non ho trovato libri per «' + text + '». Prova con meno parole, o aggiungi l\'autore.';
+  $('#isbnResMsg').textContent = titleCands.length ? (viaOl ? olWhy(res.gErr) : '') + 'Tocca il libro giusto per aggiungerlo ' + whereTxt() + ':' : 'Non ho trovato libri per «' + text + '». Prova con meno parole, o aggiungi l\'autore.';
   asIs.hidden = false;
 }
 function addedToast(b) {
