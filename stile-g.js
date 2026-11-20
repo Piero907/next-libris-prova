@@ -26,6 +26,9 @@ function act(l) {
   else if (l === 'prof' && window.NLProfilo) window.NLProfilo.open();
 }
 function vis(sel) { var e = $(sel); return !!(e && !e.hidden); }
+/* hidden cambiato solo se serve: ogni scrittura sveglia gli osservatori (questo modulo e il ritorno all'Indice di app-filtri.js);
+   prima si ridipingeva di continuo, ogni 40 ms, e «Chiudi» delle finestre dell'Indice non tornava all'Indice (20/11/2026) */
+function setHidden(e, v) { if (e && e.hidden !== !!v) e.hidden = !!v; }
 
 /* ---------- linguette laterali ---------- */
 var TABS = [['lib', 'Libri', 'libri'], ['wish', 'Desideri', 'desideri'], ['you', 'Per te', 'perte'], ['fri', 'Amici', 'amici'], ['chat', 'Chat', 'chat'], ['prof', 'Tu', 'tu']]; /* Chat aggiunta da Piero il 20/11/2026 */
@@ -79,7 +82,7 @@ function paintTabs() {
   /* numero dei messaggi non letti sul segnalibro Chat (la chat in alto non c'è più) */
   var nb = $('#btnChatN'), tb = document.querySelector('#gTabs [data-g="chat"]');
   if (tb) { var tn = tb.querySelector('.g-tn'); if (!tn) { tn = document.createElement('b'); tn.className = 'g-tn'; tb.appendChild(tn); }
-    var tx = nb && !nb.hidden ? (nb.textContent || '').trim() : ''; tn.textContent = tx; tn.hidden = !tx; tb.setAttribute('aria-label', 'Chat' + (tx ? ', ' + tx + ' da leggere' : '')); }
+    var tx = nb && !nb.hidden ? (nb.textContent || '').trim() : ''; if (tn.textContent !== tx) tn.textContent = tx; setHidden(tn, !tx); tb.setAttribute('aria-label', 'Chat' + (tx ? ', ' + tx + ' da leggere' : '')); }
   document.documentElement.classList.toggle('g-conv', vis('#chSheet') && ($('#chSheet').dataset.v === 'conv'));
   document.documentElement.classList.toggle('g-page', c === 'you' || c === 'prof' || c === 'chat' || (c === 'fri' && !(NL.guest && NL.guest())));
 }
@@ -115,12 +118,12 @@ function paintHead() {
   var who = guest ? String(NL.guest() || '') : '';
   rib.innerHTML = '<b>' + n + '</b>' + (wish ? SV(IC.desideri, 13) : '<small>libri</small>');
   run.textContent = guest ? (who || 'Libreria di un amico') : 'Next Libris';
-  bk.hidden = !guest;
+  setHidden(bk, !guest);
   document.documentElement.classList.toggle('g-guest', !!guest);
   var h1 = $('header.top h1');
   if (h1 && !h1.querySelector('.g-t')) { var t = document.createElement('span'); t.className = 'g-t'; h1.insertBefore(t, h1.firstChild); }
   if (h1) h1.querySelector('.g-t').textContent = guest ? (who ? 'Libreria di ' + who.split(' ')[0] : 'Libreria') : (wish ? 'Desideri' : 'Libreria');
-  if (guest) { pr.hidden = true; return; }
+  if (guest) { setHidden(pr, true); return; }
   var s = '';
   if (wish) {
     s = ws.length ? 'Hai <b>' + ws.length + ' ' + plural(ws.length, 'libro', 'libri') + '</b> nei Desideri.' : 'Nei Desideri metti i libri che vorresti: tocca <b>Aggiungi</b>.';
@@ -132,12 +135,12 @@ function paintHead() {
     s = rd.length === 1 ? 'Stai leggendo <b>' + esc(rd[0].t || 'un libro') + '</b>' : rd.length ? 'Stai leggendo <b>' + rd.length + ' libri</b>' : 'Hai <b>' + lib.length + ' ' + plural(lib.length, 'libro', 'libri') + '</b>';
     s += lo ? '; <button type="button" class="g-lk" data-gl="loan">' + lo + ' ' + plural(lo, 'è in prestito', 'sono in prestito') + '</button>.' : '.';
   }
-  pr.innerHTML = s; /* niente capolettera (Piero, 20/11/2026) */ pr.hidden = false;
+  if (pr.innerHTML !== s) pr.innerHTML = s; /* niente capolettera (Piero, 20/11/2026) */ setHidden(pr, false);
 }
 
 /* ---------- Indice al posto del Menu ---------- */
 function indice() {
-  var h = $('#drawerH'); if (h && h.textContent !== 'Indice') h.textContent = 'Indice';
+  var h = $('#drawerH'); if (h && h.textContent === 'Menu') h.textContent = 'Indice';   // solo il titolo del Menu: la pagina Filtri resta «Filtri» (20/11/2026)
 }
 
 /* ---------- ordine e gruppi: testi brevi («Autore» invece di «Raggruppa: Autore») ---------- */
@@ -163,18 +166,26 @@ function side() {
   if (x) x.checked = !!st.gLeft;
 }
 
+/* barra di stato del telefono del colore della pagina (carta Avorio in chiaro, --surface in scuro), non più quello delle
+   vecchie disposizioni; durante l'apertura (data-splash) resta verde come prima (20/11/2026) */
+function barColor() {
+  var root = document.documentElement, m = document.querySelector('meta[name="theme-color"]');
+  if (!m || root.hasAttribute('data-splash')) return;
+  var c = (getComputedStyle(root).getPropertyValue('--surface') || '').trim();
+  if (c && m.getAttribute('content') !== c) m.setAttribute('content', c);
+}
+
 /* ---------- avvio e aggiornamenti ---------- */
 var pend = 0;
-function soon() { if (pend) return; pend = setTimeout(function () { pend = 0; try { paintHead(); paintTabs(); shortGrp(); indice(); } catch (e) { if (window.nlErr) nlErr(e); } }, 40); }
+function soon() { if (pend) return; pend = setTimeout(function () { pend = 0; try { paintHead(); paintTabs(); shortGrp(); indice(); barColor(); } catch (e) { if (window.nlErr) nlErr(e); } }, 40); }
 function start() {
-  if (window.NL_NO_G) return;   // solo nelle prove di prima (prove/_harness.js)
   document.documentElement.classList.add('g-look');
   tabs(); head(); side(); soon();
   var mo = new MutationObserver(soon);
   ['#list', '#summary', '#cntLoan', '#grpPick'].forEach(function (s) { var e = $(s); if (e) mo.observe(e, { childList: true, characterData: true, subtree: true }); });
   var mo2 = new MutationObserver(soon);
   mo2.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['hidden', 'data-v'] });
-  new MutationObserver(soon).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(soon).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-pal', 'data-splash'] });
   if (NL.on) { NL.on('guest', soon); }
   window.addEventListener('popstate', function () { setTimeout(soon, 80); });
 }

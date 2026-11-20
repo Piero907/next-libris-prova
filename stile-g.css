@@ -87,7 +87,7 @@ html.g-look .g-tabs button:focus-visible{outline:2px solid var(--accent);outline
 /* ---------- G7. «+ Aggiungi» che galleggia ---------- */
 html.g-look .g-add{position:fixed;left:max(var(--g-pad),calc(50% - 300px));bottom:calc(20px + env(safe-area-inset-bottom));z-index:19;height:52px;padding:0 20px;border:0;border-radius:16px;
   background:var(--accent);color:var(--accent-ink);font:700 15px/1 var(--font-body);display:flex;align-items:center;gap:8px;box-shadow:0 8px 18px color-mix(in srgb,var(--accent) 35%,transparent);cursor:pointer}
-html.g-look.g-page .g-add,html.g-look.drawer-open .g-add,html.g-look:has(.sheet:not([hidden])) .g-add,html.g-look:has(.row.open.cv-full) .g-add,html.g-look.g-guest .g-add{display:none}
+html.g-look.g-page .g-add,html.g-look.drawer-open .g-add,html.g-look:has(.sheet:not([hidden])) .g-add,html.g-look:has(.row.open.cv-full) .g-add,html.g-look.g-guest .g-add,html.g-look body.typing .g-add,html.g-look:has(#selBar:not([hidden])) .g-add{display:none}   /* anche mentre scrivi e mentre scegli più libri (come la barra di prima, 20/11/2026) */
 @media (max-width:379.98px){html.g-look .g-add{height:46px;padding:0 16px}}
 
 /* ---------- G8. pagine intere: lasciano posto alle linguette, fondo bianco, sezioni con la linea ---------- */

@@ -8,13 +8,13 @@ if (!NL) return;
 var $ = NL.$, esc = NL.esc;
 var LS = 'catalogo-libri-layout';
 /* la A e' la disposizione dell'app (Piero, 16/11/2026); la classica resta solo per le prove automatiche, che girano su localhost */
-var DEF = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'classico' : 'a';
+var DEF = 'a';   // 20/11/2026 (Piero: «i vecchi layout devono sparire»): anche le prove automatiche usano la disposizione dell'app
 var LAYOUTS = [
   { k: 'classico', t: 'Classico', d: 'Tasti grandi in alto, Scansiona, Foto e Digita in basso.' },
   { k: 'a', t: 'A · Barra in basso', d: 'Libreria, Desideri, + per aggiungere, Per te e Menu sempre sotto il pollice.' }
 ];
 var cur = DEF, one = true;   // avvisi in cima sempre uno alla volta (l'opzione e' stata tolta il 16/11/2026)
-try { var c0 = JSON.parse(NL.ls.get(LS) || '{}'); if (DEF === 'classico' && LAYOUTS.some(function (x) { return x.k === c0.v; })) cur = c0.v; } catch (e) { if (window.nlErr) nlErr(e); }   // fuori dalle prove: sempre la A
+/* la scelta salvata non conta più: sempre la A (sotto lo stile G) */
 var root = document.documentElement;
 function svg(p, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
 var I = {

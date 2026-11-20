@@ -243,7 +243,8 @@ function tryIt(what) {
     if (real) pillOn(at); else pillOn(at, true);      // anche nell'esempio Indietro riporta alla guida (posto {gdp} senza pillola: c'è «‹ Guida»)
     if (real) setTimeout(function () { watch({ add: '#layAdd', key: '#kgSheet', keys: '#kwSheet', don: '#donSheet', friends: '#friSheet' }[what]); }, 120);
     if (what === 'add') {
-      var plus = document.querySelector('#layNav [data-l="add"]');
+      var plus = document.getElementById('gAdd');   // stile G: «+ Aggiungi» (20/11/2026: prima cercava la barra in basso, nascosta, e non si apriva niente)
+      if (!plus || !plus.getClientRects().length) plus = document.querySelector('#layNav [data-l="add"]');
       if (plus && plus.getClientRects().length) plus.click();
       else { var d = document.getElementById('btnScan'); if (d) { d.scrollIntoView({ block: 'center' }); try { d.focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } } }   // disposizione «Classico»: Scansiona, Foto e Digita in basso
     } else if (what === 'key') {
@@ -392,7 +393,8 @@ function pathDo(a) {
   else if (a === 'askf') { window.NLAmici.keys(); pathWatch('#kwSheet'); }
   else if (a === 'add') {
     cfg.path = 0; save();
-    var plus = document.querySelector('#layNav [data-l="add"]');
+    var plus = document.getElementById('gAdd');   // stile G: «+ Aggiungi» (20/11/2026: prima cercava la barra in basso, nascosta, e non si apriva niente)
+      if (!plus || !plus.getClientRects().length) plus = document.querySelector('#layNav [data-l="add"]');
     if (plus && plus.getClientRects().length) plus.click();
     else { var d = document.getElementById('btnScan'); if (d) { d.scrollIntoView({ block: 'center' }); try { d.focus({ preventScroll: true }); } catch (e) { if (window.nlErr) nlErr(e); } } }
   }

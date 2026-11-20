@@ -733,7 +733,7 @@ function updateSummary() {
   fg.textContent = 'Da verificare · ' + g;
   fg.hidden = g === 0 && flt !== 'guess';
   fg.setAttribute('aria-pressed', flt === 'guess' ? 'true' : 'false');
-  var allLoans = state.books.filter(function (b) { return !b.w && b.p; }).length;
+  var allLoans = state.books.filter(function (b) { return !b.w && isLoan(b); }).length;   // prestati e ricevuti, come il filtro (Piero, 17/11/2026)
   $('#cntLoan').textContent = allLoans;
   $('#fltLoan').setAttribute('aria-pressed', flt === 'loan' ? 'true' : 'false');
   var td = todoRows().length;
