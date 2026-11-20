@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.22 · 20/11/2026 09:33
+- **Segnalibro «Chat»** dopo Amici, con il numero dei messaggi da leggere; tolta l'icona della chat in alto
+
 ## Prova 110.21 · 20/11/2026 09:26
 - **Chat**: il libro in un tuo messaggio ora si legge (fondo trasparente, testo chiaro); **Libreria e Desideri**: spazio e linea sottile sotto la barra di ricerca e filtri quando scorri
 

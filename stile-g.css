@@ -248,3 +248,10 @@ html.g-look #stick.stuck{padding-bottom:16px!important;box-shadow:0 1px 0 var(--
 /* Chat: il libro dentro un mio messaggio (fumetto pieno) ha il fondo trasparente e il testo chiaro, così si legge */
 html.g-look #chSheet .ch-msg.me .ch-book{background:color-mix(in srgb,var(--accent-ink) 14%,transparent)!important;box-shadow:none!important;color:var(--accent-ink)!important}
 html.g-look #chSheet .ch-msg.it .ch-book{color:var(--ink)!important}
+
+/* ---------- G18. segnalibro «Chat» (Piero, 20/11/2026): dopo Amici; l'icona della chat in alto non c'è più, il numero dei non letti sta sul segnalibro ---------- */
+html.g-look #gIcs #btnChat{display:none!important}
+html.g-look .g-tabs .g-tn{position:absolute;top:4px;left:50%;transform:translateX(-50%);min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:var(--bad);color:#fff;font:700 11px/18px var(--font-body);text-align:center}
+html.g-look .g-tabs .g-tn[hidden]{display:none}
+html.g-look .g-tabs button:has(.g-tn:not([hidden])) svg{margin-top:12px}
+@media (max-width:379.98px){html.g-look .g-tabs .g-tn{min-width:16px;height:16px;font-size:10px;line-height:16px;padding:0 4px}}

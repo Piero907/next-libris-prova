@@ -16,6 +16,7 @@ var IC = {
   perte: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
   amici: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 5.5 5.4"/>',
   tu: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  chat: '<path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   indice: '<path d="M4 7h16M4 12h16M4 17h10"/>'
 };
@@ -27,7 +28,7 @@ function act(l) {
 function vis(sel) { var e = $(sel); return !!(e && !e.hidden); }
 
 /* ---------- linguette laterali ---------- */
-var TABS = [['lib', 'Libri', 'libri'], ['wish', 'Desideri', 'desideri'], ['you', 'Per te', 'perte'], ['fri', 'Amici', 'amici'], ['prof', 'Tu', 'tu']];
+var TABS = [['lib', 'Libri', 'libri'], ['wish', 'Desideri', 'desideri'], ['you', 'Per te', 'perte'], ['fri', 'Amici', 'amici'], ['chat', 'Chat', 'chat'], ['prof', 'Tu', 'tu']]; /* Chat aggiunta da Piero il 20/11/2026 */
 function tabs() {
   if ($('#gTabs')) return;
   var n = document.createElement('nav'); n.id = 'gTabs'; n.className = 'g-tabs'; n.setAttribute('aria-label', 'Sezioni');
@@ -40,6 +41,7 @@ function tabs() {
     var g = b.dataset.g;
     closeAll();
     if (g === 'fri') { if (window.NLAmici && window.NLAmici.open) window.NLAmici.open(); }
+    else if (g === 'chat') { if (window.NLChat && window.NLChat.open) window.NLChat.open(); }
     else act(g);
     setTimeout(paintTabs, 60);
   });
@@ -57,7 +59,8 @@ function closeAll() {
   });
 }
 function current() {
-  if (vis('#chSheet') || vis('#friSheet')) return 'fri';
+  if (vis('#chSheet')) return 'chat';
+  if (vis('#friSheet')) return 'fri';
   if (vis('#profSheet')) return (window.NLProfilo && window.NLProfilo.state && window.NLProfilo.state().cur) ? 'fri' : 'prof';
   if (document.documentElement.classList.contains('drawer-open') || vis('#drawer')) return 'prof';
   if (vis('#layYou')) return 'you';
@@ -71,8 +74,12 @@ function paintTabs() {
   if (c === 'lib' && lastTab !== 'lib' && document.querySelector('.sheet:not([hidden]):not(#layAdd):not(.gd-infosheet)')) c = lastTab;
   lastTab = c;
   Array.prototype.forEach.call(document.querySelectorAll('#gTabs [data-g]'), function (b) { var on = b.dataset.g === c; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  /* numero dei messaggi non letti sul segnalibro Chat (la chat in alto non c'è più) */
+  var nb = $('#btnChatN'), tb = document.querySelector('#gTabs [data-g="chat"]');
+  if (tb) { var tn = tb.querySelector('.g-tn'); if (!tn) { tn = document.createElement('b'); tn.className = 'g-tn'; tb.appendChild(tn); }
+    var tx = nb && !nb.hidden ? (nb.textContent || '').trim() : ''; tn.textContent = tx; tn.hidden = !tx; tb.setAttribute('aria-label', 'Chat' + (tx ? ', ' + tx + ' da leggere' : '')); }
   document.documentElement.classList.toggle('g-conv', vis('#chSheet') && ($('#chSheet').dataset.v === 'conv'));
-  document.documentElement.classList.toggle('g-page', c === 'you' || c === 'prof' || (c === 'fri' && !(NL.guest && NL.guest())));
+  document.documentElement.classList.toggle('g-page', c === 'you' || c === 'prof' || c === 'chat' || (c === 'fri' && !(NL.guest && NL.guest())));
 }
 
 /* ---------- testatina, nastro, frase in prosa, «+ Aggiungi» ---------- */
