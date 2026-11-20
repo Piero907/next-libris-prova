@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 110.21 · 20/11/2026 09:26
+- **Chat**: il libro in un tuo messaggio ora si legge (fondo trasparente, testo chiaro); **Libreria e Desideri**: spazio e linea sottile sotto la barra di ricerca e filtri quando scorri
+
 ## Prova 110.20 · 20/11/2026 09:15
 - **Linguette sempre visibili**: Statistiche, Suggerimenti, Dai tuoi libri al cinema, Aspetto e le altre finestre si aprono accanto alle linguette; resta accesa la linguetta da cui sei partito; toccando un'altra linguetta la finestra si chiude
 

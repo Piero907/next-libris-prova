@@ -241,3 +241,10 @@ html.g-look.g-left .g-tabs button{border-radius:12px 0 0 12px}
 html.g-look .sheet:not(.gd-infosheet){right:calc(var(--g-tab) + var(--g-r))!important}
 html.g-look.g-left .sheet:not(.gd-infosheet){right:0!important;left:calc(var(--g-tab) + var(--g-r))!important}
 html.g-look.g-conv .sheet:not(#chSheet){right:0!important;left:0!important}
+
+/* ---------- G17. correzioni del 20/11/2026 (foto di Piero) ---------- */
+/* Libreria: la barra di ricerca e filtri che resta in alto ha un margine sotto e una linea sottile quando le copertine le scorrono sotto */
+html.g-look #stick.stuck{padding-bottom:16px!important;box-shadow:0 1px 0 var(--line),0 10px 14px -12px rgba(0,0,0,.22)!important}
+/* Chat: il libro dentro un mio messaggio (fumetto pieno) ha il fondo trasparente e il testo chiaro, così si legge */
+html.g-look #chSheet .ch-msg.me .ch-book{background:color-mix(in srgb,var(--accent-ink) 14%,transparent)!important;box-shadow:none!important;color:var(--accent-ink)!important}
+html.g-look #chSheet .ch-msg.it .ch-book{color:var(--ink)!important}
