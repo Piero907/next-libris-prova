@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 117.1 · 21/11/2026 08:51
+- Uguale alla vera 117
+
 ## Prova 116.4 · 21/11/2026 08:40
 - **Ricerca dei libri gratis più furba**: trova il libro anche se il titolo è scritto senza «Il», «La», «I»… (per esempio «Malavoglia») e riconosce gli autori stranieri anche quando il nome è scritto in modo un po' diverso
 
