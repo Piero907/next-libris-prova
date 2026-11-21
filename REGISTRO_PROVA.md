@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 118.2 · 21/11/2026 10:17
+- **Suggerimenti sistemati sui telefoni**: gli scaffali restano dentro lo schermo e la pagina non scorre più di lato. **Linguette a sinistra**: la scelta ora resta anche quando riapri l'app.
+
 ## Prova 118.1 · 21/11/2026 10:08
 - Uguale alla versione 118: **Suggerimenti tutti nuovi**, con gli scaffali e i consigli degli amici.
 

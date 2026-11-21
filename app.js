@@ -119,7 +119,7 @@ var LS_KEY = 'catalogo-libri-v2', LS_SET = 'catalogo-libri-set', oldApp = false;
 var nlFirstRun = !ls.get(LS_KEY) && !ls.get(LS_SET);   // prima apertura in assoluto (né libri né impostazioni salvate): la guida di primo avvio si apre da sola (giro 4); chi aggiorna non la vede
 /* versione dell'app: la stessa di version.json e del nome della cache in sw.js (si aggiornano insieme) */
 var APP_VERSION = { v: 118, date: '2026-11-21', note: 'Suggerimenti tutti nuovi: pagina intera con gli scaffali e i consigli degli amici' };
-var BUILD = {"t": "2026-11-21 10:08", "n": "118.1", "note": "Uguale alla versione 118: Suggerimenti tutti nuovi, con gli scaffali e i consigli degli am"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
+var BUILD = {"t": "2026-11-21 10:17", "n": "118.2", "note": "Suggerimenti sistemati sui telefoni"};   // la copia di prova lo riempie a ogni pubblicazione (pubblica_prova.py): ora, numero («94.9») e nota
 function verNewer(j) { return !!(j && (j.v > APP_VERSION.v || (COPIA && BUILD.t && j.build && j.build !== BUILD.t))); }   // copie parallele (prova, social): anche a parita' di versione, con il timbro della pubblicazione
 function copiaDi() { return PROVA ? 'della prova' : 'della copia ' + COPIA; }
 function buildText(b) { var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)$/.exec(b || ''); return m ? m[3] + '/' + m[2] + ' alle ' + m[4] : b; }
@@ -564,6 +564,7 @@ function loadAll() {
     settings.grp = GRP_TXT[s.grp] ? s.grp : '';                                        // raggruppa per (copertine ed elenco, 17/11/2026)
     settings.grpOpen = {};                                                            // gruppi aperti (chiusi di partenza)
     if (s.grpOpen && typeof s.grpOpen === 'object') Object.keys(s.grpOpen).slice(0, 400).forEach(function (k) { if (typeof k === 'string' && k.length < 200) settings.grpOpen[k] = 1; });
+    settings.gLeft = !!s.gLeft;                                                     // «Nastro e linguette a sinistra»: prima non si ricaricava all'apertura (21/11/2026)
     settings.grpExp = s.grpExp ? 1 : 0; 
     settings.auInv = s.auInv === 0 ? 0 : 1;                                          // autori nei gruppi «Neruda, Pablo» (1, predefinito) o come sono scritti (0) (17/11/2026 notte)
     settings.auPa = {};                                                              // paese dell'autore corretto a mano: codice di due lettere (giro 2, 18/11/2026)
