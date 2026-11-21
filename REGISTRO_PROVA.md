@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 117.2 · 21/11/2026 10:06
+- **Suggerimenti tutti nuovi**: ora sono una pagina intera. In cima trovi il prossimo libro da leggere tra i tuoi; sotto, scaffali da scorrere col dito: i libri che piacciono ai tuoi amici (e chi te li può prestare), i preferiti dell'amico che legge più come te, i classici da leggere gratis, i volumi che mancano alle tue serie, altri libri dei tuoi autori e le novità dei tuoi generi. Tocca un libro per vedere perché te lo proponiamo, aggiungerlo ai Desideri o chiederlo in prestito.
+
 ## Prova 117.1 · 21/11/2026 08:51
 - Uguale alla vera 117
 
