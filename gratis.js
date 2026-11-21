@@ -5,8 +5,10 @@
    - Per te: riga «Classici da leggere gratis» (i tuoi libri e Desideri, poi altre opere gratuite dei tuoi autori);
    - libri degli amici: la stessa riga nella pagina del libro.
    Fonti controllate: Wikidata (morte dell'autore, opere, Gutenberg, LibriVox), Wikisource (in italiano e nella lingua dell'autore),
-   Open Library (solo testi liberi, niente prestito). Fonti senza API: link «Cerca anche su» (Liber Liber, Biblioteca Italiana,
-   Rai «Ad alta voce», MLOL). Niente Google. Ricerche una volta per autore, salvate SOLO SUL TELEFONO (chiave catalogo-libri-gratis).
+   Open Library (solo testi liberi, niente prestito); «Altre fonti» precise (Piero, 21/11/2026): Liber Liber (l'opera dalla sua ricerca,
+   altrimenti la pagina dell'autore da Wikidata P7208), MLOL (risorse ad accesso libero dell'autore, Wikidata P3762).
+   Rai Radio3 «Ad alta voce»: l'elenco degli audiolibri di RaiPlay Sound (una volta ogni 30 giorni) e l'autore dalla scheda
+   dell'audiolibro; vale anche per i libri moderni («Ascoltalo gratis»). Niente Google. Dati SOLO SUL TELEFONO (catalogo-libri-gratis).
    PER TOGLIERLO: cancellare gratis.js e gratis.css, le due righe in index.html, le due in SHELL di sw.js e la voce in MODULES
    di pubblica_prova.py. Non tocca il database né gli altri file. */
 (function () {
@@ -14,7 +16,7 @@
 var NL = window.NL;
 if (!NL) return;
 var esc = NL.esc, L = NL.L;
-var LS = 'catalogo-libri-gratis', V = 1, DAY = 864e5, RETRY = 30 * DAY;
+var LS = 'catalogo-libri-gratis', V = 2, DAY = 864e5, RETRY = 30 * DAY;
 var PD_Y = new Date().getFullYear() - 71;   // morto entro quell'anno: pubblico dominio in Italia (70 anni dal 1° gennaio dopo la morte)
 var WD = 'https://query.wikidata.org/sparql?format=json&query=';
 var LANG = { it: 'italiano', en: 'inglese', fr: 'francese', de: 'tedesco', es: 'spagnolo', pt: 'portoghese', ru: 'russo', la: 'latino', el: 'greco', grc: 'greco antico', pl: 'polacco', nl: 'olandese', sv: 'svedese', da: 'danese', no: 'norvegese', cs: 'ceco', hu: 'ungherese' };
@@ -32,6 +34,8 @@ function load() {
   if (db) return db;
   try { db = JSON.parse(NL.ls.get(LS) || 'null'); } catch (e) { db = null; }
   if (!db || db.v !== V || typeof db.a !== 'object') db = { v: V, a: {} };
+  if (!db.ll || typeof db.ll !== 'object') db.ll = {};   // Liber Liber: opera trovata per libro { u, t }
+  if (!db.ra || typeof db.ra !== 'object') db.ra = {};   // «Ad alta voce»: autore di ogni audiolibro trovato
   return db;
 }
 function save() { try { NL.ls.set(LS, JSON.stringify(load())); } catch (e) { /* telefono pieno: si ricerca alla prossima */ } }
@@ -69,6 +73,7 @@ async function deaths(list) {
 function detailQuery(q) {
   return 'SELECT ?k ?v ?x WHERE { hint:Query hint:optimizer "None". ' +
     '{ BIND("l" AS ?k) wd:' + q + ' wdt:P1899 ?v. } UNION { BIND("g" AS ?k) wd:' + q + ' wdt:P1938 ?v. } ' +
+    'UNION { BIND("b" AS ?k) wd:' + q + ' wdt:P7208 ?v. } UNION { BIND("m" AS ?k) wd:' + q + ' wdt:P3762 ?v. } ' +
     'UNION { BIND("c" AS ?k) wd:' + q + ' wdt:P103 ?lg. ?lg wdt:P424 ?v. } UNION { BIND("c" AS ?k) wd:' + q + ' wdt:P1412 ?lg. ?lg wdt:P424 ?v. } ' +
     'UNION { BIND("s" AS ?k) ?p schema:about wd:' + q + '; schema:isPartOf ?site. FILTER(CONTAINS(STR(?site), "wikisource")) BIND(STR(?p) AS ?v) } ' +
     'UNION { BIND("w" AS ?k) ?w wdt:P50 wd:' + q + '. ?w wikibase:sitelinks ?n. FILTER(?n > 2) ?w rdfs:label ?v. FILTER(LANG(?v) = "it") OPTIONAL { ?w wdt:P1476 ?x. } } ' +
@@ -85,6 +90,8 @@ async function details(n, x) {
   r.forEach(function (o) {
     if (o.k === 'l') x.lv = o.v;
     else if (o.k === 'g') x.gu = o.v;
+    else if (o.k === 'b') x.lb = o.v;   // Liber Liber: «p/luigi-pirandello»
+    else if (o.k === 'm') { var m0 = parseInt(o.v, 10); if (m0 > 0 && (!x.ml || m0 < x.ml)) x.ml = m0; }   // MLOL: il codice più vecchio
     else if (o.k === 'c' && langs.indexOf(o.v) < 0) langs.push(o.v);
     else if (o.k === 's') { var m = /^https:\/\/([a-z-]+)\.wikisource\.org\//.exec(o.v); if (m) ws[m[1]] = wsTitle(o.v); }
     else if (o.k === 'w') { var w = works[o.v] || (works[o.v] = { t: o.v, o: '' }); if (o.x && !w.o) w.o = o.x; }
@@ -99,6 +106,40 @@ async function details(n, x) {
     x.ol = (ol.docs || []).slice(0, 100).map(function (d) { return [d.title, d.key, (d.language || []).indexOf('ita') >= 0 ? 1 : 0]; });
   } catch (e) { x.ol = []; }
   x.ok = 1; x.t = Date.now();
+}
+
+/* ---------- Rai Radio3 «Ad alta voce» (RaiPlay Sound) ---------- */
+var RAI = 'https://www.raiplaysound.it';
+async function raiList() {
+  var d = load(); if (d.r && Date.now() - d.r.t < RETRY) return;
+  var j = await getJson(RAI + '/programmi/adaltavoce/audiolibri.json');
+  var bl = Array.isArray(j.block) ? j.block : [j.block], l = [];
+  bl.forEach(function (b) { ((b && b.cards) || []).forEach(function (c) { var p = c.path_id || c.weblink || ''; if (c.title && /^\/audiolibri\//.test(p)) l.push([c.title, p.replace(/\.json$/, '')]); }); });
+  d.r = { t: Date.now(), l: l.slice(0, 1000) }; save();
+}
+function raiFind(b) { var k = tk(b.t), r = load().r; return r ? (r.l || []).filter(function (x) { return same(tk(x[0]), k); })[0] || null : null; }
+function sur(n) { var w = tk(n).split(' '); return w[w.length - 1] || ''; }
+function raiOk(b, x) { var a = load().ra[x[1]]; if (typeof a !== 'string') return false; a = ' ' + tk(a) + ' '; return authors(b).some(function (n) { var s = sur(n); return s.length > 2 && a.indexOf(' ' + s + ' ') >= 0; }); }
+async function raiAuthors(all) {   // per i titoli che combaciano: l'autore dalla scheda dell'audiolibro (una volta)
+  var d = load(), n = 0;
+  for (var i = 0; i < all.length && n < 10; i++) {
+    var x = raiFind(all[i]); if (!x || typeof d.ra[x[1]] === 'string') continue;
+    n++;
+    var j = await getJson(RAI + x[1] + '.json'); d.ra[x[1]] = String((j.podcast_info && j.podcast_info.author) || '').replace(/^di\s+/i, ''); save();
+  }
+  return n;
+}
+/* ---------- Liber Liber: l'opera precisa, cercata quando si apre la finestra ---------- */
+function slug(s) { return tk(s).replace(/ /g, '-'); }
+function llAuthor(n, x) { return x && x.lb ? 'https://liberliber.it/autori/autori-' + x.lb.replace(/^\/+|\/+$/g, '') + '/' : ''; }
+function llKey(b) { return tk(b.t) + '|' + tk(b.a); }
+async function llFind(b) {
+  var d = load(), k = llKey(b), c = d.ll[k]; if (c && Date.now() - c.t < RETRY) return false;
+  var j = await getJson('https://liberliber.it/wp-json/wp/v2/search?subtype=page&per_page=20&search=' + encodeURIComponent(b.t));
+  var ns = authors(b).map(function (n) { var x = aget(n); return x && x.lb ? '/autori-' + x.lb.replace(/^\/+|\/+$/g, '') + '/' : '/' + slug(n) + '/'; });
+  var hit = (Array.isArray(j) ? j : []).filter(function (r) { var u = String(r.url || ''); return same(tk(String(r.title || '').replace(/&#\d+;/g, ' ')), tk(b.t)) && ns.some(function (s) { return u.indexOf(s) >= 0; }); })[0];
+  d.ll[k] = { u: hit ? String(hit.url) : '', t: Date.now() }; save();
+  return true;
 }
 
 var busy = false, timer = 0, later = {};
@@ -121,6 +162,8 @@ async function loop() {
       try { await deaths(todo.slice(i, i + 40)); changed = true; }
       catch (e) { todo.slice(i, i + 40).forEach(function (x) { later[x.k] = Date.now() + 5 * 60000; }); break; }
     }
+    try { var all = [].concat(NL.books() || [], (NL.myBooks && NL.myBooks()) || []); if (all.length && !(later.rai > Date.now())) { await raiList(); if (await raiAuthors(all)) changed = true; } }
+    catch (e) { later.rai = Date.now() + 5 * 60000; }
     for (var g = 0; g < 60; g++) {
       a = load().a;
       var next = list.filter(function (x) { var e = a[x.k]; return e && e.pd && !e.ok && !(later[x.k] > Date.now()); })[0];
@@ -150,10 +193,11 @@ function avail(b) {
     if (w && w[2]) (x.lg === 'it' ? it : or).push({ s: 'Project Gutenberg', u: 'https://www.gutenberg.org/ebooks/' + encodeURIComponent(w[2]), d: 'Leggi online o scarica in ePub' });
     if (x.lv) au.push({ s: 'LibriVox', u: 'https://librivox.org/author/' + encodeURIComponent(x.lv), d: 'Audiolibri di ' + n + ', letti da volontari' });
   });
-  if (!any || !(it.length || or.length)) return null;
-  return { it: it, or: lg === 'it' ? [] : or, au: au, lg: lg };
+  var rx = raiFind(b), ra = rx && raiOk(b, rx) ? { s: 'Rai Radio3 «Ad alta voce»', u: RAI + rx[1], d: 'Letto da attori, su RaiPlay Sound' } : null;
+  if (any && (it.length || or.length)) return { it: it, or: lg === 'it' ? [] : or, au: (ra ? [ra] : []).concat(au), lg: lg, pd: 1 };
+  return ra ? { it: [], or: [], au: [ra], lg: lg, pd: 0 } : null;   // anche i libri moderni: si ascoltano gratis (Piero, 21/11/2026)
 }
-function srcNames(v) { var s = []; v.it.concat(v.or).forEach(function (x) { if (s.indexOf(x.s) < 0) s.push(x.s); }); return s.join(', '); }
+function srcNames(v) { var s = []; (v.pd ? v.it.concat(v.or) : v.au).forEach(function (x) { if (s.indexOf(x.s) < 0) s.push(x.s); }); return s.join(', '); }
 
 /* ---------- la finestra «Leggilo gratis» ---------- */
 var sheet = null, pushed = false;
@@ -174,25 +218,31 @@ function row(x, ico) {
   return '<a class="dopt gr-a" href="' + esc(x.u) + '" target="_blank" rel="noopener"><span class="dico">' + svg(ico) + '</span><span><b>' + esc(x.s) + '</b><small>' + esc(x.d) + '</small></span><span class="n" aria-hidden="true">›</span></a>';
 }
 function sec(t, html) { return html ? '<p class="gr-lab">' + esc(t) + '</p><div class="dlist dmenu gr-list">' + html + '</div>' : ''; }
-function also(b) {
-  return [
-    { s: 'Liber Liber', u: 'https://www.liberliber.it/online/?s=' + encodeURIComponent(b.t), d: 'Classici italiani in ePub e audiolibri' },
-    { s: 'Biblioteca Italiana', u: 'http://www.bibliotecaitaliana.it/', d: 'Testi della letteratura italiana' },
-    { s: 'Rai Radio3 «Ad alta voce»', u: 'https://www.raiplaysound.it/programmi/adaltavoce', d: 'Romanzi letti da attori, su RaiPlay Sound' },
-    { s: 'MLOL', u: 'https://www.medialibrary.it/', d: 'Prestito digitale con la tessera della tua biblioteca' }
-  ].map(function (x) { return row(x, I.search); }).join('');
+function also(b) {   // solo link precisi: l'opera, altrimenti la pagina dell'autore; niente pagine iniziali generiche
+  var out = [], c = load().ll[llKey(b)];
+  authors(b).forEach(function (n, i) {
+    var x = aget(n); if (!x || !x.pd || !x.ok) return;
+    if (i === 0 && c && c.u) out.push({ s: 'Liber Liber', u: c.u, d: 'Quest\'opera in ePub, PDF e a volte audiolibro' });
+    else if (x.lb) out.push({ s: 'Liber Liber', u: llAuthor(n, x), d: 'Altre opere di ' + n + ' in ePub' });
+    if (x.ml) out.push({ s: 'MLOL', u: 'https://biblioteche.medialibrary.it/search?idcrea=' + x.ml + '&c=open', d: 'Libri e audiolibri gratuiti di ' + n });
+  });
+  var seen = {}; return out.filter(function (x) { if (seen[x.u]) return false; seen[x.u] = 1; return true; }).map(function (x) { return row(x, I.book); }).join('');
 }
+var cur = null;   // libro della finestra aperta
 function openFor(id) {
   var b = NL.get(id) || (NL.books() || []).filter(function (x) { return x.id === id; })[0], v = avail(b); if (!v) return;
   build();
   var ln = LANG[v.lg] || v.lg;
-  $('#grBody').innerHTML = '<p class="gr-lead">«' + esc(b.t) + '» è di pubblico dominio: si legge gratis, senza registrarti.</p>' +
+  cur = b;
+  $('#grH').textContent = v.pd ? 'Leggilo gratis' : 'Ascoltalo gratis';
+  $('#grBody').innerHTML = (v.pd ? '<p class="gr-lead">«' + esc(b.t) + '» è di pubblico dominio: si legge gratis, senza registrarti.</p>' : '<p class="gr-lead">«' + esc(b.t) + '» si ascolta gratis: letto da attori per Rai Radio3.</p>') +
     sec('In italiano', v.it.map(function (x) { return row(x, I.book); }).join('')) +
     sec('In ' + ln + ', la lingua originale', v.or.map(function (x) { return row(x, I.book); }).join('')) +
     sec('Da ascoltare', v.au.map(function (x) { return row(x, I.ear); }).join('')) +
-    sec('Cerca anche su', also(b)) +
-    '<p class="au-src">Da Wikidata, Wikisource e Open Library, banche dati libere.</p>';
+    (v.pd ? sec('Altre fonti', also(b)) : '') +
+    '<p class="au-src">' + (v.pd ? 'Da Wikidata, Wikisource, Open Library, Liber Liber e MLOL.' : 'Da RaiPlay Sound.') + '</p>';
   show();
+  if (v.pd && !(later.ll > Date.now())) llFind(b).then(function (ch) { if (ch && cur === b && sheet && !sheet.hidden) openFor(b.id); }).catch(function () { later.ll = Date.now() + 5 * 60000; });
 }
 function show() {
   sheet.hidden = false;
@@ -201,6 +251,7 @@ function show() {
 }
 function close(fromBack) {
   if (!sheet || sheet.hidden) return;
+  cur = null;
   sheet.hidden = true;
   if (pushed && !fromBack) { pushed = false; try { history.back(); } catch (e) { /* già tornato */ } }
   pushed = false;
@@ -210,7 +261,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sh
 function $(s) { return document.querySelector(s); }
 
 /* ---------- «Classici da leggere gratis» (Per te) ---------- */
-function mineFree() { return (NL.myBooks ? NL.myBooks() : NL.books()).filter(function (b) { return !b.xs && avail(b); }); }
+function mineFree() { return (NL.myBooks ? NL.myBooks() : NL.books()).filter(function (b) { var v = !b.xs && avail(b); return v && v.pd; }); }
 function otherWorks() {
   var mine = (NL.myBooks ? NL.myBooks() : NL.books()), have = mine.map(function (b) { return tk(b.t); }), out = [], seen = {};
   mine.forEach(function (b) {
@@ -240,7 +291,7 @@ function openAll() {
   $('#grH').textContent = 'Classici da leggere gratis';
   show();
 }
-function openBook(id) { build(); $('#grH').textContent = 'Leggilo gratis'; openFor(id); }
+function openBook(id) { build(); openFor(id); }
 function addWish(btn) {
   if (btn.disabled) return;
   if (NL.addMine) NL.addMine({ t: btn.dataset.t, a: btn.dataset.a, w: true });
@@ -254,9 +305,9 @@ function pageRow(card) {
   if (!page) return;
   var old = page.querySelector('.gr-row'), v = avail(b);
   if (!v) { if (old) old.remove(); return; }
-  if (old) return;
-  var r = document.createElement('button'); r.type = 'button'; r.className = 'gr-row'; r.dataset.grB = id;
-  r.innerHTML = '<span class="dico">' + svg(I.book) + '</span><span><b>Leggilo gratis</b><small>È di pubblico dominio · ' + esc(srcNames(v)) + '</small></span><span class="n" aria-hidden="true">›</span>';
+  var h = '<span class="dico">' + svg(v.pd ? I.book : I.ear) + '</span><span><b>' + (v.pd ? 'Leggilo gratis' : 'Ascoltalo gratis') + '</b><small>' + (v.pd ? 'È di pubblico dominio · ' + esc(srcNames(v)) : 'Rai Radio3 «Ad alta voce»') + '</small></span><span class="n" aria-hidden="true">›</span>';
+  if (old) { if (old.dataset.h !== h) { old.innerHTML = h; old.dataset.h = h; } return; }
+  var r = document.createElement('button'); r.type = 'button'; r.className = 'gr-row'; r.dataset.grB = id; r.innerHTML = h; r.dataset.h = h;
   r.addEventListener('click', function (e) { e.stopPropagation(); openBook(id); });
   var at = page.querySelector('.cv-status') || page.querySelector('.acts-main') || page.querySelector('.cv-hero');
   page.insertBefore(r, at ? at.nextSibling : page.firstChild);
@@ -265,7 +316,7 @@ function pages() { Array.prototype.forEach.call(document.querySelectorAll('.row.
 function tags() {
   var wish = NL.tab && NL.tab() === 'wish' && !(NL.guest && NL.guest());
   Array.prototype.forEach.call(document.querySelectorAll('#list .cover[data-id] .art'), function (art) {
-    var id = art.parentNode.dataset.id, on = wish && avail(NL.get(id)), t = art.querySelector('.gr-tag');
+    var id = art.parentNode.dataset.id, v0 = wish && avail(NL.get(id)), on = v0 && v0.pd, t = art.querySelector('.gr-tag');
     if (on && !t) { t = document.createElement('span'); t.className = 'gr-tag'; t.innerHTML = svg(I.book, 12) + 'Gratis'; art.appendChild(t); }
     else if (!on && t) t.remove();
     art.classList.toggle('gr-on', !!on);

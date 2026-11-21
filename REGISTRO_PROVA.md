@@ -2,6 +2,10 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 116.3 · 21/11/2026 08:30
+- **Leggilo gratis, fonti precise**: «Altre fonti» con l'opera su Liber Liber (o la pagina dell'autore) e i libri gratuiti dell'autore su MLOL; via Biblioteca Italiana e i link generici
+- **Ascoltalo gratis**: i libri letti in Rai Radio3 «Ad alta voce», anche moderni, con il link diretto all'audiolibro
+
 ## Prova 116.2 · 21/11/2026 08:09
 - **Leggilo gratis**: per i classici di pubblico dominio (autore morto da più di 70 anni) la pagina del libro mostra dove leggerli o ascoltarli gratis (Wikisource, Open Library, Gutenberg, LibriVox); segno «Gratis» nei Desideri e «Classici da leggere gratis» in Per te
 - Pagina del libro: **nome dell'autore sottolineato**, si capisce che si tocca
