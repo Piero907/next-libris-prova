@@ -2,9 +2,6 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
-## Prova 119.2 · 21/11/2026 10:33
-- **Diritti su nome e logo**: in fondo all'Indice c'è la riga «© 2026 Next Libris», e nel sito il file MARCHIO-E-DIRITTI.md spiega cosa si può fare con nome, logo e codice dell'app
-
 ## Prova 119.1 · 21/11/2026 10:23
 - Uguale alla versione 119: **Suggerimenti dentro lo schermo** sui telefoni e **linguette a sinistra** ricordate.
 
