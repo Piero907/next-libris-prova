@@ -3,16 +3,16 @@
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
 ## Prova 116.4 · 21/11/2026 08:40
-- **Leggilo gratis, nomi un po' diversi**: i titoli si trovano anche senza l'articolo iniziale («Malavoglia» = «I Malavoglia»); per «Ad alta voce» va bene anche un cognome scritto un po' diverso («Dostoevskij» = «Dostoevskji»)
+- **Ricerca dei libri gratis più furba**: trova il libro anche se il titolo è scritto senza «Il», «La», «I»… (per esempio «Malavoglia») e riconosce gli autori stranieri anche quando il nome è scritto in modo un po' diverso
 
 ## Prova 116.3 · 21/11/2026 08:30
-- **Leggilo gratis, fonti precise**: «Altre fonti» con l'opera su Liber Liber (o la pagina dell'autore) e i libri gratuiti dell'autore su MLOL; via Biblioteca Italiana e i link generici
-- **Ascoltalo gratis**: i libri letti in Rai Radio3 «Ad alta voce», anche moderni, con il link diretto all'audiolibro
+- **Link più precisi in «Leggilo gratis»**: Liber Liber apre direttamente la pagina del libro (o almeno quella dell'autore) e MLOL i libri gratuiti di quell'autore
+- **Ascoltalo gratis**: se un libro è stato letto alla radio in «Ad alta voce» di Rai Radio3, nella sua pagina trovi il link per ascoltarlo gratis, anche se è un libro recente
 
 ## Prova 116.2 · 21/11/2026 08:09
-- **Leggilo gratis**: per i classici di pubblico dominio (autore morto da più di 70 anni) la pagina del libro mostra dove leggerli o ascoltarli gratis (Wikisource, Open Library, Gutenberg, LibriVox); segno «Gratis» nei Desideri e «Classici da leggere gratis» in Per te
-- Pagina del libro: **nome dell'autore sottolineato**, si capisce che si tocca
-- Installazione su iPhone: titolo **«Installa Next Libris»** come su Android
+- **Leggilo gratis**: i classici di autori morti da più di 70 anni si leggono o si ascoltano gratis. Nella pagina del libro trovi dove (Wikisource, Open Library, Project Gutenberg, LibriVox), nei Desideri il segno «Gratis» e in Per te «Classici da leggere gratis»
+- Il **nome dell'autore** nella pagina del libro ora è sottolineato: toccalo per saperne di più
+- Su iPhone la schermata per installare l'app si chiama **«Installa Next Libris»**, come su Android
 
 ## Prova 116.1 · 21/11/2026 07:31
 - Uguale alla vera 116
