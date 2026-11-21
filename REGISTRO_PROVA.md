@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 116.1 · 21/11/2026 07:31
+- Uguale alla vera 116
+
 ## Prova 115.4 · 21/11/2026 07:27
 - **Errori dei telefoni**: gli errori dell'app arrivano anonimi al database (solo file, riga, messaggio, versione e tipo di telefono; restano 30 giorni); testo nella Privacy
 
