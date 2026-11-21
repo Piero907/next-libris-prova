@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 120.1 · 21/11/2026 13:22
+- **Nuovo indirizzo** Next Libris si prepara a spostarsi su nextlibris.app: nei testi e nei link condivisi ora c'è il nuovo indirizzo. La copia di prova resta dov'è.
+
 ## Prova 119.1 · 21/11/2026 10:23
 - Uguale alla versione 119: **Suggerimenti dentro lo schermo** sui telefoni e **linguette a sinistra** ricordate.
 
