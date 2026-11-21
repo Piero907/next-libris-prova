@@ -2,6 +2,9 @@
 
 Le modifiche pubblicate nella copia di prova, dalla più recente. Quando vanno bene passano nella versione vera e finiscono nel suo registro (REGISTRO_MODIFICHE.md).
 
+## Prova 116.4 · 21/11/2026 08:40
+- **Leggilo gratis, nomi un po' diversi**: i titoli si trovano anche senza l'articolo iniziale («Malavoglia» = «I Malavoglia»); per «Ad alta voce» va bene anche un cognome scritto un po' diverso («Dostoevskij» = «Dostoevskji»)
+
 ## Prova 116.3 · 21/11/2026 08:30
 - **Leggilo gratis, fonti precise**: «Altre fonti» con l'opera su Liber Liber (o la pagina dell'autore) e i libri gratuiti dell'autore su MLOL; via Biblioteca Italiana e i link generici
 - **Ascoltalo gratis**: i libri letti in Rai Radio3 «Ad alta voce», anche moderni, con il link diretto all'audiolibro

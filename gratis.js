@@ -45,7 +45,8 @@ function aqid(n) { try { var e = typeof window.wdEntry === 'function' ? window.w
 function authors(b) { return (NL.authorsOf(b) || []).slice(0, 2); }
 
 /* ---------- titoli: «I Malavoglia» = «I Malavoglia (Verga)» = «Opera:I Malavoglia» ---------- */
-function tk(s) { return L.norm(String(s || '').replace(/^opera:/i, '').replace(/\([^)]*\)/g, ' ')).replace(/[^a-z0-9]+/g, ' ').trim(); }
+var ART = /^(il|lo|la|i|gli|le|l|un|uno|una|the|a|an|der|die|das|les|el|los|las) (?=\S)/;   // articolo iniziale: «Malavoglia» = «I Malavoglia» (Piero, 21/11/2026)
+function tk(s) { var t = L.norm(String(s || '').replace(/^opera:/i, '').replace(/\([^)]*\)/g, ' ')).replace(/[^a-z0-9]+/g, ' ').trim(); return t.replace(ART, '') || t; }
 function same(a, b) {
   if (!a || !b) return false;
   if (a === b) return true;
@@ -119,7 +120,15 @@ async function raiList() {
 }
 function raiFind(b) { var k = tk(b.t), r = load().r; return r ? (r.l || []).filter(function (x) { return same(tk(x[0]), k); })[0] || null : null; }
 function sur(n) { var w = tk(n).split(' '); return w[w.length - 1] || ''; }
-function raiOk(b, x) { var a = load().ra[x[1]]; if (typeof a !== 'string') return false; a = ' ' + tk(a) + ' '; return authors(b).some(function (n) { var s = sur(n); return s.length > 2 && a.indexOf(' ' + s + ' ') >= 0; }); }
+function lev1(a, b) {   // una lettera diversa, in più, in meno o due scambiate: «Dostoevskij» = «Dostoevskiy» = «Dostoevskji»
+  if (a === b) return true; if (Math.abs(a.length - b.length) > 1) return false;
+  var i = 0; while (i < a.length && a[i] === b[i]) i++;
+  return a.slice(i + 1) === b.slice(i + 1) || a.slice(i) === b.slice(i + 1) || a.slice(i + 1) === b.slice(i) || (a.slice(i + 2) === b.slice(i + 2) && a[i] === b[i + 1] && a[i + 1] === b[i]);   // anche due lettere scambiate
+}
+function raiOk(b, x) {   // l'autore della scheda contiene il cognome, anche scritto un po' diverso (traslitterazioni)
+  var a = load().ra[x[1]]; if (typeof a !== 'string') return false; var ws = tk(a).split(' ');
+  return authors(b).some(function (n) { var s = sur(n); return s.length > 2 && ws.some(function (w) { return w === s || (s.length >= 5 && lev1(w, s)); }); });
+}
 async function raiAuthors(all) {   // per i titoli che combaciano: l'autore dalla scheda dell'audiolibro (una volta)
   var d = load(), n = 0;
   for (var i = 0; i < all.length && n < 10; i++) {
