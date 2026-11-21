@@ -16,6 +16,7 @@ const SHELL = ['./', 'index.html', 'indirizzo.js', 'avvio.js', 'style.css', 'app
   'notifiche.js', 'notifiche.css',   // modulo: notifiche (campanella)
   'chat.js', 'chat.css',   // modulo: chat (giro 9b)
   'ricerche.js', 'ricerche.css',   // modulo: ricerche condivise e archivio comune
+  'gratis.js', 'gratis.css',   // modulo: «Leggilo gratis» (prova 20/11/2026)
   'push.js', 'push.css',   // modulo: notifiche push
   'guida.js', 'guida.css',   // modulo: guida di primo avvio e libreria di esempio
   'trasloco.html', 'trasloco.js', 'privacy.html'];   // trasloco.html: senza, la pagina arriverebbe come index.html; privacy.html: letta anche dalla finestra Privacy (17/11/2026)
